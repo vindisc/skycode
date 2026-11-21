@@ -774,3 +774,16 @@ export interface SitePublicationResult {
     errorCode?: string;
     guidance?: string;
 }
+
+/** POST /api/sessions/{id}/messages/{id}/strip-images 响应 — 对齐后端 StripImagesResponse */
+export interface StripImagesResponse {
+    success: boolean;
+    strippedImages: number;
+    compacted: boolean;
+    /** 压缩跳过原因（compacted=false 时有值），如 mandatory_context_over_budget */
+    skipReason: string | null;
+    beforeTokens: number;
+    afterTokens: number;
+    /** 后端权威消息列表（剥图/压缩写回后），整包应用 */
+    messages: Message[];
+}

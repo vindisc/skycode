@@ -58,6 +58,7 @@ public class SessionController {
     private final SessionManager sessionManager;
     private final CompactService compactService;
     private final LlmProviderRegistry providerRegistry;
+    private final com.aicodeassistant.llm.ModelRegistry modelRegistry;
     private final SimpMessagingTemplate messaging;
     private final WebSocketSessionManager wsSessionManager;
     private final ProjectWorkspaceService projectWorkspaces;
@@ -75,6 +76,7 @@ public class SessionController {
     public SessionController(SessionManager sessionManager,
                              CompactService compactService,
                              LlmProviderRegistry providerRegistry,
+                             com.aicodeassistant.llm.ModelRegistry modelRegistry,
                              SimpMessagingTemplate messaging,
                              WebSocketSessionManager wsSessionManager,
                              ProjectWorkspaceService projectWorkspaces,
@@ -86,6 +88,7 @@ public class SessionController {
         this.sessionManager = sessionManager;
         this.compactService = compactService;
         this.providerRegistry = providerRegistry;
+        this.modelRegistry = modelRegistry;
         this.messaging = messaging;
         this.wsSessionManager = wsSessionManager;
         this.projectWorkspaces = projectWorkspaces;
@@ -268,6 +271,51 @@ public class SessionController {
 
         return ResponseEntity.ok(new CompactResponse(
                 result.skipReason() == null, result.beforeTokens(), result.afterTokens()));
+    }
+
+    /**
+     * 剥离指定消息中的全部图片并尝试重新压缩 — 图片撑爆上下文后的自救入口。
+     * <p>
+     * 含图用户消息在压缩时为 mandatory 强制保留，图片过大时压缩永远跳过
+     * （mandatory_context_over_budget）；剥离图片后 reactiveCompact 才能真正执行。
+     * 压缩跳过时保留剥图后的历史（skipReason 透传给前端展示）。
+     */
+    @PostMapping("/{sessionId}/messages/{messageId}/strip-images")
+    public ResponseEntity<StripImagesResponse> stripMessageImages(
+            @PathVariable String sessionId,
+            @PathVariable String messageId) {
+        SessionExecutionGate.Token token = executionGate.tryAcquire(
+                sessionManager.dataSourceIdentity(), sessionId);
+        if (token == null) throw new SessionExecutionBusyException(sessionId);
+        try (token) {
+            var stripped = sessionManager.stripImagesFromMessage(sessionId, messageId);
+            if (stripped.isEmpty()) throw new SessionNotFoundException(sessionId);
+            if (stripped.get().strippedImages() == 0) {
+                throw new RequestValidationException(
+                        "NO_IMAGES_IN_MESSAGE", "Message contains no image blocks to strip");
+            }
+
+            SessionData data = getSessionOrThrow(sessionId);
+            int window = modelRegistry.getContextWindowForModel(data.model());
+            CompactService.CompactResult result =
+                    compactService.reactiveCompact(data.messages(), window, false);
+            boolean compacted = false;
+            if (result.skipReason() == null) {
+                sessionManager.replaceMessages(sessionId, result.compactedMessages());
+                compacted = true;
+            }
+
+            SessionData latest = getSessionOrThrow(sessionId);
+            return ResponseEntity.ok(new StripImagesResponse(
+                    true,
+                    stripped.get().strippedImages(),
+                    compacted,
+                    result.skipReason(),
+                    result.beforeTokens(),
+                    result.afterTokens(),
+                    publicMessages.project(latest.messages())
+            ));
+        }
     }
 
     /**
@@ -462,6 +510,16 @@ public class SessionController {
             boolean success,
             int tokensBefore,
             int tokensAfter
+    ) {}
+
+    public record StripImagesResponse(
+            boolean success,
+            int strippedImages,
+            boolean compacted,
+            String skipReason,
+            int beforeTokens,
+            int afterTokens,
+            List<Message> messages
     ) {}
 
     public record MessageListResponse(

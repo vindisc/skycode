@@ -139,6 +139,8 @@ export interface MessageStoreState {
     finalizeAssistantSegment: (message?: Extract<Message, { type: 'assistant' }>) => void;
     finalizeStream: (usage: Usage) => void;
     clearMessages: () => void;
+    /** 后端权威消息列表整包应用（剥图/压缩写回后）— 简单可靠，避免局部 patch 与快照对账打架 */
+    applyMessagesUpdate: (messages: Message[]) => void;
     rewindToMessage: (messageId: string) => void;
     setTokenBudgetState: (state: TokenBudgetState | null) => void;
     clearTokenBudgetState: () => void;
@@ -409,6 +411,17 @@ export const useMessageStore = create<MessageStoreState>()(
                 d.activeToolCalls.clear();
                 d.tokenBudgetState = null;
                 d.tokenWarning = null;
+            });
+        },
+        applyMessagesUpdate: (messages) => {
+            flushStreamingBuffer();
+            streamingStore.clear();
+            set(d => {
+                d.messages = messages;
+                d.streamingMessageId = null;
+                d.streamingContent = '';
+                d.thinkingContent = '';
+                d.activeToolCalls.clear();
             });
         },
         rewindToMessage: (messageId) => set(d => {

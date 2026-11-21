@@ -464,6 +464,127 @@ public class SessionManager {
         }
     }
 
+    // ───── 消息级修补：剥离图片 / 重写历史 ─────
+
+    /**
+     * 单条消息剥图结果。
+     */
+    public record StripImagesResult(String messageId, int strippedImages) {}
+
+    /**
+     * 把指定消息中的所有 ImageBlock 替换为文本占位并落库。
+     * <p>
+     * 用于图片撑爆上下文后的自救：含图用户消息在压缩时被标记为 mandatory，
+     * 图片过大时压缩永远跳过（mandatory_context_over_budget）；剥离图片后压缩才能执行。
+     *
+     * @return 消息不存在返回 empty；消息不含图片返回 strippedImages=0（不落库）
+     */
+    public Optional<StripImagesResult> stripImagesFromMessage(String sessionId, String messageId) {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                "SELECT content_json FROM messages WHERE id = ? AND session_id = ?",
+                messageId, sessionId);
+        if (rows.isEmpty()) return Optional.empty();
+        List<ContentBlock> blocks = parseContentBlocks((String) rows.getFirst().get("content_json"));
+        int stripped = 0;
+        List<ContentBlock> rebuilt = new ArrayList<>(blocks.size());
+        for (ContentBlock block : blocks) {
+            if (block instanceof ContentBlock.ImageBlock) {
+                rebuilt.add(new ContentBlock.TextBlock("[图片已移除]"));
+                stripped++;
+            } else {
+                rebuilt.add(block);
+            }
+        }
+        if (stripped == 0) return Optional.of(new StripImagesResult(messageId, 0));
+        String contentJson = toJsonString(rebuilt);
+        try (var mutation = executionGate.acquireBackground(dataSourceIdentity(), sessionId)) {
+            String now = Instant.now().toString();
+            jdbcTemplate.update(
+                    "UPDATE messages SET content_json = ? WHERE id = ? AND session_id = ?",
+                    contentJson, messageId, sessionId);
+            jdbcTemplate.update("UPDATE sessions SET updated_at = ? WHERE id = ?", now, sessionId);
+        }
+        log.info("Stripped {} image block(s) from message {} in session {}", stripped, messageId, sessionId);
+        return Optional.of(new StripImagesResult(messageId, stripped));
+    }
+
+    /**
+     * 全量重写会话消息 — 用于压缩结果写回。事务内先删后插，seq_num 重新连续编号。
+     */
+    public void replaceMessages(String sessionId, List<Message> messages) {
+        try (var mutation = executionGate.acquireBackground(dataSourceIdentity(), sessionId)) {
+            Runnable rewrite = () -> {
+                jdbcTemplate.update("DELETE FROM messages WHERE session_id = ?", sessionId);
+                int seq = 0;
+                for (Message message : messages) {
+                    seq++;
+                    jdbcTemplate.update(
+                            """
+                            INSERT INTO messages (id, session_id, role, content_json, stop_reason,
+                                input_tokens, output_tokens, created_at, seq_num, meta_json)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            """,
+                            message.uuid(), sessionId, roleOf(message), toJsonString(contentOf(message)),
+                            stopReasonOf(message), inputTokensOf(message), outputTokensOf(message),
+                            Instant.now().toString(), seq, metaOf(message));
+                }
+                jdbcTemplate.update("UPDATE sessions SET updated_at = ? WHERE id = ?",
+                        Instant.now().toString(), sessionId);
+            };
+            if (messageTransaction == null) rewrite.run();
+            else messageTransaction.executeWithoutResult(status -> rewrite.run());
+        }
+        log.info("Replaced all messages in session {}: {} message(s)", sessionId, messages.size());
+    }
+
+    private static String roleOf(Message message) {
+        return switch (message) {
+            case Message.UserMessage ignored -> "user";
+            case Message.AssistantMessage ignored -> "assistant";
+            case Message.SystemMessage ignored -> "system";
+        };
+    }
+
+    private static Object contentOf(Message message) {
+        return switch (message) {
+            case Message.UserMessage u -> u.content();
+            case Message.AssistantMessage a -> a.content();
+            // SystemMessage 的 content 是 String；统一以 TextBlock 块形式落库，
+            // mapRowToMessage 的 system 分支会把 TextBlock 文本拼回 String
+            case Message.SystemMessage s -> List.of(
+                    new ContentBlock.TextBlock(s.content() == null ? "" : s.content()));
+        };
+    }
+
+    private static String stopReasonOf(Message message) {
+        return switch (message) {
+            case Message.AssistantMessage a -> a.stopReason();
+            default -> null;
+        };
+    }
+
+    private static int inputTokensOf(Message message) {
+        return switch (message) {
+            case Message.AssistantMessage a when a.usage() != null -> a.usage().inputTokens();
+            default -> 0;
+        };
+    }
+
+    private static int outputTokensOf(Message message) {
+        return switch (message) {
+            case Message.AssistantMessage a when a.usage() != null -> a.usage().outputTokens();
+            default -> 0;
+        };
+    }
+
+    private static Map<String, Object> metaOf(Message message) {
+        return switch (message) {
+            case Message.UserMessage u -> u.meta();
+            case Message.SystemMessage s -> s.metadata();
+            default -> null;
+        };
+    }
+
     // ───── 列表查询 ─────
 
     /**
@@ -804,6 +925,21 @@ public class SessionManager {
                                     } else if (source.hasNonNull("data")) {
                                         blocks.add(new ContentBlock.ImageBlock(
                                                 mediaType, source.get("data").asText()));
+                                    }
+                                } else if (node.has("mediaType") || node.has("media_type")) {
+                                    // 扁平形态 — ImageBlock record 的 Jackson 序列化输出
+                                    // （WebSocketController 上传路径持久化的正是此形态；此前只认
+                                    //  Anthropic source 嵌套形态，导致历史图片消息重载后图片块被静默丢弃）
+                                    String mediaType = node.has("mediaType")
+                                            ? node.get("mediaType").asText()
+                                            : node.get("media_type").asText();
+                                    if (node.hasNonNull("url")) {
+                                        blocks.add(ContentBlock.ImageBlock.fromUrl(
+                                                mediaType, node.get("url").asText()));
+                                    } else if (node.hasNonNull("base64Data")) {
+                                        blocks.add(new ContentBlock.ImageBlock(
+                                                mediaType, node.get("base64Data").asText(),
+                                                node.path("width").asInt(0), node.path("height").asInt(0)));
                                     }
                                 }
                             }

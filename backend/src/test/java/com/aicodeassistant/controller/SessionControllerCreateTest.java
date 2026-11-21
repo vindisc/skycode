@@ -168,6 +168,7 @@ class SessionControllerCreateTest {
                 sessions,
                 mock(CompactService.class),
                 providers,
+                mock(com.aicodeassistant.llm.ModelRegistry.class),
                 mock(SimpMessagingTemplate.class),
                 mock(WebSocketSessionManager.class),
                 projects,

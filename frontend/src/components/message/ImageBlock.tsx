@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ZoomIn, X, Copy, Check } from 'lucide-react';
+import { ZoomIn, X, Copy, Check, Trash2 } from 'lucide-react';
 import { copyImageToClipboard } from '@/utils/messageContent';
 
 interface ImageBlockProps {
@@ -18,6 +18,10 @@ interface ImageBlockProps {
     /** MIME 类型，如 image/png */
     mediaType?: string;
     alt?: string;
+    /** 移除该图片（剥出会话历史）— 仅用户消息传入；未传则不显示移除按钮 */
+    onRemove?: () => void;
+    /** 移除请求进行中 — 按钮转圈禁用 */
+    removing?: boolean;
 }
 
 const ImageBlock: React.FC<ImageBlockProps> = ({
@@ -25,6 +29,8 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
     src,
     mediaType = 'image/png',
     alt = 'Image',
+    onRemove,
+    removing = false,
 }) => {
     const [zoomed, setZoomed] = useState(false);
     const [loadError, setLoadError] = useState(false);
@@ -97,13 +103,30 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
                     onError={() => setLoadError(true)}
                     loading="lazy"
                 />
-                <button
-                    onClick={toggleZoom}
-                    className="panel-control absolute top-2 right-2 p-1 rounded bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label="Zoom image"
-                >
-                    <ZoomIn size={16} />
-                </button>
+                <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {onRemove && (
+                        <button
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                onRemove();
+                            }}
+                            disabled={removing}
+                            className="panel-control p-1 rounded bg-black/50 text-white hover:text-err disabled:opacity-50"
+                            aria-label="Remove image from conversation"
+                            title="从会话中移除图片（释放上下文后自动压缩）"
+                            type="button"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    )}
+                    <button
+                        onClick={toggleZoom}
+                        className="panel-control p-1 rounded bg-black/50 text-white"
+                        aria-label="Zoom image"
+                    >
+                        <ZoomIn size={16} />
+                    </button>
+                </div>
             </div>
 
             {/* Portal keeps transformed/filtered message ancestors from containing the fixed overlay. */}

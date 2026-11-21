@@ -10,9 +10,12 @@
  * padding 11×17，右对齐；禁用高饱和实底。
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
-import type { Message, ContentBlock } from '@/types';
+import type { Message, ContentBlock, StripImagesResponse } from '@/types';
+import { useSessionStore } from '@/store/sessionStore';
+import { useMessageStore } from '@/store/messageStore';
+import { useNotificationStore } from '@/store/notificationStore';
 import TextBlock from './TextBlock';
 import ImageBlock from './ImageBlock';
 import MessageActions from './MessageActions';
@@ -52,7 +55,7 @@ const UserMessage: React.FC<UserMessageProps> = ({ message, disclosure }) => {
                 )}
                 {expanded && <>
                     {message.content.map((block, i) => (
-                        <ContentBlockRenderer key={i} block={block} />
+                        <ContentBlockRenderer key={i} block={block} messageId={message.uuid} />
                     ))}
                     {/* 时间与操作属于这条问题，收入气泡内，不用横线切成两块。 */}
                     <MessageActions message={message} className="mt-1.5 flex-wrap gap-x-1.5 gap-y-0 border-t-0 pt-0" />
@@ -62,12 +65,71 @@ const UserMessage: React.FC<UserMessageProps> = ({ message, disclosure }) => {
     );
 };
 
-const ContentBlockRenderer: React.FC<{ block: ContentBlock }> = ({ block }) => {
+/** 剥离消息中的图片并触发重新压缩 — 图片撑爆上下文后的自救入口 */
+const useStripImages = (messageId: string, hasImages: boolean) => {
+    const sessionId = useSessionStore(s => s.sessionId);
+    const status = useSessionStore(s => s.status);
+    const applyMessagesUpdate = useMessageStore(s => s.applyMessagesUpdate);
+    const addNotification = useNotificationStore(s => s.addNotification);
+    const [removing, setRemoving] = useState(false);
+
+    const stripImages = useCallback(async () => {
+        if (!sessionId || !hasImages || removing) return;
+        setRemoving(true);
+        try {
+            const res = await fetch(
+                `/api/sessions/${sessionId}/messages/${encodeURIComponent(messageId)}/strip-images`,
+                { method: 'POST' },
+            );
+            const data = (await res.json()) as StripImagesResponse & { message?: string };
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || `移除失败（HTTP ${res.status}）`);
+            }
+            applyMessagesUpdate(data.messages);
+            const compactNote = data.compacted
+                ? `已重新压缩：${data.beforeTokens} → ${data.afterTokens} tokens`
+                : data.skipReason
+                    ? `压缩跳过（${data.skipReason}），图片已移除`
+                    : '图片已移除';
+            addNotification({
+                key: `strip-images-${messageId}-${Date.now()}`,
+                level: 'success',
+                message: `已移除 ${data.strippedImages} 张图片；${compactNote}`,
+            });
+        } catch (err) {
+            addNotification({
+                key: `strip-images-${messageId}-${Date.now()}`,
+                level: 'error',
+                message: err instanceof Error ? err.message : '移除图片失败',
+            });
+        } finally {
+            setRemoving(false);
+        }
+    }, [sessionId, messageId, hasImages, removing, applyMessagesUpdate, addNotification]);
+
+    // 会话运行中不允许改动历史（后端也会以 409 拒绝）
+    return { stripImages, removing, enabled: hasImages && status === 'idle' };
+};
+
+const ContentBlockRenderer: React.FC<{ block: ContentBlock; messageId: string }> = ({ block, messageId }) => {
+    const { stripImages, removing, enabled } = useStripImages(
+        messageId,
+        // hook 必须无条件调用：仅在含图消息上启用移除交互
+        block.type === 'image',
+    );
     switch (block.type) {
         case 'text':
             return <TextBlock text={block.text} />;
         case 'image':
-            return <ImageBlock base64Data={block.base64Data} src={block.url} mediaType={block.mediaType} />;
+            return (
+                <ImageBlock
+                    base64Data={block.base64Data}
+                    src={block.url}
+                    mediaType={block.mediaType}
+                    onRemove={enabled ? stripImages : undefined}
+                    removing={removing}
+                />
+            );
         default:
             return null;
     }

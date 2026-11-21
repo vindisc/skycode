@@ -94,6 +94,7 @@ class SessionControllerDeleteTest {
                 sessions,
                 mock(CompactService.class),
                 mock(LlmProviderRegistry.class),
+                mock(com.aicodeassistant.llm.ModelRegistry.class),
                 mock(SimpMessagingTemplate.class),
                 mock(WebSocketSessionManager.class),
                 mock(ProjectWorkspaceService.class),
