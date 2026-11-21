@@ -26,6 +26,11 @@ public class ModelRegistry {
         // 4 张图片为应用保守上限；费用显示为基础档 per-1k，不含长上下文加价。
         entry("gpt-6-astra",       cacheCaps("gpt-6-astra", "GPT-6 Astra（OpenAI）", 128000, 1050000, true, true, true, 4, true, 0.010, 0.050, ModelCapabilities.ImageInputMode.URL)),
         entry("gpt-5.6-sol",       caps("gpt-5.6-sol",       "GPT-5.6-Sol",      128000, 1050000, true, true, true, 10, true, 0.005, 0.03)),
+        // GPT-6 sol/astra 系（HuoshenAI 中转站 2026-11-21 实测列表）；能力参数沿用 gpt-5.6-sol 家族保守值，价格未公布暂按同族
+        entry("gpt-6.2-sol",       caps("gpt-6.2-sol",       "GPT-6.2-Sol",      128000, 1050000, true, true, true, 10, true, 0.005, 0.03)),
+        entry("gpt-6.1-sol",       caps("gpt-6.1-sol",       "GPT-6.1-Sol",      128000, 1050000, true, true, true, 10, true, 0.005, 0.03)),
+        entry("gpt-6-sol",         caps("gpt-6-sol",         "GPT-6-Sol",        128000, 1050000, true, true, true, 10, true, 0.005, 0.03)),
+        entry("gpt-6.2-astra",     caps("gpt-6.2-astra",     "GPT-6.2-Astra",    128000, 1050000, true, true, true, 4,  true, 0.010, 0.050)),
         entry("gpt-5.4-mini",      caps("gpt-5.4-mini",      "GPT-5.4 Mini",     128000, 400000,  true, true, true, 10, true, 0.00075, 0.0045)),
         // Anthropic
         entry("claude-sonnet-4-6", caps("claude-sonnet-4-6", "Claude Sonnet 4.6",  16384, 200000, true, true, true, 10, true, 0.003, 0.015)),

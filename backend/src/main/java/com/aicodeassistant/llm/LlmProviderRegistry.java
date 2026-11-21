@@ -42,9 +42,9 @@ public class LlmProviderRegistry {
     /** 内置别名映射（模型层级别名 → 实际部署模型） */
     private static final Map<String, String> BUILTIN_ALIASES = Map.ofEntries(
             // 统一指向最强模型，取消自动降级
-            Map.entry("light", "gpt-5.6-sol"),
-            Map.entry("standard", "gpt-5.6-sol"),
-            Map.entry("premium", "gpt-5.6-sol")
+            Map.entry("light", "gpt-6.2-sol"),
+            Map.entry("standard", "gpt-6.2-sol"),
+            Map.entry("premium", "gpt-6.2-sol")
     );
 
     /**

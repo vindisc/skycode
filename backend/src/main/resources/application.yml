@@ -125,8 +125,8 @@ llm:
     huoshenai:
       api-key: ${LLM_PROVIDER_HUOSHENAI_API_KEY:}
       base-url: https://huoshenai.net/v1
-      default-model: gpt-5.6-sol
-      models: ${LLM_PROVIDER_HUOSHENAI_MODELS:gpt-5.6-sol,gpt-4o,gpt-4o-mini,gpt-3.5-turbo}
+      default-model: gpt-6.2-sol
+      models: ${LLM_PROVIDER_HUOSHENAI_MODELS:gpt-6.2-sol,gpt-6.1-sol,gpt-6-sol,gpt-6.2-astra,gpt-6-astra}
     # OpenRouter：复用 OpenAI Chat Completions 协议，未配置 Key 时不注册。
     openrouter:
       api-key: ${LLM_PROVIDER_OPENROUTER_API_KEY:}
@@ -338,15 +338,16 @@ app:
     session-timeout-hours: 24
   model:
     # LlmProviderRegistry verifies the configured value against registered providers.
-    default: ${LLM_DEFAULT_MODEL:gpt-5.6-sol}
+    default: ${LLM_DEFAULT_MODEL:gpt-6.2-sol}
     # Preferred image fallback when the selected model cannot accept images.
-    vision-fallback: ${LLM_VISION_FALLBACK_MODEL:gpt-4o}
-    fast: ${LLM_FAST_MODEL:gpt-4o-mini}
-    # 降级链 — 按性能从高到低
+    vision-fallback: ${LLM_VISION_FALLBACK_MODEL:gpt-6.1-sol}
+    fast: ${LLM_FAST_MODEL:gpt-6-sol}
+    # 降级链 — 按性能从高到低；末位跨站点兜底（火神站整体不可用时降智谱）
     tier-chain:
-      - gpt-5.6-sol
-      - gpt-4o
-      - gpt-4o-mini
+      - gpt-6.2-sol
+      - gpt-6.1-sol
+      - gpt-6-sol
+      - glm-5.3
     # 降级时是否自动剥离 thinking blocks
     strip-thinking-on-downgrade: true
 
