@@ -122,6 +122,11 @@ llm:
       base-url: https://api.minimax.chat/v1
       default-model: MiniMax-M3
       models: ${LLM_PROVIDER_MINIMAX_MODELS:MiniMax-M3}
+    huoshenai:
+      api-key: ${LLM_PROVIDER_HUOSHENAI_API_KEY:}
+      base-url: https://huoshenai.net/v1
+      default-model: gpt-5.6-sol
+      models: ${LLM_PROVIDER_HUOSHENAI_MODELS:gpt-5.6-sol,gpt-4o,gpt-4o-mini,gpt-3.5-turbo}
     # OpenRouter：复用 OpenAI Chat Completions 协议，未配置 Key 时不注册。
     openrouter:
       api-key: ${LLM_PROVIDER_OPENROUTER_API_KEY:}
@@ -333,15 +338,15 @@ app:
     session-timeout-hours: 24
   model:
     # LlmProviderRegistry verifies the configured value against registered providers.
-    default: ${LLM_DEFAULT_MODEL:deepseek-v4.1-flash}
+    default: ${LLM_DEFAULT_MODEL:gpt-5.6-sol}
     # Preferred image fallback when the selected model cannot accept images.
-    vision-fallback: ${LLM_VISION_FALLBACK_MODEL:deepseek-v4.1-flash}
-    fast: ${LLM_FAST_MODEL:deepseek-v4.1-flash}
+    vision-fallback: ${LLM_VISION_FALLBACK_MODEL:gpt-4o}
+    fast: ${LLM_FAST_MODEL:gpt-4o-mini}
     # 降级链 — 按性能从高到低
     tier-chain:
-      - deepseek-v4.1-flash
-      - qwen3.8-max-0902
-      - qwen-turbo
+      - gpt-5.6-sol
+      - gpt-4o
+      - gpt-4o-mini
     # 降级时是否自动剥离 thinking blocks
     strip-thinking-on-downgrade: true
 
