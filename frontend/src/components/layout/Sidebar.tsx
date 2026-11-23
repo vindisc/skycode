@@ -29,6 +29,7 @@ import {
     ArrowDownUp,
     GitBranch,
     GitMerge,
+    Pencil,
     GitCommitHorizontal,
     BarChart3,
     FileText,
@@ -63,7 +64,7 @@ import { SessionFileExplorer } from '@/components/apos/SessionFileExplorer';
 import { dispatchNewAuthorizedSessionRequest } from '@/services/authorizedSession';
 import { activateSessionCandidate } from '@/services/sessionActivation';
 import { generateUUID } from '@/utils/uuid';
-import type { TaskState } from '@/types';
+import type { RenameSessionResponse, TaskState } from '@/types';
 import { useWorkbenchViewStore } from '@/store/workbenchViewStore';
 import { taskTitle } from '@/utils/workbenchPresentation';
 import { normalizeThemeMode, useConfigStore } from '@/store/configStore';
@@ -592,7 +593,11 @@ function useDeleteConfirmRequired(): boolean {
 
 /** 删除确认气泡定位：优先显示在按钮上方，空间不足时放到下方；水平右对齐按钮右缘且不超出左右边缘（各留 8px）。 */
 function deletePopoverStyle(rect: DOMRect, withCodeInput: boolean): React.CSSProperties {
-    const estimatedHeight = withCodeInput ? 220 : 148;
+    return anchoredPopoverStyle(rect, withCodeInput ? 220 : 148);
+}
+
+/** 锚定在触发按钮旁的气泡定位（删除确认、重命名共用）。 */
+function anchoredPopoverStyle(rect: DOMRect, estimatedHeight: number): React.CSSProperties {
     const showAbove = rect.top >= estimatedHeight + 8;
     // 气泡宽 256px：right ≤ innerWidth - 264 保证左缘 ≥ 8px；
     // 视口极窄时 Math.min 结果可能小于 8，外层 Math.max(8, ...) 兜底防右溢出。
@@ -642,6 +647,11 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
     // 删除请求 in-flight 标记：防止「确认删除」双击/Enter 连发重复 DELETE
     const [deleteSubmitting, setDeleteSubmitting] = useState(false);
 
+    // ── 重命名气泡：点击铅笔在按钮附近弹出输入框，Enter 保存、Escape 取消 ──
+    const [renaming, setRenaming] = useState<{ sessionId: string; rect: DOMRect; value: string } | null>(null);
+    const [renameSubmitting, setRenameSubmitting] = useState(false);
+    const [renameError, setRenameError] = useState<string | null>(null);
+
     // 气泡打开期间按 Escape 关闭
     useEffect(() => {
         if (!confirmingDelete) return;
@@ -654,6 +664,19 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
         document.addEventListener('keydown', handler);
         return () => document.removeEventListener('keydown', handler);
     }, [confirmingDelete]);
+
+    // 重命名气泡打开期间按 Escape 关闭
+    useEffect(() => {
+        if (!renaming) return;
+        const handler = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                event.stopPropagation();
+                setRenaming(null);
+            }
+        };
+        document.addEventListener('keydown', handler);
+        return () => document.removeEventListener('keydown', handler);
+    }, [renaming]);
 
     // §7.5 面板搜索框：搜索已下推服务端（GET /api/sessions?query=，匹配标题与首条用户消息全文），
     // 客户端不再二次过滤，避免把服务端匹配到的结果过滤掉。
@@ -776,6 +799,43 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
         setDeleteCode('');
         setDeleteCodeError(null);
     }, []);
+
+    const openRename = useCallback((e: React.MouseEvent, session: SessionSummary, displayTitle: string) => {
+        e.stopPropagation();
+        setRenaming({ sessionId: session.id, rect: e.currentTarget.getBoundingClientRect(), value: displayTitle });
+        setRenameError(null);
+    }, []);
+
+    // 重命名会话（气泡中的「保存」或输入框 Enter 触发）
+    const executeRenameSession = useCallback(async (sessionId: string, title: string) => {
+        if (renameSubmitting) return; // in-flight：忽略重复触发
+        setRenameSubmitting(true);
+        setRenameError(null);
+        try {
+            const response = await fetch(`/api/sessions/${sessionId}/rename`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title }),
+            });
+            const body = await response.json().catch(() => null);
+            if (!response.ok) {
+                // 后端拒绝（如标题过长）：气泡保持打开，红字提示原因
+                setRenameError(body?.error?.message || '重命名失败，请稍后重试。');
+                return;
+            }
+            const renamed = body as RenameSessionResponse;
+            setSessions(prev => prev.map(s => (s.id === sessionId ? { ...s, title: renamed.title } : s)));
+            // 顶栏只认当前会话的自定义标题
+            if (sessionId === useSessionStore.getState().sessionId) {
+                useSessionStore.getState().setCustomTitle(renamed.title ?? null);
+            }
+            setRenaming(null);
+        } catch {
+            setRenameError('重命名失败，请稍后重试。');
+        } finally {
+            setRenameSubmitting(false);
+        }
+    }, [renameSubmitting]);
 
     // 删除会话（确认气泡中的「确认删除」/验证码 Enter 触发）
     const executeDeleteSession = useCallback(async (sessionId: string, code?: string) => {
@@ -977,6 +1037,15 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                                             <GitMerge className="w-3.5 h-3.5" />
                                                         </button>
                                                         <button
+                                                            title={simpleMode ? '重命名任务' : '重命名会话'}
+                                                            aria-label={simpleMode ? '重命名任务' : '重命名会话'}
+                                                            disabled={renaming !== null}
+                                                            className="panel-control p-1 rounded text-t3 hover:text-t1 disabled:opacity-30"
+                                                            onClick={e => openRename(e, session, displayTitle)}
+                                                        >
+                                                            <Pencil className="w-3.5 h-3.5" />
+                                                        </button>
+                                                        <button
                                                             disabled={merging}
                                                             onClick={(e) => openDeleteConfirm(e, session.id)}
                                                             className="panel-control p-1 rounded
@@ -1010,6 +1079,64 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                 )}
             </div>
             </LayoutGroup>
+
+            {/* 重命名气泡（portal 到 body，按铅笔位置定位） */}
+            {renaming && createPortal(
+                <div
+                    className="fixed inset-0 z-40"
+                    onClick={(e) => { e.stopPropagation(); if (!renameSubmitting) setRenaming(null); }}
+                >
+                    <div
+                        role="dialog"
+                        aria-label={simpleMode ? '重命名任务' : '重命名会话'}
+                        className="fixed z-50 rounded-[14px] border border-hairline bg-surfacev2 p-3 shadow-raised"
+                        style={anchoredPopoverStyle(renaming.rect, 176)}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <p className="text-sm font-medium text-t1">{simpleMode ? '任务名称' : '会话名称'}</p>
+                        <input
+                            autoFocus
+                            type="text"
+                            value={renaming.value}
+                            maxLength={120}
+                            onChange={(e) => setRenaming(prev => (prev ? { ...prev, value: e.target.value } : prev))}
+                            onFocus={(e) => e.currentTarget.select()}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    void executeRenameSession(renaming.sessionId, renaming.value);
+                                }
+                            }}
+                            placeholder="留空则恢复为默认名称"
+                            aria-label={simpleMode ? '任务名称' : '会话名称'}
+                            className="mt-2 h-8 w-full rounded-[10px] border border-transparent bg-sunken2 px-2.5 text-sm text-t1 shadow-well
+                                placeholder:text-t4 focus:outline-none focus:ring-[3px] focus:ring-accent2-ring"
+                        />
+                        {renameError && <p className="mt-1 text-[13px] text-err">{renameError}</p>}
+                        <div className="mt-3 flex justify-end gap-2">
+                            <button
+                                type="button"
+                                disabled={renameSubmitting}
+                                onClick={(e) => { e.stopPropagation(); setRenaming(null); }}
+                                className="panel-control rounded-[10px] px-3 py-1.5 text-[13px] text-t2
+                                    transition-interactive duration-fast hover:bg-hover2 hover:text-t1 disabled:opacity-40"
+                            >
+                                取消
+                            </button>
+                            <button
+                                type="button"
+                                disabled={renameSubmitting}
+                                onClick={(e) => { e.stopPropagation(); void executeRenameSession(renaming.sessionId, renaming.value); }}
+                                className="panel-control rounded-[10px] bg-accent2 px-3 py-1.5 text-[13px] font-medium text-white shadow-e1
+                                    transition-interactive duration-fast disabled:opacity-40"
+                            >
+                                保存
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
 
             {/* 删除二次确认气泡（portal 到 body，按垃圾桶位置定位） */}
             {confirmingDelete && createPortal(

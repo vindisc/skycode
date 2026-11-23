@@ -1083,6 +1083,8 @@ function handleSessionRestore(data: {
         permissionMode: string;
         status: 'idle' | 'interrupted';
     };
+    /** 持久化的会话标题（侧栏改名）；null 表示未设置 */
+    title?: string | null;
     runSnapshot?: {
         id: string;
         status: string;
@@ -1155,6 +1157,7 @@ function handleSessionRestore(data: {
     // 4. 恢复会话元数据
     useSessionStore.getState().resumeSession(data.metadata.sessionId);
     useSessionStore.getState().setModel(data.metadata.model);
+    useSessionStore.getState().setCustomTitle(data.title ?? null);
     usePermissionStore.getState().setPermissionMode(restoredPermissionMode);
     // session_restored 是服务端 bind-session 的确认；只有收到它才记为已绑定。
     markSessionBound(data.metadata.sessionId);

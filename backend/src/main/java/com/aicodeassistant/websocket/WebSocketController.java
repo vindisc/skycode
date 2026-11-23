@@ -1777,6 +1777,8 @@ public class WebSocketController implements PermissionNotifier {
                     List<Map<String, Object>> restoredMessages = new ArrayList<>(convertMessagesForWs(data.messages()));
                     restoredPayload.put("messages", restoredMessages);
                     restoredPayload.put("metadata", metadata);
+                    // 持久化的会话标题（自定义名称）；未设置时为 null，前端回退为首条用户消息
+                    restoredPayload.put("title", data.title());
                     restoredPayload.put("activities", activities);
                     restoredPayload.put("totalActivityCount", totalActivityCount);
                     restoredPayload.put("hasMore", hasMore);

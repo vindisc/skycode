@@ -77,10 +77,13 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
     }, [loaded, defaultModel, model, setModel]);
 
     const status = useSessionStore(s => s.status);
-    const sessionTitle = useMessageStore(s => {
+    const customTitle = useSessionStore(s => s.customTitle);
+    const firstUserText = useMessageStore(s => {
         const block = s.messages.find(m => m.type === 'user')?.content.find(b => b.type === 'text');
         return block?.type === 'text' ? block.text : '任务';
     });
+    // 侧栏改名后的自定义标题优先；未设置时沿用首条用户消息
+    const sessionTitle = customTitle?.trim() || firstUserText;
     const currentTheme = {
         light: { label: '浅色', icon: Sun },
         dark: { label: '深色', icon: Moon },

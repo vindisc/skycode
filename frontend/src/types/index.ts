@@ -86,6 +86,8 @@ export interface SessionRestoredPayload {
     protocolVersion: number;
     messages: Message[];
     metadata: { sessionId: string; model: string; permissionMode: string; status: string };
+    /** 持久化的会话标题（侧栏改名）；null 表示未设置 */
+    title?: string | null;
     totalCount?: number;
     hasMore?: boolean;
     compactSummary?: string | null;
@@ -786,4 +788,11 @@ export interface StripImagesResponse {
     afterTokens: number;
     /** 后端权威消息列表（剥图/压缩写回后），整包应用 */
     messages: Message[];
+}
+
+/** POST /api/sessions/{id}/rename 响应 — 对齐后端 RenameSessionResponse */
+export interface RenameSessionResponse {
+    sessionId: string;
+    /** null 表示已清除自定义名称 */
+    title: string | null;
 }

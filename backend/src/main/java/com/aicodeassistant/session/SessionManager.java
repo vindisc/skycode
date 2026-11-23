@@ -342,6 +342,21 @@ public class SessionManager {
         }
     }
 
+    /**
+     * 重命名会话 — 只写 title。不动 updated_at：改名不算新活动，保持列表位置与分页游标稳定。
+     * 标题为空白表示清除自定义名称，界面回退为首条用户消息。
+     *
+     * @return 会话不存在时返回 false
+     */
+    public boolean updateSessionTitle(String sessionId, String title) {
+        String trimmed = title == null ? "" : title.strip();
+        String stored = trimmed.isEmpty() ? null : trimmed;
+        try (var mutation = executionGate.acquireBackground(dataSourceIdentity(), sessionId)) {
+            return jdbcTemplate.update(
+                    "UPDATE sessions SET title = ? WHERE id = ?", stored, sessionId) > 0;
+        }
+    }
+
     // ───── 添加消息 ─────
 
     /**

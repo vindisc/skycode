@@ -45,6 +45,8 @@ export interface SessionStoreState {
     status: 'idle' | 'streaming' | 'waiting_permission' | 'compacting';
     turnCount: number;
     isAborted: boolean;
+    /** 持久化的会话标题（侧栏改名）；null 表示未设置，界面回退为首条用户消息 */
+    customTitle: string | null;
 
     // Actions
     createSession: (
@@ -53,6 +55,7 @@ export interface SessionStoreState {
     ) => Promise<string>;
     resumeSession: (sessionId: string) => Promise<void>;
     setModel: (model: string) => void;
+    setCustomTitle: (title: string | null) => void;
     setStatus: (status: SessionStoreState['status']) => void;
     handleRateLimit: (data: { retryAfterMs: number; limitType: string }) => void;
     abort: () => void;
@@ -66,6 +69,7 @@ export const useSessionStore = create<SessionStoreState>()(
         status: 'idle' as const,
         turnCount: 0,
         isAborted: false,
+        customTitle: null,
 
         // Actions
         createSession: async (projectId, model) => {
@@ -101,7 +105,12 @@ export const useSessionStore = create<SessionStoreState>()(
             return body.sessionId;
         },
         resumeSession: async (sessionId) => {
-            set(d => { d.sessionId = sessionId; d.status = 'idle'; });
+            set(d => {
+                // 切到另一个会话时先清掉上一个会话的自定义标题；新标题由 session_restored 快照带回
+                if (d.sessionId !== sessionId) d.customTitle = null;
+                d.sessionId = sessionId;
+                d.status = 'idle';
+            });
             saveActiveSessionId(sessionId);
             if (newSessionCandidates.delete(sessionId)) {
                 const workbench = useWorkbenchViewStore.getState();
@@ -111,6 +120,7 @@ export const useSessionStore = create<SessionStoreState>()(
             }
         },
         setModel: (model) => set(d => { d.model = model; }),
+        setCustomTitle: (title) => set(d => { d.customTitle = title; }),
         setStatus: (status) => set(d => { d.status = status; }),
         handleRateLimit: (_data) => set(d => { d.status = 'idle'; }),
         abort: () => set(d => { d.isAborted = true; d.status = 'idle'; }),

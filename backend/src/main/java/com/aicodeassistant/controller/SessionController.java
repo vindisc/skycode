@@ -245,6 +245,29 @@ public class SessionController {
         }
     }
 
+    /** 会话标题长度上限：侧栏与顶栏都是单行截断展示，超长标题没有可读价值。 */
+    private static final int MAX_SESSION_TITLE_LENGTH = 120;
+
+    /**
+     * 重命名会话 — 只更新标题。空白标题表示清除自定义名称（界面回退为首条用户消息）。
+     */
+    @PostMapping("/{sessionId}/rename")
+    public ResponseEntity<RenameSessionResponse> renameSession(
+            @PathVariable String sessionId,
+            @RequestBody RenameSessionRequest request) {
+        getSessionOrThrow(sessionId);
+        String title = request.title() == null ? "" : request.title().strip();
+        if (title.length() > MAX_SESSION_TITLE_LENGTH) {
+            throw new RequestValidationException("TITLE_TOO_LONG",
+                    "Session title must be at most " + MAX_SESSION_TITLE_LENGTH + " characters");
+        }
+        if (!sessionManager.updateSessionTitle(sessionId, title)) {
+            throw new SessionNotFoundException(sessionId);
+        }
+        notifySessionListChanged();
+        return ResponseEntity.ok(new RenameSessionResponse(sessionId, title.isEmpty() ? null : title));
+    }
+
     /**
      * 恢复会话 — 重新建立 WebSocket 连接。
      */
@@ -521,6 +544,11 @@ public class SessionController {
             int afterTokens,
             List<Message> messages
     ) {}
+
+    public record RenameSessionRequest(String title) {}
+
+    /** title 为 null 表示已清除自定义名称 */
+    public record RenameSessionResponse(String sessionId, String title) {}
 
     public record MessageListResponse(
             List<Message> messages,
