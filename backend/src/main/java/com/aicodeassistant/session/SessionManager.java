@@ -926,21 +926,6 @@ public class SessionManager {
                                         blocks.add(new ContentBlock.ImageBlock(
                                                 mediaType, source.get("data").asText()));
                                     }
-                                } else if (node.has("mediaType") || node.has("media_type")) {
-                                    // 扁平形态 — ImageBlock record 的 Jackson 序列化输出
-                                    // （WebSocketController 上传路径持久化的正是此形态；此前只认
-                                    //  Anthropic source 嵌套形态，导致历史图片消息重载后图片块被静默丢弃）
-                                    String mediaType = node.has("mediaType")
-                                            ? node.get("mediaType").asText()
-                                            : node.get("media_type").asText();
-                                    if (node.hasNonNull("url")) {
-                                        blocks.add(ContentBlock.ImageBlock.fromUrl(
-                                                mediaType, node.get("url").asText()));
-                                    } else if (node.hasNonNull("base64Data")) {
-                                        blocks.add(new ContentBlock.ImageBlock(
-                                                mediaType, node.get("base64Data").asText(),
-                                                node.path("width").asInt(0), node.path("height").asInt(0)));
-                                    }
                                 }
                             }
                             case "thinking" -> blocks.add(new ContentBlock.ThinkingBlock(
