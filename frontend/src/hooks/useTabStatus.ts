@@ -3,7 +3,7 @@ import { useSessionStore } from '@/store/sessionStore';
 import { usePermissionStore } from '@/store/permissionStore';
 import { useMessageStore } from '@/store/messageStore';
 
-const DEFAULT_TITLE = 'zhikuncode';
+const DEFAULT_TITLE = 'SkyCode';
 
 type SessionStatus = ReturnType<typeof useSessionStore.getState>['status'];
 

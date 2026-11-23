@@ -37,9 +37,9 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     const heading = page.getByRole('heading', { name: '今天想创造什么？' });
     await expect(heading).toBeVisible();
     const hero = heading.locator('..');
-    await expect(hero.getByText('zhikuncode', { exact: true })).toBeVisible();
+    await expect(hero.getByText('SkyCode', { exact: true })).toBeVisible();
     await expect(hero.locator('img')).toBeVisible();
-    await expect(hero.getByText('下达指令，剩下的一切交给zhikuncode')).toBeVisible();
+    await expect(hero.getByText('下达指令，剩下的一切交给 SkyCode')).toBeVisible();
     await expect(hero.getByText(/APOS/)).toHaveCount(0);
     await page.evaluate(() => window.dispatchEvent(new Event('session-list-updated')));
     expect(await page.evaluate(() => sessionStorage.getItem('zhikuncode.activeSessionId'))).toBeNull();

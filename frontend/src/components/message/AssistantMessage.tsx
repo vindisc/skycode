@@ -59,7 +59,7 @@ const AssistantMessage: React.FC<AssistantMessageProps> = ({
             {/* Card 容器（§7.2：surface + hairline + rounded-panel + shadow-e2，px-18/py-20） */}
             <div className={embedded ? "min-w-0" : "flex-1 min-w-0 rounded-panel border border-hairline bg-surfacev2 shadow-e1 px-[18px] py-5"}>
                 {!embedded && <div className="flex items-center gap-1.5 mb-2 text-[13px] text-t3 font-medium">
-                    <span>zhikuncode</span>
+                    <span>SkyCode</span>
                 </div>}
 
                 <div className="text-sm text-t1 leading-[1.75]">

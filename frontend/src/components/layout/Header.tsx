@@ -149,7 +149,7 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     className="hidden md:flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-[10px] hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink">
                     <BrandLogo />
                     <span className="font-semibold text-t1 hidden lg:block">
-                        zhikuncode
+                        SkyCode
                     </span>
                 </button>
             </div>

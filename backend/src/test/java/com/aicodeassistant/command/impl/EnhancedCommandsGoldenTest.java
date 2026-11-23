@@ -446,7 +446,7 @@ class EnhancedCommandsGoldenTest {
         void versionInfo() {
             Command cmd = registry.getCommand("version");
             CommandResult result = cmd.execute("", defaultContext);
-            assertTrue(result.value().contains("Qoder"));
+            assertTrue(result.value().contains("SkyCode"));
             assertTrue(result.value().contains("Java:"));
         }
 

@@ -74,11 +74,11 @@ export function EmptyHero() {
             badge={
                 <Chip variant="accent" className="h-7 px-3">
                     <BrandLogo className="h-5 w-5" />
-                    <span data-spider-anchor="brand">zhikuncode</span>
+                    <span data-spider-anchor="brand">SkyCode</span>
                 </Chip>
             }
             title={<InkCalligraphyTitle fallback={<>今天想<b>创造</b>什么？</>} />}
-            description="下达指令，剩下的一切交给zhikuncode"
+            description="下达指令，剩下的一切交给 SkyCode"
             actions={
                 <>
                     {QUICK_CHIPS.map((chip) => (

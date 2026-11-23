@@ -28,9 +28,9 @@ describe('ganzhiYear / formatMountDate / buildMountFilename', () => {
         expect(formatMountDate(new Date(2025, 9, 3))).toBe('岁次乙巳 · 2025年10月3日');
     });
 
-    it('buildMountFilename：zhikuncode-装裱-YYYYMMDD.png（月日补零）', () => {
-        expect(buildMountFilename(new Date(2025, 0, 5))).toBe('zhikuncode-装裱-20250105.png');
-        expect(buildMountFilename(new Date(2025, 11, 31))).toBe('zhikuncode-装裱-20251231.png');
+    it('buildMountFilename：SkyCode-装裱-YYYYMMDD.png（月日补零）', () => {
+        expect(buildMountFilename(new Date(2025, 0, 5))).toBe('SkyCode-装裱-20250105.png');
+        expect(buildMountFilename(new Date(2025, 11, 31))).toBe('SkyCode-装裱-20251231.png');
     });
 });
 

@@ -139,7 +139,7 @@ const TurnCard: React.FC<TurnCardProps> = ({
                         aria-label="助手回复" data-testid={`turn-response-${turn.index}`}>
                         <div className="flex items-center gap-2 px-3 pt-3 text-[13px] font-medium text-t3 sm:px-4 sm:pt-4">
                             <BrandLogo className="h-7 w-7" />
-                            <span>zhikuncode</span>
+                            <span>SkyCode</span>
                         </div>
                         {/* 过程区（密度分档；无过程消息则不渲染） */}
                         {layers.process.length > 0 && (

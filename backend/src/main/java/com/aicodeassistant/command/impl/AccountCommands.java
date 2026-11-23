@@ -87,7 +87,7 @@ public class AccountCommands {
             @Override public CommandType getType() { return CommandType.LOCAL; }
             @Override
             public CommandResult execute(String args, CommandContext context) {
-                return CommandResult.text("Qoder AI Code Assistant\n" +
+                return CommandResult.text("SkyCode\n" +
                         "  Version: 1.0.0-SNAPSHOT\n" +
                         "  Java: " + System.getProperty("java.version") + "\n" +
                         "  OS: " + System.getProperty("os.name") + " " + System.getProperty("os.arch"));

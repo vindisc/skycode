@@ -1861,10 +1861,10 @@ public class SubAgentExecutor {
             """;
 
     static final String GUIDE_AGENT_PROMPT = """
-            你是一个专业的向导代理，精通 ZhikunCode、工具系统和 LLM API。
+            你是一个专业的向导代理，精通 SkyCode、工具系统和 LLM API。
             
             ## 你的专业领域
-            - ZhikunCode 命令、配置和工具用法
+            - SkyCode 命令、配置和工具用法
             - 工具系统模式（工具调用、多轮对话、流式传输）
             - LLM API（聊天补全、工具调用、上下文优化）
             - MCP（Model Context Protocol）服务器开发和配置

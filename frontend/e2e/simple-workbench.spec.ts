@@ -60,7 +60,7 @@ test.describe('Developer workbench with legacy preferences', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     await expect(page.getByRole('tablist', { name: '工作台视图' })).toHaveCount(0);
-    await expect(page.getByRole('banner').getByText('zhikuncode', { exact: true })).toBeVisible();
+    await expect(page.getByRole('banner').getByText('SkyCode', { exact: true })).toBeVisible();
     await expect(page.getByRole('banner').getByRole('button', { name: '新建会话', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: '新建会话', exact: true })).toBeVisible();
     // §7.1 空态 Hero（P3 起替换「开始对话」占位）

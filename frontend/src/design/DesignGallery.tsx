@@ -112,7 +112,7 @@ export default function DesignGallery() {
                         <span className="flex h-6 w-6 items-center justify-center rounded-md bg-accent2 text-white">
                             <Zap className="h-3.5 w-3.5" aria-hidden="true" />
                         </span>
-                        <span className="text-sm font-semibold">zhikuncode /design 画廊</span>
+                        <span className="text-sm font-semibold">SkyCode /design 画廊</span>
                         <Chip variant="accent">P1a · DEV only</Chip>
                     </div>
                     <div className="ml-auto flex flex-wrap items-center gap-4">

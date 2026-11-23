@@ -55,7 +55,7 @@ describe('truncateSessionTitle', () => {
 
 describe('computeTabTitle', () => {
     it('idle 返回默认标题（不带会话标题）', () => {
-        expect(computeTabTitle('idle', 0, '某任务')).toBe('zhikuncode');
+        expect(computeTabTitle('idle', 0, '某任务')).toBe('SkyCode');
     });
 
     it('streaming 显示半月 loader 帧 + 运行中 + 会话标题', () => {
@@ -110,12 +110,12 @@ describe('useTabStatus', () => {
             useMessageStore.setState({ messages: [] });
         });
         vi.useRealTimers();
-        document.title = 'zhikuncode';
+        document.title = 'SkyCode';
     });
 
     it('默认状态保持原标题', () => {
         renderHook(() => useTabStatus());
-        expect(document.title).toBe('zhikuncode');
+        expect(document.title).toBe('SkyCode');
     });
 
     it('运行中时标题带会话标题（与顶栏同源），回 idle 后恢复', () => {
@@ -124,7 +124,7 @@ describe('useTabStatus', () => {
         act(() => useSessionStore.getState().setStatus('streaming'));
         expect(document.title).toBe('◐ 运行中 · 帮我审查这份文档，哪些值得做？');
         act(() => useSessionStore.getState().setStatus('idle'));
-        expect(document.title).toBe('zhikuncode');
+        expect(document.title).toBe('SkyCode');
     });
 
     it('streaming 时标题按 250ms 一帧旋转（1s/圈）', () => {
@@ -180,7 +180,7 @@ describe('useTabStatus', () => {
             usePermissionStore.getState().respondPermission(makeAllowDecision('p1'));
             useSessionStore.getState().setStatus('idle');
         });
-        expect(document.title).toBe('zhikuncode');
+        expect(document.title).toBe('SkyCode');
     });
 
     it('多个待审批显示数量，运行中状态被待审批覆盖', () => {
@@ -207,8 +207,8 @@ describe('useTabStatus', () => {
         act(() => useSessionStore.getState().setStatus('streaming'));
         expect(document.title).toBe('◐ 运行中 · 某任务');
         unmount();
-        expect(document.title).toBe('zhikuncode');
+        expect(document.title).toBe('SkyCode');
         act(() => vi.advanceTimersByTime(500));
-        expect(document.title).toBe('zhikuncode');
+        expect(document.title).toBe('SkyCode');
     });
 });

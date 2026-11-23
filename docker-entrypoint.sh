@@ -69,7 +69,7 @@ fi
 
 # 2. Print configuration summary
 echo "============================================================"
-echo "  ZhikunCode — Starting"
+echo "  SkyCode — Starting"
 echo "============================================================"
 if [ -n "$LLM_PROVIDER_DASHSCOPE_API_KEY" ] && [ "$LLM_PROVIDER_DASHSCOPE_API_KEY" != "your-dashscope-api-key-here" ]; then
     MASKED="${LLM_PROVIDER_DASHSCOPE_API_KEY:0:6}****${LLM_PROVIDER_DASHSCOPE_API_KEY: -4}"
@@ -114,7 +114,7 @@ done
 
 # ---- Startup banner ----
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  ZhikunCode — Starting..."
+echo "  SkyCode — Starting..."
 echo "  Java:   $(java --version 2>&1 | head -1)"
 echo "  Python: $(python --version 2>&1)"
 echo "  Profile: ${SPRING_PROFILES_ACTIVE:-default}"

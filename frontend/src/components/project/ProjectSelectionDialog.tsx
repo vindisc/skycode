@@ -397,7 +397,7 @@ export function ProjectSelectionDialog() {
                         浏览服务端目录
                     </div>
                     <p className="mt-1 text-[13px] text-[var(--v2-text-2)]">
-                        这里浏览的是运行 ZhikunCode 的服务器目录，不会上传浏览器本地文件。
+                        这里浏览的是运行 SkyCode 的服务器目录，不会上传浏览器本地文件。
                     </p>
 
                     {directoryListing?.roots.length ? (

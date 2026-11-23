@@ -71,10 +71,10 @@ export function formatMountDate(d: Date): string {
     return `岁次${ganzhiYear(d.getFullYear())} · ${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
-/** 导出文件名：zhikuncode-装裱-YYYYMMDD.png */
+/** 导出文件名：SkyCode-装裱-YYYYMMDD.png */
 export function buildMountFilename(d: Date): string {
     const p = (n: number) => String(n).padStart(2, '0');
-    return `zhikuncode-装裱-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}.png`;
+    return `SkyCode-装裱-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}.png`;
 }
 
 interface Rect { x: number; y: number; w: number; h: number }
