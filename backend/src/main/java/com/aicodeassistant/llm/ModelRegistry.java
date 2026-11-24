@@ -197,6 +197,32 @@ public class ModelRegistry {
         catch (Exception ignored) { return false; }
     }
 
+    /**
+     * 只在静态来源（YAML 覆盖 + 内置表）里查能力，不回查 Provider 注册表。
+     * <p>
+     * 池同步要用这个方法而不是 {@link #isKnownModel()}：后者还会问已注册的 Provider，
+     * 而 Provider 自报的能力表未必等于内置表（只是 OpenAiCompatibleProvider 那张小表恰好都在内置表里）；
+     * 同步过程中注册表正在被改写，判断依据也不该取自它。
+     */
+    public Optional<ModelCapabilities> findStaticCapabilities(String modelId) {
+        if (modelId == null || modelId.isBlank()) return Optional.empty();
+        ModelCapabilities custom = customModels.get(modelId);
+        if (custom != null) return Optional.of(custom);
+        ModelCapabilities builtin = BUILTIN_MODELS.get(modelId);
+        if (builtin != null) return Optional.of(builtin);
+        for (var e : BUILTIN_MODELS.entrySet()) {
+            String key = e.getKey();
+            if (key.endsWith("/*") && modelId.startsWith(key.substring(0, key.length() - 1))) {
+                return Optional.of(e.getValue());
+            }
+        }
+        return Optional.empty();
+    }
+
+    public boolean hasStaticCapabilities(String modelId) {
+        return findStaticCapabilities(modelId).isPresent();
+    }
+
     /** 注册自定义模型能力（YAML 配置加载时调用） */
     public void registerCustomModel(ModelCapabilities capabilities) {
         customModels.put(capabilities.modelId(), capabilities);

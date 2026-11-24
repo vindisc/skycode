@@ -50,10 +50,24 @@ public class TokenEncryptionService {
 
     private final SecretKey secretKey;
     private final SecureRandom secureRandom = new SecureRandom();
+    /**
+     * 密钥是否来自稳定来源（Spring 配置、环境变量或已存在的密钥文件）。
+     * 为 false 表示本次进程临时生成了密钥：进程所在的文件系统若不持久（例如容器重建），
+     * 用它加密的数据下次就解不开。需要长期保存密文的调用方应据此拒绝写入。
+     */
+    private final boolean keyFromPersistentSource;
 
     public TokenEncryptionService(@Value("${zhiku.encryption.key:}") String configKey) {
-        this.secretKey = resolveKey(configKey);
-        log.info("TokenEncryptionService initialized — encryption key loaded successfully");
+        KeyResolution resolution = resolveKey(configKey);
+        this.secretKey = resolution.secretKey();
+        this.keyFromPersistentSource = resolution.persistent();
+        log.info("TokenEncryptionService initialized — encryption key loaded (persistent source: {})",
+                keyFromPersistentSource);
+    }
+
+    /** 加密密钥在进程重启后是否仍然可用；false 时不应把密文当作可长期保存的数据。 */
+    public boolean keyIsPersistent() {
+        return keyFromPersistentSource;
     }
 
     /**
@@ -127,18 +141,20 @@ public class TokenEncryptionService {
      * 密钥解析 — 按优先级尝试:
      * 1) Spring 配置 (Base64)  2) 环境变量 (Base64)  3) 文件  4) 自动生成
      */
-    private SecretKey resolveKey(String configKey) {
+    private record KeyResolution(SecretKey secretKey, boolean persistent) {}
+
+    private KeyResolution resolveKey(String configKey) {
         // 1. Spring 配置
         if (configKey != null && !configKey.isBlank()) {
             log.info("Using encryption key from Spring configuration");
-            return decodeBase64Key(configKey);
+            return new KeyResolution(decodeBase64Key(configKey), true);
         }
 
         // 2. 环境变量
         String envKey = System.getenv(KEY_ENV_VAR);
         if (envKey != null && !envKey.isBlank()) {
             log.info("Using encryption key from environment variable {}", KEY_ENV_VAR);
-            return decodeBase64Key(envKey);
+            return new KeyResolution(decodeBase64Key(envKey), true);
         }
 
         // 3. 文件 ~/.zhiku/.master-key
@@ -146,15 +162,15 @@ public class TokenEncryptionService {
             try {
                 String fileKey = Files.readString(KEY_FILE).trim();
                 log.info("Using encryption key from file {}", KEY_FILE);
-                return decodeBase64Key(fileKey);
+                return new KeyResolution(decodeBase64Key(fileKey), true);
             } catch (IOException e) {
                 log.warn("Failed to read key file {}: {}", KEY_FILE, e.getMessage());
             }
         }
 
-        // 4. 自动生成并持久化
+        // 4. 自动生成并持久化：只能假定该文件在本进程生命周期内可用
         log.info("No encryption key found — generating new key and persisting to {}", KEY_FILE);
-        return generateAndPersistKey(KEY_FILE);
+        return new KeyResolution(generateAndPersistKey(KEY_FILE), false);
     }
 
     private SecretKey decodeBase64Key(String base64Key) {
