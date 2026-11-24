@@ -79,6 +79,9 @@ public class ModelRegistry {
         entry("qwen4-max-preview", caps("qwen4-max-preview", "Qwen 4 Max Preview（百炼）", 65536, 1000000, true, true, true, 4, true, 0.0, 0.0)),
         entry("qwen4-max", caps("qwen4-max", "Qwen 4 Max（百炼）", 65536, 1000000, true, true, true, 4, true, 0.0, 0.0)),
         entry("glm-5.3",           caps("glm-5.3",           "GLM-5.3",            131072, 1048576,  true, true, false, 0, true, 0.001, 0.001)),
+        // GLM-5.4 实测收图（同账号 5.3 传图回 code 1210）。上下文/输出/价格沿用 5.3 的估值，
+        // 官方规格页未刊出；maxImages=4 只验过单张，别拿这组数估价对账。
+        entry("glm-5.4",           caps("glm-5.4",           "GLM-5.4",            131072, 1048576,  true, true, true, 4, true, 0.001, 0.001)),
         entry(BailianTokenPlanModels.GLM_53, BailianTokenPlanModels.capabilities(BailianTokenPlanModels.GLM_53)),
         // MiniMax
         entry("MiniMax-M3",       caps("MiniMax-M3",       "MiniMax M3",        16384, 1000000, true, true, true, 4, true, 0.001, 0.004)),

@@ -1105,12 +1105,14 @@ public class OpenAiCompatibleProvider implements LlmProvider {
     }
 
     /**
-     * 判断是否为 GLM 强制思考模型（GLM-5.3 / GLM-5.3-Flash）。
+     * 判断是否为 GLM 强制思考模型（GLM-5.3 / GLM-5.3-Flash / GLM-5.4）。
      * 官方 API 规范：thinking.type 仅支持 enabled，不支持 disabled，
      * 由 reasoning_effort（low/high/max）控制思考强度。
+     * GLM-5.4 实测也能接受 thinking:disabled；这里仍按项目策略统一走
+     * enabled + reasoning_effort:max，想省时间可把它移出本方法。
      */
     private static boolean isGlmForcedThinkingModel(String model) {
-        return "glm-5.3".equals(model) || "glm-5.3-flash".equals(model);
+        return "glm-5.3".equals(model) || "glm-5.3-flash".equals(model) || "glm-5.4".equals(model);
     }
 
     /**
