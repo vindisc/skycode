@@ -48,6 +48,16 @@ public class LlmProviderRegistry {
     );
 
     /**
+     * 设置页服务商池注册进来的 Provider 的名字前缀，用来和配置 / 环境变量创建的 Provider 区分：
+     * 池同步只会替换带这个前缀的条目。
+     */
+    public static final String POOL_PROVIDER_PREFIX = "db:";
+
+    public static boolean isPoolProviderName(String name) {
+        return name != null && name.startsWith(POOL_PROVIDER_PREFIX);
+    }
+
+    /**
      * 构造函数 — 通过 Spring 注入 MultiProviderConfiguration 创建的 Provider 列表。
      */
     public LlmProviderRegistry(
@@ -86,10 +96,62 @@ public class LlmProviderRegistry {
                 provider.getProviderName(), provider.getSupportedModels());
     }
 
+    public List<String> registeredProviderNames() {
+        return providerSnapshot().stream().map(LlmProvider::getProviderName).toList();
+    }
+
+    /**
+     * 当前由池以外来源（配置 / 环境变量）的 Provider 声明的模型，以及各自属于哪个 Provider。
+     * 池同步据此跳过已被占用的模型：同一个模型出现在两个 Provider 名下时 {@link #getProvider} 会直接抛错。
+     */
+    public Map<String, String> modelOwnersOutsidePool() {
+        Map<String, String> owners = new java.util.LinkedHashMap<>();
+        for (LlmProvider provider : providerSnapshot()) {
+            if (isPoolProviderName(provider.getProviderName())) continue;
+            for (String model : provider.getSupportedModels()) {
+                owners.putIfAbsent(model, provider.getProviderName());
+            }
+        }
+        return Map.copyOf(owners);
+    }
+
+    /**
+     * 一次性替换池注册的全部 Provider：先移除现有的 {@code db:*}，再注册传入的。
+     * 整个替换在同一把锁内完成，期间 {@link #getProvider} 看到的要么是旧集合要么是新集合，
+     * 不会出现某个模型短暂查不到 Provider 的窗口。
+     *
+     * @throws IllegalArgumentException 传入的 Provider 有不带 {@code db:} 前缀的，或与现有 Provider 争用同一个模型
+     */
+    public void replaceDbProviders(java.util.Collection<LlmProvider> poolProviders) {
+        List<LlmProvider> replacements = List.copyOf(poolProviders);
+        Map<String, String> owners = new java.util.HashMap<>(modelOwnersOutsidePool());
+        for (LlmProvider provider : replacements) {
+            if (!isPoolProviderName(provider.getProviderName())) {
+                throw new IllegalArgumentException("Pool providers must be named with the '"
+                        + POOL_PROVIDER_PREFIX + "' prefix: " + provider.getProviderName());
+            }
+            for (String model : provider.getSupportedModels()) {
+                String owner = owners.putIfAbsent(model, provider.getProviderName());
+                if (owner != null) {
+                    throw new IllegalArgumentException("Ambiguous model route: " + model + " in "
+                            + owner + ", " + provider.getProviderName());
+                }
+            }
+        }
+        synchronized (providers) {
+            providers.keySet().removeIf(LlmProviderRegistry::isPoolProviderName);
+            for (LlmProvider provider : replacements) {
+                providers.put(provider.getProviderName(), provider);
+            }
+        }
+        log.info("Pool providers replaced: {}",
+                replacements.stream().map(LlmProvider::getProviderName).toList());
+    }
+
     /** 列出所有可用模型 — 默认模型排在最前 */
     public List<String> listAvailableModels() {
         String defaultModel = getDefaultModel();
-        List<String> all = providers.values().stream()
+        List<String> all = providerSnapshot().stream()
                 .flatMap(p -> p.getSupportedModels().stream())
                 .distinct()
                 .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new));
@@ -102,7 +164,7 @@ public class LlmProviderRegistry {
 
     /** 列出所有可用模型及其能力 */
     public List<ModelCapabilities> listModelCapabilities() {
-        return providers.values().stream()
+        return providerSnapshot().stream()
                 .flatMap(p -> p.getSupportedModels().stream()
                         .map(model -> {
                             try {
