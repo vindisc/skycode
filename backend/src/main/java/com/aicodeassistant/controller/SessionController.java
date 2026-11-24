@@ -245,8 +245,8 @@ public class SessionController {
         }
     }
 
-    /** 会话标题长度上限：侧栏与顶栏都是单行截断展示，超长标题没有可读价值。 */
-    private static final int MAX_SESSION_TITLE_LENGTH = 120;
+    /** 会话标题长度上限：侧栏与顶栏都是单行截断展示，超长标题没有可读价值。/rename 命令共用同一上限。 */
+    public static final int MAX_SESSION_TITLE_LENGTH = 120;
 
     /**
      * 重命名会话 — 只更新标题。空白标题表示清除自定义名称（界面回退为首条用户消息）。

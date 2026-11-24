@@ -23,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -43,6 +45,7 @@ class EnhancedCommandsGoldenTest {
 
     private CommandRegistry registry;
     private CommandContext defaultContext;
+    private SessionManager sessionManager;
 
     @BeforeEach
     void setUp() {
@@ -51,6 +54,7 @@ class EnhancedCommandsGoldenTest {
         when(gitService.isGitRepositoryRoot(any())).thenReturn(true);
         GitCommands git = new GitCommands(gitService);
         SessionCommands session = new SessionCommands();
+        sessionManager = mock(SessionManager.class);
         ConfigModeCommands config = new ConfigModeCommands();
         ExtensionCommands ext = new ExtensionCommands();
         EnvironmentCommands env = new EnvironmentCommands();
@@ -65,7 +69,7 @@ class EnhancedCommandsGoldenTest {
                 git.securityReviewCommand(),
                 // Session (6)
                 session.contextCommand(), session.copyCommand(), session.exportCommand(),
-                session.filesCommand(), session.renameCommand(), session.tagCommand(),
+                session.filesCommand(), session.renameCommand(sessionManager), session.tagCommand(),
                 // Config (7)
                 config.fastCommand(), config.effortCommand(), config.outputStyleCommand(),
                 config.themeCommand(), config.colorCommand(),
@@ -260,6 +264,32 @@ class EnhancedCommandsGoldenTest {
             Command cmd = registry.getCommand("rename");
             CommandResult result = cmd.execute("", defaultContext);
             assertFalse(result.isSuccess());
+        }
+
+        @Test
+        @DisplayName("3.5 /rename 带名称时真正写入会话标题")
+        void renamePersistsTrimmedTitle() {
+            when(sessionManager.updateSessionTitle(defaultContext.sessionId(), "黄金投资方案")).thenReturn(true);
+
+            CommandResult result = registry.getCommand("rename").execute("  黄金投资方案  ", defaultContext);
+
+            assertTrue(result.isSuccess());
+            assertEquals(CommandResult.ResultType.TEXT, result.type());
+            verify(sessionManager).updateSessionTitle(defaultContext.sessionId(), "黄金投资方案");
+        }
+
+        @Test
+        @DisplayName("3.6 /rename 超过长度上限或会话不存在时报错且不写入")
+        void renameRejectsOverlongTitleAndUnknownSession() {
+            Command cmd = registry.getCommand("rename");
+
+            assertFalse(cmd.execute("长".repeat(121), defaultContext).isSuccess());
+            when(sessionManager.updateSessionTitle(any(), anyString())).thenReturn(false);
+            assertFalse(cmd.execute("新名字", defaultContext).isSuccess());
+
+            verify(sessionManager, never()).updateSessionTitle(any(), org.mockito.ArgumentMatchers.argThat(t -> t.length() > 120));
+            assertFalse(cmd.execute("新名字",
+                    CommandContext.of("", "/tmp", "model", AppState.defaultState())).isSuccess());
         }
     }
 

@@ -650,6 +650,8 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
     // ── 重命名气泡：点击铅笔在按钮附近弹出输入框，Enter 保存、Escape 取消 ──
     const [renaming, setRenaming] = useState<{ sessionId: string; rect: DOMRect; value: string } | null>(null);
     const [renameSubmitting, setRenameSubmitting] = useState(false);
+    // 同步防重：state 要到下一次渲染才更新，连按回车或回车后紧接着再点「保存」会重复发请求
+    const renameSubmittingRef = useRef(false);
     const [renameError, setRenameError] = useState<string | null>(null);
 
     // 气泡打开期间按 Escape 关闭
@@ -669,14 +671,26 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
     useEffect(() => {
         if (!renaming) return;
         const handler = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                event.stopPropagation();
-                setRenaming(null);
-            }
+            if (event.key !== 'Escape') return;
+            // 中文输入法里按 Escape 是在取消候选词，不是关闭气泡
+            if (event.isComposing || event.keyCode === 229) return;
+            event.stopPropagation();
+            setRenaming(null);
         };
         document.addEventListener('keydown', handler);
         return () => document.removeEventListener('keydown', handler);
     }, [renaming]);
+
+    // 列表每次刷新都把当前会话的持久化标题同步给顶栏：用 /rename 命令改名、或在别的标签页改名后，
+    // 顶栏也能跟着更新，不必等重新打开会话。当前会话不在已加载的列表里（比如刚新建）时不动。
+    useEffect(() => {
+        const current = sessions.find(s => s.id === currentSessionId);
+        if (!current) return;
+        const persisted = current.title ?? null;
+        if (useSessionStore.getState().customTitle !== persisted) {
+            useSessionStore.getState().setCustomTitle(persisted);
+        }
+    }, [sessions, currentSessionId]);
 
     // §7.5 面板搜索框：搜索已下推服务端（GET /api/sessions?query=，匹配标题与首条用户消息全文），
     // 客户端不再二次过滤，避免把服务端匹配到的结果过滤掉。
@@ -808,7 +822,8 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
 
     // 重命名会话（气泡中的「保存」或输入框 Enter 触发）
     const executeRenameSession = useCallback(async (sessionId: string, title: string) => {
-        if (renameSubmitting) return; // in-flight：忽略重复触发
+        if (renameSubmittingRef.current) return; // in-flight：忽略重复触发
+        renameSubmittingRef.current = true;
         setRenameSubmitting(true);
         setRenameError(null);
         try {
@@ -833,9 +848,10 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
         } catch {
             setRenameError('重命名失败，请稍后重试。');
         } finally {
+            renameSubmittingRef.current = false;
             setRenameSubmitting(false);
         }
-    }, [renameSubmitting]);
+    }, []);
 
     // 删除会话（确认气泡中的「确认删除」/验证码 Enter 触发）
     const executeDeleteSession = useCallback(async (sessionId: string, code?: string) => {
@@ -1102,10 +1118,11 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                             onChange={(e) => setRenaming(prev => (prev ? { ...prev, value: e.target.value } : prev))}
                             onFocus={(e) => e.currentTarget.select()}
                             onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    void executeRenameSession(renaming.sessionId, renaming.value);
-                                }
+                                if (e.key !== 'Enter') return;
+                                // 中文输入法：候选词还没上屏时按回车是在确认候选，不是提交
+                                if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+                                e.preventDefault();
+                                void executeRenameSession(renaming.sessionId, renaming.value);
                             }}
                             placeholder="留空则恢复为默认名称"
                             aria-label={simpleMode ? '任务名称' : '会话名称'}

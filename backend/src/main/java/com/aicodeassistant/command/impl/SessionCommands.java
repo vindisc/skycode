@@ -1,6 +1,8 @@
 package com.aicodeassistant.command.impl;
 
 import com.aicodeassistant.command.*;
+import com.aicodeassistant.controller.SessionController;
+import com.aicodeassistant.session.SessionManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -81,19 +83,35 @@ public class SessionCommands {
         };
     }
 
+    /**
+     * /rename &lt;新名称&gt; — 重命名当前会话，与侧栏改名按钮写入的是同一个字段。
+     * <p>
+     * 此前这里是只回一句话、不落库的空桩。命令成功后 WebSocket 入口会发 session_list_updated，
+     * 前端刷新会话列表时把标题同步给顶栏。
+     */
     @Bean
-    Command renameCommand() {
+    Command renameCommand(SessionManager sessionManager) {
         return new Command() {
             @Override public String getName() { return "rename"; }
-            @Override public String getDescription() { return "重命名当前会话"; }
+            @Override public String getDescription() { return "重命名当前会话：/rename <新名称>"; }
             @Override public CommandType getType() { return CommandType.LOCAL; }
             @Override
             public CommandResult execute(String args, CommandContext context) {
-                if (args.isBlank()) {
-                    return CommandResult.error("Usage: /rename <new-name> — 请指定新的会话名称");
+                String sessionId = context.sessionId();
+                if (sessionId == null || sessionId.isBlank()) {
+                    return CommandResult.error("当前没有活动的会话。");
                 }
-                // P1: 更新会话名称
-                return CommandResult.text("Session renamed to: " + args.trim());
+                String title = args == null ? "" : args.strip();
+                if (title.isEmpty()) {
+                    return CommandResult.error("用法：/rename <新名称> — 请指定新的会话名称。");
+                }
+                if (title.length() > SessionController.MAX_SESSION_TITLE_LENGTH) {
+                    return CommandResult.error("会话名称最多 " + SessionController.MAX_SESSION_TITLE_LENGTH + " 个字符。");
+                }
+                if (!sessionManager.updateSessionTitle(sessionId, title)) {
+                    return CommandResult.error("没有找到当前会话，未能重命名。");
+                }
+                return CommandResult.text("会话已重命名为：" + title);
             }
         };
     }
