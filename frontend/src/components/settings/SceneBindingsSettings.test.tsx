@@ -3,7 +3,7 @@
  * 场景与可选服务商都来自接口；图片理解兜底只能选收图的模型；保存的是池里的实际存储键。
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SceneView, ScenesResponse } from '@/api/settingsApi';
 import { SceneBindingsSettings } from './SceneBindingsSettings';
@@ -134,6 +134,23 @@ describe('SceneBindingsSettings', () => {
 
         expect(await screen.findByText('已失效')).toBeInTheDocument();
         expect(screen.getByText(/这条分派已失效/)).toBeInTheDocument();
+    });
+
+    it('lets a stale binding be cleared even when no provider is left', async () => {
+        // 服务商被删之后，绑定还在但已失效；此时没有可选服务商，操作区不渲染，清除入口不能跟着消失
+        api.listScenes.mockResolvedValue(response({
+            scenes: [promptScene(), visionScene({ active: false })],
+            providers: [],
+        }));
+        render(<SceneBindingsSettings />);
+        await screen.findByText('已失效');
+
+        fireEvent.click(screen.getByRole('button', { name: '清除这条分派' }));
+
+        await waitFor(() => expect(api.clearSceneBinding).toHaveBeenCalledWith('vision_fallback'));
+        // 没有绑定的场景不出这个按钮
+        expect(within(screen.getByTestId('scene-card-prompt_optimize')).queryByRole('button', { name: '清除这条分派' }))
+            .not.toBeInTheDocument();
     });
 
     it('shows the backend reason when saving is rejected', async () => {

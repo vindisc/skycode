@@ -204,6 +204,14 @@ export function SceneBindingsSettings({ onGoToProviders }: SceneBindingsSettings
                                         </div>
                                     </div>
                                 )}
+                                {/* 没有可选服务商时上面的操作区不渲染，但失效的绑定仍要能清掉 */}
+                                {providers.length === 0 && scene.binding && (
+                                    <div className="mt-3">
+                                        <Button size="sm" disabled={saving} onClick={() => { void handleClear(scene); }}>
+                                            清除这条分派
+                                        </Button>
+                                    </div>
+                                )}
                                 {saveErrors[scene.key] && (
                                     <p role="alert" className="mt-3 rounded-[10px] border border-err bg-errsoft px-3 py-2 text-[13px] text-errstrong">
                                         {saveErrors[scene.key]}
