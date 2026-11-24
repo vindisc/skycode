@@ -71,7 +71,7 @@ export function LlmProvidersSettings({ onGoToScenes }: LlmProvidersSettingsProps
         addNotification({
             key: `provider-routing-${provider.key}-${Date.now()}`,
             level: 'warning',
-            message: mine.registeredAs === null
+            message: mine.registeredAs == null
                 ? `「${provider.name}」没有注册进运行时：${mine.skipReason ?? '原因未知'}`
                 : `「${provider.name}」已注册，但有模型没能注册，原因见列表`,
         });
@@ -346,7 +346,8 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
 function RoutingStatus({ routing, enabled }: { routing?: ProviderRouting; enabled: boolean }) {
     if (!enabled) return <Chip variant="neutral">已停用</Chip>;
     if (!routing) return null;
-    if (routing.registeredAs !== null) return <Chip variant="ok">已注册</Chip>;
+    // 后端省略值为 null 的字段：没注册时 registeredAs 是 undefined，不能拿它和 null 严格比较
+    if (routing.registeredAs != null) return <Chip variant="ok">已注册</Chip>;
     // 没注册分两种：模型都由别处提供（无害），或有模型没注册成功（要处理）。轻重由后端判定
     return <Chip variant={routing.needsAttention ? 'warn' : 'neutral'}>未注册</Chip>;
 }

@@ -7,6 +7,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/api/request';
 import type { LlmProviderListResponse, LlmProviderResponse, LlmProviderView, ProviderRouting } from '@/api/settingsApi';
+import { useNotificationStore } from '@/store/notificationStore';
 import { LlmProvidersSettings } from './LlmProvidersSettings';
 
 const api = vi.hoisted(() => ({
@@ -50,6 +51,17 @@ const routing = (patch: Partial<ProviderRouting> = {}): ProviderRouting => ({
     ...patch,
 });
 
+/** 没注册的条目：后端省略值为 null 的字段，响应里没有 registeredAs / defaultModel */
+const unregisteredRouting = (patch: Partial<ProviderRouting> = {}): ProviderRouting => ({
+    providerKey: '智谱',
+    providerName: '智谱',
+    registeredModels: [],
+    skippedModels: [{ model: 'glm-5.4', reason: '已由配置里的服务商「zhipu」提供' }],
+    skipReason: '没有可注册的模型',
+    needsAttention: true,
+    ...patch,
+});
+
 const listResponse = (patch: Partial<LlmProviderListResponse> = {}): LlmProviderListResponse => ({
     providers: [provider()],
     apiKeyStorageReady: true,
@@ -76,6 +88,31 @@ describe('LlmProvidersSettings', () => {
         // 被跳过的模型，鼠标悬停能看到原因
         expect(within(screen.getByLabelText('智谱 的模型')).getByText('gpt-6.2-sol'))
             .toHaveAttribute('title', '已由配置里的服务商「huoshen」提供');
+    });
+
+    it('reports an entry that the API returns without registeredAs as not registered', async () => {
+        api.listProviders.mockResolvedValue(listResponse({ routing: [unregisteredRouting()] }));
+        render(<LlmProvidersSettings />);
+        const row = await screen.findByTestId('llm-provider-row-智谱');
+
+        // 回归：registeredAs 缺失时曾因为 `!== null` 被误判成"已注册"
+        expect(within(row).getByText('未注册')).toBeInTheDocument();
+        expect(within(row).getByText('未注册：没有可注册的模型')).toBeInTheDocument();
+        expect(screen.queryByText('已注册')).not.toBeInTheDocument();
+        expect(screen.queryByText(/已注册为 db:/)).not.toBeInTheDocument();
+    });
+
+    it('warns with the right wording when a saved provider did not get registered', async () => {
+        api.updateProvider.mockResolvedValue({ provider: provider(), routing: [unregisteredRouting()] });
+        render(<LlmProvidersSettings />);
+        await screen.findByText('智谱');
+
+        fireEvent.click(screen.getByRole('button', { name: '编辑' }));
+        await screen.findByTestId('llm-provider-form');
+        fireEvent.click(screen.getByRole('button', { name: '保存' }));
+
+        await waitFor(() => expect(useNotificationStore.getState().notifications.map(n => n.message))
+            .toContain('「智谱」没有注册进运行时：没有可注册的模型'));
     });
 
     it('shows a load failure with a retry that works', async () => {

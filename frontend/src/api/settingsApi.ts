@@ -2,6 +2,9 @@
  * 设置页「模型服务商」「场景分派」的接口封装。
  * 字段与后端 LlmProviderSettingsController / SceneBindingController 的响应记录一一对应。
  * 密钥只写不读：请求体里可以带明文，响应里永远只有打码后的形式。
+ *
+ * 注意：后端序列化时会省略值为 null 的字段，所以下面标成 `?: T | null` 的字段收到时是 undefined。
+ * 判断"有没有"一律用 == null / != null，不能和 null 做严格比较。
  */
 
 import { request } from './request';
@@ -29,14 +32,14 @@ export interface ProviderModelSkip {
 export interface ProviderRouting {
     providerKey: string;
     providerName: string;
-    /** 注册名（db:&lt;key&gt;）；没注册时为 null */
-    registeredAs: string | null;
+    /** 注册名（db:&lt;key&gt;）；没注册时字段缺失 */
+    registeredAs?: string | null;
     registeredModels: string[];
-    /** 实际生效的默认模型；没注册时为 null */
-    defaultModel: string | null;
+    /** 实际生效的默认模型；没注册时字段缺失 */
+    defaultModel?: string | null;
     skippedModels: ProviderModelSkip[];
-    /** 整个条目被跳过的原因；已注册时为 null */
-    skipReason: string | null;
+    /** 整个条目被跳过的原因；已注册时字段缺失 */
+    skipReason?: string | null;
     /** 有需要用户处理的问题：这个条目里有模型没能注册成功。已停用、模型都由别处提供不算 */
     needsAttention: boolean;
 }
@@ -67,8 +70,8 @@ export interface LlmProviderTestResponse {
     ok: boolean;
     model: string;
     latencyMs: number;
-    /** 为 null 表示连通 */
-    error: string | null;
+    /** 连通时字段缺失 */
+    error?: string | null;
 }
 
 export interface SceneBinding {
@@ -80,9 +83,10 @@ export interface SceneView {
     key: string;
     label: string;
     description: string;
-    binding: SceneBinding | null;
-    /** 绑定指向的服务商当前的显示名；服务商已被删除时为 null */
-    providerName: string | null;
+    /** 没有绑定时字段缺失 */
+    binding?: SceneBinding | null;
+    /** 绑定指向的服务商当前的显示名；没有绑定或服务商已被删除时字段缺失 */
+    providerName?: string | null;
     /** 绑定此刻是否真的生效 */
     active: boolean;
 }

@@ -36,12 +36,11 @@ const FIRE = {
     models: [{ id: 'gpt-6.1-sol', supportsImages: true }],
 };
 
+// 未绑定的场景：后端省略值为 null 的字段，响应里没有 binding / providerName
 const promptScene = (patch: Partial<SceneView> = {}): SceneView => ({
     key: 'prompt_optimize',
     label: '提示词优化',
     description: '输入框里「优化提示词」功能使用的模型。',
-    binding: null,
-    providerName: null,
     active: false,
     ...patch,
 });
