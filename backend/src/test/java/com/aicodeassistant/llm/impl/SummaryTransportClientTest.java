@@ -148,6 +148,44 @@ class SummaryTransportClientTest {
         assertEquals("unsupported_summary",provider("https://example.invalid/v1").summarize(request("deepseek-v4.1-flash","MAX",5000),LlmCallContext.unscoped()).failureReason());
         assertEquals(0,server.getRequestCount());
     }
+    @Test void relayPrefixWhitelistMatchesOnlyOnPathBoundary() {
+        String prefixes = "https://relay.example.com, HTTPS://Other-Relay.EXAMPLE.com/v1/ ";
+        assertTrue(SummaryTransportClient.isDeepSeekRelay("https://relay.example.com/v1", prefixes));
+        assertTrue(SummaryTransportClient.isDeepSeekRelay("https://relay.example.com/v1/", prefixes));
+        assertTrue(SummaryTransportClient.isDeepSeekRelay("https://other-relay.example.com/v1/chat", prefixes));
+        // 借着前缀混进来的地址不算在白名单内
+        assertFalse(SummaryTransportClient.isDeepSeekRelay("https://relay.example.com.evil.com/v1", prefixes));
+        assertFalse(SummaryTransportClient.isDeepSeekRelay("https://api.deepseek.com/v1", prefixes));
+        assertFalse(SummaryTransportClient.isDeepSeekRelay("https://relay.example.com/v1", ""));
+        assertFalse(SummaryTransportClient.isDeepSeekRelay("https://relay.example.com/v1", " , "));
+        assertFalse(SummaryTransportClient.isDeepSeekRelay(null, prefixes));
+    }
+    @Test void relayEndpointIsAcceptedAndUsesMaxTokens() throws Exception {
+        String relayUrl = server.url("/v1").toString();
+        String previous = System.getProperty(SummaryTransportClient.RELAY_PREFIXES_ENV);
+        System.setProperty(SummaryTransportClient.RELAY_PREFIXES_ENV, relayUrl);
+        try {
+            var relay = provider("deepseek-relay", relayUrl);
+            assertTrue(SummaryTransportClient.supportsEndpoint(relayUrl));
+            assertTrue(relay.supportsSummary("deepseek-flash", SummaryRequest.ThinkingMode.MAX));
+            server.enqueue(success(""));
+            var result = relay.summarize(request("deepseek-flash","MAX",5000), LlmCallContext.unscoped());
+            assertNull(result.failureReason());
+            // 中转站与官方端点一样只认 max_tokens
+            JsonNode body = json.readTree(server.takeRequest().getBody().readUtf8());
+            assertEquals(8192, body.path("max_tokens").asInt());
+            assertFalse(body.has("max_completion_tokens"));
+        } finally {
+            if (previous == null) System.clearProperty(SummaryTransportClient.RELAY_PREFIXES_ENV);
+            else System.setProperty(SummaryTransportClient.RELAY_PREFIXES_ENV, previous);
+        }
+    }
+    @Test void unknownHostIsRejectedWhenWhitelistIsEmpty() {
+        assertFalse(SummaryTransportClient.isDeepSeekRelay("https://relay.example.com/v1", null));
+        // 官方与百炼端点不依赖白名单
+        assertTrue(SummaryTransportClient.supportsEndpoint(SummaryTransportClient.DEEPSEEK_ENDPOINT));
+        assertTrue(SummaryTransportClient.supportsEndpoint(SummaryTransportClient.BAILIAN_ENDPOINT));
+    }
     @Test void ordinary429GetsOnlyOneRetry() {
         server.enqueue(new MockResponse().setResponseCode(429).setHeader("Retry-After","0"));
         server.enqueue(success(""));

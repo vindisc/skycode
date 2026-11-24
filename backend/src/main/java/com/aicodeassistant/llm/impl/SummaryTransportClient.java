@@ -16,20 +16,54 @@ import java.util.concurrent.*;
 final class SummaryTransportClient {
     static final String BAILIAN_ENDPOINT = "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1";
     static final String DEEPSEEK_ENDPOINT = "https://api.deepseek.com/v1";
+    /** DeepSeek 中转站前缀白名单（逗号分隔）。只有官方域名时摘要链路才被采纳，走中转站会被整体拒绝。 */
+    static final String RELAY_PREFIXES_ENV = "ZHIKUN_SUMMARY_DEEPSEEK_RELAY_PREFIXES";
     private SummaryTransportClient() {}
 
     static boolean supportsEndpoint(String baseUrl) {
-        return BAILIAN_ENDPOINT.equals(baseUrl) || DEEPSEEK_ENDPOINT.equals(baseUrl);
+        return BAILIAN_ENDPOINT.equals(baseUrl) || DEEPSEEK_ENDPOINT.equals(baseUrl)
+                || isDeepSeekRelay(baseUrl);
+    }
+
+    /** baseUrl 是否落在配置的 DeepSeek 中转站前缀白名单内（环境变量优先，其次是同名系统属性）。 */
+    static boolean isDeepSeekRelay(String baseUrl) {
+        String prefixes = System.getenv(RELAY_PREFIXES_ENV);
+        if (prefixes == null || prefixes.isBlank()) prefixes = System.getProperty(RELAY_PREFIXES_ENV);
+        return isDeepSeekRelay(baseUrl, prefixes);
+    }
+
+    /**
+     * 前缀白名单匹配，大小写不敏感、忽略首尾空白与尾斜杠。
+     * 必须匹配到路径边界：白名单里的 https://example.com 只认它自己和它下面的路径，
+     * 不认 https://example.com.evil.com 这类借着前缀混进来的地址。
+     */
+    static boolean isDeepSeekRelay(String baseUrl, String relayPrefixes) {
+        if (baseUrl == null || baseUrl.isBlank() || relayPrefixes == null || relayPrefixes.isBlank()) return false;
+        String candidate = normalizeEndpoint(baseUrl);
+        for (String prefix : relayPrefixes.split(",")) {
+            String allowed = normalizeEndpoint(prefix);
+            if (!allowed.isEmpty() && (candidate.equals(allowed) || candidate.startsWith(allowed + "/"))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String normalizeEndpoint(String value) {
+        String trimmed = value.strip().toLowerCase(java.util.Locale.ROOT);
+        while (trimmed.endsWith("/")) trimmed = trimmed.substring(0, trimmed.length() - 1);
+        return trimmed;
     }
 
     static SummaryResult execute(OkHttpClient client, ObjectMapper mapper, String baseUrl, String key,
                                  ConcurrentMap<String, Call> active, SummaryRequest input,
                                  LlmCallContext context) {
         var body = mapper.createObjectNode();
-        // DeepSeek 官方仅认 max_tokens（max_completion_tokens 被静默忽略、上限不生效，已实测）；
+        // DeepSeek 官方与 DeepSeek 中转站只认 max_tokens（max_completion_tokens 被静默忽略、上限不生效，已实测）；
         // 百炼 Token Plan 的 max_completion_tokens 已经现网验证，保持不变。必须按端点分流：
         // 百炼同样托管 deepseek- 前缀模型，不能按模型名判断。
-        String limitKey = DEEPSEEK_ENDPOINT.equals(baseUrl) ? "max_tokens" : "max_completion_tokens";
+        String limitKey = DEEPSEEK_ENDPOINT.equals(baseUrl) || isDeepSeekRelay(baseUrl)
+                ? "max_tokens" : "max_completion_tokens";
         body.put("model", input.model()).put("stream", false)
                 .put(limitKey, input.maxCompletionTokens());
         body.set("messages", mapper.valueToTree(List.of(
