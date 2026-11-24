@@ -403,6 +403,65 @@ describe('PromptInput asynchronous submit', () => {
         expect(input).toHaveValue('/retry-me');
     });
 
+    it('submits a multi-line draft starting with a slash as a normal message', async () => {
+        const onSubmit = vi.fn().mockResolvedValue(true);
+        const onSlashCommand = vi.fn().mockResolvedValue(true);
+        renderInput(onSubmit, onSlashCommand);
+        const input = screen.getByRole('textbox', { name: '输入消息' });
+        const draft = '/这个路径有问题\n第二行补充说明';
+
+        fireEvent.change(input, { target: { value: draft } });
+        fireEvent.click(screen.getByRole('button', { name: '发送消息' }));
+
+        await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(
+            expect.objectContaining({ text: draft }),
+        ));
+        expect(onSlashCommand).not.toHaveBeenCalled();
+    });
+
+    it('submits a path-like draft as a normal message instead of an unknown command', async () => {
+        const onSubmit = vi.fn().mockResolvedValue(true);
+        const onSlashCommand = vi.fn().mockResolvedValue(true);
+        renderInput(onSubmit, onSlashCommand);
+        const input = screen.getByRole('textbox', { name: '输入消息' });
+        const draft = '/Users/demo/src/index.ts 这个文件报错了';
+
+        fireEvent.change(input, { target: { value: draft } });
+        fireEvent.click(screen.getByRole('button', { name: '发送消息' }));
+
+        await waitFor(() => expect(onSubmit).toHaveBeenCalledWith(
+            expect.objectContaining({ text: draft }),
+        ));
+        expect(onSlashCommand).not.toHaveBeenCalled();
+    });
+
+    it('still routes a known command with multi-line arguments to the command path', async () => {
+        const onSubmit = vi.fn().mockResolvedValue(true);
+        const onSlashCommand = vi.fn().mockResolvedValue(true);
+        renderInput(onSubmit, onSlashCommand, [
+            { name: 'review', description: 'Review changes', group: 'Commands' },
+        ]);
+        const input = screen.getByRole('textbox', { name: '输入消息' });
+        const draft = '/review 第一行\n第二行';
+
+        fireEvent.change(input, { target: { value: draft } });
+        fireEvent.click(screen.getByRole('button', { name: '发送消息' }));
+
+        await waitFor(() => expect(onSlashCommand).toHaveBeenCalledWith(draft));
+        expect(onSubmit).not.toHaveBeenCalled();
+    });
+
+    it('does not open the command palette for a multi-line draft starting with a slash', () => {
+        renderInput(vi.fn().mockResolvedValue(true));
+        const input = screen.getByRole('textbox', { name: '输入消息' });
+
+        fireEvent.change(input, { target: { value: '/help' } });
+        expect(screen.getByRole('listbox')).toBeInTheDocument();
+
+        fireEvent.change(input, { target: { value: '/help\n第二行' } });
+        expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    });
+
     it('preserves a normal draft after a global command succeeds', async () => {
         const onSlashCommand = vi.fn().mockResolvedValue(true);
         renderInput(

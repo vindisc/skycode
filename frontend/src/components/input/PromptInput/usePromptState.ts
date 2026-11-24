@@ -22,6 +22,7 @@ import {
 } from 'react';
 import type {
     Attachment,
+    Command,
     FileReferenceCapability,
     PastePublishResult,
     PublishedLocalFile,
@@ -37,6 +38,7 @@ import { usePromptAttachments } from './usePromptAttachments';
 import { useLocalFileReference } from './useLocalFileReference';
 import { usePromptDraftKey } from './usePromptDraftKey';
 import { PROMPT_TEMPLATE_FILL_EVENT } from '@/services/promptTemplateFill';
+import { canOpenCommandPaletteFor, looksLikeSlashCommand } from './slashCommandIntent';
 
 export interface UsePromptStateParams {
     sessionId?: string | null;
@@ -49,7 +51,11 @@ export interface UsePromptStateParams {
     onPasteImages: (files: File[]) => Promise<PastePublishResult>;
     onPublishLocalFile: (file: File) => Promise<PublishedLocalFile>;
     fileReferenceCapability: FileReferenceCapability | null;
+    /** 可用命令清单，用于判定补全面板开合与提交路由；缺省时只认兜底命令名 */
+    commands?: readonly Command[];
 }
+
+const NO_COMMANDS: readonly Command[] = [];
 
 export function usePromptState({
     sessionId,
@@ -62,6 +68,7 @@ export function usePromptState({
     onPasteImages,
     onPublishLocalFile,
     fileReferenceCapability,
+    commands = NO_COMMANDS,
 }: UsePromptStateParams) {
     // 草稿文本托管到 promptDraftStore（按活动 sessionId 键控，仅内存）：
     // 卸载/重挂载（移动端底部导航切换）后从 store 读回；无会话时回落稳定兜底键。
@@ -192,9 +199,12 @@ export function usePromptState({
         }
         if (runActive && !trimmed) return;
 
+        // 只有"看起来确实是命令"的草稿才走命令分支：后端对未知命令只回
+        // COMMAND_NOT_FOUND 且无法关联到本次提交，以 "/" 开头的正文若被误判，
+        // 会在 publish 成功时被清空草稿并静默丢失。
         if (!runActive && localFiles.length === 0
                 && publishedLocalFiles.length === 0
-                && trimmed.startsWith('/')) {
+                && looksLikeSlashCommand(trimmed, commands)) {
             await submitSlashCommand(trimmed);
             return;
         }
@@ -260,6 +270,7 @@ export function usePromptState({
         runActive,
         compacting,
         draftKey,
+        commands,
     ]);
 
     // Keyboard event handling
@@ -377,11 +388,12 @@ export function usePromptState({
         }
     }, []);
 
-    // / 命令触发（PromptTextarea onChange 内调用）
-    const handleSlashIntent = useCallback((startsWithSlash: boolean) => {
-        if (!runActive && !compacting && startsWithSlash) setShowCommands(true);
+    // / 命令触发（PromptTextarea onChange 内调用，传入草稿全文）。
+    // 面板是否开合只看"是不是在敲命令名"，与提交路由分开判定。
+    const handleSlashIntent = useCallback((text: string) => {
+        if (!runActive && !compacting && canOpenCommandPaletteFor(text, commands)) setShowCommands(true);
         else setShowCommands(false);
-    }, [runActive, compacting]);
+    }, [runActive, compacting, commands]);
 
     return {
         input,

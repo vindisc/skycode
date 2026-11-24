@@ -7,7 +7,8 @@ export interface CommandItem {
     name: string;
     description: string;
     usage?: string;
-    category: 'builtin' | 'skill' | 'plugin';
+    /** local / local_jsx / prompt 是后端 GET /api/commands 实际返回的取值 */
+    category: 'builtin' | 'skill' | 'plugin' | 'local' | 'local_jsx' | 'prompt';
 }
 
 export function fuzzyMatch(query: string, items: CommandItem[]): CommandItem[] {

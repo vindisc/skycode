@@ -13,6 +13,7 @@ import { sendToServer, sendRunInput, sendSlashCommand } from '@/api/stompClient'
 import { SkillDetailModal } from '@/components/skills/SkillDetailModal';
 import { findEnabledSkill, useSkillStore } from '@/store/skillStore';
 import { useSkillSync } from '@/hooks/useSkillSync';
+import { useCommandStore } from '@/store/commandStore';
 import { MobileApprovalSheet } from '@/components/verify/MobileApprovalSheet';
 import type {
   SubmitEvent,
@@ -156,6 +157,13 @@ function App() {
     loadConfig();
   }, [loadConfig]);
 
+  // 后端命令清单（GET /api/commands）：让补全面板和提交路由认识后端注册的全部命令。
+  // 取不到时保持为空，判定函数会回落到内置的兜底命令名。
+  const backendCommands = useCommandStore(s => s.commands);
+  useEffect(() => {
+    void useCommandStore.getState().loadCommands();
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     void loadFileReferenceCapability()
@@ -181,7 +189,7 @@ function App() {
     { name: 'model', description: '查看可用模型；切换请使用模型选择器', group: 'Commands' },
   ], []);
 
-  // 将技能转换为 Command 格式
+  // 内置命令 + 后端命令清单 + 已启用技能，合成补全面板与提交路由用的命令清单
   const allCommands: Command[] = useMemo(() => {
     const skillCommands: Command[] = skills.filter(s => s.enabled).map(s => ({
       name: `skill ${s.name}`,
@@ -190,8 +198,18 @@ function App() {
       hidden: false,
       skillId: s.id,
     }));
-    return [...builtinCommands, ...skillCommands];
-  }, [builtinCommands, skills]);
+    // 与内置命令或技能重名的以后者为准（它们带有前端特有的处理与技能 id）
+    const taken = new Set<string>(
+      [...builtinCommands, ...skillCommands].map(c => c.name.toLowerCase()));
+    const serverCommands: Command[] = backendCommands
+      .filter(c => !taken.has(c.name.trim().toLowerCase()))
+      .map(c => ({
+        name: c.name.trim(),
+        description: c.description,
+        group: 'Commands',
+      }));
+    return [...builtinCommands, ...serverCommands, ...skillCommands];
+  }, [builtinCommands, skills, backendCommands]);
 
   const addSessionError = useCallback((content: string) => {
     addMessage({

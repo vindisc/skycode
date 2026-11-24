@@ -12,7 +12,8 @@ interface PromptTextareaProps {
     onValueChange: (text: string) => void;
     onCursorChange: (pos: number | null) => void;
     onAtQueryChange: (query: string | null) => void;
-    onSlashIntent: (startsWithSlash: boolean) => void;
+    /** 草稿全文变化时通知：由上层判定是否属于斜杠命令意图 */
+    onSlashIntent: (text: string) => void;
     onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
     onPaste: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
     textareaRef: React.RefObject<HTMLTextAreaElement>;
@@ -111,8 +112,8 @@ const PromptTextarea: React.FC<PromptTextareaProps> = ({
                     onAtQueryChange(null);
                 }
 
-                // 检测 / 命令触发
-                onSlashIntent(text.startsWith('/'));
+                // 检测 / 命令触发：传全文，由 usePromptState 判定是否在敲命令名
+                onSlashIntent(text);
             }}
             onKeyDown={onKeyDown}
             onPaste={onPaste}
