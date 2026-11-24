@@ -21,9 +21,17 @@ class BailianDeepSeekConfigurationTest {
 
     @Test
     void actualYamlDefaultsRouteBailianAndDirectDeepSeekIndependently() throws Exception {
+        // 本 fork 把 app.model.* 的 yaml 默认值换成了自用的模型（HuoshenAI gpt-6 系列）。
+        // 这个用例验证的是"百炼托管与 DeepSeek 直连互相独立路由"，与默认是哪个模型无关，
+        // 所以显式用环境变量指回上游示例模型，不依赖 yaml 默认值。MockEnvironment 自带的
+        // 属性源排在最前，优先于下面追加的 yaml。
         MockEnvironment env = new MockEnvironment()
                 .withProperty("LLM_PROVIDER_DASHSCOPE_TOKEN_PLAN_API_KEY", "test-token-plan")
-                .withProperty("LLM_PROVIDER_DEEPSEEK_API_KEY", "test-direct");
+                .withProperty("LLM_PROVIDER_DEEPSEEK_API_KEY", "test-direct")
+                .withProperty("LLM_DEFAULT_MODEL", BAILIAN)
+                .withProperty("LLM_VISION_FALLBACK_MODEL", BAILIAN)
+                .withProperty("LLM_FAST_MODEL", BAILIAN)
+                .withProperty("app.model.tier-chain[0]", BAILIAN);
         for (var source : new YamlPropertySourceLoader().load("application", new ClassPathResource("application.yml"))) {
             env.getPropertySources().addLast(source);
         }
