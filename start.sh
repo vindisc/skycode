@@ -143,6 +143,54 @@ if [ -f "$PROJECT_ROOT/.env" ]; then
     source "$PROJECT_ROOT/.env"
     set +a
 fi
+
+# ======================== 解析 JDK 21 ========================
+# 后端要求 JDK 21；编译（mvnw 读 JAVA_HOME）与运行（下方 java -jar）必须用同一套 JDK，
+# 否则默认 java 是 8/11 的机器会在编译期报"不支持发行版本 21"。
+# .env 里可能带着仓库搬家前的 JAVA_HOME（指向已不存在的目录），所以不无条件相信它。
+# 顺序：仓库自带的工具链 → /usr/libexec/java_home -v 21 → 现有 JAVA_HOME → PATH 上的 java。
+# JDK 8/11 的 -version 输出仍是老式的 "1.8.0_322"，要去掉前导的 "1." 才是主版本号。
+java_major_version() {
+    local version
+    version="$("$1" -version 2>&1 | head -1 | sed -E 's/.*"([0-9.]+).*/\1/')"
+    case "$version" in 1.*) version="${version#1.}" ;; esac
+    echo "${version%%.*}"
+}
+resolve_jdk21() {
+    local candidate bundled
+    for bundled in "$PROJECT_ROOT"/.zhikun/toolchains/jdk21/*/Contents/Home; do
+        if [ -x "$bundled/bin/java" ]; then JAVA_HOME="$bundled"; return 0; fi
+    done
+    if [ -x /usr/libexec/java_home ]; then
+        # 不带 --failfast 时，找不到匹配版本也会回退到默认 JVM
+        candidate="$(/usr/libexec/java_home -v 21 --failfast 2>/dev/null || true)"
+        if [ -n "$candidate" ] && [ -x "$candidate/bin/java" ]; then JAVA_HOME="$candidate"; return 0; fi
+    fi
+    if [ -n "${JAVA_HOME:-}" ] && [ -x "$JAVA_HOME/bin/java" ]; then return 0; fi
+    return 1
+}
+JAVA_BIN="$(command -v java || true)"
+if resolve_jdk21; then
+    export JAVA_HOME
+    JAVA_BIN="$JAVA_HOME/bin/java"
+    export PATH="$JAVA_HOME/bin:$PATH"
+    log_info "使用 JDK: $JAVA_HOME"
+else
+    log_warn "未能解析到 JDK 21，回退到 PATH 上的 java"
+fi
+if [ -z "$JAVA_BIN" ]; then
+    log_error "未找到 java，请安装 JDK 21+"
+    exit 1
+fi
+JAVA_MAJOR="$(java_major_version "$JAVA_BIN")"
+case "$JAVA_MAJOR" in
+    ''|*[!0-9]*) log_warn "无法识别 java 版本（$JAVA_BIN），继续执行" ;;
+    *)
+        if [ "$JAVA_MAJOR" -lt 21 ]; then
+            log_error "需要 JDK 21+，当前 java 是 $JAVA_MAJOR 版：$JAVA_BIN"
+            exit 1
+        fi ;;
+esac
 PYTHON_WORKSPACE_ROOT="${WORKSPACE_ROOT:-$PROJECT_ROOT}"
 
 # Project-pinned MCP launchers. Keeping them on PATH makes the same ZHIKUN_MCP_SERVERS
@@ -225,9 +273,10 @@ log_info "打包完成: $(basename "$BACKEND_JAR")"
 # （LOG_DIR 已在顶部定义；若 .env 中覆盖则尊重环境变量优先级）
 export LOG_DIR
 # 直接用 java -jar 启动（PID = JVM PID，无 fork 问题）。
+# 用与编译相同的 JAVA_BIN（上方已解析并校验过版本），保证编译期与运行期是同一套 JDK。
 # 三端脚本会在下方独立启动 Python，必须覆盖 .env/父进程中的托管开关，避免争抢 8000 端口。
 nohup env PYTHON_SERVICE_AUTO_START=false \
-    java -jar "$BACKEND_JAR" >> "$BACKEND_LOG" 2>&1 < /dev/null &
+    "$JAVA_BIN" -jar "$BACKEND_JAR" >> "$BACKEND_LOG" 2>&1 < /dev/null &
 BACKEND_PID=$!
 log_info "Backend 进程已启动 (PID: $BACKEND_PID)"
 
