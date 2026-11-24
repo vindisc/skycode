@@ -4,7 +4,8 @@
  * 统一管理应用中所有对话框的显示：
  * - PermissionDialog (权限请求)
  * - ElicitationDialog (反向提问)
- * - SettingsPanel (外观设置)
+ * - SettingsPanel (外观 / 模型服务商 / 场景分派)
+ * - OptimizePanel (优化提示词)
  */
 
 import React from 'react';
@@ -17,6 +18,7 @@ import { useNotificationStore } from '@/store/notificationStore';
 import PermissionDialog from '@/components/permission/PermissionDialog';
 import { ElicitationDialog } from '@/components/dialog/ElicitationDialog';
 import { SettingsPanel } from '@/components/dialog/SettingsPanel';
+import { OptimizePanel } from '@/components/dialog/OptimizePanel';
 import { KeyboardShortcutsDialog } from '@/components/dialog/KeyboardShortcutsDialog';
 import { McpManagementPage } from '@/components/mcp/McpManagementPage';
 import { MemoryPage } from '@/components/memory/MemoryPage';
@@ -151,6 +153,11 @@ export const DialogManager: React.FC = () => {
             {/* Settings Panel */}
             {activeDialog === 'settings' && (
                 <SettingsPanel onClose={closeDialog} />
+            )}
+
+            {/* 优化提示词：dialogData 里带着原始草稿和它所属的草稿键 */}
+            {activeDialog === 'promptOptimize' && (
+                <OptimizePanel onClose={closeDialog} />
             )}
 
             {activeDialog === 'keybindings' && (

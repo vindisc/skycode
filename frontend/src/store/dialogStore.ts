@@ -18,6 +18,7 @@ export type DialogType =
     | 'resume' 
     | 'theme' 
     | 'keybindings' 
+    | 'promptOptimize'
     | null;
 
 export interface DialogStoreState {

@@ -28,6 +28,7 @@ import PromptTextarea from './PromptTextarea';
 import { PromptAttachmentBar, PromptToolbar } from './PromptToolbar';
 import PromptSendButton from './PromptSendButton';
 import MobilePromptBar from './MobilePromptBar';
+import { OptimizeButton } from './OptimizeButton';
 import { ModelChip, PermissionModeChip } from './PromptComposerChips';
 import { DensitySwitch } from './DensitySwitch';
 import { SessionStatusCapsule } from '@/components/status/SessionStatusCapsule';
@@ -153,6 +154,14 @@ const PromptInput: React.FC<PromptInputProps> = (props) => {
                             onFiles={a.handleFiles}
                             onVoiceTranscript={s.handleVoiceTranscript}
                         />
+                        {/* 优化提示词：旁路调用一个小模型改写草稿，不占用会话 */}
+                        {!runActive && !compacting && (
+                            <OptimizeButton
+                                draft={s.input}
+                                draftKey={s.draftKey}
+                                disabled={props.disabled || s.isSubmitting}
+                            />
+                        )}
                         <PromptSendButton
                             runActive={runActive}
                             sendDisabled={props.disabled || compacting || s.isSubmitting

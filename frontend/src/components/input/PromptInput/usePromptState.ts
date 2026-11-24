@@ -398,6 +398,8 @@ export function usePromptState({
     return {
         input,
         setInput,
+        // 草稿在 promptDraftStore 里的键：对话框之类的组件要通过它直接改草稿
+        draftKey,
         showCommands,
         setShowCommands,
         showGlobalPalette,
