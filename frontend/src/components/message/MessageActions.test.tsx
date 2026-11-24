@@ -18,6 +18,9 @@ import MessageActions from './MessageActions';
 import UserMessage from './UserMessage';
 import AssistantMessage from './AssistantMessage';
 import type { Message, ContentBlock } from '@/types';
+import { useSessionStore } from '@/store/sessionStore';
+import { useMessageStore } from '@/store/messageStore';
+import { useNotificationStore } from '@/store/notificationStore';
 
 vi.mock('@/hooks/useTtsAvailability', () => ({
     useTtsAvailability: () => false,
@@ -260,5 +263,81 @@ describe('MessageActions — 复制全部（彩色按钮）', () => {
         expect(btn).toHaveAttribute('title', '复制失败');
         act(() => { vi.advanceTimersByTime(2000); });
         expect(btn).toHaveAttribute('title', '复制全部内容（含图片链接）');
+    });
+
+    describe('撤回', () => {
+        afterEach(() => {
+            useSessionStore.setState({ sessionId: null, status: 'idle' });
+            useMessageStore.getState().clearMessages();
+            useNotificationStore.getState().clearAll();
+        });
+
+        it('未绑定会话时不显示撤回按钮', () => {
+            render(<MessageActions message={userMessage([{ type: 'text', text: 'hi' }])} />);
+            expect(screen.queryByTestId('message-recall-button')).not.toBeInTheDocument();
+        });
+
+        it('会话空闲时纯文本消息显示撤回按钮；确认后调用接口并移除消息', async () => {
+            useSessionStore.setState({ sessionId: 's1', status: 'idle' });
+            const message = userMessage([{ type: 'text', text: '误贴的内容' }]);
+            useMessageStore.getState().addMessage(message);
+            const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ success: true }) });
+            vi.stubGlobal('fetch', fetchMock);
+            vi.stubGlobal('confirm', vi.fn(() => true));
+            render(<MessageActions message={message} />);
+
+            fireEvent.click(screen.getByTestId('message-recall-button'));
+            await act(async () => {});
+
+            expect(fetchMock).toHaveBeenCalledWith('/api/sessions/s1/messages/u-1', { method: 'DELETE' });
+            expect(useMessageStore.getState().messages).toHaveLength(0);
+        });
+
+        it('取消确认时不调用接口，消息保留', async () => {
+            useSessionStore.setState({ sessionId: 's1', status: 'idle' });
+            const message = userMessage([{ type: 'text', text: '误贴的内容' }]);
+            useMessageStore.getState().addMessage(message);
+            const fetchMock = vi.fn();
+            vi.stubGlobal('fetch', fetchMock);
+            vi.stubGlobal('confirm', vi.fn(() => false));
+            render(<MessageActions message={message} />);
+
+            fireEvent.click(screen.getByTestId('message-recall-button'));
+            await act(async () => {});
+
+            expect(fetchMock).not.toHaveBeenCalled();
+            expect(useMessageStore.getState().messages).toHaveLength(1);
+        });
+
+        it('含工具调用的消息不显示撤回按钮', () => {
+            useSessionStore.setState({ sessionId: 's1', status: 'idle' });
+            render(<MessageActions message={assistantMessage([
+                { type: 'tool_use', toolUseId: 't-1', toolName: 'Bash', input: { command: 'ls' } },
+            ])} />);
+            expect(screen.queryByTestId('message-recall-button')).not.toBeInTheDocument();
+        });
+
+        it('会话运行中不显示撤回按钮', () => {
+            useSessionStore.setState({ sessionId: 's1', status: 'streaming' });
+            render(<MessageActions message={userMessage([{ type: 'text', text: 'hi' }])} />);
+            expect(screen.queryByTestId('message-recall-button')).not.toBeInTheDocument();
+        });
+
+        it('后端拒绝时提示原因且不移除消息', async () => {
+            useSessionStore.setState({ sessionId: 's1', status: 'idle' });
+            const message = userMessage([{ type: 'text', text: '误贴的内容' }]);
+            useMessageStore.getState().addMessage(message);
+            vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+                ok: false, status: 400, json: async () => ({ error: { code: 'MESSAGE_NOT_RECALLABLE', message: '这条消息不能撤回' } }),
+            }));
+            vi.stubGlobal('confirm', vi.fn(() => true));
+            render(<MessageActions message={message} />);
+
+            fireEvent.click(screen.getByTestId('message-recall-button'));
+            await act(async () => {});
+
+            expect(useMessageStore.getState().messages).toHaveLength(1);
+            expect(useNotificationStore.getState().notifications.map(n => n.message)).toContain('这条消息不能撤回');
+        });
     });
 });

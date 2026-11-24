@@ -39,6 +39,22 @@ describe('dispatch 消息分发', () => {
         }).not.toThrow();
     });
 
+    test('message_recalled → 只移除指定的那条消息', () => {
+        useMessageStore.getState().addMessage(
+            { uuid: 'u1', type: 'user', timestamp: 1, content: [{ type: 'text', text: 'hi' }] } as never);
+        useMessageStore.getState().addMessage(
+            { uuid: 'a1', type: 'assistant', timestamp: 2, stopReason: 'end_turn', content: [] } as never);
+        useMessageStore.getState().markSteeringMessage('s1', 'u1');
+
+        dispatch({ type: 'message_recalled', messageId: 'u1', ts: 1 } as never);
+
+        expect(useMessageStore.getState().messages.map(m => m.uuid)).toEqual(['a1']);
+        expect(useMessageStore.getState().steeringMessageIds).toEqual({});
+        // 缺少 messageId 的事件不改变任何状态
+        dispatch({ type: 'message_recalled', ts: 2 } as never);
+        expect(useMessageStore.getState().messages.map(m => m.uuid)).toEqual(['a1']);
+    });
+
     test('session_restored → clearMessages + addMessage + resumeSession', async () => {
         let bindRequestId = '';
         let bindingEpoch = 0;

@@ -168,6 +168,8 @@ export interface ModelRoutedPayload {
 export interface PermissionModeChangedPayload { type: 'permission_mode_changed'; mode: string; previous?: string }
 export interface CommandResultPayload { type: 'command_result'; command: string; resultType: 'text' | 'jsx' | 'prompt'; output?: string; data?: Record<string, unknown> }
 export interface RewindCompletePayload { type: 'rewind_complete'; messageId: string; files: string[] }
+/** 服务端撤回单条消息后广播；各端据此移除本地消息（/recall 命令与撤回按钮共用） */
+export interface MessageRecalledPayload { type: 'message_recalled'; messageId: string }
 export interface TokenBudgetNudgePayload { type: 'token_budget_nudge'; pct: number; currentTokens: number; budgetTokens: number }
 export interface PlanUpdatePayload { type: 'plan_update'; isPlanMode: boolean; planName?: string; planOverview?: string; steps?: Array<{ id: string; title: string; status: string }>; currentStepId?: string }
 
@@ -255,6 +257,7 @@ export type ServerMessage =
     | PermissionModeChangedPayload
     | CommandResultPayload
     | RewindCompletePayload
+    | MessageRecalledPayload
     | TokenBudgetNudgePayload
     | SwarmStateUpdatePayload
     | WorkerProgressPayload

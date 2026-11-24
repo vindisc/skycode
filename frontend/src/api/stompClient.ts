@@ -39,6 +39,8 @@ const VALID_MESSAGE_TYPES: ReadonlySet<string> = new Set([
     'verify_progress',
     // RV-4: 证据包待审批通知（统一在 /user/queue/messages 通道分发）
     'verify_attention', 'protocol_error', 'interaction_created', 'interaction_terminal', 'interaction_updated',
+    // 撤回单条消息：服务端删除后广播，各端据此移除本地消息
+    'message_recalled',
 ]);
 
 /**

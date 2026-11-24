@@ -18,10 +18,13 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { Copy, CopyPlus, Check } from 'lucide-react';
+import { Copy, CopyPlus, Check, Undo2 } from 'lucide-react';
 import type { Message } from '@/types';
 import { formatMessageTime } from '@/utils/datetime';
 import { cn } from '@/components/ui/cn';
+import { useSessionStore } from '@/store/sessionStore';
+import { useMessageStore } from '@/store/messageStore';
+import { useNotificationStore } from '@/store/notificationStore';
 import {
     extractMessageText,
     extractMessageImage,
@@ -30,6 +33,19 @@ import {
     copyImageToClipboard,
     copyMessageWithImageRefs,
 } from '@/utils/messageContent';
+
+/**
+ * 这条消息能否撤回。
+ *
+ * 含工具调用或工具结果的消息不能撤回：删掉一侧会留下配不上对的另一半——工具卡片会永远
+ * 显示运行中，下次请求还会带上没有对应 tool_call 的 tool_result 被模型接口拒绝。
+ * 服务端（MessageRecallService）有同样的限制，这里只是不给出注定失败的入口。
+ */
+export function isRecallableMessage(message: Message): boolean {
+    // Message 是封闭联合：除了 user / assistant，其余分支（system、visualization 等）都不是对话消息
+    if (message.type !== 'user' && message.type !== 'assistant') return false;
+    return !message.content.some(block => block.type === 'tool_use' || block.type === 'tool_result');
+}
 
 interface MessageActionsProps {
     message: Message;
@@ -44,6 +60,11 @@ const COPY_ICON_RESET_MS = 2000;
 const MessageActions: React.FC<MessageActionsProps> = ({ message, isStreaming = false, className }) => {
     const [copied, setCopied] = useState(false);
     const [copyAllState, setCopyAllState] = useState<'idle' | 'copied' | 'failed'>('idle');
+    const [recalling, setRecalling] = useState(false);
+    const sessionId = useSessionStore(s => s.sessionId);
+    const sessionStatus = useSessionStore(s => s.status);
+    const removeMessage = useMessageStore(s => s.removeMessage);
+    const addNotification = useNotificationStore(s => s.addNotification);
 
     const copyable = !isStreaming && hasCopyableContent(message);
     // 「复制全部」仅在图文混合时显示：纯文本消息与普通复制等价，纯图片消息无文本可带
@@ -77,6 +98,36 @@ const MessageActions: React.FC<MessageActionsProps> = ({ message, isStreaming = 
         }
         setTimeout(() => setCopyAllState('idle'), COPY_ICON_RESET_MS);
     }, [message]);
+
+    // 撤回入口只在会话空闲时出现：会话运行中服务端会拒绝改动历史
+    const recallable = !isStreaming && sessionId != null && sessionStatus === 'idle'
+        && isRecallableMessage(message);
+
+    const handleRecall = useCallback(async () => {
+        if (!sessionId || recalling) return;
+        if (!window.confirm('撤回这条消息？撤回后无法恢复。')) return;
+        setRecalling(true);
+        try {
+            const response = await fetch(
+                `/api/sessions/${encodeURIComponent(sessionId)}/messages/${encodeURIComponent(message.uuid)}`,
+                { method: 'DELETE' },
+            );
+            if (!response.ok) {
+                const body = await response.json().catch(() => null);
+                throw new Error(body?.error?.message || `撤回失败（HTTP ${response.status}）`);
+            }
+            // 服务端同时会广播 message_recalled；这里直接移除，WebSocket 未连接时界面也保持一致
+            removeMessage(message.uuid);
+        } catch (err) {
+            addNotification({
+                key: `recall-${message.uuid}-${Date.now()}`,
+                level: 'error',
+                message: err instanceof Error ? err.message : '撤回失败，请稍后重试。',
+            });
+        } finally {
+            setRecalling(false);
+        }
+    }, [sessionId, recalling, message.uuid, removeMessage, addNotification]);
 
     return (
         <div
@@ -116,6 +167,19 @@ const MessageActions: React.FC<MessageActionsProps> = ({ message, isStreaming = 
                     data-testid="message-copy-button"
                 >
                     {copied ? <Check className="h-[18px] w-[18px]" /> : <Copy className="h-[18px] w-[18px]" />}
+                </button>
+            )}
+            {recallable && (
+                <button
+                    type="button"
+                    onClick={() => { void handleRecall(); }}
+                    disabled={recalling}
+                    className="message-action-button inline-flex shrink-0 items-center justify-center rounded-[10px] text-t4 transition-colors duration-fast group-hover:text-t2 hover:bg-hover2 hover:!text-err disabled:opacity-40"
+                    title="撤回这条消息"
+                    aria-label="撤回这条消息"
+                    data-testid="message-recall-button"
+                >
+                    <Undo2 className="h-[18px] w-[18px]" />
                 </button>
             )}
             <span

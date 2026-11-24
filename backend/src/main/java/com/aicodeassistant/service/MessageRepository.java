@@ -84,6 +84,20 @@ public class MessageRepository {
     }
 
     /**
+     * 按 (sessionId, messageId) 删除单条消息。
+     * <p>
+     * 必须带 session 条件：messageId 来自客户端，不带会话条件会有跨会话误删的风险。
+     *
+     * @return 实际删除的行数，0 表示该会话下没有这条消息
+     */
+    public int deleteByIdAndSession(String sessionId, String messageId) {
+        return jdbcTemplate.update(
+                "DELETE FROM messages WHERE id = ? AND session_id = ?",
+                messageId, sessionId
+        );
+    }
+
+    /**
      * 按消息 ID 删除。
      */
     public void deleteById(String messageId) {

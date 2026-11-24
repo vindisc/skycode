@@ -142,6 +142,8 @@ export interface MessageStoreState {
     /** 后端权威消息列表整包应用（剥图/压缩写回后）— 简单可靠，避免局部 patch 与快照对账打架 */
     applyMessagesUpdate: (messages: Message[]) => void;
     rewindToMessage: (messageId: string) => void;
+    /** 按 id 移除单条消息（撤回）；不存在时什么都不做 */
+    removeMessage: (messageId: string) => void;
     setTokenBudgetState: (state: TokenBudgetState | null) => void;
     clearTokenBudgetState: () => void;
     setTokenWarning: (warning: TokenWarningPayload | null) => void;
@@ -427,6 +429,16 @@ export const useMessageStore = create<MessageStoreState>()(
         rewindToMessage: (messageId) => set(d => {
             const idx = d.messages.findIndex(m => m.uuid === messageId);
             if (idx >= 0) d.messages.splice(idx + 1);
+        }),
+        removeMessage: (messageId) => set(d => {
+            const idx = d.messages.findIndex(m => m.uuid === messageId);
+            if (idx >= 0) d.messages.splice(idx, 1);
+            // steering 登记也要清掉，否则轮次投影会拿一个已不存在的 uuid 去匹配；清空的会话条目一并删除
+            for (const key of Object.keys(d.steeringMessageIds)) {
+                const remaining = d.steeringMessageIds[key].filter(id => id !== messageId);
+                if (remaining.length > 0) d.steeringMessageIds[key] = remaining;
+                else delete d.steeringMessageIds[key];
+            }
         }),
         setTokenBudgetState: (state) => set(d => { d.tokenBudgetState = state; }),
         clearTokenBudgetState: () => set(d => { d.tokenBudgetState = null; }),

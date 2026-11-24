@@ -686,6 +686,12 @@ const handlers: Record<string, (data: any) => void> = {
             timeout: 5000,
         });
     },
+    // 撤回单条消息：服务端已删除并广播，本地只需移除这一条（/recall 命令与撤回按钮共用）
+    'message_recalled':   (d: { messageId: string }) => {
+        if (typeof d.messageId === 'string' && d.messageId) {
+            useMessageStore.getState().removeMessage(d.messageId);
+        }
+    },
     // === #37: Token 预算续写 nudge (1 种) ===
     'token_budget_nudge':  (d: { pct: number; currentTokens: number; budgetTokens: number }) => {
         useMessageStore.getState().setTokenBudgetState({

@@ -96,6 +96,29 @@ describe('MessageStore', () => {
         expect(useMessageStore.getState().messages[0].uuid).toBe('msg-1');
     });
 
+    it('removeMessage removes exactly one message and forgets its steering registration', () => {
+        const msgs: Message[] = [
+            { uuid: 'msg-1', type: 'user', content: [], timestamp: 1 },
+            { uuid: 'msg-2', type: 'assistant', content: [], timestamp: 2 },
+            { uuid: 'msg-3', type: 'user', content: [], timestamp: 3 },
+        ] as Message[];
+        msgs.forEach(m => useMessageStore.getState().addMessage(m));
+        useMessageStore.getState().markSteeringMessage('s1', 'msg-3');
+        useMessageStore.getState().markSteeringMessage('s1', 'msg-1');
+
+        useMessageStore.getState().removeMessage('msg-2');
+
+        expect(useMessageStore.getState().messages.map(m => m.uuid)).toEqual(['msg-1', 'msg-3']);
+
+        useMessageStore.getState().removeMessage('msg-3');
+        expect(useMessageStore.getState().steeringMessageIds).toEqual({ s1: ['msg-1'] });
+
+        // 撤回一条不存在的消息不改变任何状态（服务端广播与本地主动移除可能各触发一次）
+        useMessageStore.getState().removeMessage('nope');
+        useMessageStore.getState().removeMessage('msg-3');
+        expect(useMessageStore.getState().messages.map(m => m.uuid)).toEqual(['msg-1']);
+    });
+
     it('finalizeStream saves content to message and resets streaming state', () => {
         useMessageStore.getState().appendStreamDelta('Test response');
         
