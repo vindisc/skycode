@@ -2,6 +2,7 @@ package com.aicodeassistant.llm;
 
 import com.aicodeassistant.controller.ModelController;
 import com.aicodeassistant.llm.impl.OpenAiCompatibleProvider;
+import com.aicodeassistant.settings.SceneBindingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.bind.Bindable;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 class BailianDeepSeekConfigurationTest {
     private static final String BAILIAN = "deepseek-v4.1-flash";
@@ -79,7 +81,8 @@ class BailianDeepSeekConfigurationTest {
         assertEquals(4, caps.maxImages());
         assertTrue(caps.supportsImages() && caps.supportsThinking() && caps.supportsToolUse());
         assertEquals(600, models.getCapabilities("deepseek-flash").maxImages());
-        assertEquals(BAILIAN, new VisionModelRouter(registry, models).resolveVisionModel("bailian/glm-5.3"));
+        assertEquals(BAILIAN, new VisionModelRouter(registry, models, mock(SceneBindingService.class))
+                .resolveVisionModel("bailian/glm-5.3"));
         var response = new ModelController(registry, models).listModels(null).getBody();
         assertNotNull(response);
         assertEquals(BAILIAN, response.defaultModel());

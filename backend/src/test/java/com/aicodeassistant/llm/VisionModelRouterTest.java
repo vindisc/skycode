@@ -1,20 +1,24 @@
 package com.aicodeassistant.llm;
 
+import com.aicodeassistant.settings.SceneBindingService;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import org.springframework.test.util.ReflectionTestUtils;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class VisionModelRouterTest {
 
     private final LlmProviderRegistry providerRegistry = mock(LlmProviderRegistry.class);
     private final ModelRegistry modelRegistry = mock(ModelRegistry.class);
-    private final VisionModelRouter router = new VisionModelRouter(providerRegistry, modelRegistry);
+    private final SceneBindingService sceneBindings = mock(SceneBindingService.class);
+    private final VisionModelRouter router = new VisionModelRouter(providerRegistry, modelRegistry, sceneBindings);
 
     @Test
     void textOnlyTokenPlanModelFallsBackToAvailableDeepSeekVisionModel() {
@@ -120,6 +124,45 @@ class VisionModelRouterTest {
     void returnsNoTargetWhenNoVisionProviderIsConfigured() {
         when(modelRegistry.getCapabilities("text-model")).thenReturn(textCaps("text-model"));
         assertNull(router.resolveVisionModel("text-model"));
+    }
+
+    @Test
+    void sceneBindingTakesPriorityOverConfiguredFallback() {
+        when(modelRegistry.getCapabilities("text-model")).thenReturn(textCaps("text-model"));
+        when(modelRegistry.getCapabilities("deepseek-v4.1-flash")).thenReturn(imageCaps("deepseek-v4.1-flash"));
+        when(providerRegistry.getProvider("deepseek-v4.1-flash")).thenReturn(mock(LlmProvider.class));
+        when(sceneBindings.resolve(SceneBindingService.VISION_FALLBACK))
+                .thenReturn(Optional.of(resolved("glm-5.4")));
+        when(modelRegistry.getCapabilities("glm-5.4")).thenReturn(imageCaps("glm-5.4"));
+        when(providerRegistry.getProvider("glm-5.4")).thenReturn(mock(LlmProvider.class));
+
+        assertEquals("glm-5.4", router.resolveVisionModel("text-model"));
+    }
+
+    @Test
+    void unavailableSceneBindingFallsBackToConfiguredVisionModel() {
+        // 绑定的模型此刻没注册进运行时：必须照常回落到配置的兜底，而不是让请求失败
+        when(modelRegistry.getCapabilities("text-model")).thenReturn(textCaps("text-model"));
+        when(sceneBindings.resolve(SceneBindingService.VISION_FALLBACK))
+                .thenReturn(Optional.of(resolved("gone-model")));
+        when(modelRegistry.getCapabilities("gone-model")).thenReturn(imageCaps("gone-model"));
+        when(providerRegistry.getProvider("gone-model")).thenThrow(new IllegalArgumentException("not configured"));
+        when(modelRegistry.getCapabilities("deepseek-v4.1-flash")).thenReturn(imageCaps("deepseek-v4.1-flash"));
+        when(providerRegistry.getProvider("deepseek-v4.1-flash")).thenReturn(mock(LlmProvider.class));
+
+        assertEquals("deepseek-v4.1-flash", router.resolveVisionModel("text-model"));
+    }
+
+    @Test
+    void sceneBindingIsNotConsultedWhenCurrentModelAlreadySupportsImages() {
+        when(modelRegistry.getCapabilities("text-model")).thenReturn(imageCaps("text-model"));
+        assertNull(router.resolveVisionModel("text-model"));
+        verifyNoInteractions(sceneBindings);
+    }
+
+    private static SceneBindingService.Resolved resolved(String model) {
+        return new SceneBindingService.Resolved(SceneBindingService.VISION_FALLBACK,
+                "zhipu", "智谱", "https://open.bigmodel.cn/api/paas/v4", "test-key", model);
     }
 
     private void configureDeepSeekVisionAvailable() {

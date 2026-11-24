@@ -1,9 +1,12 @@
 package com.aicodeassistant.llm;
 
+import com.aicodeassistant.settings.SceneBindingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+
+import java.util.Optional;
 
 /**
  * 视觉模型路由器 — 当用户附带图片但当前模型不支持图片时，
@@ -27,6 +30,7 @@ public class VisionModelRouter {
 
     private final LlmProviderRegistry providerRegistry;
     private final ModelRegistry modelRegistry;
+    private final SceneBindingService sceneBindings;
 
     /** 全局兜底视觉模型 */
     @Value("${app.model.vision-fallback:deepseek-v4.1-flash}")
@@ -35,9 +39,12 @@ public class VisionModelRouter {
     /** DeepSeek 系列专属图片理解兜底模型（V4.1 Flash 原生支持视觉） */
     static final String DEEPSEEK_VISION_MODEL = "deepseek-flash";
 
-    public VisionModelRouter(LlmProviderRegistry providerRegistry, ModelRegistry modelRegistry) {
+    public VisionModelRouter(LlmProviderRegistry providerRegistry,
+                             ModelRegistry modelRegistry,
+                             SceneBindingService sceneBindings) {
         this.providerRegistry = providerRegistry;
         this.modelRegistry = modelRegistry;
+        this.sceneBindings = sceneBindings;
     }
 
     /**
@@ -50,6 +57,20 @@ public class VisionModelRouter {
         ModelCapabilities caps = modelRegistry.getCapabilities(currentModel);
         if (caps.supportsImages()) {
             return null; // 当前模型已支持图片，无需路由
+        }
+
+        // 0. 设置页「图片理解兜底」的绑定优先于 application.yml 的静态配置。
+        //    绑定的模型此刻不可用（服务商被停用或删除、模型没注册进运行时）时照常往下回落，不能把请求卡死。
+        Optional<SceneBindingService.Resolved> bound = sceneBindings.resolve(SceneBindingService.VISION_FALLBACK);
+        if (bound.isPresent()) {
+            String boundModel = bound.get().modelId();
+            if (isAvailableVisionModel(boundModel)) {
+                log.info("Vision route: {} -> {} (scene binding, provider {})",
+                        currentModel, boundModel, bound.get().providerName());
+                return boundModel;
+            }
+            log.warn("Scene binding '{}' points to model '{}' which is not an available vision model; "
+                    + "falling back to configured vision model", SceneBindingService.VISION_FALLBACK, boundModel);
         }
 
         if (isAvailableVisionModel(fallbackVisionModel)) {
