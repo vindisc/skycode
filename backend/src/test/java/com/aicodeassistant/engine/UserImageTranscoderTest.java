@@ -184,4 +184,69 @@ class UserImageTranscoderTest {
         var caps=new ModelCapabilities("url","url",8192,200000,true,false,true,8,true,0,0);
         assertThat(transcoder.transcode(original,caps).messages()).isSameAs(original);assertThat(transcoder.downloads).isZero();
     }
+
+    /** 不收图的纯文本模型，形态同 glm-5.3 的登记值。 */
+    static ModelCapabilities textOnlyCaps() {
+        return new ModelCapabilities("glm-5.3","GLM-5.3",131072,1048576,true,true,false,0,true,0.001,0.001);
+    }
+    static String placeholder() { return UserImageTranscoder.OMITTED_PREFIX + UserImageTranscoder.UNSUPPORTED_MODEL_REASON + "]"; }
+
+    @Test void textOnlyModelDegradesEveryImageToPlaceholderOnACopy() throws Exception {
+        var transcoder=new Stub(png(8));
+        var history=message("old",URL+"old.png");var current=message("current",URL+"current.png");
+        var messages=List.<Message>of(history,
+                new Message.AssistantMessage("answer",Instant.now(),List.of(new ContentBlock.TextBlock("seen")),"end_turn",null),current);
+
+        var result=transcoder.transcode(messages,textOnlyCaps());
+
+        assertThat(result.messages()).isNotSameAs(messages);
+        assertThat(result.messages().stream().filter(Message.UserMessage.class::isInstance)
+                .mapToLong(UserImageTranscoderTest::images).sum()).isZero();
+        var first=(Message.UserMessage)result.messages().getFirst();
+        assertThat(first.content()).containsExactly(new ContentBlock.TextBlock("look"),new ContentBlock.TextBlock(placeholder()));
+        assertThat(first.uuid()).isEqualTo("old");assertThat(first.meta()).isEqualTo(history.meta());
+        assertThat(result.messages().get(1)).isSameAs(messages.get(1)); // 没有图片的消息原样保留
+        assertThat(((ContentBlock.ImageBlock)history.content().get(1)).url()).isEqualTo(URL+"old.png"); // 持久化历史未被改写
+        assertThat(transcoder.downloads).isZero();
+        assertThat(result.warnings()).isEmpty();
+    }
+
+    @Test void textOnlyModelAlsoDegradesInlineImagesAndToolImages() throws Exception {
+        var transcoder=new Stub(png(8));
+        var inline=new Message.UserMessage("tool",Instant.now(),List.of(new ContentBlock.TextBlock("tool response"),
+                new ContentBlock.ImageBlock("image/png",Base64.getEncoder().encodeToString(png(8)))),"result","assistant");
+
+        var result=transcoder.transcode(List.of(inline),textOnlyCaps());
+
+        var copy=(Message.UserMessage)result.messages().getFirst();
+        assertThat(copy.content()).containsExactly(new ContentBlock.TextBlock("tool response"),new ContentBlock.TextBlock(placeholder()));
+        assertThat(MessageContentAccessor.rawLegacyToolResult(copy)).isEqualTo("result");
+        assertThat(copy.sourceToolAssistantUUID()).isEqualTo("assistant");
+    }
+
+    @Test void textOnlyModelWithoutImagesReturnsTheSameList() throws Exception {
+        var transcoder=new Stub(png(8));
+        var messages=List.<Message>of(new Message.UserMessage("plain",Instant.now(),
+                List.of(new ContentBlock.TextBlock("just text")),null,null));
+
+        var result=transcoder.transcode(messages,textOnlyCaps());
+
+        assertThat(result.messages()).isSameAs(messages);
+    }
+
+    @Test void unregisteredModelIsNeverTreatedAsRejectingImages() throws Exception {
+        // 未登记模型拿到的是保守兜底值（supportsImages=false），不能据此把图片吞成文字
+        assertThat(UserImageTranscoder.rejectsImages(ModelCapabilities.DEFAULT)).isFalse();
+        var transcoder=new Stub(png(8));var original=List.<Message>of(message("current",URL+"image.png"));
+
+        assertThat(transcoder.transcode(original,ModelCapabilities.DEFAULT).messages()).isSameAs(original);
+    }
+
+    @Test void visionCapableModelsAreNotRejected() {
+        assertThat(UserImageTranscoder.rejectsImages(caps(8))).isFalse();
+        assertThat(UserImageTranscoder.rejectsImages(new ModelCapabilities("url","url",8192,200000,true,false,true,4,true,0,0))).isFalse();
+        // 声称支持图片但一张都不允许，等同不收图
+        assertThat(UserImageTranscoder.rejectsImages(new ModelCapabilities("url","url",8192,200000,true,false,true,0,true,0,0))).isTrue();
+        assertThat(UserImageTranscoder.rejectsImages(textOnlyCaps())).isTrue();
+    }
 }

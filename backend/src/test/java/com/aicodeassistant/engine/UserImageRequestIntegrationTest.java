@@ -106,4 +106,71 @@ class UserImageRequestIntegrationTest {
         assertThat(prepared.messages()).isSameAs(history);
         assertThat(transcoder.downloads).isZero();
     }
+
+    /** 纯文本模型：历史图片在请求副本里降级为占位文本，真实出网 payload 不含 image_url。 */
+    @org.junit.jupiter.api.Test
+    void textOnlyModelSendsPlaceholderInsteadOfHistoryImage() throws Exception {
+        try (var api = new MockWebServer()) {
+            api.start();
+            String model = "glm-5.3";
+            // 历史里有一张已持久化的图片，当前请求本身是纯文本
+            List<Message> history = List.of(
+                    UserImageTranscoderTest.message("stored-user-message", UserImageTranscoderTest.URL + "image.png"),
+                    new Message.AssistantMessage("previous-answer", Instant.now(),
+                            List.of(new ContentBlock.TextBlock("I can see the image.")), "end_turn", null),
+                    new Message.UserMessage("follow-up", Instant.now(),
+                            List.of(new ContentBlock.TextBlock("describe the earlier image")), null, null));
+            var models = new ModelRegistry(new LlmProviderRegistry(List.of(), new MockEnvironment()));
+            var caps = models.getCapabilities(model);
+            assertThat(UserImageTranscoder.rejectsImages(caps)).isTrue();
+            var transcoder = new UserImageTranscoderTest.Stub(UserImageTranscoderTest.png(8));
+            var prepared = transcoder.transcode(history, caps);
+            var messages = MessageParamConverter.toMaps(new MessageNormalizer().normalizeTyped(prepared.messages()));
+            int maxOutput = QueryConfig.getRecommendedMaxTokens(models, model);
+            var checked = new TokenBudgetGuard().enforcePhase2(messages,
+                    models.getContextWindowForModel(model) - maxOutput, Map.of(), Set.of(), 3.5);
+            api.enqueue(new MockResponse().addHeader("Content-Type", "text/event-stream").setBody(
+                    "data: {\"id\":\"test\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"ok\"},\"finish_reason\":null}]}\n\n" +
+                    "data: {\"id\":\"test\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\n" +
+                    "data: [DONE]\n\n"));
+            var mapper = new ObjectMapper();
+            var provider = new OpenAiCompatibleProvider("zhipu", mapper,
+                    new LlmHttpProperties(new LlmHttpProperties.PoolProperties(2, 30), 5, 5, true),
+                    new ApiKeyRotationManager("test"), "test", api.url("/v1").toString(), model, List.of(model),
+                    new FinalProviderPayloadGuard(models));
+            var failure = new AtomicReference<Throwable>();
+            provider.streamChat(model, checked.apiMessages(), "", List.of(), maxOutput, new ThinkingConfig.Disabled(),
+                    LlmCallContext.unscoped(), new StreamChatCallback() {
+                        public void onEvent(LlmStreamEvent event) {}
+                        public void onComplete() {}
+                        public void onError(Throwable error) { failure.set(error); }
+                    });
+            assertThat(failure.get()).isNull();
+            var request = api.takeRequest(2, TimeUnit.SECONDS);
+            assertThat(request).isNotNull();
+            var body = mapper.readTree(request.getBody().readUtf8());
+            assertThat(body.path("model").asText()).isEqualTo(model);
+            assertThat(body.path("messages")).hasSize(history.size());
+            assertThat(body.toString()).doesNotContain("image_url");
+            // 注意：全是 text 的 content 在出网时会被折叠成字符串而不是分块数组，
+            // 所以这里两种形态都取成纯文本再断言，不按数组下标写。
+            var firstContent = body.path("messages").get(0).path("content");
+            assertThat(firstContent.isTextual() || firstContent.isArray()).isTrue();
+            StringBuilder firstText = new StringBuilder();
+            if (firstContent.isTextual()) {
+                firstText.append(firstContent.asText());
+            } else {
+                firstContent.forEach(part -> {
+                    assertThat(part.path("type").asText()).isEqualTo("text");
+                    firstText.append(part.path("text").asText()).append('\n');
+                });
+            }
+            assertThat(firstText.toString()).contains("look")
+                    .contains(UserImageTranscoder.OMITTED_PREFIX + UserImageTranscoder.UNSUPPORTED_MODEL_REASON + "]");
+            assertThat(transcoder.downloads).isZero();
+            // 持久化历史里的原图引用未被改写，切回视觉模型时仍然可用
+            assertThat(((ContentBlock.ImageBlock) ((Message.UserMessage) history.get(0)).content().get(1)).url())
+                    .isEqualTo(UserImageTranscoderTest.URL + "image.png");
+        }
+    }
 }

@@ -913,7 +913,12 @@ public class QueryEngine {
             ModelCapabilities modelCaps = modelRegistry.getCapabilities(effectiveModel);
             // The transcoder accounts for every image below, so reserve only non-image
             // message tokens here. URL-capable models retain their existing budget path.
-            List<Message> budgetMessages = modelCaps.imageInputMode() == ModelCapabilities.ImageInputMode.BASE64_ONLY
+            // Text-only models get their history images replaced by a placeholder before the
+            // request; counting the base64 here would blow a small window and trigger needless
+            // compaction.
+            boolean imagesPreparedOnRequestCopy = modelCaps.imageInputMode() == ModelCapabilities.ImageInputMode.BASE64_ONLY
+                    || UserImageTranscoder.rejectsImages(modelCaps);
+            List<Message> budgetMessages = imagesPreparedOnRequestCopy
                     ? UserImageTranscoder.withoutImagesForBudget(state.getMessages()) : state.getMessages();
             int currentTokens = tokenCounter.estimateTokens(budgetMessages, effectiveModel);
             int remainingBudget = historyBudget - currentTokens;
@@ -976,7 +981,7 @@ public class QueryEngine {
                 injectResult = new ImageRefInjector.InjectResult(imagePreparedMessages, Set.of(), Map.of());
             }
             List<Message> apiReadyMessages = injectResult.messages();
-            if (modelCaps.imageInputMode() == ModelCapabilities.ImageInputMode.BASE64_ONLY) {
+            if (imagesPreparedOnRequestCopy) {
                 var cancellation = loopSessionId == null
                         ? com.aicodeassistant.llm.CancellationSignal.none() : getOrCreateAbortContext(loopSessionId);
                 try {

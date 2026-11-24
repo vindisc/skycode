@@ -26,6 +26,10 @@ public class UserImageTranscoder {
     static final long MAX_DOWNLOAD_BYTES = ClipboardImagePublicationService.MAX_CLIPBOARD_IMAGE_BYTES;
     static final int MAX_INLINE_BYTES = InlineImageBudget.MAX_BYTES;
     static final int MAX_IMAGES_PER_CALL = 8;
+    /** 历史图片被省略时的占位文案前缀；后接省略原因与 "]"。 */
+    static final String OMITTED_PREFIX = "[历史图片已省略：";
+    /** 纯文本模型上省略图片的原因。 */
+    static final String UNSUPPORTED_MODEL_REASON = "当前模型不支持图片输入";
     private final OssPublishProperties ossProperties;
     private final OkHttpClient httpClient;
     private final Cache<String, ContentBlock.ImageBlock> cache;
@@ -103,8 +107,55 @@ public class UserImageTranscoder {
         return result;
     }
 
+    /**
+     * 模型是否明确不接收图片。
+     * <p>
+     * 必须豁免 {@link ModelCapabilities#DEFAULT}：未登记的模型拿到的是保守兜底值
+     * （supportsImages=false），并不代表它真的不收图；不豁免会把自定义或未识别的视觉模型的
+     * 图片误吞成文字。
+     */
+    static boolean rejectsImages(ModelCapabilities caps) {
+        return !ModelCapabilities.DEFAULT.equals(caps)
+                && (!caps.supportsImages() || caps.maxImages() <= 0);
+    }
+
+    /**
+     * 纯文本模型：把请求副本里的全部 image 块换成占位文本。
+     * <p>
+     * 只改副本，不改持久化历史——切回视觉模型时原图仍在。图片块一旦进了历史就常驻，
+     * 而每轮都会重发全量历史，不降级的话不收图的模型会整轮被端点拒绝。
+     * 没有图片时原样返回同一个列表。
+     */
+    static TranscodeResult degradeImagesToPlaceholder(List<Message> messages) {
+        boolean anyImage = messages.stream()
+                .filter(Message.UserMessage.class::isInstance).map(Message.UserMessage.class::cast)
+                .anyMatch(user -> user.content() != null
+                        && user.content().stream().anyMatch(ContentBlock.ImageBlock.class::isInstance));
+        if (!anyImage) return new TranscodeResult(messages, 0, List.of());
+        List<Message> result = new ArrayList<>(messages);
+        String placeholder = OMITTED_PREFIX + UNSUPPORTED_MODEL_REASON + "]";
+        for (int i = 0; i < messages.size(); i++) {
+            if (messages.get(i) instanceof Message.UserMessage user && user.content() != null) {
+                List<ContentBlock> content = new ArrayList<>(user.content());
+                boolean changed = false;
+                for (int j = 0; j < content.size(); j++) {
+                    if (content.get(j) instanceof ContentBlock.ImageBlock) {
+                        content.set(j, new ContentBlock.TextBlock(placeholder));
+                        changed = true;
+                    }
+                }
+                if (changed) result.set(i, new Message.UserMessage(user.uuid(), user.timestamp(),
+                        List.copyOf(content), MessageContentAccessor.rawLegacyToolResult(user),
+                        user.sourceToolAssistantUUID(), user.meta()));
+            }
+        }
+        return new TranscodeResult(List.copyOf(result), 0, List.of());
+    }
+
     public TranscodeResult transcode(List<Message> messages, ModelCapabilities caps,
                                      String currentRequestId, CancellationSignal cancellation, int imageTokenBudget) {
+        // 入口早退：放在转码器内部而不是只放调用方，避免将来新增的调用点绕过降级。
+        if (rejectsImages(caps)) return degradeImagesToPlaceholder(messages);
         if (caps.imageInputMode() != ModelCapabilities.ImageInputMode.BASE64_ONLY)
             return new TranscodeResult(messages, 0, List.of());
         checkCancelled(cancellation);
@@ -153,7 +204,7 @@ public class UserImageTranscoder {
                 }
                 String warning = label + "本轮已省略，继续处理当前请求。原因：" + safeReason(failure);
                 warnings.add(warning);
-                replacement = new ContentBlock.TextBlock("[历史图片已省略：" + safeReason(failure) + "]");
+                replacement = new ContentBlock.TextBlock(OMITTED_PREFIX + safeReason(failure) + "]");
             }
             replacements.computeIfAbsent(candidate.messageIndex(), ignored -> new ArrayList<>(candidate.message().content()))
                     .set(candidate.blockIndex(), replacement);
