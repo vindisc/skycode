@@ -50,8 +50,10 @@ describe('Local development service security', () => {
             /uvicorn src\.main:app \\\s+--host 127\.0\.0\.1/,
         );
         expect(startScript).not.toContain('--host 0.0.0.0');
+        // 本地 fork：start.sh 会先解析出 JDK 21 再用 "$JAVA_BIN" 启动；这里要守住的是
+        // PYTHON_SERVICE_AUTO_START=false（Python 由脚本自己启动并只绑回环地址），不限定 java 的写法。
         expect(startScript).toMatch(
-            /nohup env PYTHON_SERVICE_AUTO_START=false \\\s+java -jar/,
+            /nohup env PYTHON_SERVICE_AUTO_START=false \\\s+("\$JAVA_BIN"|java) -jar/,
         );
         expect(startScript).toContain(
             'http://127.0.0.1:$BACKEND_PORT/actuator/health',
