@@ -80,4 +80,42 @@ describe('Appearance settings and shortcut help', () => {
         fireEvent.click(screen.getByRole('button', { name: '完成' }));
         expect(onClose).toHaveBeenCalledOnce();
     });
+
+    it('asks before closing or switching tabs while a provider form has unsaved changes', async () => {
+        const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+        const onClose = vi.fn();
+        render(<SettingsPanel onClose={onClose} />);
+        fireEvent.click(screen.getByRole('tab', { name: '模型服务商' }));
+        await screen.findByTestId('llm-providers-settings');
+        fireEvent.click(screen.getByRole('button', { name: '添加服务商' }));
+        fireEvent.change(screen.getByLabelText('服务商名称'), { target: { value: '没保存的服务商' } });
+
+        // 弹窗底部那个更大的绿色按钮：点下去不该悄悄把填好的表单丢掉
+        fireEvent.click(screen.getByRole('button', { name: '完成' }));
+        expect(confirm).toHaveBeenCalledWith('设置里有还没保存的内容，关闭后会丢失。确定关闭吗？');
+        expect(onClose).not.toHaveBeenCalled();
+        expect(screen.getByRole('dialog', { name: '设置' })).toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole('tab', { name: '场景分派' }));
+        expect(confirm).toHaveBeenLastCalledWith('设置里有还没保存的内容，切换后会丢失。确定切换吗？');
+        expect(screen.getByTestId('llm-provider-form')).toBeInTheDocument();
+
+        fireEvent.keyDown(document, { key: 'Escape' });
+        expect(onClose).not.toHaveBeenCalled();
+
+        confirm.mockReturnValue(true);
+        fireEvent.click(screen.getByRole('button', { name: '完成' }));
+        expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes without asking when nothing is unsaved', () => {
+        const confirm = vi.spyOn(window, 'confirm');
+        const onClose = vi.fn();
+        render(<SettingsPanel onClose={onClose} />);
+
+        fireEvent.click(screen.getByRole('button', { name: '完成' }));
+
+        expect(onClose).toHaveBeenCalledOnce();
+        expect(confirm).not.toHaveBeenCalled();
+    });
 });

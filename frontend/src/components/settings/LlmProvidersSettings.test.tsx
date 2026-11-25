@@ -20,6 +20,7 @@ const api = vi.hoisted(() => ({
     listScenes: vi.fn(),
     saveSceneBinding: vi.fn(),
     clearSceneBinding: vi.fn(),
+    discoverModels: vi.fn(),
 }));
 const stores = vi.hoisted(() => ({ fetchModels: vi.fn() }));
 
@@ -48,6 +49,7 @@ const routing = (patch: Partial<ProviderRouting> = {}): ProviderRouting => ({
     skippedModels: [{ model: 'gpt-6.2-sol', reason: '已由配置里的服务商「huoshen」提供' }],
     skipReason: null,
     needsAttention: false,
+    inferredModels: [],
     ...patch,
 });
 
@@ -285,5 +287,135 @@ describe('LlmProvidersSettings', () => {
         expect(await screen.findByText('手动添加')).toBeInTheDocument();
         expect(api.reloadProviders).toHaveBeenCalledTimes(1);
         expect(api.listProviders).toHaveBeenCalledTimes(2);
+    });
+
+    it('pulls the model list from the provider API and merges it into the form', async () => {
+        api.discoverModels.mockResolvedValue(['gpt-6.2-sol', 'codex-auto-review']);
+        render(<LlmProvidersSettings />);
+        await screen.findByText('智谱');
+
+        fireEvent.click(screen.getByRole('button', { name: '添加服务商' }));
+        fireEvent.change(screen.getByLabelText('接口地址'), { target: { value: 'https://relay.example/v1' } });
+        fireEvent.change(screen.getByLabelText('API Key'), { target: { value: 'sk-form-key' } });
+        fireEvent.change(screen.getByLabelText('模型清单'), { target: { value: 'my-own-model\ngpt-6.2-sol' } });
+        fireEvent.click(screen.getByRole('button', { name: '从接口获取' }));
+
+        await waitFor(() => expect(api.discoverModels).toHaveBeenCalledWith({
+            baseUrl: 'https://relay.example/v1', apiKey: 'sk-form-key', providerKey: null,
+        }));
+        // 保留用户已经填的，去掉重复的
+        await waitFor(() => expect(screen.getByLabelText('模型清单'))
+            .toHaveValue('my-own-model\ngpt-6.2-sol\ncodex-auto-review'));
+        expect(await screen.findByText(/从接口获取到 2 个模型，已并入清单/)).toBeInTheDocument();
+        // 只是取清单，没有保存任何东西
+        expect(api.createProvider).not.toHaveBeenCalled();
+    });
+
+    it('needs a complete address before pulling the model list', async () => {
+        render(<LlmProvidersSettings />);
+        await screen.findByText('智谱');
+
+        fireEvent.click(screen.getByRole('button', { name: '添加服务商' }));
+        fireEvent.change(screen.getByLabelText('接口地址'), { target: { value: 'relay.example/v1' } });
+        fireEvent.click(screen.getByRole('button', { name: '从接口获取' }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent('请先填写完整的接口地址');
+        expect(api.discoverModels).not.toHaveBeenCalled();
+    });
+
+    it('shows why pulling the model list failed inside the form', async () => {
+        api.discoverModels.mockRejectedValue(new ApiError('LLM_API_ERROR', '获取模型列表失败：HTTP 401', 502));
+        render(<LlmProvidersSettings />);
+        await screen.findByText('智谱');
+
+        fireEvent.click(screen.getByRole('button', { name: '添加服务商' }));
+        fireEvent.change(screen.getByLabelText('接口地址'), { target: { value: 'https://relay.example/v1' } });
+        fireEvent.click(screen.getByRole('button', { name: '从接口获取' }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent('获取模型列表失败：HTTP 401');
+        expect(screen.getByTestId('llm-provider-form')).toBeInTheDocument();
+    });
+
+    it('does not show raw code errors when pulling the model list breaks unexpectedly', async () => {
+        api.discoverModels.mockRejectedValue(new TypeError('L is not iterable'));
+        render(<LlmProvidersSettings />);
+        await screen.findByText('智谱');
+
+        fireEvent.click(screen.getByRole('button', { name: '添加服务商' }));
+        fireEvent.change(screen.getByLabelText('接口地址'), { target: { value: 'https://relay.example/v1' } });
+        fireEvent.click(screen.getByRole('button', { name: '从接口获取' }));
+
+        expect(await screen.findByRole('alert')).toHaveTextContent('获取模型列表失败，请稍后重试');
+        expect(screen.queryByText(/not iterable/)).not.toBeInTheDocument();
+    });
+
+    it('lets the backend reuse the stored key when pulling models for a saved provider', async () => {
+        api.discoverModels.mockResolvedValue(['glm-5.4']);
+        render(<LlmProvidersSettings />);
+        await screen.findByText('智谱');
+
+        fireEvent.click(screen.getByRole('button', { name: '编辑' }));
+        await screen.findByTestId('llm-provider-form');
+        // 编辑时密钥框是空的
+        expect(screen.getByLabelText('API Key')).toHaveValue('');
+        fireEvent.click(screen.getByRole('button', { name: '从接口获取' }));
+
+        await waitFor(() => expect(api.discoverModels).toHaveBeenCalledWith({
+            baseUrl: 'https://open.bigmodel.cn/api/paas/v4', apiKey: null, providerKey: '智谱',
+        }));
+        // 已保存的清单原样保留：拉到的 glm-5.4 本来就在里面，合并后不变
+        expect(screen.getByLabelText('模型清单')).toHaveValue('glm-5.4\ngpt-6.2-sol');
+        expect(await screen.findByText(/从接口获取到 1 个模型，已并入清单/)).toBeInTheDocument();
+    });
+
+    it('shows the basis for models that were registered with inferred capabilities', async () => {
+        api.listProviders.mockResolvedValue(listResponse({
+            routing: [routing({
+                registeredModels: ['glm-5.4', 'glm-5.9'],
+                inferredModels: [{ model: 'glm-5.9', basis: '沿用 glm-5.4 的参数' }],
+            })],
+        }));
+        render(<LlmProvidersSettings />);
+        const row = await screen.findByTestId('llm-provider-row-智谱');
+
+        const inferred = within(row).getByTestId('inferred-models');
+        expect(inferred).toHaveTextContent('以下模型不在内置能力表里，按推算的参数登记：');
+        expect(inferred).toHaveTextContent('glm-5.9');
+        expect(within(inferred).getByText(/— 沿用 glm-5\.4 的参数/)).toBeInTheDocument();
+    });
+
+    it('mentions inferred models after saving a provider that has them', async () => {
+        api.createProvider.mockResolvedValue({
+            provider: provider({ key: 'relay', name: '中转站' }),
+            routing: [routing({
+                providerKey: 'relay', providerName: '中转站', registeredAs: 'db:relay', registeredModels: ['glm-5.9'],
+                inferredModels: [{ model: 'glm-5.9', basis: '沿用 glm-5.4 的参数' }],
+            })],
+        } satisfies LlmProviderResponse);
+        render(<LlmProvidersSettings />);
+        await screen.findByText('智谱');
+
+        fireEvent.click(screen.getByRole('button', { name: '添加服务商' }));
+        fireEvent.change(screen.getByLabelText('服务商名称'), { target: { value: '中转站' } });
+        fireEvent.change(screen.getByLabelText('接口地址'), { target: { value: 'https://relay.example/v1' } });
+        fireEvent.change(screen.getByLabelText('模型清单'), { target: { value: 'glm-5.9' } });
+        fireEvent.click(screen.getByRole('button', { name: '保存' }));
+
+        await waitFor(() => expect(useNotificationStore.getState().notifications.map(n => n.message))
+            .toContain('「中转站」已注册；其中 1 个模型不在内置能力表里，按推算的参数登记，依据见列表'));
+    });
+
+    it('reports whether the form has unsaved changes', async () => {
+        const onUnsavedChange = vi.fn();
+        render(<LlmProvidersSettings onUnsavedChange={onUnsavedChange} />);
+        await screen.findByText('智谱');
+
+        fireEvent.click(screen.getByRole('button', { name: '添加服务商' }));
+        expect(onUnsavedChange).toHaveBeenLastCalledWith(false);
+        fireEvent.change(screen.getByLabelText('服务商名称'), { target: { value: '没保存的服务商' } });
+        await waitFor(() => expect(onUnsavedChange).toHaveBeenLastCalledWith(true));
+
+        fireEvent.click(screen.getByRole('button', { name: '取消' }));
+        await waitFor(() => expect(onUnsavedChange).toHaveBeenLastCalledWith(false));
     });
 });

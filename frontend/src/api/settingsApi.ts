@@ -29,12 +29,20 @@ export interface ProviderModelSkip {
 }
 
 /** 最近一次同步里，池中一个条目注册进运行时的结果。 */
+/** 一个不在内置能力表里的模型，以及给它登记能力时依据的参数（会原样显示给用户）。 */
+export interface InferredModel {
+    model: string;
+    basis: string;
+}
+
 export interface ProviderRouting {
     providerKey: string;
     providerName: string;
     /** 注册名（db:&lt;key&gt;）；没注册时字段缺失 */
     registeredAs?: string | null;
     registeredModels: string[];
+    /** 注册的模型里不在内置能力表里的那些；没有就是空数组 */
+    inferredModels?: InferredModel[];
     /** 实际生效的默认模型；没注册时字段缺失 */
     defaultModel?: string | null;
     skippedModels: ProviderModelSkip[];
@@ -64,6 +72,13 @@ export interface LlmProviderListResponse {
 export interface LlmProviderResponse {
     provider: LlmProviderView;
     routing: ProviderRouting[];
+}
+
+/** 从接口获取模型清单的入参：apiKey 与 providerKey 二选一（编辑时带后者，复用已保存的密钥） */
+export interface DiscoverModelsInput {
+    baseUrl: string;
+    apiKey?: string | null;
+    providerKey?: string | null;
 }
 
 export interface LlmProviderTestResponse {
@@ -130,6 +145,18 @@ export const settingsApi = {
     /** 丢弃后端缓存、从库重新读取，再同步一次运行时注册表 */
     reloadProviders: () =>
         request<LlmProviderListResponse>(`${PROVIDERS}/reload`, { method: 'POST' }),
+
+    /**
+     * 向服务商的 /models 接口要模型清单，返回去重排序后的模型 ID；只读，不保存任何东西。
+     * 后端的响应是 { models: [...] }，这里把数组取出来再交给调用方。
+     */
+    discoverModels: async (input: DiscoverModelsInput): Promise<string[]> => {
+        const data = await request<{ models?: string[] }>(`${PROVIDERS}/discover`, {
+            method: 'POST',
+            body: JSON.stringify(input),
+        });
+        return Array.isArray(data?.models) ? data.models : [];
+    },
 
     /** 连通性测试：model 留空表示测该服务商的默认模型 */
     testProvider: (key: string, model?: string) =>

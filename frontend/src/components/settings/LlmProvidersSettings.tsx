@@ -12,6 +12,7 @@ import {
     type LlmProviderInput,
     type LlmProviderListResponse,
     type LlmProviderTestResponse,
+    type InferredModel,
     type LlmProviderView,
     type ProviderRouting,
 } from '@/api/settingsApi';
@@ -26,9 +27,14 @@ type Editor = { mode: 'create' } | { mode: 'edit'; key: string } | null;
 interface LlmProvidersSettingsProps {
     /** 切到「场景分派」页：服务商池为空时给用户一条出路 */
     onGoToScenes?: () => void;
+    /**
+     * 表单里有没有还没保存的改动。填了好几项的表单（包括粘贴进来的密钥）被弹窗的「完成」、
+     * Esc 或切换标签页顺手关掉就全没了，而且不会有任何提示——父组件据此先确认再关。
+     */
+    onUnsavedChange?: (unsaved: boolean) => void;
 }
 
-export function LlmProvidersSettings({ onGoToScenes }: LlmProvidersSettingsProps = {}) {
+export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvidersSettingsProps = {}) {
     const addNotification = useNotificationStore(s => s.addNotification);
     const [data, setData] = useState<LlmProviderListResponse | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -38,6 +44,11 @@ export function LlmProvidersSettings({ onGoToScenes }: LlmProvidersSettingsProps
     const [saveError, setSaveError] = useState<string | null>(null);
     // undefined 表示这一次测试正在进行，先把上一次的结果清掉
     const [testResults, setTestResults] = useState<Record<string, LlmProviderTestResponse | undefined>>({});
+    const [formDirty, setFormDirty] = useState(false);
+
+    useEffect(() => {
+        onUnsavedChange?.(editor !== null && formDirty);
+    }, [editor, formDirty, onUnsavedChange]);
 
     const load = useCallback(async () => {
         setLoadError(null);
@@ -94,6 +105,7 @@ export function LlmProvidersSettings({ onGoToScenes }: LlmProvidersSettingsProps
                 message: editingKey ? `已保存「${response.provider.name}」` : `已添加「${response.provider.name}」`,
             });
             notifyRoutingProblem(response.provider, response.routing);
+            notifyInferredModels(response.provider, response.routing);
         } catch (err) {
             // 保存失败留在表单里，把后端给的原因显示在表单内部
             setSaveError(messageOf(err, '保存失败，请稍后重试'));
@@ -101,6 +113,27 @@ export function LlmProvidersSettings({ onGoToScenes }: LlmProvidersSettingsProps
             setBusy(null);
         }
     };
+
+    /** 不在内置能力表里的模型是按推算的参数登记的，告诉用户一声，免得以为出了问题 */
+    const notifyInferredModels = (provider: LlmProviderView, routing: ProviderRouting[] | undefined) => {
+        const mine = routing?.find(r => r.providerKey === provider.key);
+        const count = mine?.inferredModels?.length ?? 0;
+        if (mine?.registeredAs == null || count === 0) return;
+        addNotification({
+            key: `provider-inferred-${provider.key}-${Date.now()}`,
+            level: 'info',
+            message: `「${provider.name}」已注册；其中 ${count} 个模型不在内置能力表里，按推算的参数登记，依据见列表`,
+        });
+    };
+
+    /** 表单点「从接口获取」时调用。失败的原因由表单显示在它自己里面，这里只负责请求 */
+    const handleDiscover = async (input: { baseUrl: string; apiKey: string | null }) =>
+        settingsApi.discoverModels({
+            baseUrl: input.baseUrl,
+            apiKey: input.apiKey,
+            // 编辑时密钥框是空的：带上服务商的键，让后端复用已保存的那把
+            providerKey: editor?.mode === 'edit' ? editor.key : null,
+        });
 
     const handleDelete = async (provider: LlmProviderView) => {
         if (!window.confirm(`删除服务商「${provider.name}」？池里它提供的模型将不能再使用。`)) return;
@@ -174,7 +207,8 @@ export function LlmProvidersSettings({ onGoToScenes }: LlmProvidersSettingsProps
                 <div className="min-w-0">
                     <h3 className="text-base font-semibold text-t1">服务商池</h3>
                     <p className="mt-1 text-[13px] leading-relaxed text-t3">
-                        在配置文件之外再添加 OpenAI 兼容的服务商，保存后立即可用。配置里已经声明的模型不会重复注册。
+                        填上接口地址和密钥就能添加 OpenAI 兼容的服务商，保存后立即可用；点「从接口获取」可以直接拉取模型清单，不用手敲模型名。
+                        配置里已经声明的模型不会重复注册。
                     </p>
                 </div>
                 <div className="flex shrink-0 gap-2">
@@ -242,7 +276,9 @@ export function LlmProvidersSettings({ onGoToScenes }: LlmProvidersSettingsProps
                     busy={isBusy('save', editingProvider?.key ?? null)}
                     saveError={saveError}
                     onSubmit={input => { void handleSave(input); }}
-                    onCancel={() => { setEditor(null); setSaveError(null); }}
+                    onCancel={() => { setEditor(null); setSaveError(null); setFormDirty(false); }}
+                    onDiscover={handleDiscover}
+                    onDirtyChange={setFormDirty}
                 />
             )}
         </div>
@@ -300,11 +336,14 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
                 <div className="mt-3 flex flex-wrap gap-1.5" aria-label={`${provider.name} 的模型`}>
                     {provider.models.map(model => {
                         const skip = routing?.skippedModels.find(s => s.model === model);
+                        const inferred = routing?.inferredModels?.find(item => item.model === model);
                         return (
                             <Chip
                                 key={model}
                                 variant={!provider.enabled || !registered ? 'neutral' : skip ? 'warn' : 'accent'}
-                                title={!provider.enabled ? '服务商已停用' : skip?.reason}
+                                title={!provider.enabled
+                                    ? '服务商已停用'
+                                    : skip?.reason ?? inferred?.basis}
                             >
                                 {model}
                             </Chip>
@@ -316,6 +355,18 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
                     <p className="mt-3 text-[13px] text-t3">
                         已注册为 {routing?.registeredAs}，默认模型 {routing?.defaultModel}
                     </p>
+                )}
+                {registered && (routing?.inferredModels?.length ?? 0) > 0 && (
+                    <div className="mt-2 text-[13px] text-t3" data-testid="inferred-models">
+                        <p>以下模型不在内置能力表里，按推算的参数登记：</p>
+                        <ul className="mt-1 space-y-1">
+                            {routing?.inferredModels?.map((inferred: InferredModel) => (
+                                <li key={inferred.model}>
+                                    <span className="text-t2">{inferred.model}</span> — {inferred.basis}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 )}
                 {!registered && routing?.skipReason && (
                     <p role="status" className="mt-3 text-[13px] text-t3">未注册：{routing.skipReason}</p>

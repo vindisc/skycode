@@ -2,8 +2,11 @@
  * 「设置」弹窗：外观 / 模型服务商 / 场景分派三个标签页。
  * 只挂载当前选中的那一页：后两页都会发请求，没必要在用户看外观时就去拉服务商列表。
  * 外观：主题立即生效，由 ConfigStore 持久化。
+ * <p>
+ * 服务商表单里有还没保存的改动时（弹窗底部的「完成」、右上角的关闭、Esc、点遮罩、切换标签页都会丢掉它），
+ * 先确认再走——填了几项、还粘贴了密钥的表单，不该被顺手一点就没了。
  */
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Moon, Sun, Sparkles, Check, Rocket, Flower2, Landmark, Candy, Bug, Orbit } from 'lucide-react';
 import { useConfigStore } from '@/store/configStore';
 import { useDialogStore } from '@/store/dialogStore';
@@ -44,20 +47,41 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
     // 打开弹窗时可以通过 dialogData.tab 指定落在哪一页（例如从「优化提示词」跳到场景分派）
     const requestedTab = useDialogStore(s => s.dialogData.tab);
     const [tab, setTab] = useState<SettingsTab>(() => toSettingsTab(String(requestedTab ?? 'appearance')));
+    // 当前页有没有没保存的改动。用 ref：关闭、切换的瞬间要读到最新值，不必等重渲染
+    const unsavedRef = useRef(false);
+    const onUnsavedChange = useCallback((unsaved: boolean) => { unsavedRef.current = unsaved; }, []);
+
+    const requestClose = useCallback(() => {
+        if (unsavedRef.current && !window.confirm('设置里有还没保存的内容，关闭后会丢失。确定关闭吗？')) return;
+        unsavedRef.current = false;
+        onClose();
+    }, [onClose]);
+
+    const changeTab = (next: SettingsTab) => {
+        if (next === tab) return;
+        if (unsavedRef.current && !window.confirm('设置里有还没保存的内容，切换后会丢失。确定切换吗？')) return;
+        unsavedRef.current = false;
+        setTab(next);
+    };
 
     return (
-        <Dialog open title="设置" onClose={onClose} className="max-w-2xl border border-hairline max-h-[85vh] flex flex-col">
+        <Dialog open title="设置" onClose={requestClose} className="max-w-2xl border border-hairline max-h-[85vh] flex flex-col">
             <div className="px-5 pt-4 shrink-0">
-                <Tabs items={TABS} value={tab} onValueChange={value => setTab(toSettingsTab(value))} />
+                <Tabs items={TABS} value={tab} onValueChange={value => changeTab(toSettingsTab(value))} />
             </div>
             {/* 内容区可滚动，完成按钮固定可见 */}
             <div className="px-5 pb-5 pt-4 overflow-y-auto min-h-0 flex-1">
                 {tab === 'appearance' && <AppearanceSettings />}
-                {tab === 'providers' && <LlmProvidersSettings onGoToScenes={() => setTab('scenes')} />}
-                {tab === 'scenes' && <SceneBindingsSettings onGoToProviders={() => setTab('providers')} />}
+                {tab === 'providers' && (
+                    <LlmProvidersSettings
+                        onGoToScenes={() => changeTab('scenes')}
+                        onUnsavedChange={onUnsavedChange}
+                    />
+                )}
+                {tab === 'scenes' && <SceneBindingsSettings onGoToProviders={() => changeTab('providers')} />}
             </div>
             <div className="px-5 pb-5 pt-3 border-t border-hairline flex justify-end shrink-0">
-                <Button variant="primary" onClick={onClose}>完成</Button>
+                <Button variant="primary" onClick={requestClose}>完成</Button>
             </div>
         </Dialog>
     );
