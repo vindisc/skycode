@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Sun, Moon, Sparkles, Rocket, Flower2, Landmark, Candy, Bug, Orbit, Blocks, CircleHelp, ChevronRight, Brain, Check, Zap } from 'lucide-react';
+import { X, Sun, Moon, Sparkles, Rocket, Flower2, Landmark, Candy, Bug, Orbit, Blocks, CircleHelp, ChevronRight, Brain, Check, Zap, Wand2, Server, Route } from 'lucide-react';
 import { SheetShell } from '@/components/apos/MobileBottomSheet';
 import { ModelChip, PermissionModeChip, MobileChoice } from './PromptComposerChips';
 import { useTurnViewStore, type TurnDensity } from '@/store/turnViewStore';
@@ -10,8 +10,24 @@ import { SpaceshipFxControls } from '@/components/theme/SpaceshipFxControls';
 import { InkHavocFxControls } from '@/components/theme/InkHavocFxControls';
 import { JellyFxControls } from '@/components/theme/JellyFxControls';
 import { ACCENT_PRESETS, normalizeAccentHex } from '@/theme/accents';
+import { useOptimizePrompt } from './useOptimizePrompt';
 
 const action = 'min-h-11 rounded-[10px] px-1.5 text-sm text-t2 hover:bg-hover2 active:bg-hover2 transition-interactive duration-fast focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink';
+
+const list = 'overflow-hidden rounded-[14px] border border-hairline bg-surface2 divide-y divide-[var(--v2-border-hairline)]';
+const actionRow = 'flex min-h-12 w-full items-center gap-3 px-3 py-3 text-left text-sm text-t1 hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent2-ink disabled:opacity-50';
+
+/** 「更多操作」面板里的一行入口 */
+function ActionRow({ label, icon: Icon, run, disabled = false, hint }: { label: string; icon: typeof Brain; run: () => void; disabled?: boolean; hint?: string }) {
+    return <button type="button" className={actionRow} disabled={disabled} onClick={run}>
+        <Icon size={20} className="text-t2" aria-hidden="true" />
+        <span className="min-w-0 flex-1">
+            <span className="block">{label}</span>
+            {hint && <span className="block text-[13px] text-t3">{hint}</span>}
+        </span>
+        <ChevronRight size={16} className="text-t3" aria-hidden="true" />
+    </button>;
+}
 
 /** 显示方式三档（消息展示密度；描述沿用原 MobileDensitySwitch 文案；选项面板为上下列表） */
 const DENSITY_OPTIONS: { value: TurnDensity; label: string; description: string }[] = [
@@ -20,7 +36,12 @@ const DENSITY_OPTIONS: { value: TurnDensity; label: string; description: string 
     { value: 'detailed', label: '完整过程', description: '查看完整过程与任务导航' },
 ];
 
-export function MobileComposerNavigation() {
+interface MobileComposerNavigationProps {
+    /** 「优化提示词」要用的草稿信息；不传则不显示这一行 */
+    optimize?: { draft: string; draftKey: string; disabled: boolean };
+}
+
+export function MobileComposerNavigation({ optimize }: MobileComposerNavigationProps = {}) {
     // 工作台切换已从前台隐藏（默认开发工作台），一级入口改为模型切换；
     // 紧凑裸排形态：顺序与桌面 composer-row 统一——状态（权限项前置）、权限、模型、显示方式；更多固定末尾。
     const [panel, setPanel] = useState<'more' | null>(null);
@@ -30,6 +51,9 @@ export function MobileComposerNavigation() {
     const openDialog = useDialogStore(s => s.openDialog);
     const { theme, setTheme } = useConfigStore();
     const dialog = (type: 'mcp' | 'keybindings' | 'memory' | 'skills') => { setPanel(null); openDialog(type); };
+    // 顶栏的设置按钮在手机宽度下不显示，设置弹窗里的「模型服务商」「场景分派」只能从这里进
+    const openSettings = (tab: 'providers' | 'scenes') => { setPanel(null); openDialog('settings', { tab }); };
+    const optimizeAction = useOptimizePrompt(optimize?.draft ?? '', optimize?.draftKey ?? '');
     return <>
         <nav aria-label="手机会话操作" className="mobile-composer-navigation flex shrink-0 items-center justify-between gap-0.5 overflow-x-auto px-2 pb-1">
             <PermissionModeChip mobile />
@@ -73,13 +97,22 @@ export function MobileComposerNavigation() {
                         </div>
                         )}
                     </section>
-                    <div className="overflow-hidden rounded-[14px] border border-hairline bg-surface2 divide-y divide-[var(--v2-border-hairline)]">
+                    {/* 输入条那一排在手机上已经排满，所以「优化提示词」和设置页的入口都放在这里 */}
+                    <div className={list}>
+                        {optimize && <ActionRow label="优化提示词" icon={Wand2} disabled={optimize.disabled}
+                            hint={optimizeAction.unconfigured ? '还没有配置优化用的模型，点击去设置' : undefined}
+                            // 和下面几个弹窗入口一样：先收起面板，否则它会留在弹窗底下，干扰 Esc 关闭和焦点归还
+                            run={() => { setPanel(null); optimizeAction.handleClick(); }} />}
+                        <ActionRow label="模型服务商" icon={Server} run={() => openSettings('providers')} />
+                        <ActionRow label="场景分派" icon={Route} run={() => openSettings('scenes')} />
+                    </div>
+                    <div className={list}>
                         {[
                             { label: '记忆', icon: Brain, run: () => dialog('memory') },
                             { label: 'MCP 管理', icon: Blocks, run: () => dialog('mcp') },
                             { label: 'Skill 管理', icon: Zap, run: () => dialog('skills') },
                             { label: '帮助与快捷键', icon: CircleHelp, run: () => dialog('keybindings') },
-                        ].map(({ label, icon: Icon, run }) => <button key={label} className="flex min-h-12 w-full items-center gap-3 px-3 py-3 text-left text-sm text-t1 hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent2-ink" onClick={run}><Icon size={20} className="text-t2" aria-hidden="true" /><span className="flex-1">{label}</span><ChevronRight size={16} className="text-t3" aria-hidden="true" /></button>)}
+                        ].map(({ label, icon: Icon, run }) => <ActionRow key={label} label={label} icon={Icon} run={run} />)}
                     </div>
                 </>}
             </div>

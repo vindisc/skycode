@@ -1,21 +1,31 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { beforeEach, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PromptInput from './index';
 import { usePromptDraftStore } from '@/store/promptDraftStore';
 import { useModelStore } from '@/store/modelStore';
 import { useTurnViewStore } from '@/store/turnViewStore';
 import { useDialogStore } from '@/store/dialogStore';
+import { useNotificationStore } from '@/store/notificationStore';
 
 const mocks = vi.hoisted(() => ({ available: true, start: vi.fn() }));
+const promptApi = vi.hoisted(() => ({ status: vi.fn(), optimize: vi.fn() }));
+/** 「优化提示词」已配置时的状态；手机端「更多操作」里那一行会用到 */
+const OPTIMIZE_ENABLED = { enabled: true, model: 'gpt-6.1-sol', providerName: '火神', source: 'scene_binding' };
+const OPTIMIZE_DISABLED = { enabled: false, model: null, providerName: null, source: null };
 vi.mock('@/hooks/useResponsive', () => ({ useResponsive: () => ({ isMobile: true }) }));
 vi.mock('@/hooks/useAsrAvailability', () => ({ useAsrAvailability: () => mocks.available }));
 vi.mock('@/hooks/useVoiceRecorder', () => ({ useVoiceRecorder: () => ({ state: 'idle', elapsedSeconds: 0, error: null, startRecording: mocks.start, stopRecording: vi.fn() }) }));
+vi.mock('@/api/promptOptimizeApi', () => ({ promptOptimizeApi: promptApi }));
 
 beforeEach(() => {
     mocks.available = true; mocks.start.mockClear();
     usePromptDraftStore.setState({ drafts: {} });
     useTurnViewStore.setState({ density: 'compact', expandOverrides: {} });
     useModelStore.setState({ models: [{ id: 'kimi-k3', displayName: 'Kimi K3', maxImages: 0, supportsImages: false }], loading: false, error: null });
+    useNotificationStore.setState({ notifications: [] });
+    // 这个文件里所有用例都会挂载手机输入条，状态接口的 mock 必须有返回值
+    promptApi.status.mockReset();
+    promptApi.status.mockResolvedValue(OPTIMIZE_ENABLED);
 });
 function mount(runActive = false) {
     return render(<PromptInput sessionId="mobile-review" onSubmit={vi.fn()} onSlashCommand={vi.fn()} onInterrupt={vi.fn()}
@@ -109,4 +119,89 @@ it('从手机更多操作打开 Skill 管理并关闭底部面板', async () => 
     fireEvent.click(screen.getByRole('button', { name: 'Skill 管理' }));
     expect(useDialogStore.getState().activeDialog).toBe('skills');
     await waitFor(() => expect(screen.queryByRole('dialog', { name: '更多操作' })).not.toBeInTheDocument());
+});
+
+// 输入条那一排在手机上已经排满（390px 宽只剩 28px 空隙），所以优化提示词和设置页的入口都放在「更多操作」里；
+// 顶栏的设置按钮在手机宽度下不显示，这里是它们唯一的入口。
+describe('手机更多操作里的优化提示词与设置入口', () => {
+    const openMore = () => {
+        fireEvent.click(screen.getByRole('button', { name: '更多' }));
+        return screen.getByRole('dialog', { name: '更多操作' });
+    };
+
+    beforeEach(() => {
+        useDialogStore.setState({ activeDialog: null, dialogData: {} });
+        promptApi.status.mockResolvedValue(OPTIMIZE_ENABLED);
+    });
+
+    it('那一排按钮保持原样，三个入口都在更多操作里', () => {
+        mount();
+        // 不能再往输入条那一排加按钮，否则 390px 宽的手机上「发送」会被挤到第二行
+        const rowButtons = Array.from(screen.getByTestId('mobile-persistent-actions').querySelectorAll('button'))
+            .map(button => button.getAttribute('aria-label'));
+        expect(rowButtons).toEqual(['文件引用', '图片附件', '拍照', '命令', '语音输入', '发送消息']);
+
+        const more = openMore();
+        expect(within(more).getByRole('button', { name: /优化提示词/ })).toBeInTheDocument();
+        expect(within(more).getByRole('button', { name: '模型服务商' })).toBeInTheDocument();
+        expect(within(more).getByRole('button', { name: '场景分派' })).toBeInTheDocument();
+    });
+
+    it('点场景分派打开设置弹窗的对应页并收起面板', async () => {
+        mount();
+        fireEvent.click(within(openMore()).getByRole('button', { name: '场景分派' }));
+
+        expect(useDialogStore.getState()).toMatchObject({ activeDialog: 'settings', dialogData: { tab: 'scenes' } });
+        await waitFor(() => expect(screen.queryByRole('dialog', { name: '更多操作' })).not.toBeInTheDocument());
+    });
+
+    it('点模型服务商落到服务商池那页', () => {
+        mount();
+        fireEvent.click(within(openMore()).getByRole('button', { name: '模型服务商' }));
+
+        expect(useDialogStore.getState()).toMatchObject({ activeDialog: 'settings', dialogData: { tab: 'providers' } });
+    });
+
+    it('点优化提示词带着当前草稿和它的草稿键打开优化面板', async () => {
+        mount();
+        fireEvent.change(screen.getByRole('textbox'), { target: { value: '帮我写个函数' } });
+        fireEvent.click(within(openMore()).getByRole('button', { name: /优化提示词/ }));
+
+        const state = useDialogStore.getState();
+        expect(state.activeDialog).toBe('promptOptimize');
+        expect(state.dialogData.prompt).toBe('帮我写个函数');
+        const keyOfDraft = Object.entries(usePromptDraftStore.getState().drafts)
+            .find(([, draft]) => draft.input === '帮我写个函数')?.[0];
+        expect(state.dialogData.draftKey).toBe(keyOfDraft);
+        // 面板不能留在弹窗底下（回归：这一行最初漏了收起）
+        await waitFor(() => expect(screen.queryByRole('dialog', { name: '更多操作' })).not.toBeInTheDocument());
+    });
+
+    it('草稿为空时只提示，不打开面板', () => {
+        mount();
+        fireEvent.click(within(openMore()).getByRole('button', { name: /优化提示词/ }));
+
+        expect(useDialogStore.getState().activeDialog).toBeNull();
+        expect(useNotificationStore.getState().notifications.map(n => n.message)).toContain('先写点内容，再来优化提示词');
+    });
+
+    it('还没配置优化模型时说明原因，点了直接去场景分派', async () => {
+        promptApi.status.mockResolvedValue(OPTIMIZE_DISABLED);
+        mount();
+        const more = openMore();
+        // 状态是挂载时异步取的，等它回来
+        expect(await within(more).findByText('还没有配置优化用的模型，点击去设置')).toBeInTheDocument();
+
+        fireEvent.click(within(more).getByRole('button', { name: /优化提示词/ }));
+
+        expect(useDialogStore.getState()).toMatchObject({ activeDialog: 'settings', dialogData: { tab: 'scenes' } });
+    });
+
+    it('任务运行中禁用优化提示词，设置入口不受影响', () => {
+        mount(true);
+        const more = openMore();
+
+        expect(within(more).getByRole('button', { name: /优化提示词/ })).toBeDisabled();
+        expect(within(more).getByRole('button', { name: '场景分派' })).toBeEnabled();
+    });
 });

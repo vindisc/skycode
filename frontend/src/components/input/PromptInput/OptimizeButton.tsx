@@ -1,13 +1,11 @@
 /**
- * 输入框工具栏上的「优化提示词」：把当前草稿交给一个独立的小模型改写。
+ * 输入框工具栏上的「优化提示词」（桌面）：把当前草稿交给一个独立的小模型改写。
  * 优化用的模型由设置页的「场景分派」决定；还没配置时，点击直接带用户去那里。
+ * 点击逻辑在 useOptimizePrompt 里，和手机端「更多操作」里的同一行共用。
  */
 
-import { useEffect, useState } from 'react';
 import { Wand2 } from 'lucide-react';
-import { promptOptimizeApi, type PromptOptimizeStatus } from '@/api/promptOptimizeApi';
-import { useDialogStore } from '@/store/dialogStore';
-import { useNotificationStore } from '@/store/notificationStore';
+import { useOptimizePrompt } from './useOptimizePrompt';
 
 interface OptimizeButtonProps {
     /** 当前草稿，以及它在 promptDraftStore 里的键（优化结果要写回的地方） */
@@ -17,32 +15,7 @@ interface OptimizeButtonProps {
 }
 
 export function OptimizeButton({ draft, draftKey, disabled }: OptimizeButtonProps) {
-    const openDialog = useDialogStore(s => s.openDialog);
-    const addNotification = useNotificationStore(s => s.addNotification);
-    const [status, setStatus] = useState<PromptOptimizeStatus | null>(null);
-
-    useEffect(() => {
-        let cancelled = false;
-        promptOptimizeApi.status()
-            .then(result => { if (!cancelled) setStatus(result); })
-            // 拿不到状态时不拦着用户：照常打开面板，由面板给出确切的结论
-            .catch(() => { /* 面板会重新判断 */ });
-        return () => { cancelled = true; };
-    }, []);
-
-    const unconfigured = status !== null && !status.enabled;
-
-    const handleClick = () => {
-        if (!draft.trim()) {
-            addNotification({ key: 'prompt-optimize-empty', level: 'info', message: '先写点内容，再来优化提示词' });
-            return;
-        }
-        if (unconfigured) {
-            openDialog('settings', { tab: 'scenes' });
-            return;
-        }
-        openDialog('promptOptimize', { prompt: draft, draftKey });
-    };
+    const { unconfigured, handleClick } = useOptimizePrompt(draft, draftKey);
 
     return (
         <button

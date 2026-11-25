@@ -74,7 +74,7 @@ const MobilePromptBar: React.FC<MobilePromptBarProps> = ({ state: s, runActive, 
                 <PromptSendButton variant="mobile" runActive={runActive} sendDisabled={sendDisabled} stopDisabled={disabled || s.isSubmitting}
                     onSend={() => { void s.handleSubmit(); }} onInterrupt={onInterrupt} />
             </div>
-            <MobileComposerNavigation />
+            <MobileComposerNavigation optimize={{ draft: s.input, draftKey: s.draftKey, disabled: busy || runActive }} />
         </div>
     );
 };

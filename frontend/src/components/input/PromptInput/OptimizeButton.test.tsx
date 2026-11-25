@@ -50,6 +50,17 @@ describe('OptimizeButton', () => {
         });
     });
 
+    it('goes to settings even on an empty draft when unconfigured', async () => {
+        api.status.mockResolvedValue(DISABLED);
+        render(<OptimizeButton draft="   " draftKey="s1" disabled={false} />);
+        await waitFor(() => expect(api.status).toHaveBeenCalledTimes(1));
+
+        fireEvent.click(screen.getByRole('button', { name: '优化提示词' }));
+
+        // 入口上的提示写的是"点击去设置"，不能因为草稿为空就改口让人先写内容
+        expect(useDialogStore.getState()).toMatchObject({ activeDialog: 'settings', dialogData: { tab: 'scenes' } });
+    });
+
     it('does nothing but notify on an empty draft', async () => {
         render(<OptimizeButton draft="   " draftKey="s1" disabled={false} />);
         await waitFor(() => expect(api.status).toHaveBeenCalledTimes(1));
