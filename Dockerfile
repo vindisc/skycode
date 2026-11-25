@@ -188,11 +188,6 @@ RUN /app/python-service/.venv/bin/python -m playwright install-deps chromium && 
 RUN /app/python-service/.venv/bin/python -m playwright install --only-shell chromium && \
     chmod -R a+rX /opt/playwright-browsers
 
-COPY --from=backend-build /build/backend/target/app.jar ./app.jar
-COPY --from=frontend-build /build/frontend/dist ./static/
-# PythonProcessManager starts this service as a subprocess.
-COPY python-service/src ./python-service/src/
-
 # Alibaba Cloud Ops has stricter FastMCP/Pydantic pins than the application,
 # so isolate it from the Python analysis service.
 RUN python3 -m venv /app/mcp-servers/alibaba-cloud-ops && \
@@ -218,6 +213,13 @@ COPY configuration/ ./configuration/
 # Copy entrypoint
 COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
+
+# 应用产物放在所有依赖层之后：上面各层只在依赖变化时才重建，
+# 改代码时从这里开始重建，不用重新 pip install。
+COPY --from=backend-build /build/backend/target/app.jar ./app.jar
+COPY --from=frontend-build /build/frontend/dist ./static/
+# PythonProcessManager starts this service as a subprocess.
+COPY python-service/src ./python-service/src/
 
 # Create data and log directories; pre-create the HOME-side .zhikun mountpoint
 # tree (owned by zhikun) so deploying a bind mount over /app/.zhikun/skills
