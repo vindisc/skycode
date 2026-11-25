@@ -177,6 +177,10 @@ public class LlmProviderSettingsService {
         if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
             throw new RequestValidationException("INVALID_PROVIDER", "接口地址必须以 http:// 或 https:// 开头");
         }
+        // 构造 Provider 时不校验网址，要等发请求才报错；在保存时就拦住，用户能马上改
+        if (okhttp3.HttpUrl.parse(baseUrl) == null) {
+            throw new RequestValidationException("INVALID_PROVIDER", "接口地址不是一个完整的网址，形如 https://api.example.com/v1");
+        }
         List<String> models = normalizeModels(input.models());
         if (models.isEmpty()) {
             throw new RequestValidationException("INVALID_PROVIDER", "至少要填写一个模型");

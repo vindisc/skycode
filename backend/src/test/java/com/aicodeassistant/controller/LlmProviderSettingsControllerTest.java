@@ -6,12 +6,17 @@ import com.aicodeassistant.llm.DbProviderRegistrySync.ModelSkip;
 import com.aicodeassistant.llm.DbProviderRegistrySync.ProviderSync;
 import com.aicodeassistant.llm.DbProviderRegistrySync.SyncResult;
 import com.aicodeassistant.llm.LlmApiException;
+import com.aicodeassistant.llm.LlmHttpProperties;
+import com.aicodeassistant.llm.ProviderModelDiscovery;
 import com.aicodeassistant.prompt.optimize.ExternalLlmClient;
 import com.aicodeassistant.settings.LlmProviderSettingsService;
 import com.aicodeassistant.settings.LlmProviderSettingsService.ProviderInput;
 import com.aicodeassistant.settings.SettingsRepository;
 import com.aicodeassistant.settings.SettingsTestSupport;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,6 +24,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -33,7 +39,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * /api/settings/llm-providers — 服务商池的接口层：响应里只能有打码后的密钥，
- * 每次改动都要触发一次运行时同步并把结果带回去。
+ * 每次改动都要触发一次运行时同步并把结果带回去；从接口获取模型清单走服务商的 /models。
  */
 class LlmProviderSettingsControllerTest {
 
@@ -44,15 +50,24 @@ class LlmProviderSettingsControllerTest {
 
     private final DbProviderRegistrySync sync = mock(DbProviderRegistrySync.class);
     private final ExternalLlmClient external = mock(ExternalLlmClient.class);
+    private MockWebServer relay;
     private LlmProviderSettingsService pool;
     private LlmProviderSettingsController controller;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         JdbcTemplate jdbc = SettingsTestSupport.globalDb(temp);
         pool = new LlmProviderSettingsService(new SettingsRepository(jdbc), SettingsTestSupport.encryption(),
                 new ObjectMapper());
-        controller = new LlmProviderSettingsController(pool, sync, external);
+        relay = new MockWebServer();
+        relay.start();
+        controller = new LlmProviderSettingsController(pool, sync, external, new ProviderModelDiscovery(
+                new LlmHttpProperties(new LlmHttpProperties.PoolProperties(1, 5), 5, 5, false), new ObjectMapper()));
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        relay.shutdown();
     }
 
     @Test
@@ -143,6 +158,72 @@ class LlmProviderSettingsControllerTest {
         verify(external, never()).probe(any());
     }
 
+    @Test
+    void discoverAsksTheRelayForItsModelListUsingTheKeyTypedInTheForm() throws Exception {
+        relay.enqueue(new MockResponse().setHeader("Content-Type", "application/json").setBody("""
+                {"object":"list","data":[{"id":"gpt-6.2-sol"},{"id":"codex-auto-review"},{"id":"gpt-6.2-sol"}]}
+                """));
+
+        var response = controller.discover(new LlmProviderSettingsController.DiscoverRequest(
+                relay.url("/v1").toString(), "sk-typed-in-form", null));
+
+        // 去重、排序
+        assertThat(response.models()).containsExactly("codex-auto-review", "gpt-6.2-sol");
+        var request = relay.takeRequest();
+        assertThat(request.getMethod()).isEqualTo("GET");
+        assertThat(request.getPath()).isEqualTo("/v1/models");
+        assertThat(request.getHeader("Authorization")).isEqualTo("Bearer sk-typed-in-form");
+        // 只读清单，什么都不保存
+        assertThat(pool.list()).isEmpty();
+        verify(sync, never()).sync();
+    }
+
+    @Test
+    void discoverReusesTheStoredKeyWhenEditingASavedProvider() throws Exception {
+        String key = pool.create(input("relay", "gpt-6.2-sol")).key();
+        relay.enqueue(new MockResponse().setHeader("Content-Type", "application/json").setBody("""
+                {"data":[{"id":"glm-5.4"}]}
+                """));
+
+        controller.discover(new LlmProviderSettingsController.DiscoverRequest(
+                relay.url("/v1").toString(), null, key));
+
+        assertThat(relay.takeRequest().getHeader("Authorization")).isEqualTo("Bearer " + RAW_KEY);
+    }
+
+    @Test
+    void discoverRequiresACompleteHttpAddress() {
+        assertCode(() -> controller.discover(null), "INVALID_PROVIDER");
+        assertCode(() -> controller.discover(new LlmProviderSettingsController.DiscoverRequest("  ", "k", null)),
+                "INVALID_PROVIDER");
+        assertCode(() -> controller.discover(new LlmProviderSettingsController.DiscoverRequest("api.example.com/v1", "k", null)),
+                "INVALID_PROVIDER");
+        assertThat(relay.getRequestCount()).isZero();
+    }
+
+    @Test
+    void discoverSurfacesRelayFailuresWithoutEchoingTheKey() {
+        relay.enqueue(new MockResponse().setResponseCode(401).setBody(
+                "{\"error\":{\"message\":\"Incorrect API key provided: sk-secret-key-123456\"}}"));
+
+        assertThatThrownBy(() -> controller.discover(new LlmProviderSettingsController.DiscoverRequest(
+                relay.url("/v1").toString(), "sk-secret-key-123456", null)))
+                .isInstanceOf(LlmApiException.class)
+                .hasMessageContaining("401")
+                .hasMessageContaining("***")
+                .hasMessageNotContaining("sk-secret-key-123456");
+    }
+
+    @Test
+    void discoverRejectsAResponseThatIsNotAModelList() {
+        relay.enqueue(new MockResponse().setHeader("Content-Type", "application/json").setBody("{\"ok\":true}"));
+
+        assertThatThrownBy(() -> controller.discover(new LlmProviderSettingsController.DiscoverRequest(
+                relay.url("/v1").toString(), "k", null)))
+                .isInstanceOf(LlmApiException.class)
+                .hasMessageContaining("不是模型清单");
+    }
+
     // ───── 辅助 ─────
 
     private static ProviderInput input(String name, String model) {
@@ -150,7 +231,7 @@ class LlmProviderSettingsControllerTest {
     }
 
     private static SyncResult routing(String registeredAs, String model) {
-        return new SyncResult(List.of(new ProviderSync("relay", "中转站", registeredAs, List.of(model),
+        return new SyncResult(List.of(new ProviderSync("relay", "中转站", registeredAs, List.of(model), List.of(),
                 model, List.of(new ModelSkip(model, "示例原因")), null, false)));
     }
 

@@ -126,6 +126,8 @@ class LlmProviderSettingsServiceTest {
         // 模型 ID 大小写敏感：不做归一
         assertCode(() -> service.create(input("x", "https://x.example/v1", List.of("glm-5.4"), "GLM-5.4")),
                 "INVALID_PROVIDER");
+        // 只有协议头、没有主机名的地址现在就会被拦下，而不是等到发请求才报错
+        assertCode(() -> service.create(input("x", "https://", List.of("glm-5.4"), null)), "INVALID_PROVIDER");
         assertCode(() -> service.update("nope", zhipu(RAW_KEY, List.of("glm-5.4"))), "PROVIDER_NOT_FOUND");
         assertCode(() -> service.delete("nope"), "PROVIDER_NOT_FOUND");
     }
