@@ -2,6 +2,10 @@
  * 服务商的新增 / 编辑表单。只负责收集输入并在本地做一遍基础校验；
  * 保存结果、注册情况和不在能力表里的模型由父组件 LlmProvidersSettings 展示。
  * 密钥只写不读：编辑时输入框是空的，留空提交表示保持原值。
+ * <p>
+ * 有两种服务商：设置页里添加的（名字、地址都自己填），和配置文件里预置的
+ * （OpenAI、百炼、DeepSeek……，传入 {@link LlmProviderFormProps#configured}）——
+ * 后者的名字是注册名，不能改；接口地址只有配置里允许覆盖的（目前是 DeepSeek）才能改。
  */
 
 import { useEffect, useId, useMemo, useState } from 'react';
@@ -26,10 +30,22 @@ interface LlmProviderFormProps {
     saveError: string | null;
     onSubmit: (input: LlmProviderInput) => void;
     onCancel: () => void;
-    /** 向服务商的 /models 接口要模型清单；表单负责把结果并进模型清单。不传就不显示这个入口 */
+    /**
+     * 向服务商的 /models 接口要模型清单；表单负责把结果并进模型清单。不传就不显示这个入口。
+     * 编辑配置里的服务商时由父组件自己决定用哪把密钥，所以只通知一声
+     */
     onDiscover?: (input: { baseUrl: string; apiKey: string | null }) => Promise<string[]>;
     /** 表单里有没有相对初始值改动过的内容。父组件用它决定关闭弹窗、切换标签页前要不要确认 */
     onDirtyChange?: (dirty: boolean) => void;
+    /** 编辑的是配置文件里预置的服务商时传入 */
+    configured?: {
+        /** 注册名，例如 huoshenai */
+        name: string;
+        displayName: string;
+        baseUrlEditable: boolean;
+        /** 此刻生效的密钥来自配置文件（而不是页面上填的） */
+        keyFromConfig: boolean;
+    };
 }
 
 const LABEL = 'block text-sm font-medium text-t2 mb-1.5';
@@ -45,6 +61,7 @@ export function LlmProviderForm({
     onCancel,
     onDiscover,
     onDirtyChange,
+    configured,
 }: LlmProviderFormProps) {
     const [form, setForm] = useState<ProviderFormState>(initial);
     const [localError, setLocalError] = useState<string | null>(null);
@@ -80,6 +97,7 @@ export function LlmProviderForm({
         setLocalError(null);
         setDiscovering(true);
         try {
+            // 配置里的服务商：地址和密钥最终以生效配置为准，由父组件和后端处理
             const discovered = await onDiscover({ baseUrl, apiKey: form.apiKey.trim() || null });
             // 并进已有的清单：保留用户已经填的，去掉重复的
             const merged = [...new Set([...splitModelList(form.modelsText), ...discovered])];
@@ -101,7 +119,7 @@ export function LlmProviderForm({
     return (
         <form onSubmit={handleSubmit} noValidate className="rounded-[14px] border border-hairline bg-surfacev2 p-4 space-y-4" data-testid="llm-provider-form">
             <h3 className="text-base font-semibold text-t1">
-                {existing ? `编辑「${existing.name}」` : '添加服务商'}
+                {configured ? `编辑「${configured.displayName}」` : existing ? `编辑「${existing.name}」` : '添加服务商'}
             </h3>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -109,11 +127,14 @@ export function LlmProviderForm({
                     <label htmlFor={id('name')} className={LABEL}>服务商名称</label>
                     <Input
                         id={id('name')}
-                        value={form.name}
+                        value={configured ? `${configured.displayName}（${configured.name}）` : form.name}
                         onChange={e => update({ name: e.target.value })}
                         placeholder="例如：智谱、本地 Ollama"
                         autoComplete="off"
                         autoFocus
+                        disabled={!!configured}
+                        readOnly={!!configured}
+                        title={configured ? '配置里预置的服务商，注册名不能改' : undefined}
                     />
                 </div>
                 <div>
@@ -125,6 +146,9 @@ export function LlmProviderForm({
                         placeholder="https://api.example.com/v1"
                         autoComplete="off"
                         spellCheck={false}
+                        disabled={!!configured && !configured.baseUrlEditable}
+                        readOnly={!!configured && !configured.baseUrlEditable}
+                        title={configured && !configured.baseUrlEditable ? '这个服务商的接口地址写死在配置里，不能在页面上改' : undefined}
                     />
                 </div>
             </div>
@@ -141,9 +165,18 @@ export function LlmProviderForm({
                     spellCheck={false}
                     disabled={!apiKeyStorageReady}
                     placeholder={existing?.hasApiKey
-                        ? `留空则保持不变（当前 ${existing.apiKeyMasked}）`
-                        : '本地模型可以留空'}
+                        ? configured?.keyFromConfig
+                            ? `密钥来自配置文件（${existing.apiKeyMasked}），在这里填写可替换`
+                            : `留空则保持不变（当前 ${existing.apiKeyMasked}）`
+                        : configured
+                            ? '填写 API Key 后这个服务商就会启用'
+                            : '本地模型可以留空'}
                 />
+                {configured && existing?.hasApiKey && configured.keyFromConfig && form.apiKey.trim() && (
+                    <p className={HINT} role="status">
+                        保存后将改用这里填的密钥；「恢复默认」可以回到配置文件里的那把。
+                    </p>
+                )}
                 <p className={HINT}>
                     {apiKeyStorageReady
                         ? '保存前会加密，保存后只显示末 4 位。'

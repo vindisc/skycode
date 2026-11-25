@@ -6,7 +6,13 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '@/api/request';
-import type { LlmProviderListResponse, LlmProviderResponse, LlmProviderView, ProviderRouting } from '@/api/settingsApi';
+import type {
+    ConfiguredProviderView,
+    LlmProviderListResponse,
+    LlmProviderResponse,
+    LlmProviderView,
+    ProviderRouting,
+} from '@/api/settingsApi';
 import { useNotificationStore } from '@/store/notificationStore';
 import { LlmProvidersSettings } from './LlmProvidersSettings';
 
@@ -21,10 +27,24 @@ const api = vi.hoisted(() => ({
     saveSceneBinding: vi.fn(),
     clearSceneBinding: vi.fn(),
     discoverModels: vi.fn(),
+    listConfiguredProviders: vi.fn(),
+    saveConfiguredProvider: vi.fn(),
+    resetConfiguredProvider: vi.fn(),
+    testConfiguredProvider: vi.fn(),
+    discoverConfiguredModels: vi.fn(),
 }));
 const stores = vi.hoisted(() => ({ fetchModels: vi.fn() }));
 
-vi.mock('@/api/settingsApi', () => ({ settingsApi: api }));
+vi.mock('@/api/settingsApi', () => ({
+    settingsApi: api,
+    configuredProvidersApi: {
+        list: api.listConfiguredProviders,
+        save: api.saveConfiguredProvider,
+        reset: api.resetConfiguredProvider,
+        test: api.testConfiguredProvider,
+        discoverModels: api.discoverConfiguredModels,
+    },
+}));
 vi.mock('@/store/modelStore', () => ({ useModelStore: { getState: () => ({ fetchModels: stores.fetchModels }) } }));
 
 const provider = (patch: Partial<LlmProviderView> = {}): LlmProviderView => ({
@@ -71,9 +91,26 @@ const listResponse = (patch: Partial<LlmProviderListResponse> = {}): LlmProvider
     ...patch,
 });
 
+const configuredProvider = (patch: Partial<ConfiguredProviderView> = {}): ConfiguredProviderView => ({
+    name: 'huoshenai',
+    displayName: 'HuoshenAI 中转站',
+    baseUrl: 'https://huoshenai.net/v1',
+    apiKeyMasked: '••••vEEm',
+    hasApiKey: true,
+    keyFromConfig: true,
+    models: ['gpt-6.2-sol', 'gpt-6.1-sol'],
+    defaultModel: 'gpt-6.2-sol',
+    enabled: true,
+    overridden: false,
+    active: true,
+    baseUrlEditable: false,
+    ...patch,
+});
+
 beforeEach(() => {
     vi.clearAllMocks();
     api.listProviders.mockResolvedValue(listResponse());
+    api.listConfiguredProviders.mockResolvedValue([]);
     stores.fetchModels.mockResolvedValue(undefined);
     vi.spyOn(window, 'confirm').mockReturnValue(true);
 });
@@ -417,5 +454,162 @@ describe('LlmProvidersSettings', () => {
 
         fireEvent.click(screen.getByRole('button', { name: '取消' }));
         await waitFor(() => expect(onUnsavedChange).toHaveBeenLastCalledWith(false));
+    });
+
+    it('lists the providers defined in the config file with their status', async () => {
+        api.listConfiguredProviders.mockResolvedValue([
+            configuredProvider(),
+            configuredProvider({ name: 'zhipu', displayName: '智谱', baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
+                apiKeyMasked: '', hasApiKey: false, models: ['glm-5.3'], defaultModel: 'glm-5.3', active: false }),
+            configuredProvider({ name: 'deepseek', displayName: 'DeepSeek', baseUrl: 'https://api.deepseek.com/v1',
+                overridden: true, models: ['deepseek-flash', 'deepseek-chat'], defaultModel: 'deepseek-flash' }),
+        ]);
+        render(<LlmProvidersSettings />);
+
+        const section = await screen.findByTestId('configured-providers');
+
+        const active = within(section).getByTestId('configured-provider-row-huoshenai');
+        expect(within(active).getByText('已启用')).toBeInTheDocument();
+        expect(within(active).getByText('HuoshenAI 中转站')).toBeInTheDocument();
+        expect(active).toHaveTextContent('密钥 ••••vEEm');
+        expect(active).toHaveTextContent('来自配置文件');
+        expect(within(active).getByRole('button', { name: '恢复默认' })).toBeDisabled();
+
+        const keyless = within(section).getByTestId('configured-provider-row-zhipu');
+        expect(within(keyless).getByText('未配置密钥')).toBeInTheDocument();
+        expect(keyless).toHaveTextContent('还没有填写密钥');
+
+        const edited = within(section).getByTestId('configured-provider-row-deepseek');
+        expect(within(edited).getByText('页面修改过')).toBeInTheDocument();
+        expect(within(edited).getByRole('button', { name: '恢复默认' })).toBeEnabled();
+    });
+
+    it('edits a configured provider: the name and a hard-coded address stay read-only', async () => {
+        api.listConfiguredProviders.mockResolvedValue([configuredProvider()]);
+        api.saveConfiguredProvider.mockResolvedValue({
+            provider: configuredProvider({ overridden: true, models: ['gpt-6.2-sol'], keyFromConfig: false }),
+            routing: [],
+        });
+        render(<LlmProvidersSettings />);
+        const section = await screen.findByTestId('configured-providers');
+        fireEvent.click(within(within(section).getByTestId('configured-provider-row-huoshenai')).getByRole('button', { name: '编辑' }));
+        await screen.findByTestId('llm-provider-form');
+
+        expect(screen.getByLabelText('服务商名称')).toBeDisabled();
+        expect(screen.getByLabelText('服务商名称')).toHaveValue('HuoshenAI 中转站（huoshenai）');
+        expect(screen.getByLabelText('接口地址')).toBeDisabled();
+        expect(screen.getByLabelText('API Key')).toHaveAttribute('placeholder', '密钥来自配置文件（••••vEEm），在这里填写可替换');
+
+        fireEvent.change(screen.getByLabelText('模型清单'), { target: { value: 'gpt-6.2-sol' } });
+        fireEvent.click(screen.getByRole('button', { name: '保存' }));
+
+        await waitFor(() => expect(api.saveConfiguredProvider).toHaveBeenCalledTimes(1));
+        const [name, input] = api.saveConfiguredProvider.mock.calls[0];
+        expect(name).toBe('huoshenai');
+        // 没填密钥：传 null 表示沿用配置文件里的那把；地址不可改，所以不提交
+        expect(input.apiKey).toBeNull();
+        expect(input.baseUrl).toBeNull();
+        expect(input.models).toEqual(['gpt-6.2-sol']);
+        expect(api.createProvider).not.toHaveBeenCalled();
+        expect(api.listProviders).toHaveBeenCalledTimes(2);
+    });
+
+    it('sends a typed key and lets the address be edited only where the config allows it', async () => {
+        api.listConfiguredProviders.mockResolvedValue([configuredProvider({ name: 'deepseek', displayName: 'DeepSeek',
+            baseUrl: 'https://api.deepseek.com/v1', baseUrlEditable: true })]);
+        api.saveConfiguredProvider.mockResolvedValue({
+            provider: configuredProvider({ name: 'deepseek', displayName: 'DeepSeek', baseUrl: 'https://relay.example/v1',
+                baseUrlEditable: true, overridden: true, keyFromConfig: false }),
+            routing: [],
+        });
+        render(<LlmProvidersSettings />);
+        const section = await screen.findByTestId('configured-providers');
+        fireEvent.click(within(within(section).getByTestId('configured-provider-row-deepseek')).getByRole('button', { name: '编辑' }));
+        await screen.findByTestId('llm-provider-form');
+
+        expect(screen.getByLabelText('接口地址')).toBeEnabled();
+        fireEvent.change(screen.getByLabelText('接口地址'), { target: { value: 'https://relay.example/v1' } });
+        fireEvent.change(screen.getByLabelText('API Key'), { target: { value: 'sk-typed-for-deepseek' } });
+        fireEvent.click(screen.getByRole('button', { name: '保存' }));
+
+        await waitFor(() => expect(api.saveConfiguredProvider).toHaveBeenCalledWith('deepseek', expect.objectContaining({
+            apiKey: 'sk-typed-for-deepseek', baseUrl: 'https://relay.example/v1',
+        })));
+    });
+
+    it('toggles a configured provider without touching its key or model list', async () => {
+        const keyless = configuredProvider({ name: 'zhipu', displayName: '智谱', hasApiKey: false, apiKeyMasked: '' });
+        const disabled = configuredProvider({ enabled: false, overridden: true });
+        api.listConfiguredProviders.mockResolvedValue([configuredProvider(), keyless]);
+        api.saveConfiguredProvider.mockImplementation(async () => {
+            // 保存之后列表重新拉取，拿到的就是停用后的状态
+            api.listConfiguredProviders.mockResolvedValue([disabled, keyless]);
+            return { provider: disabled, routing: [] };
+        });
+        render(<LlmProvidersSettings />);
+        const section = await screen.findByTestId('configured-providers');
+        const row = within(section).getByTestId('configured-provider-row-huoshenai');
+
+        fireEvent.click(within(row).getByRole('switch', { name: '启用 HuoshenAI 中转站' }));
+
+        await waitFor(() => expect(api.saveConfiguredProvider).toHaveBeenCalledWith('huoshenai', { enabled: false }));
+        expect(await within(row).findByText('已停用')).toBeInTheDocument();
+        // 没有密钥的条目不给开关：打开了也用不了
+        expect(within(within(section).getByTestId('configured-provider-row-zhipu')).queryByRole('switch')).not.toBeInTheDocument();
+    });
+
+    it('restores a configured provider to the config values after asking', async () => {
+        const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true);
+        api.listConfiguredProviders.mockResolvedValue([configuredProvider({ overridden: true })]);
+        api.resetConfiguredProvider.mockResolvedValue(undefined);
+        render(<LlmProvidersSettings />);
+        const section = await screen.findByTestId('configured-providers');
+        const reset = () => within(within(section).getByTestId('configured-provider-row-huoshenai')).getByRole('button', { name: '恢复默认' });
+
+        fireEvent.click(reset());
+        expect(api.resetConfiguredProvider).not.toHaveBeenCalled();
+
+        fireEvent.click(reset());
+        await waitFor(() => expect(api.resetConfiguredProvider).toHaveBeenCalledWith('huoshenai'));
+        confirm.mockRestore();
+    });
+
+    it('tests and discovers models for a configured provider through the backend', async () => {
+        api.listConfiguredProviders.mockResolvedValue([configuredProvider()]);
+        api.testConfiguredProvider.mockResolvedValue({ ok: true, model: 'gpt-6.2-sol', latencyMs: 88, error: null });
+        api.discoverConfiguredModels.mockResolvedValue(['gpt-6.2-sol', 'gpt-6.1-sol', 'gpt-6-sol']);
+        render(<LlmProvidersSettings />);
+        const section = await screen.findByTestId('configured-providers');
+        const row = within(section).getByTestId('configured-provider-row-huoshenai');
+
+        fireEvent.click(within(row).getByRole('button', { name: '测试' }));
+        expect(await within(row).findByText('连通')).toBeInTheDocument();
+        expect(api.testConfiguredProvider).toHaveBeenCalledWith('huoshenai');
+        expect(within(row).getByText('gpt-6.2-sol · 88 ms')).toBeInTheDocument();
+
+        fireEvent.click(within(row).getByRole('button', { name: '编辑' }));
+        await screen.findByTestId('llm-provider-form');
+        fireEvent.click(screen.getByRole('button', { name: '从接口获取' }));
+
+        await waitFor(() => expect(api.discoverConfiguredModels).toHaveBeenCalledWith('huoshenai'));
+        await waitFor(() => expect(screen.getByLabelText('模型清单'))
+            .toHaveValue('gpt-6.2-sol\ngpt-6.1-sol\ngpt-6-sol'));
+        expect(api.discoverModels).not.toHaveBeenCalled();
+    });
+
+    it('says so when a configured provider was saved without a key', async () => {
+        api.listConfiguredProviders.mockResolvedValue([configuredProvider({ hasApiKey: false, apiKeyMasked: '', active: false })]);
+        api.saveConfiguredProvider.mockResolvedValue({
+            provider: configuredProvider({ hasApiKey: false, apiKeyMasked: '', active: false, overridden: true }),
+            routing: [],
+        });
+        render(<LlmProvidersSettings />);
+        const section = await screen.findByTestId('configured-providers');
+        fireEvent.click(within(within(section).getByTestId('configured-provider-row-huoshenai')).getByRole('button', { name: '编辑' }));
+        await screen.findByTestId('llm-provider-form');
+        fireEvent.click(screen.getByRole('button', { name: '保存' }));
+
+        await waitFor(() => expect(useNotificationStore.getState().notifications.map(n => n.message))
+            .toContain('已保存「HuoshenAI 中转站」；它还没有密钥，填上后才会启用'));
     });
 });

@@ -1,18 +1,23 @@
 /**
- * 设置页「模型服务商」：管理配置文件之外的服务商池。
- * 每次保存、删除后，后端都会把池同步进运行时注册表并把结果带回来；这里同时刷新模型列表，
+ * 设置页「模型服务商」，分两块：
+ * - 配置里的服务商：application.yml 里预置的那批（OpenAI、百炼、DeepSeek、智谱、火神中转站……），
+ *   地址和默认模型都写好了，在页面上填密钥、改模型、启停即可，改动存库并立即生效，不用改 .env、不用重启
+ * - 自定义服务商：配置之外自己加的（服务商池）
+ * 每次保存、删除后，后端都会把两类同步进运行时注册表并把结果带回来；这里同时刷新模型列表，
  * 让新模型不用刷新页面就出现在选择器里。密钥只写不读，界面上永远只有打码后的形式。
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, RotateCcw } from 'lucide-react';
 import { Button, Card, Chip, EmptyState, Spinner, Toggle } from '@/components/ui';
 import {
+    configuredProvidersApi,
     settingsApi,
+    type ConfiguredProviderView,
+    type InferredModel,
     type LlmProviderInput,
     type LlmProviderListResponse,
     type LlmProviderTestResponse,
-    type InferredModel,
     type LlmProviderView,
     type ProviderRouting,
 } from '@/api/settingsApi';
@@ -21,8 +26,12 @@ import { useNotificationStore } from '@/store/notificationStore';
 import { LlmProviderForm } from './LlmProviderForm';
 import { EMPTY_PROVIDER_FORM, formFromProvider, messageOf } from './providerForm';
 
-type Operation = 'save' | 'delete' | 'test' | 'reload';
-type Editor = { mode: 'create' } | { mode: 'edit'; key: string } | null;
+type Operation = 'save' | 'delete' | 'reset' | 'test' | 'reload';
+type Editor =
+    | { mode: 'create' }
+    | { mode: 'edit'; key: string }
+    | { mode: 'configured'; name: string }
+    | null;
 
 interface LlmProvidersSettingsProps {
     /** 切到「场景分派」页：服务商池为空时给用户一条出路 */
@@ -37,6 +46,7 @@ interface LlmProvidersSettingsProps {
 export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvidersSettingsProps = {}) {
     const addNotification = useNotificationStore(s => s.addNotification);
     const [data, setData] = useState<LlmProviderListResponse | null>(null);
+    const [configured, setConfigured] = useState<ConfiguredProviderView[] | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
     /** 正在进行的操作；key 是它作用的服务商，作用于全局操作时为 null */
     const [busy, setBusy] = useState<{ what: Operation; key: string | null } | null>(null);
@@ -53,7 +63,12 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
     const load = useCallback(async () => {
         setLoadError(null);
         try {
-            setData(await settingsApi.listProviders());
+            const [poolData, configuredData] = await Promise.all([
+                settingsApi.listProviders(),
+                configuredProvidersApi.list(),
+            ]);
+            setData(poolData);
+            setConfigured(configuredData);
         } catch (err) {
             setLoadError(messageOf(err, '服务商列表加载失败'));
         }
@@ -88,32 +103,6 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
         });
     };
 
-    const handleSave = async (input: LlmProviderInput) => {
-        const editingKey = editor?.mode === 'edit' ? editor.key : null;
-        setBusy({ what: 'save', key: editingKey });
-        try {
-            const response = editingKey
-                ? await settingsApi.updateProvider(editingKey, input)
-                : await settingsApi.createProvider(input);
-            setEditor(null);
-            setSaveError(null);
-            await load();
-            void useModelStore.getState().fetchModels();
-            addNotification({
-                key: `provider-saved-${response.provider.key}-${Date.now()}`,
-                level: 'success',
-                message: editingKey ? `已保存「${response.provider.name}」` : `已添加「${response.provider.name}」`,
-            });
-            notifyRoutingProblem(response.provider, response.routing);
-            notifyInferredModels(response.provider, response.routing);
-        } catch (err) {
-            // 保存失败留在表单里，把后端给的原因显示在表单内部
-            setSaveError(messageOf(err, '保存失败，请稍后重试'));
-        } finally {
-            setBusy(null);
-        }
-    };
-
     /** 不在内置能力表里的模型是按推算的参数登记的，告诉用户一声，免得以为出了问题 */
     const notifyInferredModels = (provider: LlmProviderView, routing: ProviderRouting[] | undefined) => {
         const mine = routing?.find(r => r.providerKey === provider.key);
@@ -126,14 +115,61 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
         });
     };
 
-    /** 表单点「从接口获取」时调用。失败的原因由表单显示在它自己里面，这里只负责请求 */
-    const handleDiscover = async (input: { baseUrl: string; apiKey: string | null }) =>
-        settingsApi.discoverModels({
-            baseUrl: input.baseUrl,
-            apiKey: input.apiKey,
-            // 编辑时密钥框是空的：带上服务商的键，让后端复用已保存的那把
-            providerKey: editor?.mode === 'edit' ? editor.key : null,
-        });
+    const editingConfigured = editor?.mode === 'configured'
+        ? configured?.find(view => view.name === editor.name) ?? null
+        : null;
+
+    const handleSave = async (input: LlmProviderInput) => {
+        const editingKey = editor?.mode === 'edit' ? editor.key : null;
+        setBusy({ what: 'save', key: editingKey ?? editingConfigured?.name ?? null });
+        try {
+            if (editor?.mode === 'configured' && editingConfigured) {
+                const view = editingConfigured;
+                const response = await configuredProvidersApi.save(view.name, {
+                    apiKey: input.apiKey ?? null,
+                    // 地址只有配置允许覆盖的才提交，免得把只读框里的值当成改动
+                    baseUrl: view.baseUrlEditable ? input.baseUrl : null,
+                    models: input.models,
+                    defaultModel: input.defaultModel,
+                    enabled: input.enabled,
+                });
+                setEditor(null);
+                setSaveError(null);
+                await load();
+                void useModelStore.getState().fetchModels();
+                const saved = response.provider;
+                addNotification({
+                    key: `configured-saved-${view.name}-${Date.now()}`,
+                    level: saved.active ? 'success' : 'warning',
+                    message: saved.active
+                        ? `已保存「${saved.displayName}」`
+                        : saved.enabled
+                            ? `已保存「${saved.displayName}」；它还没有密钥，填上后才会启用`
+                            : `已保存「${saved.displayName}」；它处于停用状态`,
+                });
+            } else {
+                const response = editingKey
+                    ? await settingsApi.updateProvider(editingKey, input)
+                    : await settingsApi.createProvider(input);
+                setEditor(null);
+                setSaveError(null);
+                await load();
+                void useModelStore.getState().fetchModels();
+                addNotification({
+                    key: `provider-saved-${response.provider.key}-${Date.now()}`,
+                    level: 'success',
+                    message: editingKey ? `已保存「${response.provider.name}」` : `已添加「${response.provider.name}」`,
+                });
+                notifyRoutingProblem(response.provider, response.routing);
+                notifyInferredModels(response.provider, response.routing);
+            }
+        } catch (err) {
+            // 保存失败留在表单里，把后端给的原因显示在表单内部
+            setSaveError(messageOf(err, '保存失败，请稍后重试'));
+        } finally {
+            setBusy(null);
+        }
+    };
 
     const handleDelete = async (provider: LlmProviderView) => {
         if (!window.confirm(`删除服务商「${provider.name}」？池里它提供的模型将不能再使用。`)) return;
@@ -146,6 +182,17 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
             });
         } catch (err) {
             addNotification({ key: `provider-delete-failed-${Date.now()}`, level: 'error', message: messageOf(err, '删除失败，请稍后重试') });
+        }
+    };
+
+    /** 配置里的服务商不能删，只能把页面上的修改撤掉，回到配置文件的值 */
+    const handleResetConfigured = async (view: ConfiguredProviderView) => {
+        if (!window.confirm(`把「${view.displayName}」恢复成配置文件里的设置？在页面上填的密钥和改过的模型清单都会丢掉。`)) return;
+        try {
+            await run('reset', view.name, () => configuredProvidersApi.reset(view.name));
+            addNotification({ key: `configured-reset-${view.name}-${Date.now()}`, level: 'success', message: `「${view.displayName}」已恢复为配置文件里的设置` });
+        } catch (err) {
+            addNotification({ key: `configured-reset-failed-${Date.now()}`, level: 'error', message: messageOf(err, '恢复失败，请稍后重试') });
         }
     };
 
@@ -165,22 +212,42 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
         }
     };
 
-    const handleTest = async (provider: LlmProviderView) => {
-        setTestResults(previous => ({ ...previous, [provider.key]: undefined }));
-        setBusy({ what: 'test', key: provider.key });
+    /** 停用配置里的服务商：不用去 .env 里删密钥，在这里关掉就行；它的模型随之从选择器里消失。 */
+    const handleToggleConfigured = async (view: ConfiguredProviderView, enabled: boolean) => {
         try {
-            const result = await settingsApi.testProvider(provider.key);
-            setTestResults(previous => ({ ...previous, [provider.key]: result }));
+            await run('save', view.name, () => configuredProvidersApi.save(view.name, { enabled }));
+            addNotification({
+                key: `configured-toggle-${view.name}-${Date.now()}`,
+                level: 'success',
+                message: enabled ? `已启用「${view.displayName}」` : `已停用「${view.displayName}」，它的模型不再出现在选择器里`,
+            });
+        } catch (err) {
+            addNotification({ key: `configured-toggle-failed-${Date.now()}`, level: 'error', message: messageOf(err, '操作失败，请稍后重试') });
+        }
+    };
+
+    const test = async (resultKey: string, operation: () => Promise<LlmProviderTestResponse>) => {
+        setTestResults(previous => ({ ...previous, [resultKey]: undefined }));
+        setBusy({ what: 'test', key: resultKey });
+        try {
+            const result = await operation();
+            setTestResults(previous => ({ ...previous, [resultKey]: result }));
         } catch (err) {
             // 测试失败是一种结果，不是异常：留在这一行里给用户看
             setTestResults(previous => ({
                 ...previous,
-                [provider.key]: { ok: false, model: provider.defaultModel, latencyMs: 0, error: messageOf(err, '测试失败，请稍后重试') },
+                [resultKey]: { ok: false, model: '', latencyMs: 0, error: messageOf(err, '测试失败，请稍后重试') },
             }));
         } finally {
             setBusy(null);
         }
     };
+
+    const handleTest = (provider: LlmProviderView) =>
+        test(provider.key, () => settingsApi.testProvider(provider.key));
+
+    const handleTestConfigured = (view: ConfiguredProviderView) =>
+        test(`configured:${view.name}`, () => configuredProvidersApi.test(view.name));
 
     const handleReload = async () => {
         try {
@@ -201,14 +268,29 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
         ? data?.providers.find(p => p.key === editor.key) ?? null
         : null;
 
+    // 配置里的服务商借用池表单的入参形状：只用到显示名、打码密钥、模型清单这几项
+    const configuredAsExisting = editingConfigured
+        ? ({
+            key: editingConfigured.name,
+            name: editingConfigured.displayName,
+            baseUrl: editingConfigured.baseUrl,
+            apiKeyMasked: editingConfigured.apiKeyMasked,
+            hasApiKey: editingConfigured.hasApiKey,
+            models: editingConfigured.models,
+            defaultModel: editingConfigured.defaultModel,
+            enabled: editingConfigured.enabled,
+            updatedAt: '',
+          } satisfies LlmProviderView)
+        : null;
+
     return (
-        <div className="space-y-4" data-testid="llm-providers-settings">
+        <div className="space-y-5" data-testid="llm-providers-settings">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                    <h3 className="text-base font-semibold text-t1">服务商池</h3>
+                    <h3 className="text-base font-semibold text-t1">模型服务商</h3>
                     <p className="mt-1 text-[13px] leading-relaxed text-t3">
-                        填上接口地址和密钥就能添加 OpenAI 兼容的服务商，保存后立即可用；点「从接口获取」可以直接拉取模型清单，不用手敲模型名。
-                        配置里已经声明的模型不会重复注册。
+                        配置文件里预置的服务商填上密钥就能用；它不提供的，可以自己添加 OpenAI 兼容的服务商。保存后立即可用，
+                        点「从接口获取」可以直接拉取模型清单，不用手敲模型名。
                     </p>
                 </div>
                 <div className="flex shrink-0 gap-2">
@@ -237,51 +319,192 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
                 </div>
             )}
 
-            {!data && !loadError && (
+            {(!data || !configured) && !loadError && (
                 <div className="flex justify-center py-8"><Spinner label="正在加载服务商" /></div>
             )}
 
-            {data && data.providers.length === 0 && !editor && (
-                <EmptyState
-                    variant="compact"
-                    title="还没有添加服务商"
-                    description="添加之后，它的模型会出现在输入框下方的模型选择器里；也可以在「场景分派」里指派给某个用途。"
-                    actions={onGoToScenes && <Button size="sm" onClick={onGoToScenes}>去场景分派</Button>}
-                />
+            {configured && (
+                <section aria-label="配置里的服务商" data-testid="configured-providers">
+                    <h4 className="text-sm font-medium text-t2">配置里的服务商</h4>
+                    <p className="mb-3 mt-0.5 text-[13px] leading-relaxed text-t3">
+                        这些是配置文件里预置的，地址和默认模型已经写好。没配密钥的填上密钥即可启用；在页面上改过的可以恢复成配置文件里的值。
+                    </p>
+                    <ul className="space-y-3">
+                        {configured.map(view => (
+                            <ConfiguredProviderRow
+                                key={view.name}
+                                view={view}
+                                operation={busy?.key === view.name || busy?.key === `configured:${view.name}` ? busy.what : null}
+                                anyBusy={anyBusy}
+                                testResult={testResults[`configured:${view.name}`]}
+                                onTest={() => { void handleTestConfigured(view); }}
+                                onToggle={enabled => { void handleToggleConfigured(view, enabled); }}
+                                onEdit={() => openEditor({ mode: 'configured', name: view.name })}
+                                onReset={() => { void handleResetConfigured(view); }}
+                            />
+                        ))}
+                    </ul>
+                </section>
             )}
 
-            <ul className="space-y-3">
-                {data?.providers.map(provider => (
-                    <ProviderRow
-                        key={provider.key}
-                        provider={provider}
-                        routing={data.routing.find(r => r.providerKey === provider.key)}
-                        operation={busy?.key === provider.key ? busy.what : null}
-                        anyBusy={anyBusy}
-                        testResult={testResults[provider.key]}
-                        onToggle={enabled => { void handleToggleEnabled(provider, enabled); }}
-                        onTest={() => { void handleTest(provider); }}
-                        onEdit={() => openEditor({ mode: 'edit', key: provider.key })}
-                        onDelete={() => { void handleDelete(provider); }}
-                    />
-                ))}
-            </ul>
+            {configured && (
+                <section aria-label="设置页里添加的服务商" data-testid="custom-providers">
+                    <h4 className="text-sm font-medium text-t2">设置页里添加的服务商</h4>
+                    {data && data.providers.length === 0 && !editor && (
+                        <EmptyState
+                            variant="compact"
+                            title="还没有添加服务商"
+                            description="添加之后，它的模型会出现在输入框下方的模型选择器里；也可以在「场景分派」里指派给某个用途。"
+                            actions={onGoToScenes && <Button size="sm" onClick={onGoToScenes}>去场景分派</Button>}
+                        />
+                    )}
+                    <ul className="mt-3 space-y-3">
+                        {data?.providers.map(provider => (
+                            <ProviderRow
+                                key={provider.key}
+                                provider={provider}
+                                routing={data.routing.find(r => r.providerKey === provider.key)}
+                                operation={busy?.key === provider.key ? busy.what : null}
+                                anyBusy={anyBusy}
+                                testResult={testResults[provider.key]}
+                                onToggle={enabled => { void handleToggleEnabled(provider, enabled); }}
+                                onTest={() => { void handleTest(provider); }}
+                                onEdit={() => openEditor({ mode: 'edit', key: provider.key })}
+                                onDelete={() => { void handleDelete(provider); }}
+                            />
+                        ))}
+                    </ul>
+                </section>
+            )}
 
-            {editor && (
+            {editor && (editingProvider || editingConfigured || editor.mode === 'create') && (
                 <LlmProviderForm
-                    key={editingProvider?.key ?? 'create'}
-                    initial={editingProvider ? formFromProvider(editingProvider) : EMPTY_PROVIDER_FORM}
-                    existing={editingProvider ?? undefined}
+                    key={editingConfigured?.name ?? editingProvider?.key ?? 'create'}
+                    initial={configuredAsExisting
+                        ? formFromProvider(configuredAsExisting)
+                        : editingProvider ? formFromProvider(editingProvider) : EMPTY_PROVIDER_FORM}
+                    existing={configuredAsExisting ?? editingProvider ?? undefined}
+                    configured={editingConfigured ? {
+                        name: editingConfigured.name,
+                        displayName: editingConfigured.displayName,
+                        baseUrlEditable: editingConfigured.baseUrlEditable,
+                        keyFromConfig: editingConfigured.keyFromConfig,
+                    } : undefined}
                     apiKeyStorageReady={data?.apiKeyStorageReady ?? false}
-                    busy={isBusy('save', editingProvider?.key ?? null)}
+                    busy={isBusy('save', editingConfigured?.name ?? editingProvider?.key ?? null)}
                     saveError={saveError}
                     onSubmit={input => { void handleSave(input); }}
                     onCancel={() => { setEditor(null); setSaveError(null); setFormDirty(false); }}
-                    onDiscover={handleDiscover}
+                    onDiscover={async input => editor?.mode === 'configured'
+                        // 配置里的服务商：用后端此刻生效的地址和密钥（密钥框留空就是配置文件里的那把）
+                        ? configuredProvidersApi.discoverModels(editor.name)
+                        : settingsApi.discoverModels({
+                            baseUrl: input.baseUrl,
+                            apiKey: input.apiKey,
+                            providerKey: editor?.mode === 'edit' ? editor.key : null,
+                        })}
                     onDirtyChange={setFormDirty}
                 />
             )}
         </div>
+    );
+}
+
+function TestOutcome({ testResult }: { testResult?: LlmProviderTestResponse }) {
+    if (!testResult) return null;
+    return (
+        <p role="status" className="mt-3 flex flex-wrap items-center gap-2 text-[13px]">
+            <Chip variant={testResult.ok ? 'ok' : 'err'}>{testResult.ok ? '连通' : '连接失败'}</Chip>
+            <span className="text-t3">
+                {testResult.model}{testResult.ok ? ` · ${testResult.latencyMs} ms` : ''}
+            </span>
+            {testResult.error && <span className="text-errstrong">{testResult.error}</span>}
+        </p>
+    );
+}
+
+interface ConfiguredProviderRowProps {
+    view: ConfiguredProviderView;
+    /** 正作用在这一行上的操作；没有时为 null */
+    operation: Operation | null;
+    anyBusy: boolean;
+    testResult?: LlmProviderTestResponse;
+    onTest: () => void;
+    onToggle: (enabled: boolean) => void;
+    onEdit: () => void;
+    onReset: () => void;
+}
+
+function ConfiguredProviderRow({ view, operation, anyBusy, testResult, onTest, onToggle, onEdit, onReset }: ConfiguredProviderRowProps) {
+    return (
+        <li data-testid={`configured-provider-row-${view.name}`}>
+            <Card className="p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1 basis-64">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-sm font-semibold text-t1">{view.displayName}</span>
+                            <span className="text-[13px] text-t4">{view.name}</span>
+                            <ConfiguredStatus view={view} />
+                        </div>
+                        <div className="mt-1 truncate text-[13px] text-t3" title={view.baseUrl}>{view.baseUrl}</div>
+                        <div className="mt-0.5 text-[13px] text-t3">
+                            {view.hasApiKey
+                                ? <>密钥 {view.apiKeyMasked}{view.keyFromConfig && <span className="text-t4">（来自配置文件）</span>}</>
+                                : '还没有填写密钥'}
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-1.5" aria-label={`${view.displayName} 的模型`}>
+                            {view.models.map(model => (
+                                <Chip key={model} variant={view.active ? 'accent' : 'neutral'}>{model}</Chip>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                        {/* 没有密钥的条目谈不上启停，给了开关只会让人以为打开就能用 */}
+                        {view.hasApiKey && (
+                            <label className="flex items-center gap-2 text-[13px] text-t2">
+                                <Toggle
+                                    checked={view.enabled}
+                                    onCheckedChange={onToggle}
+                                    disabled={anyBusy}
+                                    aria-label={`启用 ${view.displayName}`}
+                                />
+                                启用
+                            </label>
+                        )}
+                        <Button size="sm" onClick={onTest} loading={operation === 'test'} disabled={anyBusy}>测试</Button>
+                        <Button size="sm" variant="ghost" onClick={onEdit} disabled={anyBusy}>编辑</Button>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={onReset}
+                            loading={operation === 'reset'}
+                            disabled={anyBusy || !view.overridden}
+                            title={view.overridden ? '撤掉设置页里的修改，回到配置文件里的值' : '没有在设置页里改过'}
+                        >
+                            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                            恢复默认
+                        </Button>
+                    </div>
+                </div>
+                <TestOutcome testResult={testResult} />
+            </Card>
+        </li>
+    );
+}
+
+/** 已启用 / 已停用 / 未配置密钥 / 未注册，外加一个"页面修改过"的标记。 */
+function ConfiguredStatus({ view }: { view: ConfiguredProviderView }) {
+    return (
+        <>
+            {!view.enabled
+                ? <Chip variant="neutral">已停用</Chip>
+                : !view.hasApiKey
+                    ? <Chip variant="neutral">未配置密钥</Chip>
+                    : view.active
+                        ? <Chip variant="ok">已启用</Chip>
+                        : <Chip variant="warn">未注册</Chip>}
+            {view.overridden && <Chip variant="accent">页面修改过</Chip>}
+        </>
     );
 }
 
@@ -380,15 +603,7 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
                         ))}
                     </ul>
                 )}
-                {testResult && (
-                    <p role="status" className="mt-3 flex flex-wrap items-center gap-2 text-[13px]">
-                        <Chip variant={testResult.ok ? 'ok' : 'err'}>{testResult.ok ? '连通' : '连接失败'}</Chip>
-                        <span className="text-t3">
-                            {testResult.model}{testResult.ok ? ` · ${testResult.latencyMs} ms` : ''}
-                        </span>
-                        {testResult.error && <span className="text-errstrong">{testResult.error}</span>}
-                    </p>
-                )}
+                <TestOutcome testResult={testResult} />
             </Card>
         </li>
     );
@@ -402,5 +617,3 @@ function RoutingStatus({ routing, enabled }: { routing?: ProviderRouting; enable
     // 没注册分两种：模型都由别处提供（无害），或有模型没注册成功（要处理）。轻重由后端判定
     return <Chip variant={routing.needsAttention ? 'warn' : 'neutral'}>未注册</Chip>;
 }
-
-export default LlmProvidersSettings;

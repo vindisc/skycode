@@ -89,7 +89,14 @@ export interface LlmProviderTestResponse {
     error?: string | null;
 }
 
+/**
+ * 场景绑定。source 指向哪一类服务商：
+ * - configured：配置文件里定义的，providerKey 是注册名（huoshenai、deepseek…）
+ * - pool：设置页里添加的，providerKey 是实际存储键
+ * 早期存的绑定没有 source，一律按 pool 处理。
+ */
 export interface SceneBinding {
+    source?: 'pool' | 'configured';
     providerKey: string;
     modelId: string;
 }
@@ -112,6 +119,8 @@ export interface SceneModelOption {
 }
 
 export interface SceneProviderOption {
+    /** 与 SceneBinding.source 相同 */
+    source: 'pool' | 'configured';
     key: string;
     name: string;
     models: SceneModelOption[];
@@ -167,12 +176,124 @@ export const settingsApi = {
 
     listScenes: () => request<ScenesResponse>(SCENES),
 
-    saveSceneBinding: (scene: string, providerKey: string, modelId: string) =>
+    saveSceneBinding: (scene: string, source: SceneBinding['source'], providerKey: string, modelId: string) =>
         request<{ binding: SceneBinding }>(`${SCENES}/${segment(scene)}`, {
             method: 'PUT',
-            body: JSON.stringify({ providerKey, modelId }),
+            body: JSON.stringify({ source, providerKey, modelId }),
         }),
 
     clearSceneBinding: (scene: string) =>
         request<void>(`${SCENES}/${segment(scene)}`, { method: 'DELETE' }),
+};
+
+/**
+ * 配置文件（application.yml + 环境变量）里定义的一个服务商，叠加设置页里对它的修改。
+ * name 是注册名；改它存的是"覆盖"，删掉覆盖就回到配置文件的值。
+ */
+export interface ConfiguredProviderView {
+    name: string;
+    displayName: string;
+    baseUrl: string;
+    /** 打码后的密钥；没有密钥时为空串 */
+    apiKeyMasked: string;
+    hasApiKey: boolean;
+    /** 生效的密钥来自配置文件，而不是页面上填的 */
+    keyFromConfig: boolean;
+    models: string[];
+    defaultModel: string;
+    /** 页面上有没有把它停用 */
+    enabled: boolean;
+    /** 在设置页里改过（存了覆盖） */
+    overridden: boolean;
+    /** 已经注册进运行时：已启用、有密钥、有模型 */
+    active: boolean;
+    /** 接口地址能不能在页面上改（目前只有 DeepSeek，其余写死在配置里） */
+    baseUrlEditable: boolean;
+}
+
+/** 修改配置里的服务商。apiKey 留空表示不改密钥；models 不传表示不改模型清单。 */
+export interface ConfiguredProviderInput {
+    apiKey?: string | null;
+    baseUrl?: string | null;
+    models?: string[] | null;
+    defaultModel?: string | null;
+    enabled?: boolean | null;
+}
+
+export interface ConfiguredProviderResponse {
+    provider: ConfiguredProviderView;
+    routing: ProviderRouting[];
+}
+
+/** 某条管线此刻实际在用的模型，以及它是怎么来的。 */
+export interface RuntimeModelStatus {
+    /** 为 null 表示这条管线此刻没有任何生效的模型 */
+    model: string | null;
+    /** scene_binding:<服务商> = 设置页里分派的；config = 配置文件里的；env = 环境变量；inherit = 跟随主对话 */
+    source: string | null;
+}
+
+export interface RuntimePythonStatus {
+    autoStart: boolean;
+    running: boolean;
+    healthy: boolean;
+    state: string;
+    restartCount: number;
+    lastHealthCheck: string;
+    serviceUrl: string;
+    /** 顺序由后端固定；key 是能力域代码（CODE_INTEL 等），name 是 Python 服务给的显示名 */
+    capabilities: { key?: string; name: string; available: boolean; reason: string | null }[];
+    /** 不可用时给出该看哪里；可用时为 null */
+    hint: string | null;
+}
+
+export interface RuntimeSummaryStatus {
+    enabled: boolean;
+    configuredProvider: string | null;
+    configuredModel: string | null;
+    model: string | null;
+    source: string | null;
+    unavailable: string | null;
+}
+
+export interface RuntimeStatus {
+    python: RuntimePythonStatus;
+    defaultModel: RuntimeModelStatus;
+    fastModel: RuntimeModelStatus;
+    subAgentModel: RuntimeModelStatus;
+    visionFallbackModel: RuntimeModelStatus;
+    promptOptimizeModel: RuntimeModelStatus;
+    summary: RuntimeSummaryStatus;
+    configuredProviders: string[];
+    poolProviders: string[];
+}
+
+const CONFIGURED_PROVIDERS = '/api/settings/configured-providers';
+
+export const configuredProvidersApi = {
+    list: () => request<ConfiguredProviderView[]>(CONFIGURED_PROVIDERS),
+
+    save: (name: string, input: ConfiguredProviderInput) =>
+        request<ConfiguredProviderResponse>(`${CONFIGURED_PROVIDERS}/${segment(name)}`, {
+            method: 'PUT',
+            body: JSON.stringify(input),
+        }),
+
+    /** 删掉设置页里的修改，回到配置文件的值 */
+    reset: (name: string) => request<void>(`${CONFIGURED_PROVIDERS}/${segment(name)}`, { method: 'DELETE' }),
+
+    /** 连通性测试：按此刻生效的配置发一次最小对话请求；model 留空表示测默认模型 */
+    test: (name: string, model?: string) =>
+        request<LlmProviderTestResponse>(`${CONFIGURED_PROVIDERS}/${segment(name)}/test`, {
+            method: 'POST',
+            body: JSON.stringify(model ? { model } : {}),
+        }),
+
+    /** 从接口获取模型清单，用此刻生效的地址和密钥 */
+    discoverModels: (name: string) =>
+        request<string[]>(`${CONFIGURED_PROVIDERS}/discover`, { method: 'POST', body: JSON.stringify({ name }) }),
+};
+
+export const runtimeApi = {
+    status: () => request<RuntimeStatus>('/api/settings/runtime'),
 };

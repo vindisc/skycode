@@ -23,6 +23,7 @@ const api = vi.hoisted(() => ({
 vi.mock('@/api/settingsApi', () => ({ settingsApi: api }));
 
 const ZHIPU = {
+    source: 'pool' as const,
     key: '智谱',
     name: '智谱',
     models: [
@@ -31,6 +32,7 @@ const ZHIPU = {
     ],
 };
 const FIRE = {
+    source: 'pool' as const,
     key: 'fire',
     name: '火神',
     models: [{ id: 'gpt-6.1-sol', supportsImages: true }],
@@ -48,7 +50,7 @@ const visionScene = (patch: Partial<SceneView> = {}): SceneView => ({
     key: 'vision_fallback',
     label: '图片理解兜底',
     description: '当前模型不支持图片时使用的模型。',
-    binding: { providerKey: '智谱', modelId: 'glm-5.4' },
+    binding: { source: 'pool', providerKey: '智谱', modelId: 'glm-5.4' },
     providerName: '智谱',
     active: true,
     ...patch,
@@ -96,11 +98,11 @@ describe('SceneBindingsSettings', () => {
 
         const visionCard = screen.getByTestId('scene-card-vision_fallback');
         // 换服务商后，模型回落到该服务商下第一个可选的模型
-        fireEvent.change(visionCard.querySelectorAll('select')[0], { target: { value: 'fire' } });
+        fireEvent.change(visionCard.querySelectorAll('select')[0], { target: { value: 'pool\u0000fire' } });
         expect((visionCard.querySelectorAll('select')[1] as HTMLSelectElement).value).toBe('gpt-6.1-sol');
         fireEvent.click(screen.getAllByRole('button', { name: '保存' })[1]);
 
-        await waitFor(() => expect(api.saveSceneBinding).toHaveBeenCalledWith('vision_fallback', 'fire', 'gpt-6.1-sol'));
+        await waitFor(() => expect(api.saveSceneBinding).toHaveBeenCalledWith('vision_fallback', 'pool', 'fire', 'gpt-6.1-sol'));
         await waitFor(() => expect(api.listScenes).toHaveBeenCalledTimes(2));
     });
 
@@ -181,5 +183,40 @@ describe('SceneBindingsSettings', () => {
         expect(await screen.findByRole('alert')).toHaveTextContent('场景列表加载失败');
         fireEvent.click(screen.getByRole('button', { name: '重试' }));
         expect(await screen.findByText('提示词优化')).toBeInTheDocument();
+    });
+
+    it('offers providers from the config file and from the settings page in separate groups', async () => {
+        api.listScenes.mockResolvedValue(response({
+            providers: [
+                { source: 'configured', key: 'huoshenai', name: 'HuoshenAI 中转站', models: [{ id: 'gpt-6.1-sol', supportsImages: true }] },
+                FIRE,
+            ],
+            scenes: [promptScene()],
+        }));
+        render(<SceneBindingsSettings />);
+        await screen.findByText('提示词优化');
+
+        const card = screen.getByTestId('scene-card-prompt_optimize');
+        const groups = Array.from(card.querySelectorAll('optgroup'));
+        expect(groups.map(group => group.label)).toEqual(['配置里的服务商', '设置页里添加的']);
+
+        fireEvent.change(card.querySelectorAll('select')[0], { target: { value: 'configured\u0000huoshenai' } });
+        fireEvent.click(within(card).getByRole('button', { name: '保存' }));
+
+        await waitFor(() => expect(api.saveSceneBinding)
+            .toHaveBeenCalledWith('prompt_optimize', 'configured', 'huoshenai', 'gpt-6.1-sol'));
+    });
+
+    it('a binding that points at a configured provider shows which one', async () => {
+        api.listScenes.mockResolvedValue(response({
+            providers: [{ source: 'configured', key: 'zhipu', name: '智谱', models: [{ id: 'glm-5.4', supportsImages: true }] }],
+            scenes: [promptScene(), visionScene({ binding: { source: 'configured', providerKey: 'zhipu', modelId: 'glm-5.4' } })],
+        }));
+        render(<SceneBindingsSettings />);
+
+        expect(await screen.findByText('当前：智谱 / glm-5.4')).toBeInTheDocument();
+        expect(screen.getByText('已生效')).toBeInTheDocument();
+        fireEvent.click(within(screen.getByTestId('scene-card-vision_fallback')).getByRole('button', { name: '清除' }));
+        await waitFor(() => expect(api.clearSceneBinding).toHaveBeenCalledWith('vision_fallback'));
     });
 });
