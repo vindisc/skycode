@@ -16,8 +16,11 @@ services:
       target: runtime
     image: zhikuncode:latest
     container_name: zhikuncode
+    # 默认只绑定本机回环地址。镜像里 ALLOW_PRIVATE_NETWORK=true 时，经端口映射进来的请求一律免鉴权，
+    # 绑到 0.0.0.0 等于把一个拥有"完全访问"权限、挂着工作区的 Agent 向整个局域网敞开。
+    # 确实需要手机等局域网设备访问时，在 .env 里设 ZHIKUN_BIND_ADDRESS=0.0.0.0（并确认所在网络可信）。
     ports:
-      - "${ZHIKUN_PORT:-8080}:8080"
+      - "${ZHIKUN_BIND_ADDRESS:-127.0.0.1}:${ZHIKUN_PORT:-8080}:8080"
     environment:
       # ---- Required ----
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-production}
@@ -26,6 +29,7 @@ services:
       - LLM_PROVIDER_OPENAI_API_KEY=${LLM_PROVIDER_OPENAI_API_KEY:-}
       - LLM_PROVIDER_OPENAI_MODELS=${LLM_PROVIDER_OPENAI_MODELS:-gpt-6-astra}
       - LLM_PROVIDER_DASHSCOPE_API_KEY=${LLM_PROVIDER_DASHSCOPE_API_KEY:-}
+      - LLM_PROVIDER_DASHSCOPE_MODELS=${LLM_PROVIDER_DASHSCOPE_MODELS:-qwen3.8-max-0902}
       - LLM_PROVIDER_DASHSCOPE_TOKEN_PLAN_API_KEY=${LLM_PROVIDER_DASHSCOPE_TOKEN_PLAN_API_KEY:-}
       - LLM_PROVIDER_DASHSCOPE_TOKEN_PLAN_MODELS=${LLM_PROVIDER_DASHSCOPE_TOKEN_PLAN_MODELS:-deepseek-v4.1-flash,bailian/glm-5.3,qwen4-max-preview,qwen4-max}
       - LLM_PROVIDER_DEEPSEEK_API_KEY=${LLM_PROVIDER_DEEPSEEK_API_KEY:-}
@@ -34,11 +38,13 @@ services:
       - ZHIKUN_SUMMARY_DEEPSEEK_RELAY_PREFIXES=${ZHIKUN_SUMMARY_DEEPSEEK_RELAY_PREFIXES:-}
       - LLM_PROVIDER_DEEPSEEK_MODELS=${LLM_PROVIDER_DEEPSEEK_MODELS:-deepseek-flash}
       - LLM_PROVIDER_MOONSHOT_API_KEY=${LLM_PROVIDER_MOONSHOT_API_KEY:-}
+      - LLM_PROVIDER_MOONSHOT_MODELS=${LLM_PROVIDER_MOONSHOT_MODELS:-kimi-k3.1-pro-highspeed}
       - LLM_PROVIDER_KIMI_CODE_API_KEY=${LLM_PROVIDER_KIMI_CODE_API_KEY:-}
       - LLM_PROVIDER_KIMI_CODE_MODELS=${LLM_PROVIDER_KIMI_CODE_MODELS:-k3.1-pro-highspeed}
       - LLM_PROVIDER_ZHIPU_API_KEY=${LLM_PROVIDER_ZHIPU_API_KEY:-}
       - LLM_PROVIDER_ZHIPU_MODELS=${LLM_PROVIDER_ZHIPU_MODELS:-glm-5.3}
       - LLM_PROVIDER_MINIMAX_API_KEY=${LLM_PROVIDER_MINIMAX_API_KEY:-}
+      - LLM_PROVIDER_MINIMAX_MODELS=${LLM_PROVIDER_MINIMAX_MODELS:-MiniMax-M3}
       - LLM_PROVIDER_HUOSHENAI_API_KEY=${LLM_PROVIDER_HUOSHENAI_API_KEY:-}
       - LLM_PROVIDER_HUOSHENAI_MODELS=${LLM_PROVIDER_HUOSHENAI_MODELS:-gpt-6.2-sol,gpt-6.1-sol,gpt-6-sol,gpt-6.2-astra,gpt-6-astra}
       - LLM_PROVIDER_ZENMUX_API_KEY=${LLM_PROVIDER_ZENMUX_API_KEY:-}
@@ -98,6 +104,12 @@ services:
       - ZHIKUN_WORKSPACE_ALLOWED_ROOTS=/app/workspace
       - ZHIKUN_GLOBAL_DB_PATH=/app/data/global.db
       - ZHIKUNCODE_DATABASE_PROJECT_ROOT=/app/data
+      # Python 服务（代码洞察、增强 Git、浏览器自动化、代码质量、变更影响、文件树）由后端拉起并守护。
+      # 镜像里装全了，但开关默认是关的，不透传就永远不会启动。
+      # WORKSPACE_ROOT：Python 侧解析相对路径的根；不传的话会落到 /app/python-service，路径会锚错。
+      - PYTHON_SERVICE_AUTO_START=${PYTHON_SERVICE_AUTO_START:-true}
+      - WORKSPACE_ROOT=/app/workspace
+      # 注意：.env 里的 PLAYWRIGHT_BROWSERS_PATH 是宿主机路径，不要透传——镜像里浏览器装在 /opt/playwright-browsers（Dockerfile 已设）。
       # 设置页保存的 API Key 用这个密钥加密（Base64 编码的 32 字节随机值）。后端取不到时会临时生成一把，
       # 而临时密钥不在数据卷里，容器重建后就变了，已保存的 Key 全部解不开——所以要显式透传
       - ZHIKU_ENCRYPTION_KEY=${ZHIKU_ENCRYPTION_KEY:-}
