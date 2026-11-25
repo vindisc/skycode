@@ -2,6 +2,7 @@ package com.aicodeassistant.prompt.optimize;
 
 import com.aicodeassistant.llm.LlmApiException;
 import com.aicodeassistant.llm.LlmHttpProperties;
+import com.aicodeassistant.llm.LlmUserAgent;
 import com.aicodeassistant.settings.SceneBindingService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,6 +77,7 @@ public class ExternalLlmClient {
         this.objectMapper = objectMapper;
         this.env = env;
         this.httpClient = new OkHttpClient.Builder()
+                .addNetworkInterceptor(LlmUserAgent.interceptor())
                 .connectTimeout(Duration.ofSeconds(httpProperties.connectTimeoutSeconds()))
                 .readTimeout(CALL_TIMEOUT)
                 .writeTimeout(Duration.ofSeconds(httpProperties.writeTimeoutSeconds()))

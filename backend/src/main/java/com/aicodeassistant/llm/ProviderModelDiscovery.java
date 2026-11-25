@@ -29,6 +29,7 @@ public class ProviderModelDiscovery {
     public ProviderModelDiscovery(LlmHttpProperties httpProperties, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.httpClient = new OkHttpClient.Builder()
+                .addNetworkInterceptor(LlmUserAgent.interceptor())
                 .connectTimeout(Duration.ofSeconds(httpProperties.connectTimeoutSeconds()))
                 .readTimeout(CALL_TIMEOUT)
                 .callTimeout(CALL_TIMEOUT)

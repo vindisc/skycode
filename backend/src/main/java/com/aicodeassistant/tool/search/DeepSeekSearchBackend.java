@@ -1,5 +1,6 @@
 package com.aicodeassistant.tool.search;
 
+import com.aicodeassistant.llm.LlmUserAgent;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -78,7 +79,7 @@ public class DeepSeekSearchBackend implements WebSearchBackend {
     private final ObjectMapper objectMapper;
 
     public DeepSeekSearchBackend(String apiKey, String baseUrl) {
-        this(apiKey, baseUrl, new OkHttpClient());
+        this(apiKey, baseUrl, new OkHttpClient.Builder().addNetworkInterceptor(LlmUserAgent.interceptor()).build());
     }
 
     // Package-visible to test connection routing without public configuration changes.

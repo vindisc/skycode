@@ -76,6 +76,7 @@ public class AnthropicProvider implements LlmProvider {
         this.payloadGuard = payloadGuard;
 
         this.httpClient = new OkHttpClient.Builder()
+                .addNetworkInterceptor(LlmUserAgent.interceptor())
                 .connectionPool(new ConnectionPool(
                         httpProperties.pool().maxIdleConnections(),
                         httpProperties.pool().keepAliveSeconds(),
