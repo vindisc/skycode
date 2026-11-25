@@ -105,6 +105,7 @@ public class OpenAiCompatibleProvider implements LlmProvider {
         this.payloadGuard = payloadGuard;
 
         this.httpClient = new OkHttpClient.Builder()
+                .addNetworkInterceptor(LlmUserAgent.interceptor())
                 .connectionPool(new ConnectionPool(
                         httpProperties.pool().maxIdleConnections(),
                         httpProperties.pool().keepAliveSeconds(),
@@ -136,6 +137,20 @@ public class OpenAiCompatibleProvider implements LlmProvider {
         if (request.maxCompletionTokens() <= 0) return SummaryResult.failed("invalid_summary_configuration");
         String key = keyRotationManager.getKeyCount() > 0 ? keyRotationManager.getNextKey() : apiKey;
         return SummaryTransportClient.execute(httpClient, objectMapper, baseUrl, key, activeCalls, request, context);
+    }
+
+    @Override
+    public boolean supportsExplicitSummary(String model) {
+        return model != null && supportedModels.contains(model);
+    }
+
+    @Override
+    public SummaryResult summarizeExplicit(SummaryRequest request, LlmCallContext context) {
+        if (!supportsExplicitSummary(request.model())) return SummaryResult.failed("unsupported_summary");
+        if (request.maxCompletionTokens() <= 0) return SummaryResult.failed("invalid_summary_configuration");
+        String key = keyRotationManager.getKeyCount() > 0 ? keyRotationManager.getNextKey() : apiKey;
+        return SummaryTransportClient.execute(httpClient, objectMapper, baseUrl, key, activeCalls, request,
+                context, true);
     }
 
     @Override

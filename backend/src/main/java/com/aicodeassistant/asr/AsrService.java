@@ -1,6 +1,6 @@
 package com.aicodeassistant.asr;
 
-import com.aicodeassistant.llm.LlmProvidersProperties;
+import com.aicodeassistant.settings.ConfiguredProviderService;
 import com.aicodeassistant.llm.LlmProvidersProperties.ProviderConfig;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -87,7 +87,7 @@ public class AsrService {
      */
     private volatile List<CorrectionRule> cachedRules;
 
-    private final LlmProvidersProperties llmProperties;
+    private final ConfiguredProviderService configured;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
 
@@ -97,8 +97,8 @@ public class AsrService {
      */
     record CorrectionRule(String canonical, List<Pattern> patterns) {}
 
-    public AsrService(LlmProvidersProperties llmProperties, ObjectMapper objectMapper) {
-        this.llmProperties = llmProperties;
+    public AsrService(ConfiguredProviderService configured, ObjectMapper objectMapper) {
+        this.configured = configured;
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(15))
@@ -111,12 +111,16 @@ public class AsrService {
      * ASR 模型不在 Token Plan 白名单中，故不检查 dashscope-token-plan。
      */
     public boolean isAvailable() {
-        Map<String, ProviderConfig> providers = llmProperties.providers();
-        if (providers == null) {
-            return false;
-        }
-        ProviderConfig dashscope = providers.get("dashscope");
-        return dashscope != null && hasApiKey(dashscope);
+        return availableProviderOrNull() != null;
+    }
+
+    /** 配置文件里的百炼，叠加设置页里对它的修改（用户可以直接在页面上填密钥）；没有密钥时返回 null。 */
+    private ProviderConfig availableProviderOrNull() {
+        return configured.effective("dashscope")
+                .map(effective -> new ProviderConfig(effective.apiKey(), effective.baseUrl(),
+                        effective.defaultModel(), effective.models()))
+                .filter(this::hasApiKey)
+                .orElse(null);
     }
 
     /**
@@ -442,10 +446,9 @@ public class AsrService {
     }
 
     private ProviderConfig resolveProvider() {
-        Map<String, ProviderConfig> providers = llmProperties.providers();
-        // ASR 模型不在 Token Plan 白名单中，仅标准 dashscope provider 可用
-        ProviderConfig dashscope = providers.get("dashscope");
-        if (dashscope != null && hasApiKey(dashscope)) {
+        // 这类模型不在 Token Plan 白名单中，仅标准 dashscope provider 可用
+        ProviderConfig dashscope = availableProviderOrNull();
+        if (dashscope != null) {
             return dashscope;
         }
         throw new IllegalStateException("没有可用的 DashScope provider（未配置 apiKey）");

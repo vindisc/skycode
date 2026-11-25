@@ -2,6 +2,7 @@ package com.aicodeassistant.engine;
 
 import com.aicodeassistant.llm.*;
 import com.aicodeassistant.model.*;
+import com.aicodeassistant.settings.SceneBindingService;
 import org.springframework.stereotype.Component;
 import org.springframework.context.event.EventListener;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -31,12 +32,67 @@ public class ContextCompactor {
     private final LlmProviderRegistry providers;
     private final ModelRegistry models;
     private final CompactConfiguration configuration;
+    /** 场景分派；为 null 表示没有这个模块（部分测试、精简装配），一律走配置文件里的摘要设置 */
+    private final SceneBindingService sceneBindings;
     public ContextCompactor(TokenCounter counter, LlmProviderRegistry providers, ModelRegistry models,
                             CompactConfiguration configuration) {
+        this(counter, providers, models, configuration, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public ContextCompactor(TokenCounter counter, LlmProviderRegistry providers, ModelRegistry models,
+                            CompactConfiguration configuration, SceneBindingService sceneBindings) {
         this.counter = counter; this.providers = providers; this.models = models; this.configuration = configuration;
+        this.sceneBindings = sceneBindings;
+    }
+
+    /** 一次摘要调用的目标。source 用在日志里：是场景分派指定的，还是配置文件里的。 */
+    private record SummaryTarget(LlmProvider provider, String model, ModelCapabilities caps,
+                                 int completionTokens, String source) {}
+
+    /**
+     * 场景分派里给「压缩摘要」指定了模型就用它；没指定、或指定的此刻用不了（服务商被停用、模型没注册），
+     * 返回 null，走配置文件里的设置。
+     */
+    private SummaryTarget summaryTarget(CompactConfiguration.Settings settings) {
+        if (sceneBindings == null) return null;
+        SceneBindingService.Resolved bound = sceneBindings.resolve(ModelScenes.COMPACT_SUMMARY).orElse(null);
+        if (bound == null) return null;
+        LlmProvider provider = bound.registryName() == null ? null
+                : providers.findProviderByName(bound.registryName()).orElse(null);
+        ModelCapabilities caps = bound.modelId() == null ? null : models.findKnownCapabilities(bound.modelId()).orElse(null);
+        if (provider == null || caps == null) {
+            log.warn("Scene binding '{}' points to provider '{}' / model '{}' which is not available right now; "
+                    + "using the configured summary model", ModelScenes.COMPACT_SUMMARY, bound.registryName(), bound.modelId());
+            return null;
+        }
+        // 配置里的生成上限是按默认的摘要模型定的；换成输出上限更小的模型时相应压低
+        return new SummaryTarget(provider, bound.modelId(), caps,
+                Math.min(settings.completionTokens(), caps.maxOutputTokens()), "scene_binding:" + bound.providerName());
     }
 
     public long timeoutMillis() { return configuration.settings().timeoutMs(); }
+
+    /**
+     * 压缩摘要此刻的配置与可用性，给设置页的「运行状态」看。
+     *
+     * @param model        实际会用的模型：场景分派指定的优先，否则是配置文件里的
+     * @param source       model 的来源：{@code scene_binding:<服务商>} 或 {@code config}
+     * @param unavailable  不可用的原因；可用时为 null
+     */
+    public record SummaryStatus(boolean enabled, String configuredProvider, String configuredModel,
+                                String model, String source, String unavailable) {}
+
+    public SummaryStatus summaryStatus() {
+        var settings = configuration.settings();
+        if (!settings.enabled()) return new SummaryStatus(false, null, null, null, null, settings.unavailable());
+        SummaryTarget chosen = summaryTarget(settings);
+        if (chosen != null) {
+            return new SummaryStatus(true, settings.provider(), settings.model(), chosen.model(), chosen.source(), null);
+        }
+        return new SummaryStatus(true, settings.provider(), settings.model(), settings.model(), "config",
+                unavailable(settings));
+    }
 
     /** Manual preview has no assembled system/tools yet; final execution still recalculates its full budget. */
     public CompactionContext previewContext(String model) {
@@ -52,6 +108,10 @@ public class ContextCompactor {
         var s = configuration.settings();
         log.info("Summary configuration: enabled={}, provider={}, model={}, mode={}, generation={}, summary={}, deadlineMs={}, availability={}",
                 s.enabled(), s.provider(), s.model(), s.mode(), s.completionTokens(), s.summaryTokens(), s.timeoutMs(), unavailable(s));
+        if (s.enabled()) {
+            SummaryTarget chosen = summaryTarget(s);
+            log.info("Summary model from scene binding: {}", chosen == null ? "none (using the configured summary model)" : chosen.source() + " / " + chosen.model());
+        }
     }
 
     private String unavailable(CompactConfiguration.Settings settings) {
@@ -112,6 +172,9 @@ public class ContextCompactor {
         long started = System.nanoTime();
         long deadline = context.startDeadline(settings.timeoutMs());
         String reason = unavailable(settings);
+        // 场景分派指定的目标取代配置文件里的：它的可用性在 summaryTarget 里已经判过
+        SummaryTarget chosen = settings.enabled() ? summaryTarget(settings) : null;
+        if (chosen != null) reason = null;
         List<Message> removed = new ArrayList<>();
         List<Message> reference = new ArrayList<>();
         for (int i = 0; i < messages.size(); i++) {
@@ -126,8 +189,12 @@ public class ContextCompactor {
         int softAvailable = Math.min(context.historyBudget(), context.contextWindow() / 2) - overhead;
         int target = Math.min(settings.summaryTokens(), softAvailable > 0 ? softAvailable : hardAvailable);
         if (reason == null && target > 0) {
-            var provider = providers.findProviderByName(settings.provider()).orElseThrow();
-            var caps = models.findExplicitCapabilities(settings.model(), provider).orElseThrow();
+            LlmProvider provider = chosen != null ? chosen.provider()
+                    : providers.findProviderByName(settings.provider()).orElseThrow();
+            ModelCapabilities caps = chosen != null ? chosen.caps()
+                    : models.findExplicitCapabilities(settings.model(), provider).orElseThrow();
+            String summaryModel = chosen == null ? settings.model() : chosen.model();
+            int completionTokens = chosen == null ? settings.completionTokens() : chosen.completionTokens();
             String input = "摘要正文上限（执行模型口径）=" + target + " tokens；通常目标约 " + Math.min(target, 2000)
                     + " tokens，简单内容更短。\n[只读参考记录]\n" + CompactionHistory.format(reference, history)
                     + "\n[待替换记录]\n" + CompactionHistory.format(removed, history);
@@ -136,19 +203,23 @@ public class ContextCompactor {
             try { serialized = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(List.of(PROMPT, input)); }
             catch (com.fasterxml.jackson.core.JsonProcessingException e) { throw new IllegalStateException(e); }
             long inputTokens = (long)Math.ceil(serialized.length() / caps.tokenCharRatio()) + 128;
-            if (inputTokens + settings.completionTokens() > caps.contextWindow() * .95) reason = "summary_input_over_budget";
+            if (inputTokens + completionTokens > caps.contextWindow() * .95) reason = "summary_input_over_budget";
             else if (!context.summaryAttempted().compareAndSet(false, true)) reason = "summary_already_attempted";
             else {
                 context.checkValid();
                 SummaryResult result;
                 try {
-                    result = provider.summarize(new SummaryRequest(settings.model(), settings.mode(), PROMPT, input,
-                            settings.completionTokens(), deadline), context.call());
+                    SummaryRequest request = new SummaryRequest(summaryModel, settings.mode(), PROMPT, input,
+                            completionTokens, deadline);
+                    result = chosen != null && provider.supportsExplicitSummary(summaryModel)
+                            ? provider.summarizeExplicit(request, context.call())
+                            : provider.summarize(request, context.call());
                 } catch (CancellationException e) { throw e;
                 } catch (RuntimeException e) { result = SummaryResult.failed("summary_provider_error"); }
                 context.checkValid();
                 if (!verifySource(messages, source, context)) return CompactService.CompactResult.skipped("source_changed");
-                log.info("Summary response: model={}, finish={}, elapsedMs={}, usage={}, failure={}", settings.model(),
+                log.info("Summary response: model={}, source={}, finish={}, elapsedMs={}, usage={}, failure={}", summaryModel,
+                        chosen == null ? "config" : chosen.source(),
                         result == null ? null : result.finishReason(), (System.nanoTime() - started) / 1_000_000,
                         result == null ? null : result.usage(), result == null ? "summary_empty_response" : result.failureReason());
                 reason = result == null ? "summary_empty_response" : result.failureReason();
@@ -161,7 +232,8 @@ public class ContextCompactor {
                     var candidate = rebuild(messages, required, notices, tail, summary, SystemMessageType.COMPACT_SUMMARY);
                     if (acceptable(candidate, context, before)) {
                         if (!verifySource(messages, source, context)) return CompactService.CompactResult.skipped("source_changed");
-                        log.info("Summary accepted: model={}, finish={}, elapsedMs={}, usage={}", settings.model(), result.finishReason(),
+                        log.info("Summary accepted: model={}, source={}, finish={}, elapsedMs={}, usage={}", summaryModel,
+                                chosen == null ? "config" : chosen.source(), result.finishReason(),
                                 (System.nanoTime() - started) / 1_000_000, result.usage());
                         return applied(candidate, before, context, removed.size(), "llm_summary", null);
                     }

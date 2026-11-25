@@ -184,6 +184,8 @@ public class ModelRegistry {
             }
         } catch (RuntimeException ignored) { }
         if (base == null) base = BUILTIN_MODELS.get(modelId);
+        // 设置里加的、不在内置表里的模型：能力是登记在池那一块里的
+        if (base == null) base = poolModels.get(modelId);
         var override = properties.getCapabilities().get(modelId);
         if (override == null) return java.util.Optional.ofNullable(base);
         if (base == null && (override.getContextWindow() == null || override.getOutputMaxTokens() == null

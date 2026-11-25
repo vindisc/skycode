@@ -74,7 +74,8 @@ class ExternalLlmClientTest {
         env.put(ExternalLlmClient.ENV_MODEL, "gpt-6.1-sol");
         env.put(ExternalLlmClient.ENV_BASE_URL, server.url("/v1").toString());
         when(sceneBindings.resolve(SceneBindingService.PROMPT_OPTIMIZE)).thenReturn(Optional.of(
-                new SceneBindingService.Resolved(SceneBindingService.PROMPT_OPTIMIZE, "zhipu", "智谱",
+                new SceneBindingService.Resolved(SceneBindingService.PROMPT_OPTIMIZE,
+                        SceneBindingService.SOURCE_CONFIGURED, "zhipu", "智谱", "zhipu",
                         server.url("/v4").toString(), "sk-bound-key", "glm-5.4")));
 
         var endpoint = client.resolveEndpoint().orElseThrow();

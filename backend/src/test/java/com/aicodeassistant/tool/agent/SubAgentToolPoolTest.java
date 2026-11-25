@@ -26,6 +26,7 @@ import com.aicodeassistant.tool.impl.GlobTool;
 import com.aicodeassistant.tool.impl.GrepTool;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
@@ -201,13 +202,54 @@ class SubAgentToolPoolTest {
                     "测试失败就自动 FAIL", "阅读不是验证", "PARTIAL 仅用于环境限制",
                     "Exit code: 0（curl 正常完成");
         }
-        verifyNoInteractions(providers);
+        // 装配阶段只允许做一件事：问场景分派「子 Agent」有没有指定模型。其余对注册表的访问
+        //（按别名解析、按模型找 Provider）仍然不应该发生
+        verify(providers).sceneBoundModel(com.aicodeassistant.llm.ModelScenes.SUB_AGENT);
+        verifyNoMoreInteractions(providers);
 
         // The typed definitions must describe the same canonical capability sets as the execution path.
         BuiltInAgentDefinition definition = new AgentStrategyFactory().getAgent(type).orElseThrow();
         SubAgentExecutor.AgentDefinition executable = new AgentStrategyFactory().toAgentDefinition(definition);
         assertThat(definition.allowedTools()).isEqualTo(executable.allowedTools());
         assertThat(definition.deniedTools()).isEqualTo(executable.deniedTools());
+    }
+
+    @Test
+    void aSceneBindingOverridesTheInheritedParentModelButNotAnExplicitRequestModel() throws Exception {
+        Path workspace = Files.createTempDirectory("subagent-scene-");
+        OperationAnalyzerRegistry analyzers = mock(OperationAnalyzerRegistry.class);
+        when(analyzers.isExplicitCoreTool(anyString())).thenReturn(true);
+        ToolRegistry registry = new ToolRegistry(List.of(
+                new FileReadTool(null, null, null, null, null), unavailableTool("Bash"), unavailableTool("Grep")),
+                analyzers);
+        QueryEngine engine = mock(QueryEngine.class);
+        when(engine.execute(any(QueryConfig.class), any(QueryLoopState.class), any(QueryMessageHandler.class)))
+                .thenReturn(new QueryEngine.QueryResult(List.of(), null, "end_turn", null, 1));
+        SessionManager sessions = mock(SessionManager.class);
+        when(sessions.getFileStateCache(anyString())).thenReturn(new FileStateCache());
+        when(sessions.loadSession(anyString())).thenReturn(Optional.empty());
+        LlmProviderRegistry providers = mock(LlmProviderRegistry.class);
+        // 设置页「子 Agent」场景指定了 glm-5.4；显式指定的模型按别名解析
+        when(providers.sceneBoundModel(com.aicodeassistant.llm.ModelScenes.SUB_AGENT)).thenReturn(Optional.of("glm-5.4"));
+        when(providers.resolveModelAlias("fast")).thenReturn("gpt-6-sol");
+        SubAgentExecutor executor = new SubAgentExecutor(
+                mock(AgentConcurrencyController.class), engine, registry, mock(BackgroundAgentTracker.class), null,
+                new TaskNotificationFormatter(), mock(FeatureFlagService.class), mock(CoordinatorService.class),
+                sessions, null, providers, new AgentTimeoutConfig(), null,
+                mock(CheckpointService.class), new ObjectMapper());
+        var parent = ToolUseContext.of(workspace.toString(), "parent").withParentModel("stub-model");
+        var models = ArgumentCaptor.forClass(QueryConfig.class);
+
+        // 没显式指定：场景分派优先于"继承父会话模型"
+        executor.executeSync(new SubAgentExecutor.AgentRequest("scene-1", "Inspect", "explore", null,
+                SubAgentExecutor.IsolationMode.NONE, false, null, false), parent);
+        executor.executeSync(new SubAgentExecutor.AgentRequest("scene-2", "Inspect", "explore", "fast",
+                SubAgentExecutor.IsolationMode.NONE, false, null, false), parent);
+
+        verify(engine, times(2)).execute(models.capture(), any(QueryLoopState.class), any(QueryMessageHandler.class));
+        assertThat(models.getAllValues().get(0).model()).isEqualTo("glm-5.4");
+        // 调用时显式指定了模型的，仍然以指定的为准
+        assertThat(models.getAllValues().get(1).model()).isEqualTo("gpt-6-sol");
     }
 
     private static Tool unavailableTool(String name) {

@@ -58,22 +58,41 @@ final class SummaryTransportClient {
     static SummaryResult execute(OkHttpClient client, ObjectMapper mapper, String baseUrl, String key,
                                  ConcurrentMap<String, Call> active, SummaryRequest input,
                                  LlmCallContext context) {
+        return execute(client, mapper, baseUrl, key, active, input, context, false);
+    }
+
+    /**
+     * @param explicit 用户在设置页的场景分派里明确选了这个端点和这个模型。这时端点不必在白名单里、型号也不限于
+     *                  {@link SummaryRequest#supports} 的那几个，请求按最通用的写法发：上限用 max_tokens，
+     *                  不给不认识的型号加厂商私有的思考参数（加了可能被上游以"未知参数"拒掉）
+     */
+    static SummaryResult execute(OkHttpClient client, ObjectMapper mapper, String baseUrl, String key,
+                                 ConcurrentMap<String, Call> active, SummaryRequest input,
+                                 LlmCallContext context, boolean explicit) {
         var body = mapper.createObjectNode();
         // DeepSeek 官方与 DeepSeek 中转站只认 max_tokens（max_completion_tokens 被静默忽略、上限不生效，已实测）；
         // 百炼 Token Plan 的 max_completion_tokens 已经现网验证，保持不变。必须按端点分流：
         // 百炼同样托管 deepseek- 前缀模型，不能按模型名判断。
-        String limitKey = DEEPSEEK_ENDPOINT.equals(baseUrl) || isDeepSeekRelay(baseUrl)
-                ? "max_tokens" : "max_completion_tokens";
+        boolean bailian = BAILIAN_ENDPOINT.equals(baseUrl);
+        String limitKey = bailian ? "max_completion_tokens"
+                : explicit || DEEPSEEK_ENDPOINT.equals(baseUrl) || isDeepSeekRelay(baseUrl)
+                        ? "max_tokens" : "max_completion_tokens";
         body.put("model", input.model()).put("stream", false)
                 .put(limitKey, input.maxCompletionTokens());
         body.set("messages", mapper.valueToTree(List.of(
                 Map.of("role", "system", "content", input.systemPrompt()),
                 Map.of("role", "user", "content", input.userContent()))));
         boolean thinking = input.thinkingMode() != SummaryRequest.ThinkingMode.OFF;
-        if (input.model().startsWith("deepseek-")) {
+        boolean deepSeekFamily = input.model().startsWith("deepseek-");
+        boolean knownModel = SummaryRequest.supports(input.model(), input.thinkingMode());
+        if (deepSeekFamily) {
             body.putObject("thinking").put("type", thinking ? "enabled" : "disabled");
-        } else body.put("enable_thinking", thinking);
-        if (thinking) body.put("reasoning_effort", input.thinkingMode().name().toLowerCase(java.util.Locale.ROOT));
+        } else if (knownModel || !explicit) {
+            body.put("enable_thinking", thinking);
+        }
+        if (thinking && (deepSeekFamily || knownModel || !explicit)) {
+            body.put("reasoning_effort", input.thinkingMode().name().toLowerCase(java.util.Locale.ROOT));
+        }
         Request request = new Request.Builder().url(baseUrl + "/chat/completions")
                 .header("Authorization", "Bearer " + key)
                 .post(RequestBody.create(body.toString(), MediaType.get("application/json"))).build();

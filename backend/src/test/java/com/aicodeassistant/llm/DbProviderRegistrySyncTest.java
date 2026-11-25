@@ -3,6 +3,7 @@ package com.aicodeassistant.llm;
 import com.aicodeassistant.llm.DbProviderRegistrySync.ModelSkip;
 import com.aicodeassistant.llm.DbProviderRegistrySync.ProviderSync;
 import com.aicodeassistant.llm.impl.OpenAiCompatibleProvider;
+import com.aicodeassistant.settings.ConfiguredProviderService;
 import com.aicodeassistant.settings.LlmProviderSettingsService;
 import com.aicodeassistant.settings.LlmProviderSettingsService.ProviderInput;
 import com.aicodeassistant.settings.SettingsRepository;
@@ -27,7 +28,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * 池同步：池里的服务商以 db: 前缀注册进运行时，不抢配置里已有的模型，
- * 没登记能力的模型不注册，每个被跳过的模型都带原因。
+ * 配置里的服务商按原名注册（叠加设置页里的修改），池里的以 db: 前缀注册、不抢已被占用的模型。
  */
 class DbProviderRegistrySyncTest {
 
@@ -38,6 +39,7 @@ class DbProviderRegistrySyncTest {
     private LlmProviderRegistry registry;
     private ModelRegistry modelRegistry;
     private LlmProviderSettingsService pool;
+    private ConfiguredProviderService configured;
     private DbProviderRegistrySync sync;
 
     @BeforeEach
@@ -47,7 +49,55 @@ class DbProviderRegistrySyncTest {
                 List.of(provider("huoshen", List.of("gpt-6.2-sol", "gpt-6.1-sol"))), new MockEnvironment());
         modelRegistry = new ModelRegistry(registry);
         pool = new LlmProviderSettingsService(new SettingsRepository(jdbc), SettingsTestSupport.encryption(), mapper);
-        sync = new DbProviderRegistrySync(pool, registry, modelRegistry, httpProperties(), mapper, null);
+        // 配置文件里的两个服务商：huoshen 有密钥，zhipu 没有
+        Map<String, LlmProvidersProperties.ProviderConfig> templates = new java.util.LinkedHashMap<>();
+        templates.put("huoshen", new LlmProvidersProperties.ProviderConfig("sk-config-huoshen",
+                "https://huoshen.example/v1", "gpt-6.2-sol", List.of("gpt-6.2-sol", "gpt-6.1-sol")));
+        templates.put("zhipu", new LlmProvidersProperties.ProviderConfig("",
+                "https://open.bigmodel.cn/api/paas/v4", "glm-5.3", List.of("glm-5.3")));
+        configured = new ConfiguredProviderService(new LlmProvidersProperties(templates),
+                new SettingsRepository(jdbc), SettingsTestSupport.encryption(), mapper);
+        sync = new DbProviderRegistrySync(pool, configured, registry, modelRegistry, httpProperties(), mapper, null);
+    }
+
+    @Test
+    void configuredProvidersAreRegisteredUnderTheirOwnNamesAndCanBeEnabledFromTheSettingsPage() {
+        sync.sync();
+
+        // huoshen 按原名注册（没有 db: 前缀）；zhipu 在配置里没有密钥，不注册
+        assertThat(registry.registeredProviderNames()).containsExactly("huoshen");
+        assertThat(registry.getProvider("gpt-6.2-sol").getProviderName()).isEqualTo("huoshen");
+
+        // 用户在设置页上给 zhipu 填了密钥：不用改 .env、不用重启，同步之后就注册上了
+        configured.save("zhipu", new ConfiguredProviderService.ConfiguredProviderInput(
+                "sk-typed-on-page", null, List.of("glm-5.3", "glm-5.4"), "glm-5.4", null));
+        sync.sync();
+
+        assertThat(registry.registeredProviderNames()).containsExactly("huoshen", "zhipu");
+        assertThat(registry.getProvider("glm-5.4").getProviderName()).isEqualTo("zhipu");
+        assertThat(registry.getProvider("glm-5.4").getDefaultModel()).isEqualTo("glm-5.4");
+    }
+
+    @Test
+    void aConfiguredProviderDisabledOnTheSettingsPageIsRemovedFromTheRegistry() {
+        configured.save("huoshen", new ConfiguredProviderService.ConfiguredProviderInput(
+                null, null, null, null, false));
+        sync.sync();
+
+        assertThat(registry.findProviderByName("huoshen")).isEmpty();
+        assertThat(registry.supportsModel("gpt-6.2-sol")).isFalse();
+    }
+
+    @Test
+    void aModelAddedToAConfiguredProviderOnTheSettingsPageGetsInferredCapabilities() {
+        configured.save("huoshen", new ConfiguredProviderService.ConfiguredProviderInput(
+                null, null, List.of("gpt-6.2-sol", "huoshen-new-model"), null, null));
+        sync.sync();
+
+        assertThat(registry.supportsModel("huoshen-new-model")).isTrue();
+        assertThat(modelRegistry.findKnownCapabilities("huoshen-new-model")).isPresent();
+        assertThat(modelRegistry.getCapabilities("huoshen-new-model").contextWindow())
+                .isEqualTo(PoolModelCapabilities.GENERIC_CONTEXT_WINDOW);
     }
 
     @Test

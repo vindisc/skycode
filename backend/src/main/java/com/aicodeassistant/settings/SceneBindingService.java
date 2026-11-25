@@ -1,7 +1,9 @@
 package com.aicodeassistant.settings;
 
 import com.aicodeassistant.exception.RequestValidationException;
+import com.aicodeassistant.llm.LlmProviderRegistry;
 import com.aicodeassistant.llm.ModelRegistry;
+import com.aicodeassistant.llm.ModelScenes;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -18,36 +20,46 @@ import java.util.Optional;
  * 场景分派：把"某个用途该用哪个模型"保存成一条引用（服务商 + 模型），由各消费方在运行时读取。
  * <p>
  * 清单里只列真正接了消费方的场景。界面上可选、但运行时没人读取的条目会让用户以为已经生效，
- * 所以接入新场景时必须同时补上消费方，不能只加界面。
+ * 所以接入新场景时必须同时补上消费方，不能只加界面。场景键和各自的消费方见 {@link ModelScenes}。
  * <p>
- * 当前接线的场景：
- * <ul>
- *   <li>{@code prompt_optimize} — 输入框的「优化提示词」，由 ExternalLlmClient 读取</li>
- *   <li>{@code vision_fallback} — 当前模型不支持图片时的兜底，由 VisionModelRouter 读取</li>
- * </ul>
+ * 绑定可以指向两类服务商：设置页里加的（{@link #SOURCE_POOL}）和配置文件里定义的
+ * （{@link #SOURCE_CONFIGURED}）。没绑定、或绑定的服务商此刻用不了（被停用、删除、模型不在清单里、
+ * 没注册进运行时）时，{@link #resolve} 返回空，由调用方回落到配置文件里的默认值。
  */
 @Service
 public class SceneBindingService {
 
     private static final Logger log = LoggerFactory.getLogger(SceneBindingService.class);
 
-    public static final String PROMPT_OPTIMIZE = "prompt_optimize";
-    public static final String VISION_FALLBACK = "vision_fallback";
+    public static final String PROMPT_OPTIMIZE = ModelScenes.PROMPT_OPTIMIZE;
+    public static final String VISION_FALLBACK = ModelScenes.VISION_FALLBACK;
+
+    public static final String SOURCE_POOL = "pool";
+    public static final String SOURCE_CONFIGURED = "configured";
 
     private static final Map<String, Scene> SCENES = createScenes();
 
     private final SettingsRepository repository;
-    private final LlmProviderSettingsService providers;
+    private final LlmProviderSettingsService pool;
+    private final ConfiguredProviderService configured;
     private final ModelRegistry modelRegistry;
+    private final LlmProviderRegistry providerRegistry;
     private final ObjectMapper objectMapper;
+    /** 保护缓存与库的一致性；缓存为 null 表示尚未从库加载。 */
+    private final Object lock = new Object();
+    private volatile Map<String, Setting.SceneBinding> cache;
 
     public SceneBindingService(SettingsRepository repository,
-                              LlmProviderSettingsService providers,
+                              LlmProviderSettingsService pool,
+                              ConfiguredProviderService configured,
                               ModelRegistry modelRegistry,
+                              LlmProviderRegistry providerRegistry,
                               ObjectMapper objectMapper) {
         this.repository = repository;
-        this.providers = providers;
+        this.pool = pool;
+        this.configured = configured;
         this.modelRegistry = modelRegistry;
+        this.providerRegistry = providerRegistry;
         this.objectMapper = objectMapper;
     }
 
@@ -55,21 +67,33 @@ public class SceneBindingService {
 
     /**
      * 解析后的可用绑定：带上了服务商的真实连接信息，apiKey 为明文，仅供进程内部使用。
+     *
+     * @param registryName 这个服务商在 {@link LlmProviderRegistry} 里注册的名字
      */
     public record Resolved(
             String scene,
+            String source,
             String providerKey,
             String providerName,
+            String registryName,
             String baseUrl,
             String apiKey,
             String modelId) {}
 
     private static Map<String, Scene> createScenes() {
         Map<String, Scene> scenes = new LinkedHashMap<>();
-        scenes.put(PROMPT_OPTIMIZE, new Scene(PROMPT_OPTIMIZE, "提示词优化",
-                "输入框里「优化提示词」功能使用的模型。适合选响应快的小模型。"));
+        scenes.put(ModelScenes.MAIN_DEFAULT, new Scene(ModelScenes.MAIN_DEFAULT, "主对话默认模型",
+                "新会话默认使用的模型。已经打开的会话保持各自选的模型，不受这里影响。"));
+        scenes.put(ModelScenes.COMPACT_SUMMARY, new Scene(ModelScenes.COMPACT_SUMMARY, "压缩摘要",
+                "上下文太长时，用来把较早的记录压成摘要的模型。不选则使用配置文件里的设置。"));
+        scenes.put(ModelScenes.FAST, new Scene(ModelScenes.FAST, "后台小任务",
+                "可视化意图识别、记忆重排这类后台小任务使用的模型。适合选响应快、便宜的。"));
+        scenes.put(ModelScenes.SUB_AGENT, new Scene(ModelScenes.SUB_AGENT, "子 Agent",
+                "子 Agent 默认使用的模型。不选则跟随主对话的模型；调用时显式指定了模型的仍然以指定的为准。"));
         scenes.put(VISION_FALLBACK, new Scene(VISION_FALLBACK, "图片理解兜底",
                 "当前模型不支持图片时，自动改用这个模型来理解图片。必须选一个支持图片输入的模型。"));
+        scenes.put(PROMPT_OPTIMIZE, new Scene(PROMPT_OPTIMIZE, "提示词优化",
+                "输入框里「优化提示词」功能使用的模型。适合选响应快的小模型。"));
         return Collections.unmodifiableMap(scenes);
     }
 
@@ -84,9 +108,8 @@ public class SceneBindingService {
 
     /** 已保存的绑定（未校验服务商是否还在）。 */
     public Optional<Setting.SceneBinding> find(String scene) {
-        return repository.find(SettingsRepository.CATEGORY_SCENE_BINDING, scene)
-                .map(stored -> deserialize(scene, stored.value()))
-                .filter(binding -> binding != null);
+        Setting.SceneBinding binding = bindings().get(scene);
+        return Optional.ofNullable(binding);
     }
 
     /**
@@ -94,66 +117,140 @@ public class SceneBindingService {
      * 模型清单里时返回空，由调用方回落默认配置。
      */
     public Optional<Resolved> resolve(String scene) {
-        Optional<Setting.SceneBinding> binding = find(scene);
-        if (binding.isEmpty()) return Optional.empty();
-        String providerKey = binding.get().providerKey();
-        var entry = providers.getAllProviderEntries().stream()
-                .filter(e -> e.key().equals(providerKey))
-                .findFirst().orElse(null);
-        if (entry == null || !entry.config().enabled()) {
-            log.debug("Scene binding '{}' points to a missing or disabled provider '{}'; falling back to defaults",
-                    scene, providerKey);
-            return Optional.empty();
+        Setting.SceneBinding binding = bindings().get(scene);
+        if (binding == null) return Optional.empty();
+        String providerKey = binding.providerKey();
+        String model = binding.modelId();
+        if (binding.isConfigured()) {
+            Optional<ConfiguredProviderService.Effective> entry = configured.effective(providerKey)
+                    .filter(ConfiguredProviderService.Effective::usable);
+            if (entry.isEmpty()) return inactive(scene, providerKey, "missing, disabled or has no key");
+            var config = entry.get();
+            if (!config.models().contains(model)) return inactive(scene, providerKey, "model no longer listed");
+            return Optional.of(new Resolved(scene, SOURCE_CONFIGURED, providerKey, config.displayName(), providerKey,
+                    config.baseUrl(), config.apiKey(), model));
         }
+        var entry = pool.getAllProviderEntries().stream()
+                .filter(e -> e.key().equals(providerKey) && e.config().enabled())
+                .findFirst().orElse(null);
+        if (entry == null) return inactive(scene, providerKey, "missing or disabled");
         var config = entry.config();
         // 模型清单是可编辑的：被删掉的模型不能再拿来调用，否则会拿着一个上游不认识的模型 ID 发请求
-        if (!config.models().contains(binding.get().modelId())) {
-            log.warn("Scene binding '{}' points to model '{}' which is no longer listed by provider '{}'; "
-                    + "falling back to defaults", scene, binding.get().modelId(), providerKey);
-            return Optional.empty();
-        }
-        return Optional.of(new Resolved(scene, entry.key(), config.name(), config.baseUrl(),
-                config.apiKey(), binding.get().modelId()));
+        if (!config.models().contains(model)) return inactive(scene, providerKey, "model no longer listed");
+        return Optional.of(new Resolved(scene, SOURCE_POOL, providerKey, config.name(),
+                LlmProviderRegistry.POOL_PROVIDER_PREFIX + providerKey, config.baseUrl(), config.apiKey(), model));
     }
 
-    public Setting.SceneBinding save(String scene, String providerKey, String modelId) {
+    /**
+     * 场景绑定的模型此刻能不能真的调用（有已注册的 Provider 提供它）。给只需要模型 ID 的消费方用，
+     * 例如主对话默认模型、快速模型、子 Agent。
+     */
+    public Optional<String> supportedBoundModel(String scene) {
+        Optional<Resolved> resolved = resolve(scene);
+        if (resolved.isEmpty()) return Optional.empty();
+        String model = resolved.get().modelId();
+        if (!providerRegistry.supportsModel(model)) {
+            log.warn("Scene binding '{}' points to model '{}' which no provider is serving right now; using defaults",
+                    scene, model);
+            return Optional.empty();
+        }
+        return Optional.of(model);
+    }
+
+    private Optional<Resolved> inactive(String scene, String providerKey, String why) {
+        log.debug("Scene binding '{}' points to provider '{}' which is {}; falling back to defaults",
+                scene, providerKey, why);
+        return Optional.empty();
+    }
+
+    public Setting.SceneBinding save(String scene, String source, String providerKey, String modelId) {
         if (!SCENES.containsKey(scene)) {
             throw new RequestValidationException("UNKNOWN_SCENE", "未知的场景：" + scene);
+        }
+        boolean fromConfigured = SOURCE_CONFIGURED.equals(source);
+        if (!fromConfigured && !SOURCE_POOL.equals(source)) {
+            throw new RequestValidationException("INVALID_SCENE_BINDING", "未知的服务商来源：" + source);
         }
         if (providerKey == null || providerKey.isBlank()) {
             throw new RequestValidationException("INVALID_SCENE_BINDING", "请选择一个服务商");
         }
-        var entry = providers.getAllProviderEntries().stream()
-                .filter(e -> e.key().equals(providerKey))
-                .findFirst()
-                .orElseThrow(() -> new RequestValidationException(
-                        "PROVIDER_NOT_FOUND", "服务商不存在：" + providerKey));
         if (modelId == null || modelId.isBlank()) {
             throw new RequestValidationException("INVALID_SCENE_BINDING", "请选择一个模型");
         }
         String model = modelId.trim();
+        String providerName;
+        List<String> listedModels;
+        if (fromConfigured) {
+            var entry = configured.effective(providerKey)
+                    .orElseThrow(() -> new RequestValidationException(
+                            "PROVIDER_NOT_FOUND", "配置里没有这个服务商：" + providerKey));
+            providerName = entry.displayName();
+            listedModels = entry.models();
+        } else {
+            var entry = pool.getAllProviderEntries().stream()
+                    .filter(e -> e.key().equals(providerKey))
+                    .findFirst()
+                    .orElseThrow(() -> new RequestValidationException(
+                            "PROVIDER_NOT_FOUND", "服务商不存在：" + providerKey));
+            providerName = entry.config().name();
+            listedModels = entry.config().models();
+        }
         // 模型 ID 大小写敏感：不做归一，直接校验是否在该服务商名下
-        if (!entry.config().models().contains(model)) {
+        if (!listedModels.contains(model)) {
             throw new RequestValidationException("INVALID_SCENE_BINDING",
-                    "模型 " + model + " 不属于服务商 " + entry.config().name());
+                    "模型 " + model + " 不属于服务商 " + providerName);
         }
         if (VISION_FALLBACK.equals(scene)) {
             // 路由器运行时按注册表里的能力判断是否收图，这里提前用同一份能力拦住，免得存一个永远不生效的绑定。
             // 池里登记的模型能力是推算出来的，也算在内；还没同步过的按注册后会得到的能力算
-            boolean acceptsImages = modelRegistry.effectiveCapabilities(model).supportsImages();
-            if (!acceptsImages) {
+            if (!modelRegistry.effectiveCapabilities(model).supportsImages()) {
                 throw new RequestValidationException("INVALID_SCENE_BINDING",
                         "模型 " + model + " 不支持图片输入，不能用作图片理解兜底");
             }
         }
-        Setting.SceneBinding binding = new Setting.SceneBinding(entry.key(), model);
-        repository.upsert(SettingsRepository.CATEGORY_SCENE_BINDING, scene, serialize(binding), null);
-        log.info("Scene binding saved: scene={} provider={} model={}", scene, entry.key(), model);
+        Setting.SceneBinding binding = new Setting.SceneBinding(source, providerKey, model);
+        synchronized (lock) {
+            repository.upsert(SettingsRepository.CATEGORY_SCENE_BINDING, scene, serialize(binding), null);
+            Map<String, Setting.SceneBinding> current = new LinkedHashMap<>(bindings());
+            current.put(scene, binding);
+            cache = Collections.unmodifiableMap(current);
+        }
+        log.info("Scene binding saved: scene={} source={} provider={} model={}", scene, source, providerKey, model);
         return binding;
     }
 
     public void clear(String scene) {
-        repository.delete(SettingsRepository.CATEGORY_SCENE_BINDING, scene);
+        synchronized (lock) {
+            repository.delete(SettingsRepository.CATEGORY_SCENE_BINDING, scene);
+            Map<String, Setting.SceneBinding> current = new LinkedHashMap<>(bindings());
+            current.remove(scene);
+            cache = Collections.unmodifiableMap(current);
+        }
+    }
+
+    /** 丢弃缓存并从库重新加载。 */
+    public void reload() {
+        synchronized (lock) {
+            cache = null;
+            bindings();
+        }
+    }
+
+    // ───── 内部 ─────
+
+    private Map<String, Setting.SceneBinding> bindings() {
+        Map<String, Setting.SceneBinding> snapshot = cache;
+        if (snapshot != null) return snapshot;
+        synchronized (lock) {
+            if (cache != null) return cache;
+            Map<String, Setting.SceneBinding> loaded = new LinkedHashMap<>();
+            for (var stored : repository.list(SettingsRepository.CATEGORY_SCENE_BINDING)) {
+                Setting.SceneBinding binding = deserialize(stored.value());
+                if (binding != null) loaded.put(stored.key(), binding);
+            }
+            cache = Collections.unmodifiableMap(loaded);
+            return cache;
+        }
     }
 
     private String serialize(Setting.SceneBinding binding) {
@@ -164,11 +261,16 @@ public class SceneBindingService {
         }
     }
 
-    private Setting.SceneBinding deserialize(String scene, String json) {
+    private Setting.SceneBinding deserialize(String json) {
         try {
-            return objectMapper.readValue(json, Setting.SceneBinding.class);
+            Setting.SceneBinding binding = objectMapper.readValue(json, Setting.SceneBinding.class);
+            if (binding == null || binding.providerKey() == null || binding.modelId() == null) return null;
+            // 早期存的绑定没有 source 字段，那时只有池里的服务商可选
+            return binding.source() == null
+                    ? new Setting.SceneBinding(SOURCE_POOL, binding.providerKey(), binding.modelId())
+                    : binding;
         } catch (JsonProcessingException e) {
-            log.warn("Ignoring unreadable scene binding '{}': {}", scene, e.getMessage());
+            log.warn("Ignoring unreadable scene binding value: {}", e.getMessage());
             return null;
         }
     }

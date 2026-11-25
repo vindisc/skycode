@@ -162,7 +162,8 @@ class VisionModelRouterTest {
 
     private static SceneBindingService.Resolved resolved(String model) {
         return new SceneBindingService.Resolved(SceneBindingService.VISION_FALLBACK,
-                "zhipu", "智谱", "https://open.bigmodel.cn/api/paas/v4", "test-key", model);
+                SceneBindingService.SOURCE_POOL, "zhipu", "智谱", "db:zhipu",
+                "https://open.bigmodel.cn/api/paas/v4", "test-key", model);
     }
 
     private void configureDeepSeekVisionAvailable() {

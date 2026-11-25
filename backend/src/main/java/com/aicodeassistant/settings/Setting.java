@@ -25,8 +25,14 @@ public final class Setting {
     /**
      * 场景绑定：只存引用，不重复保存密钥。
      *
-     * @param providerKey 服务商池里的实际存储键（不是显示名）
+     * @param source      {@value SceneBindingService#SOURCE_POOL}（设置页里加的服务商，providerKey 是存储键）
+     *                    或 {@value SceneBindingService#SOURCE_CONFIGURED}（配置文件里的服务商，providerKey 是注册名）
+     * @param providerKey 服务商的键：不是显示名
      * @param modelId     该服务商名下的模型 ID
      */
-    public record SceneBinding(String providerKey, String modelId) {}
+    public record SceneBinding(String source, String providerKey, String modelId) {
+        public boolean isConfigured() {
+            return SceneBindingService.SOURCE_CONFIGURED.equals(source);
+        }
+    }
 }

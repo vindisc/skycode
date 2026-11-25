@@ -2,6 +2,7 @@ package com.aicodeassistant.engine;
 
 import com.aicodeassistant.llm.*;
 import com.aicodeassistant.model.*;
+import com.aicodeassistant.settings.SceneBindingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.mock.env.MockEnvironment;
@@ -364,4 +365,87 @@ class ContextCompactorTest {
     static Message user(String id,String text) { return new Message.UserMessage(id,Instant.EPOCH,List.of(new ContentBlock.TextBlock(text)),null,null); }
     static Message call(String id,String tool,int size) { return new Message.AssistantMessage(id,Instant.EPOCH,List.of(new ContentBlock.ToolUseBlock(tool,"Bash",JSON.createObjectNode().put("path","/repo/main.java").put("command","x".repeat(size)))),null,null); }
     static Message result(String id,String tool,String text) { return new Message.UserMessage(id,Instant.EPOCH,List.of(new ContentBlock.ToolResultBlock(tool,text,true)),text,tool); }
+
+    // ───── 场景分派：压缩摘要 ─────
+
+    private SceneBindingService.Resolved binding(String registryName, String model) {
+        return new SceneBindingService.Resolved(ModelScenes.COMPACT_SUMMARY, SceneBindingService.SOURCE_POOL,
+                "relay", "中转站", registryName, "https://relay.example/v1", "sk-k", model);
+    }
+
+    @Test void sceneBindingPicksTheSummaryModelAndBypassesTheEndpointWhitelist() {
+        // 配置里的摘要设置完全不可用（provider/model 都空），只靠场景绑定
+        var boundProvider = mock(LlmProvider.class);
+        var bindings = mock(SceneBindingService.class);
+        when(registry.findProviderByName("db:relay")).thenReturn(Optional.of(boundProvider));
+        when(models.findKnownCapabilities("glm-5.4")).thenReturn(Optional.of(
+                new ModelCapabilities("glm-5.4", "GLM", 65536, 1048576, true, true, true, 4, true, 0, 0)));
+        when(bindings.resolve(ModelScenes.COMPACT_SUMMARY)).thenReturn(Optional.of(binding("db:relay", "glm-5.4")));
+        when(boundProvider.supportsExplicitSummary("glm-5.4")).thenReturn(true);
+        when(boundProvider.summarizeExplicit(any(), any())).thenReturn(
+                new SummaryResult("<summary>" + SUMMARY + "</summary>", "stop", null, "GLM", "id", null));
+        var bound = new ContextCompactor(counter, registry, models, new CompactConfiguration(new MockEnvironment()
+                .withProperty("app.compact.llm-enabled", "true")), bindings);
+
+        var r = bound.compact(history(), context(12000), false);
+
+        assertEquals("llm_summary", r.mode());
+        var request = org.mockito.ArgumentCaptor.forClass(SummaryRequest.class);
+        verify(boundProvider).summarizeExplicit(request.capture(), any());
+        assertEquals("glm-5.4", request.getValue().model());
+        // 走的是"用户明确指定"那条路，不经过端点和型号白名单；配置里的摘要模型一次都没被调用
+        verify(boundProvider, never()).summarize(any(), any());
+        verify(provider, never()).summarize(any(), any());
+    }
+
+    @Test void fallsBackToTheConfiguredSummaryModelWhenTheBoundProviderIsNotRegistered() {
+        var bindings = mock(SceneBindingService.class);
+        when(bindings.resolve(ModelScenes.COMPACT_SUMMARY)).thenReturn(Optional.of(binding("db:gone", "glm-5.4")));
+        when(registry.findProviderByName("db:gone")).thenReturn(Optional.empty());
+        var bound = new ContextCompactor(counter, registry, models, new CompactConfiguration(env), bindings);
+
+        var r = bound.compact(history(), context(12000), false);
+
+        assertEquals("llm_summary", r.mode());
+        verify(provider, times(1)).summarize(any(), any());
+    }
+
+    @Test void fallsBackToTheConfiguredSummaryModelWhenTheBoundModelHasNoKnownCapabilities() {
+        var bindings = mock(SceneBindingService.class);
+        when(bindings.resolve(ModelScenes.COMPACT_SUMMARY)).thenReturn(Optional.of(binding("deepseek", "mystery")));
+        when(models.findKnownCapabilities("mystery")).thenReturn(Optional.empty());
+        var bound = new ContextCompactor(counter, registry, models, new CompactConfiguration(env), bindings);
+
+        var r = bound.compact(history(), context(12000), false);
+
+        assertEquals("llm_summary", r.mode());
+        verify(provider, times(1)).summarize(any(), any());
+        verify(provider, never()).summarizeExplicit(any(), any());
+    }
+
+    @Test void summaryStatusNamesTheModelThatWillActuallyBeUsed() {
+        assertEquals("config", compactor.summaryStatus().source());
+        assertEquals("deepseek-flash", compactor.summaryStatus().model());
+        assertNull(compactor.summaryStatus().unavailable());
+
+        var bindings = mock(SceneBindingService.class);
+        when(bindings.resolve(ModelScenes.COMPACT_SUMMARY)).thenReturn(Optional.of(binding("deepseek", "gpt-6.2-sol")));
+        when(models.findKnownCapabilities("gpt-6.2-sol")).thenReturn(Optional.of(
+                new ModelCapabilities("gpt-6.2-sol", "GPT", 128000, 1050000, true, true, true, 10, true, 0, 0)));
+        var bound = new ContextCompactor(counter, registry, models, new CompactConfiguration(env), bindings);
+
+        var status = bound.summaryStatus();
+        assertEquals("gpt-6.2-sol", status.model());
+        assertEquals("scene_binding:中转站", status.source());
+        assertEquals("deepseek-flash", status.configuredModel());
+        // 配置里的生成上限 8192 高于这个模型的输出上限时会被压低；这里模型上限更大，保持不变
+    }
+
+    @Test void summaryStatusReportsWhenTheWholeThingIsDisabled() {
+        var off = new ContextCompactor(counter, registry, models,
+                new CompactConfiguration(new MockEnvironment().withProperty("app.compact.llm-enabled", "false")));
+
+        assertFalse(off.summaryStatus().enabled());
+        assertEquals("summary_disabled", off.summaryStatus().unavailable());
+    }
 }

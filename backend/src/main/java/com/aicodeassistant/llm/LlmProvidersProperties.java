@@ -39,7 +39,7 @@ public record LlmProvidersProperties(
     private static final Set<String> REMOVED_MODELS = Set.of(
             "qwen3.8-max", "qwen3.8-flash", "kimi-for-coding", "glm-5.3-flash", "openai/gpt-5.6-sol");
 
-    static boolean isRemovedModel(String id) {
+    public static boolean isRemovedModel(String id) {
         return id != null && REMOVED_MODELS.contains(id);
     }
 

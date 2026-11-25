@@ -13,6 +13,7 @@ import com.aicodeassistant.engine.QueryLoopState;
 import com.aicodeassistant.engine.QueryMessageHandler;
 import com.aicodeassistant.llm.LlmProviderRegistry;
 import com.aicodeassistant.llm.ModelRegistry;
+import com.aicodeassistant.llm.ModelScenes;
 import com.aicodeassistant.llm.ThinkingConfig;
 import com.aicodeassistant.model.ContentBlock;
 import com.aicodeassistant.model.Message;
@@ -1260,13 +1261,20 @@ public class SubAgentExecutor {
             return resolved;
         }
 
-        // 优先级 2：继承父会话模型（核心变更）
+        // 优先级 2：设置页「子 Agent」场景指定了模型就用它（调用时显式指定的仍然最优先）
+        Optional<String> bound = providerRegistry.sceneBoundModel(ModelScenes.SUB_AGENT);
+        if (bound.isPresent()) {
+            log.info("resolveModel: scene binding → '{}'", bound.get());
+            return bound.get();
+        }
+
+        // 优先级 3：继承父会话模型（核心变更）
         if (parentModel != null && !parentModel.isBlank()) {
             log.info("resolveModel: inheriting parent model '{}'", parentModel);
             return parentModel;  // 直接使用，无需别名解析（已是真实模型 ID）
         }
 
-        // 优先级 3：兜底使用 premium 别名（最强模型）
+        // 优先级 4：兜底使用 premium 别名（最强模型）
         String resolved = providerRegistry.resolveModelAlias("premium");
         log.info("resolveModel: fallback to premium → '{}'", resolved);
         return resolved;

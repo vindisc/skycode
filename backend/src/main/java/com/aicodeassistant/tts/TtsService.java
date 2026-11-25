@@ -1,6 +1,6 @@
 package com.aicodeassistant.tts;
 
-import com.aicodeassistant.llm.LlmProvidersProperties;
+import com.aicodeassistant.settings.ConfiguredProviderService;
 import com.aicodeassistant.llm.LlmProvidersProperties.ProviderConfig;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +34,7 @@ public class TtsService {
     /** 单次合成的最大文本长度，超出部分被截断 */
     private static final int MAX_TEXT_LENGTH = 500;
 
-    private final LlmProvidersProperties llmProperties;
+    private final ConfiguredProviderService configured;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
 
@@ -44,8 +44,8 @@ public class TtsService {
     @Value("${tts.voice:Cherry}")
     private String ttsVoice;
 
-    public TtsService(LlmProvidersProperties llmProperties, ObjectMapper objectMapper) {
-        this.llmProperties = llmProperties;
+    public TtsService(ConfiguredProviderService configured, ObjectMapper objectMapper) {
+        this.configured = configured;
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(15))
@@ -58,12 +58,15 @@ public class TtsService {
      * TTS 模型不在 Token Plan 白名单中，故不检查 dashscope-token-plan。
      */
     public boolean isAvailable() {
-        Map<String, ProviderConfig> providers = llmProperties.providers();
-        if (providers == null) {
-            return false;
-        }
-        ProviderConfig dashscope = providers.get("dashscope");
-        return dashscope != null && hasApiKey(dashscope);
+        return availableProviderOrNull() != null;
+    }
+
+    private ProviderConfig availableProviderOrNull() {
+        return configured.effective("dashscope")
+                .map(effective -> new ProviderConfig(effective.apiKey(), effective.baseUrl(),
+                        effective.defaultModel(), effective.models()))
+                .filter(this::hasApiKey)
+                .orElse(null);
     }
 
     /**
@@ -130,10 +133,9 @@ public class TtsService {
     }
 
     private ProviderConfig resolveProvider() {
-        Map<String, ProviderConfig> providers = llmProperties.providers();
-        // TTS 模型不在 Token Plan 白名单中，仅标准 dashscope provider 可用
-        ProviderConfig dashscope = providers.get("dashscope");
-        if (dashscope != null && hasApiKey(dashscope)) {
+        // 这类模型不在 Token Plan 白名单中，仅标准 dashscope provider 可用
+        ProviderConfig dashscope = availableProviderOrNull();
+        if (dashscope != null) {
             return dashscope;
         }
         throw new IllegalStateException("没有可用的 DashScope provider（未配置 apiKey）");

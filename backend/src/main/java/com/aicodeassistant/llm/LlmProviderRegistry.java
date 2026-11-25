@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,6 +28,11 @@ public class LlmProviderRegistry {
 
     private final Map<String, LlmProvider> providers = Collections.synchronizedMap(new java.util.LinkedHashMap<>());
     private final Environment env;
+    /**
+     * 场景分派的查询入口：按场景键返回绑定的、此刻能调用的模型 ID。由设置模块在全部单例创建完成后装上
+     * （注册表在构造阶段不能依赖设置模块，那会形成循环）。没装、或场景没绑定时返回空，走配置文件里的默认值。
+     */
+    private volatile java.util.function.Function<String, Optional<String>> sceneModelLookup;
     private final Set<String> warnedInvalidDefaults = ConcurrentHashMap.newKeySet();
     private final Set<String> warnedInvalidTierAliases = ConcurrentHashMap.newKeySet();
 
@@ -98,6 +104,52 @@ public class LlmProviderRegistry {
 
     public List<String> registeredProviderNames() {
         return providerSnapshot().stream().map(LlmProvider::getProviderName).toList();
+    }
+
+    /** 装上场景分派的查询入口；传 null 表示卸掉。 */
+    public void setSceneModelLookup(java.util.function.Function<String, Optional<String>> lookup) {
+        this.sceneModelLookup = lookup;
+    }
+
+    /**
+     * 某个场景在设置页里绑定的模型，前提是此刻确实有已注册的 Provider 提供它。
+     * 查询过程出任何错都按"没绑定"处理：场景分派是配置之外的增强，不能让它拖垮主流程。
+     */
+    public Optional<String> sceneBoundModel(String scene) {
+        var lookup = sceneModelLookup;
+        if (lookup == null) return Optional.empty();
+        Optional<String> bound;
+        try {
+            bound = lookup.apply(scene);
+        } catch (RuntimeException e) {
+            log.warn("Scene binding lookup for '{}' failed; using configured defaults: {}", scene, e.toString());
+            return Optional.empty();
+        }
+        return bound == null ? Optional.empty() : bound.filter(this::supportsModel);
+    }
+
+    /**
+     * 同步"配置里的服务商"（名字来自 application.yml 的那批）：按名字替换已注册的，并移除被停用或没了密钥的。
+     * 只动不带 db: 前缀的名字，池里的由 {@link #replaceDbProviders} 管。
+     */
+    public void applyConfiguredProviders(java.util.Collection<LlmProvider> replacements,
+                                         java.util.Collection<String> removals) {
+        List<LlmProvider> updated = List.copyOf(replacements);
+        for (LlmProvider provider : updated) {
+            if (isPoolProviderName(provider.getProviderName())) {
+                throw new IllegalArgumentException("Configured providers must not use the '"
+                        + POOL_PROVIDER_PREFIX + "' prefix: " + provider.getProviderName());
+            }
+        }
+        synchronized (providers) {
+            for (String name : removals) {
+                if (!isPoolProviderName(name)) providers.remove(name);
+            }
+            for (LlmProvider provider : updated) {
+                providers.put(provider.getProviderName(), provider);
+            }
+        }
+        log.info("Configured providers synced: registered {}, removed {}", updated.stream().map(LlmProvider::getProviderName).toList(), removals);
     }
 
     /**
@@ -187,6 +239,11 @@ public class LlmProviderRegistry {
      * 一个无法调用的默认模型。
      */
     public String getDefaultModel() {
+        // 设置页「主对话默认模型」的绑定优先于配置文件里的 app.model.default
+        Optional<String> bound = sceneBoundModel(ModelScenes.MAIN_DEFAULT);
+        if (bound.isPresent()) {
+            return bound.get();
+        }
         if (supportsModel(configuredDefaultModel)) {
             return configuredDefaultModel;
         }
@@ -219,6 +276,9 @@ public class LlmProviderRegistry {
 
     /** 获取快速模型 — 用于分类器/摘要 */
     public String getFastModel() {
+        // 设置页「后台小任务」的绑定优先于配置文件里的 app.model.fast
+        Optional<String> bound = sceneBoundModel(ModelScenes.FAST);
+        if (bound.isPresent()) return bound.get();
         // 全局快速模型优先于 Provider 注册顺序。
         if (supportsModel(configuredFastModel)) return configuredFastModel;
         return providerSnapshot().stream()

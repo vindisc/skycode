@@ -1,6 +1,7 @@
 package com.aicodeassistant.llm;
 
 import com.aicodeassistant.llm.impl.OpenAiCompatibleProvider;
+import com.aicodeassistant.settings.ConfiguredProviderService;
 import com.aicodeassistant.settings.LlmProviderSettingsService;
 import com.aicodeassistant.settings.Setting;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,8 +16,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 把设置页服务商池里启用的条目注册进 {@link LlmProviderRegistry}，这样在设置页加的服务商和模型
- * 才会真正出现在模型选择器和主会话里。
+ * 把设置里的服务商同步进 {@link LlmProviderRegistry}，这样设置页里加的、改的服务商和模型才会真正
+ * 出现在模型选择器和主会话里。两类来源，顺序固定：
+ * <ol>
+ *   <li>配置文件里定义的服务商（名字来自 application.yml），叠加设置页里对它们的修改——
+ *       {@link ConfiguredProviderService}。它们排在前面，模型被占用的优先级也更高</li>
+ *   <li>设置页里额外添加的服务商池——{@link LlmProviderSettingsService}</li>
+ * </ol>
  * <p>
  * 触发时机：全部单例创建完成后（早于 Web 服务器启动）同步一次；之后由设置接口在保存、删除、
  * reload 之后调用 {@link #sync()}。这里不反过来依赖设置接口，避免循环依赖。
@@ -76,6 +82,7 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
     }
 
     private final LlmProviderSettingsService pool;
+    private final ConfiguredProviderService configured;
     private final LlmProviderRegistry registry;
     private final ModelRegistry modelRegistry;
     private final LlmHttpProperties httpProperties;
@@ -85,12 +92,14 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
     private volatile SyncResult last;
 
     public DbProviderRegistrySync(LlmProviderSettingsService pool,
+                                  ConfiguredProviderService configured,
                                   LlmProviderRegistry registry,
                                   ModelRegistry modelRegistry,
                                   LlmHttpProperties httpProperties,
                                   ObjectMapper objectMapper,
                                   FinalProviderPayloadGuard payloadGuard) {
         this.pool = pool;
+        this.configured = configured;
         this.registry = registry;
         this.modelRegistry = modelRegistry;
         this.httpProperties = httpProperties;
@@ -115,15 +124,17 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
     }
 
     public synchronized SyncResult sync() {
+        // 不在内置能力表里的模型（两类来源都算），这一轮给它们登记的能力
+        List<ModelCapabilities> registeredCapabilities = new ArrayList<>();
+        java.util.Set<String> knownModelIds = modelRegistry.staticModelIds();
+
+        // 先同步配置里的服务商：池里的条目要等它们就位之后才知道哪些模型已经被占用
+        syncConfiguredProviders(registeredCapabilities, knownModelIds);
         Map<String, String> configuredOwners = registry.modelOwnersOutsidePool();
         // 本轮已被池里靠前条目声明的模型 -> 那个条目的显示名
         Map<String, String> poolOwners = new HashMap<>();
         List<LlmProvider> providers = new ArrayList<>();
         List<ProviderSync> results = new ArrayList<>();
-        // 不在内置能力表里的模型，这一轮给它们登记的能力
-        List<ModelCapabilities> poolCapabilities = new ArrayList<>();
-        java.util.Set<String> knownModelIds = modelRegistry.staticModelIds();
-
         for (var entry : pool.getAllProviderEntries()) {
             String key = entry.key();
             Setting.LlmProviderConfig config = entry.config();
@@ -147,7 +158,7 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
                 if (!modelRegistry.hasStaticCapabilities(model)) {
                     PoolModelCapabilities.Inferred guess = PoolModelCapabilities.infer(
                             model, knownModelIds, modelRegistry::findStaticCapabilities);
-                    poolCapabilities.add(guess.capabilities());
+                    registeredCapabilities.add(guess.capabilities());
                     inferred.add(new InferredModel(model, guess.basis()));
                 }
             }
@@ -169,7 +180,7 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
                 registrable.forEach(poolOwners::remove);
                 // 这一条注册不了，给它那些没登记过的模型推算的能力也一并撤掉
                 for (InferredModel item : inferred) {
-                    poolCapabilities.removeIf(capability -> capability.modelId().equals(item.model()));
+                    registeredCapabilities.removeIf(capability -> capability.modelId().equals(item.model()));
                 }
                 log.warn("Provider pool entry '{}' cannot be registered: {}", key, failure.getMessage());
                 results.add(new ProviderSync(key, config.name(), null, List.of(), List.of(), null, skips,
@@ -181,7 +192,7 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
         }
 
         // 先登记能力再注册 Provider：Provider 一注册，请求就可能来查这些模型的能力
-        modelRegistry.replacePoolModels(poolCapabilities);
+        modelRegistry.replacePoolModels(registeredCapabilities);
         registry.replaceDbProviders(providers);
         SyncResult result = new SyncResult(List.copyOf(results));
         last = result;
@@ -189,6 +200,45 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
                 result.registeredModels(), result.inferredModels(),
                 results.stream().mapToInt(p -> p.skippedModels().size()).sum());
         return result;
+    }
+
+    /**
+     * 配置文件里定义的服务商，叠加设置页里的修改：能用的按名字注册（替换启动时按环境变量建的那份），
+     * 被停用或没有密钥的从注册表里移除。名字不变，所以按名字生效的特殊行为都还在。
+     */
+    private void syncConfiguredProviders(List<ModelCapabilities> registeredCapabilities,
+                                         java.util.Set<String> knownModelIds) {
+        List<LlmProvider> toRegister = new ArrayList<>();
+        List<String> toRemove = new ArrayList<>();
+        for (ConfiguredProviderService.Effective effective : configured.effectiveProviders()) {
+            List<String> models = effective.models() == null ? List.of()
+                    : effective.models().stream().filter(model -> model != null && !model.isBlank()).toList();
+            if (!effective.usable()) {
+                toRemove.add(effective.name());
+                continue;
+            }
+            try {
+                String defaultModel = models.contains(effective.defaultModel())
+                        ? effective.defaultModel() : models.getFirst();
+                List<String> apiKeys = MultiProviderConfiguration.splitApiKeys(effective.apiKey());
+                toRegister.add(new OpenAiCompatibleProvider(effective.name(), objectMapper, httpProperties,
+                        new ApiKeyRotationManager(apiKeys, effective.keySelectionStrategy()),
+                        apiKeys.isEmpty() ? null : apiKeys.getFirst(), effective.baseUrl(), defaultModel,
+                        models, payloadGuard));
+            } catch (RuntimeException failure) {
+                toRemove.add(effective.name());
+                log.warn("Configured provider '{}' cannot be registered: {}", effective.name(), failure.getMessage());
+                continue;
+            }
+            // 在设置页里给配置里的服务商加了内置表没有的模型：和池里一样推算能力
+            for (String model : models) {
+                if (!modelRegistry.hasStaticCapabilities(model)) {
+                    registeredCapabilities.add(PoolModelCapabilities
+                            .infer(model, knownModelIds, modelRegistry::findStaticCapabilities).capabilities());
+                }
+            }
+        }
+        registry.applyConfiguredProviders(toRegister, toRemove);
     }
 
     /** @return 该模型已被哪个服务商占用（完整原因文案）；没人占用时返回 null */

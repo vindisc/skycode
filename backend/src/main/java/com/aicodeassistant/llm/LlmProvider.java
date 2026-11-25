@@ -132,6 +132,15 @@ public interface LlmProvider {
         return SummaryResult.failed("unsupported_summary");
     }
 
+    /**
+     * 用户在设置页的场景分派里明确指定了"用这个 Provider 的这个模型做压缩摘要"。
+     * 这条路不要求端点和型号在 {@link #supportsSummary} 的白名单里：是用户自己选的。
+     */
+    default boolean supportsExplicitSummary(String model) { return false; }
+    default SummaryResult summarizeExplicit(SummaryRequest request, LlmCallContext context) {
+        return SummaryResult.failed("unsupported_summary");
+    }
+
     // ==================== 模型能力查询 ====================
 
     /** 获取默认/推荐模型 */
