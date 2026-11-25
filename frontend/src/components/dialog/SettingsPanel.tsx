@@ -1,5 +1,5 @@
 /**
- * 「设置」弹窗：外观 / 模型服务商 / 场景分派三个标签页。
+ * 「设置」弹窗：外观 / 模型服务商 / 场景分派 / 运行状态四个标签页。
  * 只挂载当前选中的那一页：后两页都会发请求，没必要在用户看外观时就去拉服务商列表。
  * 外观：主题立即生效，由 ConfigStore 持久化。
  * <p>
@@ -16,15 +16,17 @@ import { InkHavocFxControls } from '@/components/theme/InkHavocFxControls';
 import { JellyFxControls } from '@/components/theme/JellyFxControls';
 import { ACCENT_PRESETS, normalizeAccentHex } from '@/theme/accents';
 import { LlmProvidersSettings } from '@/components/settings/LlmProvidersSettings';
+import { RuntimeStatusPanel } from '@/components/settings/RuntimeStatusPanel';
 import { SceneBindingsSettings } from '@/components/settings/SceneBindingsSettings';
 import type { ThemeConfig } from '@/types';
 
-export type SettingsTab = 'appearance' | 'providers' | 'scenes';
+export type SettingsTab = 'appearance' | 'providers' | 'scenes' | 'runtime';
 
 const TABS: { value: SettingsTab; label: string }[] = [
     { value: 'appearance', label: '外观' },
     { value: 'providers', label: '模型服务商' },
     { value: 'scenes', label: '场景分派' },
+    { value: 'runtime', label: '运行状态' },
 ];
 
 function toSettingsTab(value: string): SettingsTab {
@@ -79,6 +81,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
                     />
                 )}
                 {tab === 'scenes' && <SceneBindingsSettings onGoToProviders={() => changeTab('providers')} />}
+                {tab === 'runtime' && <RuntimeStatusPanel />}
             </div>
             <div className="px-5 pb-5 pt-3 border-t border-hairline flex justify-end shrink-0">
                 <Button variant="primary" onClick={requestClose}>完成</Button>
