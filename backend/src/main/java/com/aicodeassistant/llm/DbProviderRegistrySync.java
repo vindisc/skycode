@@ -26,7 +26,11 @@ import java.util.Map;
  * <p>
  * 不抢模型：同一个模型出现在两个 Provider 名下时 {@link LlmProviderRegistry#getProvider} 会直接
  * 抛错。配置 / 环境变量已声明的模型，以及本轮已被池里靠前条目声明的模型，都会被跳过并记下原因。
- * 模型还必须在能力表里静态登记过，否则只会拿到保守默认值，算出的预算为负，一选就报错。
+ * <p>
+ * 模型不需要先在内置能力表里登记过：没登记的由 {@link PoolModelCapabilities} 推算一份能力
+ * （沿用相近型号的参数，或者用通用参数），登记进 {@link ModelRegistry}。
+ * 不这么做的话，设置页里加的新模型只会拿到保守默认值（8K 窗口、不支持工具），
+ * 算出的预算为负，一选就报错——用户看到的就是"加了却不显示 / 不能用"。
  */
 @Service
 public class DbProviderRegistrySync implements SmartInitializingSingleton {
@@ -36,19 +40,24 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
     /** 某个模型没有注册进运行时的原因。 */
     public record ModelSkip(String model, String reason) {}
 
+    /** 一个不在内置能力表里的模型，以及给它登记能力时依据的是什么。 */
+    public record InferredModel(String model, String basis) {}
+
     /**
      * 池里一个条目的同步结果。
      *
      * @param registeredAs     注册进注册表的名字（{@code db:<key>}）；没有注册时为 null
+     * @param inferredModels   注册的模型里不在内置能力表里的那些，以及各自登记能力时依据的参数
      * @param defaultModel     实际生效的默认模型；条目里填的默认模型被跳过时，退到第一个注册成功的模型
      * @param skipReason       整个条目被跳过的原因；已注册时为 null
-     * @param needsAttention   有需要用户处理的问题：有条目里的模型没能注册成功。已停用、模型都由其他服务商提供不算
+     * @param needsAttention   有需要用户处理的问题（目前只有注册失败）。已停用、模型都由其他服务商提供不算
      */
     public record ProviderSync(
             String providerKey,
             String providerName,
             String registeredAs,
             List<String> registeredModels,
+            List<InferredModel> inferredModels,
             String defaultModel,
             List<ModelSkip> skippedModels,
             String skipReason,
@@ -58,6 +67,11 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
         /** 注册进运行时的全部模型，按池里的顺序。 */
         public List<String> registeredModels() {
             return providers.stream().flatMap(p -> p.registeredModels().stream()).toList();
+        }
+
+        /** 其中不在内置能力表里、按推算参数登记的模型。 */
+        public List<InferredModel> inferredModels() {
+            return providers.stream().flatMap(p -> p.inferredModels().stream()).toList();
         }
     }
 
@@ -106,36 +120,42 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
         Map<String, String> poolOwners = new HashMap<>();
         List<LlmProvider> providers = new ArrayList<>();
         List<ProviderSync> results = new ArrayList<>();
+        // 不在内置能力表里的模型，这一轮给它们登记的能力
+        List<ModelCapabilities> poolCapabilities = new ArrayList<>();
+        java.util.Set<String> knownModelIds = modelRegistry.staticModelIds();
 
         for (var entry : pool.getAllProviderEntries()) {
             String key = entry.key();
             Setting.LlmProviderConfig config = entry.config();
             if (!config.enabled()) {
-                results.add(new ProviderSync(key, config.name(), null, List.of(), null, List.of(), "服务商已停用", false));
+                results.add(new ProviderSync(key, config.name(), null, List.of(), List.of(), null, List.of(),
+                        "服务商已停用", false));
                 continue;
             }
 
             List<String> registrable = new ArrayList<>();
+            List<InferredModel> inferred = new ArrayList<>();
             List<ModelSkip> skips = new ArrayList<>();
-            int claimedElsewhere = 0;
             for (String model : config.models()) {
                 String claimedBy = claimedBy(model, configuredOwners, poolOwners);
                 if (claimedBy != null) {
                     skips.add(new ModelSkip(model, claimedBy));
-                    claimedElsewhere++;
-                } else if (!modelRegistry.hasStaticCapabilities(model)) {
-                    skips.add(new ModelSkip(model, "未在能力表登记，拿不到上下文预算，选它会报错"));
-                } else {
-                    registrable.add(model);
-                    poolOwners.put(model, config.name());
+                    continue;
+                }
+                registrable.add(model);
+                poolOwners.put(model, config.name());
+                if (!modelRegistry.hasStaticCapabilities(model)) {
+                    PoolModelCapabilities.Inferred guess = PoolModelCapabilities.infer(
+                            model, knownModelIds, modelRegistry::findStaticCapabilities);
+                    poolCapabilities.add(guess.capabilities());
+                    inferred.add(new InferredModel(model, guess.basis()));
                 }
             }
             if (registrable.isEmpty()) {
-                // 全是"别人已经在提供"不算故障，文案上要说清楚，免得用户以为配置坏了
-                boolean allClaimed = claimedElsewhere == config.models().size();
-                results.add(new ProviderSync(key, config.name(), null, List.of(), null, skips,
-                        allClaimed ? "模型都已由其他服务商提供，无需重复注册" : "没有可注册的模型",
-                        !allClaimed));
+                // 没被占用的模型都会注册，所以为空只剩一种情况：全是"别人已经在提供"。不算故障，
+                // 文案上要说清楚，免得用户以为配置坏了
+                results.add(new ProviderSync(key, config.name(), null, List.of(), List.of(), null, skips,
+                        "模型都已由其他服务商提供，无需重复注册", false));
                 continue;
             }
 
@@ -147,21 +167,26 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
             } catch (RuntimeException failure) {
                 // 构造失败（例如接口地址不合法）只影响这一个条目；释放它占住的模型，别挡住后面的条目
                 registrable.forEach(poolOwners::remove);
+                // 这一条注册不了，给它那些没登记过的模型推算的能力也一并撤掉
+                for (InferredModel item : inferred) {
+                    poolCapabilities.removeIf(capability -> capability.modelId().equals(item.model()));
+                }
                 log.warn("Provider pool entry '{}' cannot be registered: {}", key, failure.getMessage());
-                results.add(new ProviderSync(key, config.name(), null, List.of(), null, skips,
+                results.add(new ProviderSync(key, config.name(), null, List.of(), List.of(), null, skips,
                         "注册失败：" + failure.getMessage(), true));
                 continue;
             }
-            // 部分注册：被跳过的模型里只要有一个不是因为"别人已在提供"，就是用户需要知道并处理的问题
-            boolean partialLoss = skips.size() > claimedElsewhere;
-            results.add(new ProviderSync(key, config.name(), registeredAs, registrable, defaultModel, skips, null,
-                    partialLoss));
+            results.add(new ProviderSync(key, config.name(), registeredAs, registrable, List.copyOf(inferred),
+                    defaultModel, skips, null, false));
         }
 
+        // 先登记能力再注册 Provider：Provider 一注册，请求就可能来查这些模型的能力
+        modelRegistry.replacePoolModels(poolCapabilities);
         registry.replaceDbProviders(providers);
         SyncResult result = new SyncResult(List.copyOf(results));
         last = result;
-        log.info("Provider pool synced: registered {}, skipped {} model(s)", result.registeredModels(),
+        log.info("Provider pool synced: registered {}, inferred {}, skipped {} model(s)",
+                result.registeredModels(), result.inferredModels(),
                 results.stream().mapToInt(p -> p.skippedModels().size()).sum());
         return result;
     }

@@ -15,6 +15,11 @@ public class ModelRegistry {
     private static final Logger log = LoggerFactory.getLogger(ModelRegistry.class);
 
     private final Map<String, ModelCapabilities> customModels = new ConcurrentHashMap<>();
+    /**
+     * 设置页服务商池登记的、不在内置表里的模型的能力（由 DbProviderRegistrySync 整批替换）。
+     * 每次整体换成一个不可变 Map，读的一方不用加锁。
+     */
+    private volatile Map<String, ModelCapabilities> poolModels = Map.of();
     private final Set<String> warnedUnknownModels = ConcurrentHashMap.newKeySet();
     private final LlmProviderRegistry providerRegistry;
     private final ModelCapabilitiesProperties properties;
@@ -131,6 +136,10 @@ public class ModelRegistry {
         ModelCapabilities custom = customModels.get(modelId);
         if (custom != null) return custom;
 
+        // Level 1.5: 设置页服务商池登记的能力（只用于内置表里没有的模型）
+        ModelCapabilities pool = poolModels.get(modelId);
+        if (pool != null) return pool;
+
         // Level 2: 从 Provider 动态查询
         // 注意: getProvider() 在无匹配时抛 IllegalArgumentException，不返回 null
         try {
@@ -193,8 +202,50 @@ public class ModelRegistry {
         if (customModels.containsKey(modelId) || BUILTIN_MODELS.containsKey(modelId)) return true;
         if (BUILTIN_MODELS.keySet().stream().anyMatch(k -> k.endsWith("/*")
                 && modelId.startsWith(k.substring(0, k.length() - 1)))) return true;
+        if (poolModels.containsKey(modelId)) return true;
         try { return providerRegistry.getProvider(modelId).getModelCapabilities(modelId) != null; }
         catch (Exception ignored) { return false; }
+    }
+
+    /**
+     * 整批替换设置页服务商池登记的模型能力；传空集合即全部清掉。
+     * 要在把这些模型的 Provider 注册进注册表之前调用：Provider 一注册，请求就可能来查能力。
+     */
+    public void replacePoolModels(java.util.Collection<ModelCapabilities> capabilities) {
+        Map<String, ModelCapabilities> replaced = new java.util.HashMap<>();
+        for (ModelCapabilities capability : capabilities) {
+            replaced.put(capability.modelId(), capability);
+        }
+        poolModels = Map.copyOf(replaced);
+        log.info("Pool model capabilities replaced: {}", replaced.keySet());
+    }
+
+    /** 内置表和 YAML 覆盖里登记过的全部模型 ID（不含通配符条目）。 */
+    public java.util.Set<String> staticModelIds() {
+        java.util.Set<String> ids = new java.util.HashSet<>(customModels.keySet());
+        for (String id : BUILTIN_MODELS.keySet()) {
+            if (!id.endsWith("/*")) ids.add(id);
+        }
+        return java.util.Set.copyOf(ids);
+    }
+
+    /**
+     * 这个模型目前可知的能力：YAML 覆盖 → 服务商池登记 → 内置表。
+     * 与 {@link #findStaticCapabilities} 的区别是算上了池里登记的，给"这个模型收不收图"这类判断用。
+     */
+    public Optional<ModelCapabilities> findKnownCapabilities(String modelId) {
+        Optional<ModelCapabilities> pool = Optional.ofNullable(modelId == null ? null : poolModels.get(modelId));
+        return pool.isPresent() ? pool : findStaticCapabilities(modelId);
+    }
+
+    /**
+     * 这个模型在池里注册之后会有的能力：已经知道的（YAML 覆盖 / 池里登记 / 内置表）直接用，
+     * 否则按 {@link PoolModelCapabilities} 现推一份。给"保存前校验"用——那时它的 Provider 可能还没注册，
+     * 但结论要和注册之后一致。
+     */
+    public ModelCapabilities effectiveCapabilities(String modelId) {
+        return findKnownCapabilities(modelId).orElseGet(() -> PoolModelCapabilities.infer(
+                modelId, staticModelIds(), this::findStaticCapabilities).capabilities());
     }
 
     /**
@@ -237,6 +288,7 @@ public class ModelRegistry {
         try {
             providerRegistry.listModelCapabilities().forEach(mc -> all.putIfAbsent(mc.modelId(), mc));
         } catch (Exception ignored) {}
+        poolModels.values().forEach(mc -> all.put(mc.modelId(), mc));
         return List.copyOf(all.values());
     }
 

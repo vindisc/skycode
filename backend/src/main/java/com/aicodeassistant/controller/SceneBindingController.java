@@ -86,8 +86,7 @@ public class SceneBindingController {
 
     private List<ModelOption> modelOptions(List<String> models) {
         return models.stream()
-                .map(model -> new ModelOption(model, modelRegistry.findStaticCapabilities(model)
-                        .map(ModelCapabilities::supportsImages).orElse(false)))
+                .map(model -> new ModelOption(model, modelRegistry.effectiveCapabilities(model).supportsImages()))
                 .toList();
     }
 

@@ -1,7 +1,6 @@
 package com.aicodeassistant.settings;
 
 import com.aicodeassistant.exception.RequestValidationException;
-import com.aicodeassistant.llm.ModelCapabilities;
 import com.aicodeassistant.llm.ModelRegistry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -139,10 +138,9 @@ public class SceneBindingService {
                     "模型 " + model + " 不属于服务商 " + entry.config().name());
         }
         if (VISION_FALLBACK.equals(scene)) {
-            // 路由器运行时按能力表判断是否收图，这里提前用同一张表拦住，免得存一个永远不生效的绑定
-            boolean acceptsImages = modelRegistry.findStaticCapabilities(model)
-                    .map(ModelCapabilities::supportsImages)
-                    .orElse(false);
+            // 路由器运行时按注册表里的能力判断是否收图，这里提前用同一份能力拦住，免得存一个永远不生效的绑定。
+            // 池里登记的模型能力是推算出来的，也算在内；还没同步过的按注册后会得到的能力算
+            boolean acceptsImages = modelRegistry.effectiveCapabilities(model).supportsImages();
             if (!acceptsImages) {
                 throw new RequestValidationException("INVALID_SCENE_BINDING",
                         "模型 " + model + " 不支持图片输入，不能用作图片理解兜底");

@@ -109,6 +109,18 @@ class SceneBindingServiceTest {
     }
 
     @Test
+    void anUnregisteredPoolModelIsJudgedByTheCapabilitiesItWillGet() {
+        // 两个都不在内置能力表里：glm-9-vision 会沿用 glm-5.4 的参数（收图），codex-auto-review 只有通用参数（不收图）
+        var provider = pool.create(new ProviderInput("中转站", "https://relay.example/v1", RAW_KEY,
+                List.of("glm-9-vision", "codex-auto-review"), null, null));
+
+        assertThat(service.save(SceneBindingService.VISION_FALLBACK, provider.key(), "glm-9-vision").modelId())
+                .isEqualTo("glm-9-vision");
+        assertCode(() -> service.save(SceneBindingService.VISION_FALLBACK, provider.key(), "codex-auto-review"),
+                "INVALID_SCENE_BINDING");
+    }
+
+    @Test
     void rejectsUnknownScenesProvidersAndUnlistedModels() {
         var provider = pool.create(new ProviderInput("智谱", BASE_URL, RAW_KEY, List.of("glm-5.4"), null, null));
 

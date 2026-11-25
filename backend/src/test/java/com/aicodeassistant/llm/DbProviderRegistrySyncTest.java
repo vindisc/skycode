@@ -51,7 +51,7 @@ class DbProviderRegistrySyncTest {
     }
 
     @Test
-    void registersPoolProvidersUnderTheDbPrefixAndSkipsModelsItCannotTake() {
+    void registersPoolProvidersUnderTheDbPrefixAndOnlySkipsModelsClaimedElsewhere() {
         String key = addProvider("智谱", List.of("gpt-6.2-sol", "mystery-model", "glm-5.4"), "gpt-6.2-sol", null);
 
         var result = sync.sync();
@@ -59,26 +59,69 @@ class DbProviderRegistrySyncTest {
         assertThat(result.providers()).hasSize(1);
         ProviderSync entry = result.providers().getFirst();
         assertThat(entry.registeredAs()).isEqualTo("db:" + key);
-        assertThat(entry.registeredModels()).containsExactly("glm-5.4");
+        // 不在内置能力表里的 mystery-model 也注册了：用户在设置页加了模型，就得真的能用
+        assertThat(entry.registeredModels()).containsExactly("mystery-model", "glm-5.4");
         // 条目里填的默认模型被跳过了，退到第一个注册成功的模型
-        assertThat(entry.defaultModel()).isEqualTo("glm-5.4");
+        assertThat(entry.defaultModel()).isEqualTo("mystery-model");
         assertThat(entry.skipReason()).isNull();
-        assertThat(entry.skippedModels()).extracting(ModelSkip::model)
-                .containsExactly("gpt-6.2-sol", "mystery-model");
-        assertThat(entry.skippedModels().get(0).reason()).contains("huoshen");
-        assertThat(entry.skippedModels().get(1).reason()).contains("能力表");
-        // 有一个模型因为没登记能力而没注册成：需要用户关注
-        assertThat(entry.needsAttention()).isTrue();
-        assertThat(result.registeredModels()).containsExactly("glm-5.4");
+        assertThat(entry.needsAttention()).isFalse();
+        assertThat(entry.skippedModels()).extracting(ModelSkip::model).containsExactly("gpt-6.2-sol");
+        assertThat(entry.skippedModels().getFirst().reason()).contains("huoshen");
+        assertThat(entry.inferredModels()).hasSize(1);
+        assertThat(entry.inferredModels().getFirst().model()).isEqualTo("mystery-model");
+        assertThat(entry.inferredModels().getFirst().basis()).startsWith("通用参数");
+        assertThat(result.registeredModels()).containsExactly("mystery-model", "glm-5.4");
 
         // 配置里的 Provider 排在前面、原样不动；池里的追加在后面
         assertThat(registry.registeredProviderNames()).containsExactly("huoshen", "db:" + key);
+        assertThat(registry.getProvider("mystery-model").getProviderName()).isEqualTo("db:" + key);
         assertThat(registry.getProvider("glm-5.4").getProviderName()).isEqualTo("db:" + key);
         assertThat(registry.getProvider("gpt-6.2-sol").getProviderName()).isEqualTo("huoshen");
-        assertThat(registry.listAvailableModels()).contains("glm-5.4");
-        // 能力来自内置表，而不是会让预算算成负数的保守默认值
+        assertThat(registry.listAvailableModels()).contains("mystery-model", "glm-5.4");
+        // 已登记的模型能力仍来自内置表；没登记的拿到推算出来的通用参数，而不是会让预算算成负数的保守默认值
         assertThat(modelRegistry.getCapabilities("glm-5.4").contextWindow()).isEqualTo(1048576);
+        assertThat(modelRegistry.getCapabilities("mystery-model").contextWindow())
+                .isEqualTo(PoolModelCapabilities.GENERIC_CONTEXT_WINDOW);
+        assertThat(modelRegistry.getCapabilities("mystery-model").modelId()).isEqualTo("mystery-model");
+        assertThat(modelRegistry.findKnownCapabilities("mystery-model")).isPresent();
+        // "静态登记过"的判断不受影响：mystery-model 确实不在内置表里
+        assertThat(modelRegistry.hasStaticCapabilities("mystery-model")).isFalse();
         assertThat(sync.last()).isSameAs(result);
+    }
+
+    @Test
+    void anUnknownModelInheritsCapabilitiesFromTheClosestModelOfItsFamily() {
+        addProvider("智谱", List.of("glm-5.9"), null, null);
+
+        var result = sync.sync();
+
+        // glm-5.9 不在内置表里，按最相近的 glm-5.4 登记，于是它收图，可以作为视觉兜底
+        assertThat(result.inferredModels()).singleElement().satisfies(inferred -> {
+            assertThat(inferred.model()).isEqualTo("glm-5.9");
+            assertThat(inferred.basis()).isEqualTo("沿用 glm-5.4 的参数");
+        });
+        assertThat(modelRegistry.getCapabilities("glm-5.9").supportsImages()).isTrue();
+        assertThat(modelRegistry.getCapabilities("glm-5.9").contextWindow()).isEqualTo(1048576);
+        assertThat(modelRegistry.getCapabilities("glm-5.9").supportsToolUse()).isTrue();
+        assertThat(modelRegistry.isKnownModel("glm-5.9")).isTrue();
+    }
+
+    @Test
+    void inferredCapabilitiesGoAwayWhenTheProviderThatBroughtThemIsRemoved() {
+        String key = addProvider("智谱", List.of("mystery-model", "glm-5.9"), null, null);
+        sync.sync();
+        assertThat(modelRegistry.findKnownCapabilities("glm-5.9")).isPresent();
+
+        pool.update(key, new ProviderInput("智谱", "https://relay.example/v1", null, List.of("glm-5.9"), null, null));
+        sync.sync();
+        // 清单里删掉的模型，能力也跟着撤掉
+        assertThat(modelRegistry.findKnownCapabilities("mystery-model")).isEmpty();
+        assertThat(modelRegistry.getCapabilities("mystery-model")).isEqualTo(ModelCapabilities.DEFAULT);
+
+        pool.delete(key);
+        sync.sync();
+        assertThat(modelRegistry.findKnownCapabilities("glm-5.9")).isEmpty();
+        assertThat(modelRegistry.listAllModels()).noneMatch(capabilities -> capabilities.modelId().equals("glm-5.9"));
     }
 
     @Test
