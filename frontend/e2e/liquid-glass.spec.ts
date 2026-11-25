@@ -71,9 +71,9 @@ test('玻璃侧栏仍可收起恢复，弹层保持焦点与关闭行为', async
     await expect(page.getByRole('textbox', { name: '搜索会话' })).toBeHidden();
     await page.getByRole('button', { name: '展开侧栏列表' }).click();
     await expect(page.getByRole('textbox', { name: '搜索会话' })).toBeVisible();
-    const entry = page.getByRole('button', { name: '外观设置', exact: true });
+    const entry = page.getByRole('button', { name: '设置', exact: true });
     await entry.click();
-    const dialog = page.getByRole('dialog', { name: '外观设置' });
+    const dialog = page.getByRole('dialog', { name: '设置', exact: true });
     await expect(dialog).toBeVisible();
     await expect(dialog.locator('.liquid-glass-material')).toBeVisible();
     await page.keyboard.press('Escape');

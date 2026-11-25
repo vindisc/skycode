@@ -202,12 +202,12 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     </button>
                 )}
 
-                {/* 显示当前主题；点击选择，不再循环切换。 */}
+                {/* 显示当前主题；点击打开「设置」弹窗（默认落在外观页，里面还有模型服务商和场景分派）。 */}
                 <button
                     onClick={() => openDialog('settings')}
                     className={`panel-control hidden md:inline-flex items-center gap-1.5 border border-hairline bg-surfacev2 shadow-raised hover:shadow-raised-hover ${HEADER_BUTTON_CLASS}`}
-                    title="外观设置"
-                    aria-label="外观设置"
+                    title="设置"
+                    aria-label="设置"
                     aria-haspopup="dialog"
                 >
                     <ThemeIcon className="w-4 h-4" aria-hidden="true" />

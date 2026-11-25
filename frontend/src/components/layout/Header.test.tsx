@@ -31,7 +31,7 @@ describe('Header', () => {
         useConfigStore.setState({ theme: JSON.parse(JSON.stringify({ ...useConfigStore.getState().theme, mode })) });
         document.documentElement.classList.add('system');
         render(<ThemeProvider><Header /></ThemeProvider>);
-        expect(screen.getByRole('button', { name: '外观设置' })).toBeVisible();
+        expect(screen.getByRole('button', { name: '设置' })).toBeVisible();
         expect(document.documentElement.classList.contains('system')).toBe(false);
         expect(document.documentElement.classList.contains('light') || document.documentElement.classList.contains('dark')).toBe(true);
     });

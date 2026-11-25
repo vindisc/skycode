@@ -310,8 +310,8 @@ test.describe('前端 E2E 与 UI 功能测试 (Task 13)', () => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.waitForTimeout(2000);
 
-    // 找到设置按钮 (title="外观设置")
-    const settingsBtn = page.locator('button[title="外观设置"]');
+    // 找到设置按钮 (title="设置")
+    const settingsBtn = page.locator('button[title="设置"]');
     await expect(settingsBtn).toBeVisible();
 
     await settingsBtn.click();
@@ -338,8 +338,8 @@ test.describe('前端 E2E 与 UI 功能测试 (Task 13)', () => {
   test('TC-FE-06: 主题切换与刷新持久化', async ({ page }) => {
     await page.route('**/api/config', route => route.fulfill({ json: { theme: 'dark' } }));
     await page.goto('/');
-    await page.getByRole('button', { name: '外观设置', exact: true }).click();
-    const dialog = page.getByRole('dialog', { name: '外观设置' });
+    await page.getByRole('button', { name: '设置', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: '设置', exact: true });
     await expect(dialog).toBeVisible();
     for (const [mode, label] of [['dark', '深色'], ['glass', '液态玻璃'], ['light', '浅色']]) {
       const option = dialog.getByRole('button', { name: label, exact: true });
@@ -351,7 +351,7 @@ test.describe('前端 E2E 与 UI 功能测试 (Task 13)', () => {
     await dialog.getByRole('button', { name: '完成', exact: true }).click();
     await expect(dialog).not.toBeVisible();
     await page.reload();
-    await expect(page.getByRole('button', { name: '外观设置', exact: true })).toContainText('浅色');
+    await expect(page.getByRole('button', { name: '设置', exact: true })).toContainText('浅色');
     await expect(page.locator('html')).toHaveClass(/\blight\b/);
   });
 
@@ -367,7 +367,7 @@ test.describe('前端 E2E 与 UI 功能测试 (Task 13)', () => {
       const errors: string[] = [];
       page.on('pageerror', error => errors.push(error.message));
       await page.goto('/');
-      await expect(page.getByRole('button', { name: '外观设置', exact: true })).toBeVisible();
+      await expect(page.getByRole('button', { name: '设置', exact: true })).toBeVisible();
       await expect(page.locator('html')).toHaveClass(new RegExp(`(^|\\s)${colorScheme}(\\s|$)`));
       expect(await page.evaluate(() => JSON.parse(localStorage.getItem('ai-coder-config')!).state.theme.mode)).toBe(colorScheme);
       expect(errors).toEqual([]);
