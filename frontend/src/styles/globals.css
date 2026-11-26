@@ -364,12 +364,17 @@ html.light .session-active-pill {
     var(--v2-shadow-raised);
 }
 
-/* ===== 会话卡操作区：指针能力自适应可见性 =====
+/* ===== 会话卡尾部：操作区 / 状态胶囊按指针能力切换 =====
    触屏/粗指针设备无 hover：操作区默认常驻可见（合并/删除入口可发现，
-   且避免 opacity-0 元素仍可被误触）；仅精确指针（鼠标）设备折叠为
-   hover/聚焦显示，保持列表整洁与键盘可达（focus-within）。 */
+   且避免 opacity-0 元素仍可被误触），状态胶囊排在其左侧。
+   仅精确指针（鼠标）设备：操作区折叠为 hover/聚焦显示，保持列表整洁与键盘可达（focus-within）；
+   状态胶囊绝对定位叠到操作区所在位置（卡片右缘），hover/聚焦时让位给操作区，
+   避免胶囊与按钮并排挤压标题。 */
 @media (hover: hover) and (pointer: fine) {
   .session-card .card-actions { opacity: 0; }
+  .session-card .card-status { position: absolute; right: 0; top: 50%; transform: translateY(-50%); }
   .session-card:hover .card-actions,
   .session-card:focus-within .card-actions { opacity: 1; }
+  .session-card:hover .card-status,
+  .session-card:focus-within .card-status { opacity: 0; pointer-events: none; }
 }

@@ -114,7 +114,7 @@ const PANEL_NEW_BUTTON_CLASS =
 /** 会话卡：surface 底浮在 app 底上（三主题自动适配），hover 泛 accent 微光 + 浮起阴影。
  *  选中视觉不再改卡片本身，由卡内 .session-active-pill 独立层承担（globals.css）。 */
 const SESSION_CARD_CLASS =
-    'session-card group relative px-3 py-2.5 rounded-[14px] cursor-pointer border border-hairline ' +
+    'session-card group relative px-3 py-2 rounded-[14px] cursor-pointer border border-hairline ' +
     'bg-surfacev2 shadow-e1 transition-interactive duration-fast ' +
     'hover:shadow-raised hover:border-accent2-ring';
 
@@ -1004,33 +1004,11 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                                         transition={reducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 480, damping: 32, mass: 0.6 }}
                                                     />
                                                 )}
-                                                <div className="relative flex items-start justify-between gap-1">
+                                                <div className="relative flex items-center gap-1">
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className={`min-w-0 flex-1 truncate text-sm ${isActive ? 'font-semibold' : 'font-medium'} text-t1`}>
-                                                                {displayTitle}
-                                                            </div>
-                                                            {generating && (
-                                                                <span role="status"
-                                                                    className="inline-flex shrink-0 items-center gap-1 rounded-full border border-accent2-ring bg-accent2-soft px-2 py-0.5 text-[13px] font-medium leading-5 text-accent2-ink">
-                                                                    <Loader2 aria-hidden="true" className="h-3 w-3 animate-spin" />
-                                                                    运行中
-                                                                </span>
-                                                            )}
-                                                            {merging && <span role="status" className="text-xs text-accent2-ink whitespace-nowrap">合并中</span>}
+                                                        <div className={`truncate text-sm ${isActive ? 'font-semibold' : 'font-medium'} text-t1`}>
+                                                            {displayTitle}
                                                         </div>
-                                                        {!simpleMode && (
-                                                            <div className={`mt-1 flex items-center gap-1.5 text-[13px] ${isActive ? 'text-t2' : 'text-t3'}`}>
-                                                                <span className="truncate">{session.model}</span>
-                                                                <span aria-hidden="true">·</span>
-                                                                <span className="whitespace-nowrap tabular-nums">{session.messageCount} 条</span>
-                                                                <span aria-hidden="true">·</span>
-                                                                <span className="inline-flex items-center gap-1 whitespace-nowrap tabular-nums">
-                                                                    <Clock className="w-3 h-3" aria-hidden="true" />
-                                                                    {formatTime(session.updatedAt)}
-                                                                </span>
-                                                            </div>
-                                                        )}
                                                         {simpleMode && (
                                                             <div className={`mt-1 flex items-center gap-1.5 text-[13px] ${isActive ? 'text-t2' : 'text-t3'}`} title={session.workingDirectory}>
                                                                 {folder && <span className="truncate">文件夹：{folder}</span>}
@@ -1042,36 +1020,50 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                                             </div>
                                                         )}
                                                     </div>
-                                                    {/* 操作区：可见性由 globals.css 按指针能力切换
-                                                        （触屏常驻可见；鼠标设备 hover/聚焦显示） */}
-                                                    <div className="card-actions flex shrink-0 items-start gap-0.5 transition-interactive duration-fast">
-                                                        <button
-                                                            title="合并为新会话" aria-label="合并为新会话"
-                                                            disabled={generating || merging}
-                                                            className="panel-control p-1 rounded text-t3 hover:text-t1 disabled:opacity-30"
-                                                            onClick={e => { e.stopPropagation(); useSessionMergeStore.getState().openDialog(session); }}>
-                                                            <GitMerge className="w-3.5 h-3.5" />
-                                                        </button>
-                                                        <button
-                                                            title={simpleMode ? '重命名任务' : '重命名会话'}
-                                                            aria-label={simpleMode ? '重命名任务' : '重命名会话'}
-                                                            disabled={renaming !== null}
-                                                            className="panel-control p-1 rounded text-t3 hover:text-t1 disabled:opacity-30"
-                                                            onClick={e => openRename(e, session, displayTitle)}
-                                                        >
-                                                            <Pencil className="w-3.5 h-3.5" />
-                                                        </button>
-                                                        <button
-                                                            disabled={merging}
-                                                            onClick={(e) => openDeleteConfirm(e, session.id)}
-                                                            className="panel-control p-1 rounded
-                                                                hover:bg-errsoft text-t3 hover:text-err
-                                                                transition-interactive duration-fast"
-                                                            title={simpleMode ? '删除任务' : '删除会话'}
-                                                            aria-label={simpleMode ? '删除任务' : '删除会话'}
-                                                        >
-                                                            <Trash2 className="w-3.5 h-3.5" />
-                                                        </button>
+                                                    {/* 尾部槽位：状态胶囊与操作区占同一位置。触屏并排常驻；
+                                                        鼠标设备 hover/聚焦时胶囊让位给操作按钮（切换规则见 globals.css） */}
+                                                    <div className="relative flex shrink-0 items-center gap-1.5">
+                                                        {(generating || merging) && (
+                                                            <div className="card-status flex items-center gap-1.5 transition-interactive duration-fast">
+                                                                {generating && (
+                                                                    <span role="status"
+                                                                        className="inline-flex shrink-0 items-center gap-1 rounded-full border border-accent2-ring bg-accent2-soft px-2 py-0.5 text-[13px] font-medium leading-5 text-accent2-ink">
+                                                                        <Loader2 aria-hidden="true" className="h-3 w-3 animate-spin" />
+                                                                        运行中
+                                                                    </span>
+                                                                )}
+                                                                {merging && <span role="status" className="text-xs text-accent2-ink whitespace-nowrap">合并中</span>}
+                                                            </div>
+                                                        )}
+                                                        <div className="card-actions flex items-center gap-0.5 transition-interactive duration-fast">
+                                                            <button
+                                                                title="合并为新会话" aria-label="合并为新会话"
+                                                                disabled={generating || merging}
+                                                                className="panel-control p-1 rounded text-t3 hover:text-t1 disabled:opacity-30"
+                                                                onClick={e => { e.stopPropagation(); useSessionMergeStore.getState().openDialog(session); }}>
+                                                                <GitMerge className="w-3.5 h-3.5" />
+                                                            </button>
+                                                            <button
+                                                                title={simpleMode ? '重命名任务' : '重命名会话'}
+                                                                aria-label={simpleMode ? '重命名任务' : '重命名会话'}
+                                                                disabled={renaming !== null}
+                                                                className="panel-control p-1 rounded text-t3 hover:text-t1 disabled:opacity-30"
+                                                                onClick={e => openRename(e, session, displayTitle)}
+                                                            >
+                                                                <Pencil className="w-3.5 h-3.5" />
+                                                            </button>
+                                                            <button
+                                                                disabled={merging}
+                                                                onClick={(e) => openDeleteConfirm(e, session.id)}
+                                                                className="panel-control p-1 rounded
+                                                                    hover:bg-errsoft text-t3 hover:text-err
+                                                                    transition-interactive duration-fast"
+                                                                title={simpleMode ? '删除任务' : '删除会话'}
+                                                                aria-label={simpleMode ? '删除任务' : '删除会话'}
+                                                            >
+                                                                <Trash2 className="w-3.5 h-3.5" />
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

@@ -219,6 +219,25 @@ it('非选中卡不渲染 pill', async () => {
     expect(otherTitle).toHaveClass('font-medium');
 });
 
+it('会话卡只保留标题：不显示模型、消息数与时间；运行中状态收进尾部槽位与操作区同位', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({
+        sessions: [{ id: 'target', title: '目标会话', model: 'test-model-x', workingDirectory: '/workspace', updatedAt: new Date().toISOString(), messageCount: 8, running: true }],
+        hasMore: false,
+    }) }));
+    render(<Sidebar />);
+    const title = await screen.findByText('目标会话');
+    const card = title.closest('.session-card')!;
+    expect(screen.queryByText('test-model-x')).not.toBeInTheDocument();
+    expect(screen.queryByText(/8 条/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/刚刚/)).not.toBeInTheDocument();
+    const status = card.querySelector('.card-status');
+    expect(status).not.toBeNull();
+    expect(status).toHaveTextContent('运行中');
+    const actions = card.querySelector('.card-actions');
+    expect(actions).not.toBeNull();
+    expect(status!.parentElement).toBe(actions!.parentElement);
+});
+
 // ═══ 删除会话二次确认气泡 ═══
 
 /** mock 会话列表 + delete-confirm 配置 + DELETE 响应（deleteStatuses 依次消费） */
