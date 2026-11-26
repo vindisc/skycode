@@ -174,7 +174,7 @@ export function LlmProviderForm({
                 />
                 {configured && existing?.hasApiKey && configured.keyFromConfig && form.apiKey.trim() && (
                     <p className={HINT} role="status">
-                        保存后将改用这里填的密钥；「恢复默认」可以回到配置文件里的那把。
+                        保存后将改用这里填的密钥；之后那行会多出一个「恢复默认」，点了就回到 .env 里的那把。
                     </p>
                 )}
                 <p className={HINT}>

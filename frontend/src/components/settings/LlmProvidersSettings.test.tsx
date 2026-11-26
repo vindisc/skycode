@@ -473,7 +473,7 @@ describe('LlmProvidersSettings', () => {
         expect(within(active).getByText('HuoshenAI 中转站')).toBeInTheDocument();
         expect(active).toHaveTextContent('密钥 ••••vEEm');
         expect(active).toHaveTextContent('来自 .env');
-        expect(within(active).getByRole('button', { name: '恢复默认' })).toBeDisabled();
+        expect(within(active).queryByRole('button', { name: '恢复默认' })).not.toBeInTheDocument();
 
         const keyless = within(section).getByTestId('configured-provider-row-zhipu');
         expect(within(keyless).getByText('未配置密钥')).toBeInTheDocument();
@@ -481,6 +481,7 @@ describe('LlmProvidersSettings', () => {
 
         const edited = within(section).getByTestId('configured-provider-row-deepseek');
         expect(within(edited).getByText('页面修改过')).toBeInTheDocument();
+        // 「恢复默认」只在页面上改过时才出现，出现即可用
         expect(within(edited).getByRole('button', { name: '恢复默认' })).toBeEnabled();
     });
 

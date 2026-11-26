@@ -470,17 +470,20 @@ function ConfiguredProviderRow({ view, operation, anyBusy, testResult, onTest, o
                         )}
                         <Button size="sm" onClick={onTest} loading={operation === 'test'} disabled={anyBusy}>测试</Button>
                         <Button size="sm" variant="ghost" onClick={onEdit} disabled={anyBusy}>编辑</Button>
-                        <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={onReset}
-                            loading={operation === 'reset'}
-                            disabled={anyBusy || !view.overridden}
-                            title={view.overridden ? '撤掉设置页里的修改，回到 .env 里的值' : '没有在设置页里改过'}
-                        >
-                            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-                            恢复默认
-                        </Button>
+                        {/* 只在页面上改过时才出现：没改过就没什么可恢复的，常驻一个灰按钮只是噪音 */}
+                        {view.overridden && (
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={onReset}
+                                loading={operation === 'reset'}
+                                disabled={anyBusy}
+                                title="撤掉设置页里的修改，回到 .env 里的值"
+                            >
+                                <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                                恢复默认
+                            </Button>
+                        )}
                     </div>
                 </div>
                 <TestOutcome testResult={testResult} />
