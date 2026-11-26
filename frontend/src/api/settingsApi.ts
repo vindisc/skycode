@@ -225,49 +225,6 @@ export interface ConfiguredProviderResponse {
     routing: ProviderRouting[];
 }
 
-/** 某条管线此刻实际在用的模型，以及它是怎么来的。 */
-export interface RuntimeModelStatus {
-    /** 为 null 表示这条管线此刻没有任何生效的模型 */
-    model: string | null;
-    /** scene_binding:<服务商> = 设置页里分派的；config = 配置文件里的；env = 环境变量；inherit = 跟随主对话 */
-    source: string | null;
-}
-
-export interface RuntimePythonStatus {
-    autoStart: boolean;
-    running: boolean;
-    healthy: boolean;
-    state: string;
-    restartCount: number;
-    lastHealthCheck: string;
-    serviceUrl: string;
-    /** 顺序由后端固定；key 是能力域代码（CODE_INTEL 等），name 是 Python 服务给的显示名 */
-    capabilities: { key?: string; name: string; available: boolean; reason: string | null }[];
-    /** 不可用时给出该看哪里；可用时为 null */
-    hint: string | null;
-}
-
-export interface RuntimeSummaryStatus {
-    enabled: boolean;
-    configuredProvider: string | null;
-    configuredModel: string | null;
-    model: string | null;
-    source: string | null;
-    unavailable: string | null;
-}
-
-export interface RuntimeStatus {
-    python: RuntimePythonStatus;
-    defaultModel: RuntimeModelStatus;
-    fastModel: RuntimeModelStatus;
-    subAgentModel: RuntimeModelStatus;
-    visionFallbackModel: RuntimeModelStatus;
-    promptOptimizeModel: RuntimeModelStatus;
-    summary: RuntimeSummaryStatus;
-    configuredProviders: string[];
-    poolProviders: string[];
-}
-
 const CONFIGURED_PROVIDERS = '/api/settings/configured-providers';
 
 export const configuredProvidersApi = {
@@ -292,8 +249,4 @@ export const configuredProvidersApi = {
     /** 从接口获取模型清单，用此刻生效的地址和密钥 */
     discoverModels: (name: string) =>
         request<string[]>(`${CONFIGURED_PROVIDERS}/discover`, { method: 'POST', body: JSON.stringify({ name }) }),
-};
-
-export const runtimeApi = {
-    status: () => request<RuntimeStatus>('/api/settings/runtime'),
 };

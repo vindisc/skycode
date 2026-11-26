@@ -422,30 +422,4 @@ class ContextCompactorTest {
         verify(provider, times(1)).summarize(any(), any());
         verify(provider, never()).summarizeExplicit(any(), any());
     }
-
-    @Test void summaryStatusNamesTheModelThatWillActuallyBeUsed() {
-        assertEquals("config", compactor.summaryStatus().source());
-        assertEquals("deepseek-flash", compactor.summaryStatus().model());
-        assertNull(compactor.summaryStatus().unavailable());
-
-        var bindings = mock(SceneBindingService.class);
-        when(bindings.resolve(ModelScenes.COMPACT_SUMMARY)).thenReturn(Optional.of(binding("deepseek", "gpt-6.2-sol")));
-        when(models.findKnownCapabilities("gpt-6.2-sol")).thenReturn(Optional.of(
-                new ModelCapabilities("gpt-6.2-sol", "GPT", 128000, 1050000, true, true, true, 10, true, 0, 0)));
-        var bound = new ContextCompactor(counter, registry, models, new CompactConfiguration(env), bindings);
-
-        var status = bound.summaryStatus();
-        assertEquals("gpt-6.2-sol", status.model());
-        assertEquals("scene_binding:中转站", status.source());
-        assertEquals("deepseek-flash", status.configuredModel());
-        // 配置里的生成上限 8192 高于这个模型的输出上限时会被压低；这里模型上限更大，保持不变
-    }
-
-    @Test void summaryStatusReportsWhenTheWholeThingIsDisabled() {
-        var off = new ContextCompactor(counter, registry, models,
-                new CompactConfiguration(new MockEnvironment().withProperty("app.compact.llm-enabled", "false")));
-
-        assertFalse(off.summaryStatus().enabled());
-        assertEquals("summary_disabled", off.summaryStatus().unavailable());
-    }
 }

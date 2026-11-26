@@ -73,27 +73,6 @@ public class ContextCompactor {
 
     public long timeoutMillis() { return configuration.settings().timeoutMs(); }
 
-    /**
-     * 压缩摘要此刻的配置与可用性，给设置页的「运行状态」看。
-     *
-     * @param model        实际会用的模型：场景分派指定的优先，否则是配置文件里的
-     * @param source       model 的来源：{@code scene_binding:<服务商>} 或 {@code config}
-     * @param unavailable  不可用的原因；可用时为 null
-     */
-    public record SummaryStatus(boolean enabled, String configuredProvider, String configuredModel,
-                                String model, String source, String unavailable) {}
-
-    public SummaryStatus summaryStatus() {
-        var settings = configuration.settings();
-        if (!settings.enabled()) return new SummaryStatus(false, null, null, null, null, settings.unavailable());
-        SummaryTarget chosen = summaryTarget(settings);
-        if (chosen != null) {
-            return new SummaryStatus(true, settings.provider(), settings.model(), chosen.model(), chosen.source(), null);
-        }
-        return new SummaryStatus(true, settings.provider(), settings.model(), settings.model(), "config",
-                unavailable(settings));
-    }
-
     /** Manual preview has no assembled system/tools yet; final execution still recalculates its full budget. */
     public CompactionContext previewContext(String model) {
         if (models == null || model == null) throw new IllegalArgumentException("manual_compaction_model_required");
