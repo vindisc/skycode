@@ -11,11 +11,11 @@ import { GlassMaterial } from '@/components/theme/GlassMaterial';
  */
 
 import { useEffect } from 'react';
-import { Menu, Sun, Moon, Sparkles, Rocket, Flower2, Landmark, Candy, Bug, Orbit, Keyboard, ChevronDown, Coins, Loader2, Flag } from 'lucide-react';
+import { Menu, Settings, Keyboard, Coins, Loader2, Flag } from 'lucide-react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useCostStore } from '@/store/costStore';
 import { useDialogStore } from '@/store/dialogStore';
-import { defaultInkHavocFx, normalizeThemeMode, useConfigStore } from '@/store/configStore';
+import { defaultInkHavocFx, useConfigStore } from '@/store/configStore';
 import { useModelStore } from '@/store/modelStore';
 import { useBridgeStore } from '@/store/bridgeStore';
 import { clearSessionSelection } from '@/services/sessionActivation';
@@ -84,18 +84,6 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
     });
     // 侧栏改名后的自定义标题优先；未设置时沿用首条用户消息
     const sessionTitle = customTitle?.trim() || firstUserText;
-    const currentTheme = {
-        light: { label: '浅色', icon: Sun },
-        dark: { label: '深色', icon: Moon },
-        glass: { label: '液态玻璃', icon: Sparkles },
-        spaceship: { label: '星舰', icon: Rocket },
-        'ink-havoc': { label: '花果晨', icon: Flower2 },
-        'ink-havoc-night': { label: '灵霄夜', icon: Landmark },
-        jelly: { label: '果冻', icon: Candy },
-        spider: { label: '蜘蛛爬虫', icon: Bug },
-        galaxy: { label: '璀璨银河', icon: Orbit },
-    }[normalizeThemeMode(theme.mode)];
-    const ThemeIcon = currentTheme.icon;
     const currentModelName = availableModels.find(item => item.id === model)?.displayName ?? model ?? '';
     // Compact presentation only; option labels, ids and model requests remain unchanged.
     const compactModelName = currentModelName.replace(/\s*[（(][^）)]*[）)]\s*$/, '');
@@ -202,17 +190,15 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     </button>
                 )}
 
-                {/* 显示当前主题；点击打开「设置」弹窗（默认落在外观页，里面还有模型服务商和场景分派）。 */}
+                {/* 设置入口：打开「设置」弹窗（外观 / 模型服务商 / 场景分派）。 */}
                 <button
                     onClick={() => openDialog('settings')}
-                    className={`panel-control hidden md:inline-flex items-center gap-1.5 border border-hairline bg-surfacev2 shadow-raised hover:shadow-raised-hover ${HEADER_BUTTON_CLASS}`}
+                    className={`panel-control hidden md:inline-flex ${HEADER_BUTTON_CLASS}`}
                     title="设置"
                     aria-label="设置"
                     aria-haspopup="dialog"
                 >
-                    <ThemeIcon className="w-4 h-4" aria-hidden="true" />
-                    <span className="text-sm whitespace-nowrap">{currentTheme.label}</span>
-                    <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />
+                    <Settings className="w-4 h-4" aria-hidden="true" />
                 </button>
 
                 {/* Settings */}

@@ -351,7 +351,8 @@ test.describe('前端 E2E 与 UI 功能测试 (Task 13)', () => {
     await dialog.getByRole('button', { name: '完成', exact: true }).click();
     await expect(dialog).not.toBeVisible();
     await page.reload();
-    await expect(page.getByRole('button', { name: '设置', exact: true })).toContainText('浅色');
+    // 顶栏入口现在是齿轮图标，不再显示主题名；持久化看 html 的主题类
+    await expect(page.getByRole('button', { name: '设置', exact: true })).toBeVisible();
     await expect(page.locator('html')).toHaveClass(/\blight\b/);
   });
 
