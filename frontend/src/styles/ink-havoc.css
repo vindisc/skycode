@@ -704,13 +704,10 @@ html.ink-havoc-night.fx-ink-rich .user-message > .bg-surfacev2::after {
 
 /* ============================================================
    书法字体应用点（品牌/标题类；正文/代码/表格不动）
-   命中真实类名：①品牌名 ②Header 会话标题（SessionTitle 按钮内 .truncate）
-   ③弹窗标题（ui/Dialog h2.text-xl，设置/会话详情等） ④空状态 Hero 大标题
+   命中真实类名：①品牌名 ②弹窗标题（ui/Dialog h2.text-xl，设置等） ③空状态 Hero 大标题
    ============================================================ */
 .ink-havoc .app-header .font-semibold,
 .ink-havoc-night .app-header .font-semibold,
-.ink-havoc .app-header [aria-label="查看会话详情"] .truncate,
-.ink-havoc-night .app-header [aria-label="查看会话详情"] .truncate,
 .ink-havoc [role="dialog"] h2.text-xl,
 .ink-havoc-night [role="dialog"] h2.text-xl,
 .ink-havoc h1[class*="text-[clamp(34px"],

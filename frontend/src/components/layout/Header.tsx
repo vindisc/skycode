@@ -1,4 +1,3 @@
-import { SessionTitle } from './SessionTitle';
 import { useMessageStore } from '@/store/messageStore';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { GlassMaterial } from '@/components/theme/GlassMaterial';
@@ -6,12 +5,13 @@ import { GlassMaterial } from '@/components/theme/GlassMaterial';
  * Header — 顶部导航栏组件
  * SPEC: §8.6.1
  *
- * 包含: Logo, SessionTitle, SessionStatus, Metrics(Tokens/Cost), ThemeSwitch, NewSession, Settings
- * （会话状态与用量指标自底部状态栏右簇上移；连接状态由 SessionTitle 副行呈现，不再重复）
+ * 包含: Logo, SessionStatus, Metrics(Tokens/Cost), ThemeSwitch, NewSession, Settings
+ * （会话状态与用量指标自底部状态栏右簇上移；会话标题由左侧列表承载，桌面端不再重复，
+ *   仅移动端抽屉不常驻时在本栏显示标题）
  */
 
 import { useEffect } from 'react';
-import { Menu, Settings, Keyboard, Coins, Loader2, Flag } from 'lucide-react';
+import { Menu, Settings, Coins, Loader2, Flag } from 'lucide-react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useCostStore } from '@/store/costStore';
 import { useDialogStore } from '@/store/dialogStore';
@@ -47,7 +47,7 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
-    const { sessionId, model, setModel } = useSessionStore();
+    const { model, setModel } = useSessionStore();
     const { sessionCost, totalCost, usage } = useCostStore();
     const { bridgeStatus } = useBridgeStore();
     const { openDialog } = useDialogStore();
@@ -142,13 +142,8 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                 </button>
             </div>
 
-            {/* Center: Session Title */}
-            <div className="hidden md:flex flex-1 items-center justify-center gap-1.5 md:gap-3 min-w-0">
-                <SessionTitle title={sessionTitle} sessionId={sessionId} connection={bridgeStatus === 'connected' ? '已连接' : ({disconnected: '连接已断开', reconnecting: '连接中', error: '连接异常'}[bridgeStatus])} />
-            </div>
-
             {/* Right: SessionStatus + Metrics + Theme + New Session + MCP + Shortcuts */}
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2 ml-auto">
                 {/* 会话状态 + 用量指标（自底部状态栏右簇上移；指标细节 ≥lg 展示，空间不足时让位） */}
                 <div className="flex items-center gap-2.5 pr-1 text-[13px] font-mono tabular-nums text-t3">
                     <SessionStatusCapsule />
@@ -190,17 +185,6 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     </button>
                 )}
 
-                {/* 设置入口：打开「设置」弹窗（外观 / 模型服务商 / 场景分派）。 */}
-                <button
-                    onClick={() => openDialog('settings')}
-                    className={`panel-control hidden md:inline-flex ${HEADER_BUTTON_CLASS}`}
-                    title="设置"
-                    aria-label="设置"
-                    aria-haspopup="dialog"
-                >
-                    <Settings className="w-4 h-4" aria-hidden="true" />
-                </button>
-
                 {/* Settings */}
                 <button
                     onClick={() => openDialog('mcp')}
@@ -232,12 +216,13 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                 </button>
 
                 <button
-                    onClick={() => openDialog('keybindings')}
+                    onClick={() => openDialog('settings')}
                     className={`panel-control hidden md:inline-flex ${HEADER_BUTTON_CLASS}`}
-                    title="快捷键帮助"
-                    aria-label="快捷键帮助"
+                    title="设置"
+                    aria-label="设置"
+                    aria-haspopup="dialog"
                 >
-                    <Keyboard className="w-6 h-6" />
+                    <Settings className="w-4 h-4" aria-hidden="true" />
                 </button>
 
             </div>
