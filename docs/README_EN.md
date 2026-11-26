@@ -1,8 +1,8 @@
 [🇨🇳 中文版](../README.md)
 
 <div align="center">
-  <img src="assets/logo.svg" alt="ZhikunCode" width="120" />
-  <h1>ZhikunCode</h1>
+  <img src="assets/logo.svg" alt="SkyCode" width="120" />
+  <h1>SkyCode</h1>
   <p><strong>Open-Source AI Coding Workspace — Self-Hosted and Browser-Based</strong></p>
   <p>Run on Your Computer, Continue on Your Phone · Agent Delegation · Context Management · Tool Execution and Verification</p>
 

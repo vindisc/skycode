@@ -1,8 +1,8 @@
 [🌐 English](docs/README_EN.md)
 
 <div align="center">
-  <img src="docs/assets/logo.svg" alt="ZhikunCode" width="120" />
-  <h1>ZhikunCode</h1>
+  <img src="docs/assets/logo.svg" alt="SkyCode" width="120" />
+  <h1>SkyCode</h1>
   <p><strong>开源 AI 编程工作台 — 自托管，通过浏览器操作</strong></p>
   <p>电脑运行，手机接续 · Agent 分工 · 上下文管理 · 工具授权 · 运行验证</p>
 
