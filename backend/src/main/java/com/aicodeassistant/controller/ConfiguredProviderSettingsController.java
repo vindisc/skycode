@@ -55,9 +55,15 @@ public class ConfiguredProviderSettingsController {
         this.discovery = discovery;
     }
 
+    /**
+     * 只列配了密钥的、以及在页面上改过的。配置里预置但没配密钥的那几个不下发——
+     * 设置页只显示用户实际在用的服务商，要别的自己加。
+     */
     @GetMapping
     public List<ConfiguredProviderView> list() {
-        return configured.views(this::isActive);
+        return configured.views(this::isActive).stream()
+                .filter(view -> view.hasApiKey() || view.overridden())
+                .toList();
     }
 
     @PutMapping("/{name}")

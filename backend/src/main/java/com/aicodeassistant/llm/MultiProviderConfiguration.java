@@ -57,9 +57,12 @@ public class MultiProviderConfiguration {
                     // 这些服务商在 application.yml 里是预置的，没配密钥是常态：只记一条不吓人的提示，
                     // 真正的问题（有密钥但缺地址或模型）才用警告
                     boolean hasKey = config.apiKey() != null && !config.apiKey().isBlank();
-                    log.info("Provider '{}' from config is not active ({}{}); it can be enabled on the settings page",
-                            name, hasKey ? "has key, but baseUrl or models missing" : "no API key configured",
-                            config.baseUrl() == null || config.baseUrl().isBlank() ? ", baseUrl missing" : "");
+                    if (hasKey) {
+                        log.warn("Provider '{}' from config has an API key but is not usable ({})", name,
+                                config.baseUrl() == null || config.baseUrl().isBlank() ? "baseUrl missing" : "no models");
+                    } else {
+                        log.info("Provider '{}' from config is not active (no API key configured)", name);
+                    }
                     continue;
                 }
 

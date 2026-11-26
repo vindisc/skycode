@@ -47,12 +47,13 @@ class ConfiguredProviderSettingsControllerTest {
     private final LlmProviderRegistry registry = mock(LlmProviderRegistry.class);
     private final ExternalLlmClient external = mock(ExternalLlmClient.class);
     private final ProviderModelDiscovery discovery = mock(ProviderModelDiscovery.class);
+    private JdbcTemplate jdbc;
     private ConfiguredProviderService configured;
     private ConfiguredProviderSettingsController controller;
 
     @BeforeEach
     void setUp() {
-        JdbcTemplate jdbc = SettingsTestSupport.globalDb(temp);
+        jdbc = SettingsTestSupport.globalDb(temp);
         Map<String, LlmProvidersProperties.ProviderConfig> templates = new LinkedHashMap<>();
         templates.put("huoshenai", new LlmProvidersProperties.ProviderConfig(ENV_KEY, "https://huoshenai.net/v1",
                 "gpt-6.2-sol", List.of("gpt-6.2-sol", "gpt-6.1-sol")));
@@ -79,6 +80,25 @@ class ConfiguredProviderSettingsControllerTest {
 
         when(registry.findProviderByName("huoshenai")).thenReturn(java.util.Optional.of(mock(com.aicodeassistant.llm.LlmProvider.class)));
         assertThat(controller.list().getFirst().active()).isTrue();
+    }
+
+    @Test
+    void presetsWithoutAKeyAreNotListedUnlessTheyWereEditedOnThePage() {
+        Map<String, LlmProvidersProperties.ProviderConfig> templates = new LinkedHashMap<>();
+        templates.put("huoshenai", new LlmProvidersProperties.ProviderConfig(ENV_KEY, "https://huoshenai.net/v1",
+                "gpt-6.2-sol", List.of("gpt-6.2-sol")));
+        templates.put("openai", new LlmProvidersProperties.ProviderConfig("", "https://api.openai.com/v1",
+                "gpt-6-astra", List.of("gpt-6-astra")));
+        configured = new ConfiguredProviderService(new LlmProvidersProperties(templates), new SettingsRepository(jdbc),
+                SettingsTestSupport.encryption(), new ObjectMapper());
+        controller = new ConfiguredProviderSettingsController(configured, sync, registry, external, discovery);
+
+        // 设置页只列用户实际在用的：预置但没配密钥的不出现
+        assertThat(controller.list()).extracting(view -> view.name()).containsExactly("huoshenai");
+
+        // 在页面上改过的例外，否则用户找不到自己刚改的那一条
+        controller.save("openai", new ConfiguredProviderInput(null, null, List.of("gpt-6-astra", "gpt-6-astra-mini"), null, null));
+        assertThat(controller.list()).extracting(view -> view.name()).containsExactly("huoshenai", "openai");
     }
 
     @Test

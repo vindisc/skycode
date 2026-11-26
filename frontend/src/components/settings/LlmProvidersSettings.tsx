@@ -1,9 +1,10 @@
 /**
- * 设置页「模型服务商」，分两块：
- * - 配置里的服务商：application.yml 里预置的那批（OpenAI、百炼、DeepSeek、智谱、火神中转站……），
- *   地址和默认模型都写好了，在页面上填密钥、改模型、启停即可，改动存库并立即生效，不用改 .env、不用重启
- * - 自定义服务商：配置之外自己加的（服务商池）
- * 每次保存、删除后，后端都会把两类同步进运行时注册表并把结果带回来；这里同时刷新模型列表，
+ * 设置页「模型服务商」：一张清单，列的就是当前可用的服务商，两类来源混在一起显示——
+ * - .env 里配了密钥的（application.yml 预置的那批里真正在用的）：可以换密钥、改模型、启停，
+ *   改动存库并立即生效，不用改 .env、不用重启；标着「来自 .env」，删不掉
+ * - 设置页里自己添加的（服务商池）
+ * 预置但没配密钥的那几个后端不下发——用户要的是"我加了什么，出现什么"。
+ * 每次保存、删除后，后端都会把它们同步进运行时注册表并把结果带回来；这里同时刷新模型列表，
  * 让新模型不用刷新页面就出现在选择器里。密钥只写不读，界面上永远只有打码后的形式。
  */
 
@@ -185,9 +186,9 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
         }
     };
 
-    /** 配置里的服务商不能删，只能把页面上的修改撤掉，回到配置文件的值 */
+    /** 配置里的服务商不能删，只能把页面上的修改撤掉，回到 .env 里的值 */
     const handleResetConfigured = async (view: ConfiguredProviderView) => {
-        if (!window.confirm(`把「${view.displayName}」恢复成配置文件里的设置？在页面上填的密钥和改过的模型清单都会丢掉。`)) return;
+        if (!window.confirm(`把「${view.displayName}」恢复成 .env 里的设置？在页面上填的密钥和改过的模型清单都会丢掉。`)) return;
         try {
             await run('reset', view.name, () => configuredProvidersApi.reset(view.name));
             addNotification({ key: `configured-reset-${view.name}-${Date.now()}`, level: 'success', message: `「${view.displayName}」已恢复为配置文件里的设置` });
@@ -289,8 +290,8 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
                 <div className="min-w-0">
                     <h3 className="text-base font-semibold text-t1">模型服务商</h3>
                     <p className="mt-1 text-[13px] leading-relaxed text-t3">
-                        配置文件里预置的服务商填上密钥就能用；它不提供的，可以自己添加 OpenAI 兼容的服务商。保存后立即可用，
-                        点「从接口获取」可以直接拉取模型清单，不用手敲模型名。
+                        这里列出的就是当前可用的服务商。要加新的点「添加服务商」，保存后立即可用；
+                        模型清单可以点「从接口获取」，不用手敲模型名。
                     </p>
                 </div>
                 <div className="flex shrink-0 gap-2">
@@ -324,56 +325,48 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
             )}
 
             {configured && (
-                <section aria-label="配置里的服务商" data-testid="configured-providers">
-                    <h4 className="text-sm font-medium text-t2">配置里的服务商</h4>
-                    <p className="mb-3 mt-0.5 text-[13px] leading-relaxed text-t3">
-                        这些是配置文件里预置的，地址和默认模型已经写好。没配密钥的填上密钥即可启用；在页面上改过的可以恢复成配置文件里的值。
-                    </p>
-                    <ul className="space-y-3">
-                        {configured.map(view => (
-                            <ConfiguredProviderRow
-                                key={view.name}
-                                view={view}
-                                operation={busy?.key === view.name || busy?.key === `configured:${view.name}` ? busy.what : null}
-                                anyBusy={anyBusy}
-                                testResult={testResults[`configured:${view.name}`]}
-                                onTest={() => { void handleTestConfigured(view); }}
-                                onToggle={enabled => { void handleToggleConfigured(view, enabled); }}
-                                onEdit={() => openEditor({ mode: 'configured', name: view.name })}
-                                onReset={() => { void handleResetConfigured(view); }}
+                <section aria-label="服务商" data-testid="providers-list">
+                    {configured.length === 0 && data && data.providers.length === 0
+                        ? (!editor && (
+                            <EmptyState
+                                variant="compact"
+                                title="还没有服务商"
+                                description="添加一个之后，它的模型会出现在输入框下方的模型选择器里；也可以在「场景分派」里指派给某个场景。"
+                                actions={onGoToScenes && <Button size="sm" onClick={onGoToScenes}>去场景分派</Button>}
                             />
-                        ))}
-                    </ul>
-                </section>
-            )}
-
-            {configured && (
-                <section aria-label="设置页里添加的服务商" data-testid="custom-providers">
-                    <h4 className="text-sm font-medium text-t2">设置页里添加的服务商</h4>
-                    {data && data.providers.length === 0 && !editor && (
-                        <EmptyState
-                            variant="compact"
-                            title="还没有添加服务商"
-                            description="添加之后，它的模型会出现在输入框下方的模型选择器里；也可以在「场景分派」里指派给某个用途。"
-                            actions={onGoToScenes && <Button size="sm" onClick={onGoToScenes}>去场景分派</Button>}
-                        />
-                    )}
-                    <ul className="mt-3 space-y-3">
-                        {data?.providers.map(provider => (
-                            <ProviderRow
-                                key={provider.key}
-                                provider={provider}
-                                routing={data.routing.find(r => r.providerKey === provider.key)}
-                                operation={busy?.key === provider.key ? busy.what : null}
-                                anyBusy={anyBusy}
-                                testResult={testResults[provider.key]}
-                                onToggle={enabled => { void handleToggleEnabled(provider, enabled); }}
-                                onTest={() => { void handleTest(provider); }}
-                                onEdit={() => openEditor({ mode: 'edit', key: provider.key })}
-                                onDelete={() => { void handleDelete(provider); }}
-                            />
-                        ))}
-                    </ul>
+                        ))
+                        : (
+                            /* 一张清单：.env 里配了密钥的在前，设置页里添加的在后 */
+                            <ul className="space-y-3">
+                                {configured.map(view => (
+                                    <ConfiguredProviderRow
+                                        key={view.name}
+                                        view={view}
+                                        operation={busy?.key === view.name || busy?.key === `configured:${view.name}` ? busy.what : null}
+                                        anyBusy={anyBusy}
+                                        testResult={testResults[`configured:${view.name}`]}
+                                        onTest={() => { void handleTestConfigured(view); }}
+                                        onToggle={enabled => { void handleToggleConfigured(view, enabled); }}
+                                        onEdit={() => openEditor({ mode: 'configured', name: view.name })}
+                                        onReset={() => { void handleResetConfigured(view); }}
+                                    />
+                                ))}
+                                {data?.providers.map(provider => (
+                                    <ProviderRow
+                                        key={provider.key}
+                                        provider={provider}
+                                        routing={data.routing.find(r => r.providerKey === provider.key)}
+                                        operation={busy?.key === provider.key ? busy.what : null}
+                                        anyBusy={anyBusy}
+                                        testResult={testResults[provider.key]}
+                                        onToggle={enabled => { void handleToggleEnabled(provider, enabled); }}
+                                        onTest={() => { void handleTest(provider); }}
+                                        onEdit={() => openEditor({ mode: 'edit', key: provider.key })}
+                                        onDelete={() => { void handleDelete(provider); }}
+                                    />
+                                ))}
+                            </ul>
+                        )}
                 </section>
             )}
 
@@ -443,14 +436,18 @@ function ConfiguredProviderRow({ view, operation, anyBusy, testResult, onTest, o
                     <div className="min-w-0 flex-1 basis-64">
                         <div className="flex flex-wrap items-center gap-2">
                             <span className="text-sm font-semibold text-t1">{view.displayName}</span>
-                            <span className="text-[13px] text-t4">{view.name}</span>
+                            {/* 这一条是 .env 里配的：能在这里换密钥、改模型、启停，但删不掉（删除要去 .env），所以标一下来源 */}
+                            <span
+                                className="text-[13px] text-t4"
+                                title={`在 .env 里配置的服务商（${view.name}）。可以在这里换密钥、改模型清单；要彻底去掉得从 .env 里删`}
+                            >
+                                来自 .env
+                            </span>
                             <ConfiguredStatus view={view} />
                         </div>
                         <div className="mt-1 truncate text-[13px] text-t3" title={view.baseUrl}>{view.baseUrl}</div>
                         <div className="mt-0.5 text-[13px] text-t3">
-                            {view.hasApiKey
-                                ? <>密钥 {view.apiKeyMasked}{view.keyFromConfig && <span className="text-t4">（来自配置文件）</span>}</>
-                                : '还没有填写密钥'}
+                            {view.hasApiKey ? <>密钥 {view.apiKeyMasked}</> : '还没有填写密钥'}
                         </div>
                         <div className="mt-3 flex flex-wrap gap-1.5" aria-label={`${view.displayName} 的模型`}>
                             {view.models.map(model => (
@@ -479,7 +476,7 @@ function ConfiguredProviderRow({ view, operation, anyBusy, testResult, onTest, o
                             onClick={onReset}
                             loading={operation === 'reset'}
                             disabled={anyBusy || !view.overridden}
-                            title={view.overridden ? '撤掉设置页里的修改，回到配置文件里的值' : '没有在设置页里改过'}
+                            title={view.overridden ? '撤掉设置页里的修改，回到 .env 里的值' : '没有在设置页里改过'}
                         >
                             <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
                             恢复默认

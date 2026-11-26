@@ -74,7 +74,7 @@ describe('SceneBindingsSettings', () => {
 
         expect(await screen.findByText('提示词优化')).toBeInTheDocument();
         expect(screen.getByText('图片理解兜底')).toBeInTheDocument();
-        expect(screen.getByText('使用默认配置')).toBeInTheDocument();
+        expect(screen.getByTestId('scene-card-prompt_optimize').querySelector('h4')?.parentElement).toHaveTextContent('未分派');
         expect(screen.getByText('已生效')).toBeInTheDocument();
         expect(screen.getByText('当前：智谱 / glm-5.4')).toBeInTheDocument();
         expect(api.listScenes).toHaveBeenCalledTimes(1);
@@ -86,8 +86,17 @@ describe('SceneBindingsSettings', () => {
 
         const promptCard = screen.getByTestId('scene-card-prompt_optimize');
         const visionCard = screen.getByTestId('scene-card-vision_fallback');
+        // 没分派的场景不预选服务商：服务商停在「未分派」，模型框空着，保存不可点
+        const promptProvider = promptCard.querySelectorAll('select')[0] as HTMLSelectElement;
+        expect(promptProvider.value).toBe('');
+        expect(promptProvider.selectedOptions[0].textContent).toBe('未分派（使用默认模型）');
+        expect(Array.from(promptCard.querySelectorAll('select')[1].options).map(o => o.value)).toEqual(['']);
+        expect(within(promptCard).getByRole('button', { name: '保存' })).toBeDisabled();
+        // 选了服务商才出模型清单
+        fireEvent.change(promptProvider, { target: { value: 'pool\u0000智谱' } });
         expect(Array.from(promptCard.querySelectorAll('select')[1].options).map(o => o.value))
             .toEqual(['glm-5.3', 'glm-5.4']);
+        expect(within(promptCard).getByRole('button', { name: '保存' })).toBeEnabled();
         expect(Array.from(visionCard.querySelectorAll('select')[1].options).map(o => o.value))
             .toEqual(['glm-5.4']);
     });
@@ -111,8 +120,8 @@ describe('SceneBindingsSettings', () => {
         await screen.findByText('图片理解兜底');
 
         const buttons = screen.getAllByRole('button', { name: '保存' });
-        // 已生效的绑定：没改动，保存按钮禁用；未绑定的场景：默认选中第一项，与"未绑定"不同，可以保存
-        expect(buttons[0]).toBeEnabled();
+        // 没分派的场景没选东西、已生效的绑定没改动：两种情况都不能保存
+        expect(buttons[0]).toBeDisabled();
         expect(buttons[1]).toBeDisabled();
         expect(api.saveSceneBinding).not.toHaveBeenCalled();
     });
@@ -155,12 +164,30 @@ describe('SceneBindingsSettings', () => {
             .not.toBeInTheDocument();
     });
 
+    it('drops an unsaved choice when the user picks "unassigned" again', async () => {
+        render(<SceneBindingsSettings />);
+        await screen.findByText('图片理解兜底');
+        const card = screen.getByTestId('scene-card-prompt_optimize');
+        const provider = card.querySelectorAll('select')[0] as HTMLSelectElement;
+
+        fireEvent.change(provider, { target: { value: 'pool\u0000fire' } });
+        expect(within(card).getByRole('button', { name: '保存' })).toBeEnabled();
+
+        fireEvent.change(provider, { target: { value: '' } });
+
+        expect(provider.value).toBe('');
+        expect(within(card).getByRole('button', { name: '保存' })).toBeDisabled();
+        expect(api.saveSceneBinding).not.toHaveBeenCalled();
+    });
+
     it('shows the backend reason when saving is rejected', async () => {
         api.saveSceneBinding.mockRejectedValue(new Error('模型 glm-5.3 不支持图片输入'));
         render(<SceneBindingsSettings />);
         await screen.findByText('图片理解兜底');
+        const promptCard = screen.getByTestId('scene-card-prompt_optimize');
+        fireEvent.change(promptCard.querySelectorAll('select')[0], { target: { value: 'pool\u0000智谱' } });
 
-        fireEvent.click(screen.getAllByRole('button', { name: '保存' })[0]);
+        fireEvent.click(within(promptCard).getByRole('button', { name: '保存' }));
 
         expect(await screen.findByRole('alert')).toHaveTextContent('模型 glm-5.3 不支持图片输入');
     });
@@ -185,7 +212,7 @@ describe('SceneBindingsSettings', () => {
         expect(await screen.findByText('提示词优化')).toBeInTheDocument();
     });
 
-    it('offers providers from the config file and from the settings page in separate groups', async () => {
+    it('offers every provider that the providers page lists, in one flat list', async () => {
         api.listScenes.mockResolvedValue(response({
             providers: [
                 { source: 'configured', key: 'huoshenai', name: 'HuoshenAI 中转站', models: [{ id: 'gpt-6.1-sol', supportsImages: true }] },
@@ -197,10 +224,13 @@ describe('SceneBindingsSettings', () => {
         await screen.findByText('提示词优化');
 
         const card = screen.getByTestId('scene-card-prompt_optimize');
-        const groups = Array.from(card.querySelectorAll('optgroup'));
-        expect(groups.map(group => group.label)).toEqual(['配置里的服务商', '设置页里添加的']);
+        const provider = card.querySelectorAll('select')[0];
+        // 不分「配置里的」「添加的」两组：用户看到的就是一串可选的服务商
+        expect(card.querySelectorAll('optgroup')).toHaveLength(0);
+        expect(Array.from(provider.options).map(option => option.textContent))
+            .toEqual(['未分派（使用默认模型）', 'HuoshenAI 中转站', '火神']);
 
-        fireEvent.change(card.querySelectorAll('select')[0], { target: { value: 'configured\u0000huoshenai' } });
+        fireEvent.change(provider, { target: { value: 'configured\u0000huoshenai' } });
         fireEvent.click(within(card).getByRole('button', { name: '保存' }));
 
         await waitFor(() => expect(api.saveSceneBinding)

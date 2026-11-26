@@ -290,7 +290,7 @@ describe('LlmProvidersSettings', () => {
 
         fireEvent.click(screen.getByRole('button', { name: '删除' }));
         await waitFor(() => expect(api.deleteProvider).toHaveBeenCalledWith('智谱'));
-        expect(await screen.findByText('还没有添加服务商')).toBeInTheDocument();
+        expect(await screen.findByText('还没有服务商')).toBeInTheDocument();
     });
 
     it('shows the connectivity test result inline, failures included', async () => {
@@ -466,13 +466,13 @@ describe('LlmProvidersSettings', () => {
         ]);
         render(<LlmProvidersSettings />);
 
-        const section = await screen.findByTestId('configured-providers');
+        const section = await screen.findByTestId('providers-list');
 
         const active = within(section).getByTestId('configured-provider-row-huoshenai');
         expect(within(active).getByText('已启用')).toBeInTheDocument();
         expect(within(active).getByText('HuoshenAI 中转站')).toBeInTheDocument();
         expect(active).toHaveTextContent('密钥 ••••vEEm');
-        expect(active).toHaveTextContent('来自配置文件');
+        expect(active).toHaveTextContent('来自 .env');
         expect(within(active).getByRole('button', { name: '恢复默认' })).toBeDisabled();
 
         const keyless = within(section).getByTestId('configured-provider-row-zhipu');
@@ -484,6 +484,19 @@ describe('LlmProvidersSettings', () => {
         expect(within(edited).getByRole('button', { name: '恢复默认' })).toBeEnabled();
     });
 
+    it('shows .env providers and providers added on the page in one list', async () => {
+        api.listConfiguredProviders.mockResolvedValue([configuredProvider()]);
+        render(<LlmProvidersSettings />);
+
+        const section = await screen.findByTestId('providers-list');
+        // .env 里配了的在前，页面上添加的在后，同一张清单（行里嵌着的小列表不算）
+        expect(Array.from(section.querySelectorAll<HTMLLIElement>(':scope > ul > li')).map(row => row.dataset.testid))
+            .toEqual(['configured-provider-row-huoshenai', 'llm-provider-row-智谱']);
+        expect(within(section).getByText('来自 .env')).toBeInTheDocument();
+        expect(screen.queryByText('配置里的服务商')).not.toBeInTheDocument();
+        expect(screen.queryByText('设置页里添加的服务商')).not.toBeInTheDocument();
+    });
+
     it('edits a configured provider: the name and a hard-coded address stay read-only', async () => {
         api.listConfiguredProviders.mockResolvedValue([configuredProvider()]);
         api.saveConfiguredProvider.mockResolvedValue({
@@ -491,7 +504,7 @@ describe('LlmProvidersSettings', () => {
             routing: [],
         });
         render(<LlmProvidersSettings />);
-        const section = await screen.findByTestId('configured-providers');
+        const section = await screen.findByTestId('providers-list');
         fireEvent.click(within(within(section).getByTestId('configured-provider-row-huoshenai')).getByRole('button', { name: '编辑' }));
         await screen.findByTestId('llm-provider-form');
 
@@ -523,7 +536,7 @@ describe('LlmProvidersSettings', () => {
             routing: [],
         });
         render(<LlmProvidersSettings />);
-        const section = await screen.findByTestId('configured-providers');
+        const section = await screen.findByTestId('providers-list');
         fireEvent.click(within(within(section).getByTestId('configured-provider-row-deepseek')).getByRole('button', { name: '编辑' }));
         await screen.findByTestId('llm-provider-form');
 
@@ -547,7 +560,7 @@ describe('LlmProvidersSettings', () => {
             return { provider: disabled, routing: [] };
         });
         render(<LlmProvidersSettings />);
-        const section = await screen.findByTestId('configured-providers');
+        const section = await screen.findByTestId('providers-list');
         const row = within(section).getByTestId('configured-provider-row-huoshenai');
 
         fireEvent.click(within(row).getByRole('switch', { name: '启用 HuoshenAI 中转站' }));
@@ -563,7 +576,7 @@ describe('LlmProvidersSettings', () => {
         api.listConfiguredProviders.mockResolvedValue([configuredProvider({ overridden: true })]);
         api.resetConfiguredProvider.mockResolvedValue(undefined);
         render(<LlmProvidersSettings />);
-        const section = await screen.findByTestId('configured-providers');
+        const section = await screen.findByTestId('providers-list');
         const reset = () => within(within(section).getByTestId('configured-provider-row-huoshenai')).getByRole('button', { name: '恢复默认' });
 
         fireEvent.click(reset());
@@ -579,7 +592,7 @@ describe('LlmProvidersSettings', () => {
         api.testConfiguredProvider.mockResolvedValue({ ok: true, model: 'gpt-6.2-sol', latencyMs: 88, error: null });
         api.discoverConfiguredModels.mockResolvedValue(['gpt-6.2-sol', 'gpt-6.1-sol', 'gpt-6-sol']);
         render(<LlmProvidersSettings />);
-        const section = await screen.findByTestId('configured-providers');
+        const section = await screen.findByTestId('providers-list');
         const row = within(section).getByTestId('configured-provider-row-huoshenai');
 
         fireEvent.click(within(row).getByRole('button', { name: '测试' }));
@@ -604,7 +617,7 @@ describe('LlmProvidersSettings', () => {
             routing: [],
         });
         render(<LlmProvidersSettings />);
-        const section = await screen.findByTestId('configured-providers');
+        const section = await screen.findByTestId('providers-list');
         fireEvent.click(within(within(section).getByTestId('configured-provider-row-huoshenai')).getByRole('button', { name: '编辑' }));
         await screen.findByTestId('llm-provider-form');
         fireEvent.click(screen.getByRole('button', { name: '保存' }));
