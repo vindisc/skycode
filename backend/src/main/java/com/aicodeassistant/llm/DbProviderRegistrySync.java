@@ -203,20 +203,18 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
     }
 
     /**
-     * 配置文件里定义的服务商，叠加设置页里的修改：能用的按名字注册（替换启动时按环境变量建的那份），
-     * 被停用或没有密钥的从注册表里移除。名字不变，所以按名字生效的特殊行为都还在。
+     * 设置页里带注册名的那批服务商：能用的按名字注册，被停用或没有密钥的从注册表里移除。
+     * 名字不变，所以按名字生效的特殊行为都还在。第一次启动先做一次性导入（.env → 库）。
      */
     private void syncConfiguredProviders(List<ModelCapabilities> registeredCapabilities,
                                          java.util.Set<String> knownModelIds) {
+        configured.seedIfNeeded();
         List<LlmProvider> toRegister = new ArrayList<>();
-        List<String> toRemove = new ArrayList<>();
+        java.util.Set<String> wanted = new java.util.LinkedHashSet<>();
         for (ConfiguredProviderService.Effective effective : configured.effectiveProviders()) {
             List<String> models = effective.models() == null ? List.of()
                     : effective.models().stream().filter(model -> model != null && !model.isBlank()).toList();
-            if (!effective.usable()) {
-                toRemove.add(effective.name());
-                continue;
-            }
+            if (!effective.usable()) continue;
             try {
                 String defaultModel = models.contains(effective.defaultModel())
                         ? effective.defaultModel() : models.getFirst();
@@ -225,12 +223,12 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
                         new ApiKeyRotationManager(apiKeys, effective.keySelectionStrategy()),
                         apiKeys.isEmpty() ? null : apiKeys.getFirst(), effective.baseUrl(), defaultModel,
                         models, payloadGuard));
+                wanted.add(effective.name());
             } catch (RuntimeException failure) {
-                toRemove.add(effective.name());
                 log.warn("Configured provider '{}' cannot be registered: {}", effective.name(), failure.getMessage());
                 continue;
             }
-            // 在设置页里给配置里的服务商加了内置表没有的模型：和池里一样推算能力
+            // 在设置页里给它加了内置表没有的模型：和池里一样推算能力
             for (String model : models) {
                 if (!modelRegistry.hasStaticCapabilities(model)) {
                     registeredCapabilities.add(PoolModelCapabilities
@@ -238,6 +236,12 @@ public class DbProviderRegistrySync implements SmartInitializingSingleton {
                 }
             }
         }
+        // 注册表里这类名字但已不在设置存储里的（被删了），以及启动时按环境变量建的那批没被设置存储接管的，
+        // 全部移除——.env 从此只提供首次导入的初始值
+        List<String> toRemove = registry.registeredProviderNames().stream()
+                .filter(name -> !LlmProviderRegistry.isPoolProviderName(name))
+                .filter(name -> !wanted.contains(name))
+                .toList();
         registry.applyConfiguredProviders(toRegister, toRemove);
     }
 

@@ -29,7 +29,7 @@ const api = vi.hoisted(() => ({
     discoverModels: vi.fn(),
     listConfiguredProviders: vi.fn(),
     saveConfiguredProvider: vi.fn(),
-    resetConfiguredProvider: vi.fn(),
+    deleteConfiguredProvider: vi.fn(),
     testConfiguredProvider: vi.fn(),
     discoverConfiguredModels: vi.fn(),
 }));
@@ -40,7 +40,7 @@ vi.mock('@/api/settingsApi', () => ({
     configuredProvidersApi: {
         list: api.listConfiguredProviders,
         save: api.saveConfiguredProvider,
-        reset: api.resetConfiguredProvider,
+        delete: api.deleteConfiguredProvider,
         test: api.testConfiguredProvider,
         discoverModels: api.discoverConfiguredModels,
     },
@@ -97,13 +97,10 @@ const configuredProvider = (patch: Partial<ConfiguredProviderView> = {}): Config
     baseUrl: 'https://huoshenai.net/v1',
     apiKeyMasked: '••••vEEm',
     hasApiKey: true,
-    keyFromConfig: true,
     models: ['gpt-6.2-sol', 'gpt-6.1-sol'],
     defaultModel: 'gpt-6.2-sol',
     enabled: true,
-    overridden: false,
     active: true,
-    baseUrlEditable: false,
     ...patch,
 });
 
@@ -456,13 +453,11 @@ describe('LlmProvidersSettings', () => {
         await waitFor(() => expect(onUnsavedChange).toHaveBeenLastCalledWith(false));
     });
 
-    it('lists the providers defined in the config file with their status', async () => {
+    it('lists the registered-name providers with their status and a delete button', async () => {
         api.listConfiguredProviders.mockResolvedValue([
             configuredProvider(),
             configuredProvider({ name: 'zhipu', displayName: '智谱', baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
                 apiKeyMasked: '', hasApiKey: false, models: ['glm-5.3'], defaultModel: 'glm-5.3', active: false }),
-            configuredProvider({ name: 'deepseek', displayName: 'DeepSeek', baseUrl: 'https://api.deepseek.com/v1',
-                overridden: true, models: ['deepseek-flash', 'deepseek-chat'], defaultModel: 'deepseek-flash' }),
         ]);
         render(<LlmProvidersSettings />);
 
@@ -472,36 +467,31 @@ describe('LlmProvidersSettings', () => {
         expect(within(active).getByText('已启用')).toBeInTheDocument();
         expect(within(active).getByText('HuoshenAI 中转站')).toBeInTheDocument();
         expect(active).toHaveTextContent('密钥 ••••vEEm');
-        expect(active).toHaveTextContent('来自 .env');
+        expect(within(active).getByRole('button', { name: '删除' })).toBeEnabled();
         expect(within(active).queryByRole('button', { name: '恢复默认' })).not.toBeInTheDocument();
+        expect(screen.queryByText('来自 .env')).not.toBeInTheDocument();
 
         const keyless = within(section).getByTestId('configured-provider-row-zhipu');
         expect(within(keyless).getByText('未配置密钥')).toBeInTheDocument();
         expect(keyless).toHaveTextContent('还没有填写密钥');
-
-        const edited = within(section).getByTestId('configured-provider-row-deepseek');
-        expect(within(edited).getByText('页面修改过')).toBeInTheDocument();
-        // 「恢复默认」只在页面上改过时才出现，出现即可用
-        expect(within(edited).getByRole('button', { name: '恢复默认' })).toBeEnabled();
     });
 
-    it('shows .env providers and providers added on the page in one list', async () => {
+    it('shows registered-name providers and providers added on the page in one list', async () => {
         api.listConfiguredProviders.mockResolvedValue([configuredProvider()]);
         render(<LlmProvidersSettings />);
 
         const section = await screen.findByTestId('providers-list');
-        // .env 里配了的在前，页面上添加的在后，同一张清单（行里嵌着的小列表不算）
+        // 同一张清单（行里嵌着的小列表不算），不分来源分组
         expect(Array.from(section.querySelectorAll<HTMLLIElement>(':scope > ul > li')).map(row => row.dataset.testid))
             .toEqual(['configured-provider-row-huoshenai', 'llm-provider-row-智谱']);
-        expect(within(section).getByText('来自 .env')).toBeInTheDocument();
         expect(screen.queryByText('配置里的服务商')).not.toBeInTheDocument();
         expect(screen.queryByText('设置页里添加的服务商')).not.toBeInTheDocument();
     });
 
-    it('edits a configured provider: the name and a hard-coded address stay read-only', async () => {
+    it('edits a registered-name provider: only the name stays read-only', async () => {
         api.listConfiguredProviders.mockResolvedValue([configuredProvider()]);
         api.saveConfiguredProvider.mockResolvedValue({
-            provider: configuredProvider({ overridden: true, models: ['gpt-6.2-sol'], keyFromConfig: false }),
+            provider: configuredProvider({ models: ['gpt-6.2-sol'] }),
             routing: [],
         });
         render(<LlmProvidersSettings />);
@@ -511,8 +501,8 @@ describe('LlmProvidersSettings', () => {
 
         expect(screen.getByLabelText('服务商名称')).toBeDisabled();
         expect(screen.getByLabelText('服务商名称')).toHaveValue('HuoshenAI 中转站（huoshenai）');
-        expect(screen.getByLabelText('接口地址')).toBeDisabled();
-        expect(screen.getByLabelText('API Key')).toHaveAttribute('placeholder', '密钥来自配置文件（••••vEEm），在这里填写可替换');
+        expect(screen.getByLabelText('接口地址')).toBeEnabled();
+        expect(screen.getByLabelText('API Key')).toHaveAttribute('placeholder', '留空则保持不变（当前 ••••vEEm）');
 
         fireEvent.change(screen.getByLabelText('模型清单'), { target: { value: 'gpt-6.2-sol' } });
         fireEvent.click(screen.getByRole('button', { name: '保存' }));
@@ -520,20 +510,18 @@ describe('LlmProvidersSettings', () => {
         await waitFor(() => expect(api.saveConfiguredProvider).toHaveBeenCalledTimes(1));
         const [name, input] = api.saveConfiguredProvider.mock.calls[0];
         expect(name).toBe('huoshenai');
-        // 没填密钥：传 null 表示沿用配置文件里的那把；地址不可改，所以不提交
+        // 没填密钥：传 null 表示沿用已保存的那把
         expect(input.apiKey).toBeNull();
-        expect(input.baseUrl).toBeNull();
         expect(input.models).toEqual(['gpt-6.2-sol']);
         expect(api.createProvider).not.toHaveBeenCalled();
         expect(api.listProviders).toHaveBeenCalledTimes(2);
     });
 
-    it('sends a typed key and lets the address be edited only where the config allows it', async () => {
+    it('sends a typed key and the edited address', async () => {
         api.listConfiguredProviders.mockResolvedValue([configuredProvider({ name: 'deepseek', displayName: 'DeepSeek',
-            baseUrl: 'https://api.deepseek.com/v1', baseUrlEditable: true })]);
+            baseUrl: 'https://api.deepseek.com/v1' })]);
         api.saveConfiguredProvider.mockResolvedValue({
-            provider: configuredProvider({ name: 'deepseek', displayName: 'DeepSeek', baseUrl: 'https://relay.example/v1',
-                baseUrlEditable: true, overridden: true, keyFromConfig: false }),
+            provider: configuredProvider({ name: 'deepseek', displayName: 'DeepSeek', baseUrl: 'https://relay.example/v1' }),
             routing: [],
         });
         render(<LlmProvidersSettings />);
@@ -553,7 +541,7 @@ describe('LlmProvidersSettings', () => {
 
     it('toggles a configured provider without touching its key or model list', async () => {
         const keyless = configuredProvider({ name: 'zhipu', displayName: '智谱', hasApiKey: false, apiKeyMasked: '' });
-        const disabled = configuredProvider({ enabled: false, overridden: true });
+        const disabled = configuredProvider({ enabled: false });
         api.listConfiguredProviders.mockResolvedValue([configuredProvider(), keyless]);
         api.saveConfiguredProvider.mockImplementation(async () => {
             // 保存之后列表重新拉取，拿到的就是停用后的状态
@@ -572,19 +560,19 @@ describe('LlmProvidersSettings', () => {
         expect(within(within(section).getByTestId('configured-provider-row-zhipu')).queryByRole('switch')).not.toBeInTheDocument();
     });
 
-    it('restores a configured provider to the config values after asking', async () => {
+    it('deletes a configured provider after asking', async () => {
         const confirm = vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true);
-        api.listConfiguredProviders.mockResolvedValue([configuredProvider({ overridden: true })]);
-        api.resetConfiguredProvider.mockResolvedValue(undefined);
+        api.listConfiguredProviders.mockResolvedValue([configuredProvider()]);
+        api.deleteConfiguredProvider.mockResolvedValue(undefined);
         render(<LlmProvidersSettings />);
         const section = await screen.findByTestId('providers-list');
-        const reset = () => within(within(section).getByTestId('configured-provider-row-huoshenai')).getByRole('button', { name: '恢复默认' });
+        const row = within(section).getByTestId('configured-provider-row-huoshenai');
 
-        fireEvent.click(reset());
-        expect(api.resetConfiguredProvider).not.toHaveBeenCalled();
+        fireEvent.click(within(row).getByRole('button', { name: '删除' }));
+        expect(api.deleteConfiguredProvider).not.toHaveBeenCalled();
 
-        fireEvent.click(reset());
-        await waitFor(() => expect(api.resetConfiguredProvider).toHaveBeenCalledWith('huoshenai'));
+        fireEvent.click(within(row).getByRole('button', { name: '删除' }));
+        await waitFor(() => expect(api.deleteConfiguredProvider).toHaveBeenCalledWith('huoshenai'));
         confirm.mockRestore();
     });
 
@@ -614,7 +602,7 @@ describe('LlmProvidersSettings', () => {
     it('says so when a configured provider was saved without a key', async () => {
         api.listConfiguredProviders.mockResolvedValue([configuredProvider({ hasApiKey: false, apiKeyMasked: '', active: false })]);
         api.saveConfiguredProvider.mockResolvedValue({
-            provider: configuredProvider({ hasApiKey: false, apiKeyMasked: '', active: false, overridden: true }),
+            provider: configuredProvider({ hasApiKey: false, apiKeyMasked: '', active: false }),
             routing: [],
         });
         render(<LlmProvidersSettings />);

@@ -1,15 +1,14 @@
 /**
- * 设置页「模型服务商」：一张清单，列的就是当前可用的服务商，两类来源混在一起显示——
- * - .env 里配了密钥的（application.yml 预置的那批里真正在用的）：可以换密钥、改模型、启停，
- *   改动存库并立即生效，不用改 .env、不用重启；标着「来自 .env」，删不掉
+ * 设置页「模型服务商」：一张清单，列的就是当前可用的服务商，两类条目混在一起显示——
+ * - 带注册名的（deepseek、zhipu……第一次启动时从 .env 一次性导入的初始值）：可以换密钥、
+ *   改地址、改模型、启停、删除，改动存库并立即生效；之后 .env 不再参与
  * - 设置页里自己添加的（服务商池）
- * 预置但没配密钥的那几个后端不下发——用户要的是"我加了什么，出现什么"。
  * 每次保存、删除后，后端都会把它们同步进运行时注册表并把结果带回来；这里同时刷新模型列表，
  * 让新模型不用刷新页面就出现在选择器里。密钥只写不读，界面上永远只有打码后的形式。
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, RefreshCw, RotateCcw } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
 import { Button, Card, Chip, EmptyState, Spinner, Toggle } from '@/components/ui';
 import {
     configuredProvidersApi,
@@ -128,8 +127,7 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
                 const view = editingConfigured;
                 const response = await configuredProvidersApi.save(view.name, {
                     apiKey: input.apiKey ?? null,
-                    // 地址只有配置允许覆盖的才提交，免得把只读框里的值当成改动
-                    baseUrl: view.baseUrlEditable ? input.baseUrl : null,
+                    baseUrl: input.baseUrl,
                     models: input.models,
                     defaultModel: input.defaultModel,
                     enabled: input.enabled,
@@ -186,14 +184,14 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
         }
     };
 
-    /** 配置里的服务商不能删，只能把页面上的修改撤掉，回到 .env 里的值 */
-    const handleResetConfigured = async (view: ConfiguredProviderView) => {
-        if (!window.confirm(`把「${view.displayName}」恢复成 .env 里的设置？在页面上填的密钥和改过的模型清单都会丢掉。`)) return;
+    /** 删掉这类服务商：删了就是删了，模型从选择器消失，指向它的场景分派会失效 */
+    const handleDeleteConfigured = async (view: ConfiguredProviderView) => {
+        if (!window.confirm(`删除服务商「${view.displayName}」？它提供的模型将从选择器里消失，指向它的场景分派会失效。`)) return;
         try {
-            await run('reset', view.name, () => configuredProvidersApi.reset(view.name));
-            addNotification({ key: `configured-reset-${view.name}-${Date.now()}`, level: 'success', message: `「${view.displayName}」已恢复为配置文件里的设置` });
+            await run('delete', view.name, () => configuredProvidersApi.delete(view.name));
+            addNotification({ key: `configured-deleted-${view.name}-${Date.now()}`, level: 'success', message: `已删除「${view.displayName}」` });
         } catch (err) {
-            addNotification({ key: `configured-reset-failed-${Date.now()}`, level: 'error', message: messageOf(err, '恢复失败，请稍后重试') });
+            addNotification({ key: `configured-delete-failed-${Date.now()}`, level: 'error', message: messageOf(err, '删除失败，请稍后重试') });
         }
     };
 
@@ -348,7 +346,7 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
                                         onTest={() => { void handleTestConfigured(view); }}
                                         onToggle={enabled => { void handleToggleConfigured(view, enabled); }}
                                         onEdit={() => openEditor({ mode: 'configured', name: view.name })}
-                                        onReset={() => { void handleResetConfigured(view); }}
+                                        onDelete={() => { void handleDeleteConfigured(view); }}
                                     />
                                 ))}
                                 {data?.providers.map(provider => (
@@ -380,8 +378,6 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
                     configured={editingConfigured ? {
                         name: editingConfigured.name,
                         displayName: editingConfigured.displayName,
-                        baseUrlEditable: editingConfigured.baseUrlEditable,
-                        keyFromConfig: editingConfigured.keyFromConfig,
                     } : undefined}
                     apiKeyStorageReady={data?.apiKeyStorageReady ?? false}
                     busy={isBusy('save', editingConfigured?.name ?? editingProvider?.key ?? null)}
@@ -425,10 +421,10 @@ interface ConfiguredProviderRowProps {
     onTest: () => void;
     onToggle: (enabled: boolean) => void;
     onEdit: () => void;
-    onReset: () => void;
+    onDelete: () => void;
 }
 
-function ConfiguredProviderRow({ view, operation, anyBusy, testResult, onTest, onToggle, onEdit, onReset }: ConfiguredProviderRowProps) {
+function ConfiguredProviderRow({ view, operation, anyBusy, testResult, onTest, onToggle, onEdit, onDelete }: ConfiguredProviderRowProps) {
     return (
         <li data-testid={`configured-provider-row-${view.name}`}>
             <Card className="p-4">
@@ -436,13 +432,7 @@ function ConfiguredProviderRow({ view, operation, anyBusy, testResult, onTest, o
                     <div className="min-w-0 flex-1 basis-64">
                         <div className="flex flex-wrap items-center gap-2">
                             <span className="text-sm font-semibold text-t1">{view.displayName}</span>
-                            {/* 这一条是 .env 里配的：能在这里换密钥、改模型、启停，但删不掉（删除要去 .env），所以标一下来源 */}
-                            <span
-                                className="text-[13px] text-t4"
-                                title={`在 .env 里配置的服务商（${view.name}）。可以在这里换密钥、改模型清单；要彻底去掉得从 .env 里删`}
-                            >
-                                来自 .env
-                            </span>
+                            <span className="text-[13px] text-t4" title={`注册名 ${view.name}`}>{view.name}</span>
                             <ConfiguredStatus view={view} />
                         </div>
                         <div className="mt-1 truncate text-[13px] text-t3" title={view.baseUrl}>{view.baseUrl}</div>
@@ -470,20 +460,15 @@ function ConfiguredProviderRow({ view, operation, anyBusy, testResult, onTest, o
                         )}
                         <Button size="sm" onClick={onTest} loading={operation === 'test'} disabled={anyBusy}>测试</Button>
                         <Button size="sm" variant="ghost" onClick={onEdit} disabled={anyBusy}>编辑</Button>
-                        {/* 只在页面上改过时才出现：没改过就没什么可恢复的，常驻一个灰按钮只是噪音 */}
-                        {view.overridden && (
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={onReset}
-                                loading={operation === 'reset'}
-                                disabled={anyBusy}
-                                title="撤掉设置页里的修改，回到 .env 里的值"
-                            >
-                                <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-                                恢复默认
-                            </Button>
-                        )}
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={onDelete}
+                            loading={operation === 'delete'}
+                            disabled={anyBusy}
+                        >
+                            删除
+                        </Button>
                     </div>
                 </div>
                 <TestOutcome testResult={testResult} />
@@ -492,20 +477,11 @@ function ConfiguredProviderRow({ view, operation, anyBusy, testResult, onTest, o
     );
 }
 
-/** 已启用 / 已停用 / 未配置密钥 / 未注册，外加一个"页面修改过"的标记。 */
+/** 已启用 / 已停用 / 未配置密钥 / 未注册。 */
 function ConfiguredStatus({ view }: { view: ConfiguredProviderView }) {
-    return (
-        <>
-            {!view.enabled
-                ? <Chip variant="neutral">已停用</Chip>
-                : !view.hasApiKey
-                    ? <Chip variant="neutral">未配置密钥</Chip>
-                    : view.active
-                        ? <Chip variant="ok">已启用</Chip>
-                        : <Chip variant="warn">未注册</Chip>}
-            {view.overridden && <Chip variant="accent">页面修改过</Chip>}
-        </>
-    );
+    if (!view.enabled) return <Chip variant="neutral">已停用</Chip>;
+    if (!view.hasApiKey) return <Chip variant="neutral">未配置密钥</Chip>;
+    return view.active ? <Chip variant="ok">已启用</Chip> : <Chip variant="warn">未注册</Chip>;
 }
 
 interface ProviderRowProps {

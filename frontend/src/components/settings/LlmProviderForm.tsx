@@ -39,12 +39,9 @@ interface LlmProviderFormProps {
     onDirtyChange?: (dirty: boolean) => void;
     /** 编辑的是配置文件里预置的服务商时传入 */
     configured?: {
-        /** 注册名，例如 huoshenai */
+        /** 注册名，例如 huoshenai。名称不能改（压缩摘要等链路按这个名字找它） */
         name: string;
         displayName: string;
-        baseUrlEditable: boolean;
-        /** 此刻生效的密钥来自配置文件（而不是页面上填的） */
-        keyFromConfig: boolean;
     };
 }
 
@@ -134,7 +131,7 @@ export function LlmProviderForm({
                         autoFocus
                         disabled={!!configured}
                         readOnly={!!configured}
-                        title={configured ? '配置里预置的服务商，注册名不能改' : undefined}
+                        title={configured ? '注册名不能改' : undefined}
                     />
                 </div>
                 <div>
@@ -146,9 +143,7 @@ export function LlmProviderForm({
                         placeholder="https://api.example.com/v1"
                         autoComplete="off"
                         spellCheck={false}
-                        disabled={!!configured && !configured.baseUrlEditable}
-                        readOnly={!!configured && !configured.baseUrlEditable}
-                        title={configured && !configured.baseUrlEditable ? '这个服务商的接口地址写死在配置里，不能在页面上改' : undefined}
+
                     />
                 </div>
             </div>
@@ -165,18 +160,9 @@ export function LlmProviderForm({
                     spellCheck={false}
                     disabled={!apiKeyStorageReady}
                     placeholder={existing?.hasApiKey
-                        ? configured?.keyFromConfig
-                            ? `密钥来自配置文件（${existing.apiKeyMasked}），在这里填写可替换`
-                            : `留空则保持不变（当前 ${existing.apiKeyMasked}）`
-                        : configured
-                            ? '填写 API Key 后这个服务商就会启用'
-                            : '本地模型可以留空'}
+                        ? `留空则保持不变（当前 ${existing.apiKeyMasked}）`
+                        : '本地模型可以留空'}
                 />
-                {configured && existing?.hasApiKey && configured.keyFromConfig && form.apiKey.trim() && (
-                    <p className={HINT} role="status">
-                        保存后将改用这里填的密钥；之后那行会多出一个「恢复默认」，点了就回到 .env 里的那把。
-                    </p>
-                )}
                 <p className={HINT}>
                     {apiKeyStorageReady
                         ? '保存前会加密，保存后只显示末 4 位。'

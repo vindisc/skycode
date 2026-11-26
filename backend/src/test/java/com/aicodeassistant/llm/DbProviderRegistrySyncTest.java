@@ -57,6 +57,7 @@ class DbProviderRegistrySyncTest {
                 "https://open.bigmodel.cn/api/paas/v4", "glm-5.3", List.of("glm-5.3")));
         configured = new ConfiguredProviderService(new LlmProvidersProperties(templates),
                 new SettingsRepository(jdbc), SettingsTestSupport.encryption(), mapper);
+        configured.seedIfNeeded();
         sync = new DbProviderRegistrySync(pool, configured, registry, modelRegistry, httpProperties(), mapper, null);
     }
 
@@ -68,14 +69,12 @@ class DbProviderRegistrySyncTest {
         assertThat(registry.registeredProviderNames()).containsExactly("huoshen");
         assertThat(registry.getProvider("gpt-6.2-sol").getProviderName()).isEqualTo("huoshen");
 
-        // 用户在设置页上给 zhipu 填了密钥：不用改 .env、不用重启，同步之后就注册上了
-        configured.save("zhipu", new ConfiguredProviderService.ConfiguredProviderInput(
-                "sk-typed-on-page", null, List.of("glm-5.3", "glm-5.4"), "glm-5.4", null));
+        // 在设置页上删掉它：从注册表里消失，再同步也不会回来（.env 只提供首次导入的初始值）
+        configured.delete("huoshen");
         sync.sync();
-
-        assertThat(registry.registeredProviderNames()).containsExactly("huoshen", "zhipu");
-        assertThat(registry.getProvider("glm-5.4").getProviderName()).isEqualTo("zhipu");
-        assertThat(registry.getProvider("glm-5.4").getDefaultModel()).isEqualTo("glm-5.4");
+        assertThat(registry.registeredProviderNames()).isEmpty();
+        sync.sync();
+        assertThat(registry.registeredProviderNames()).isEmpty();
     }
 
     @Test

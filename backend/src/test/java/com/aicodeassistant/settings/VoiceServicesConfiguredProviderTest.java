@@ -32,27 +32,31 @@ class VoiceServicesConfiguredProviderTest {
     void setUp() {
         JdbcTemplate jdbc = globalDb(temp);
         var templates = new LinkedHashMap<String, LlmProvidersProperties.ProviderConfig>();
-        templates.put("dashscope", new LlmProvidersProperties.ProviderConfig("", "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        templates.put("dashscope", new LlmProvidersProperties.ProviderConfig("sk-env-dashscope-key", "https://dashscope.aliyuncs.com/compatible-mode/v1",
                 "qwen3.8-max-0902", List.of("qwen3.8-max-0902")));
         configured = new ConfiguredProviderService(new LlmProvidersProperties(templates), new SettingsRepository(jdbc),
                 encryption(), new ObjectMapper());
+        configured.seedIfNeeded();
     }
 
     @Test
-    void voiceServicesBecomeAvailableOnceADashscopeKeyIsEnteredOnTheSettingsPage() {
+    void voiceServicesUseTheKeyStoredInTheSettingsStore() {
         ObjectMapper mapper = new ObjectMapper();
         var tts = new TtsService(configured, mapper);
         var asr = new AsrService(configured, mapper);
-        assertThat(tts.isAvailable()).isFalse();
-        assertThat(asr.isAvailable()).isFalse();
-
-        configured.save("dashscope", new ConfiguredProviderService.ConfiguredProviderInput(
-                "sk-page-dashscope-key", null, null, null, null));
-
+        // 首次导入把 .env 里的 dashscope 密钥带进来了，语音能力直接可用
         assertThat(tts.isAvailable()).isTrue();
         assertThat(asr.isAvailable()).isTrue();
 
-        // 密钥只可能来自两处：配置文件，或者页面上填的
+        // 在设置页上换了密钥：立即生效
+        configured.save("dashscope", new ConfiguredProviderService.ConfiguredProviderInput(
+                "sk-page-dashscope-key", null, null, null, null));
         assertThat(configured.effective("dashscope").orElseThrow().apiKey()).isEqualTo("sk-page-dashscope-key");
+        assertThat(tts.isAvailable()).isTrue();
+
+        // 删掉这个服务商：语音能力随之下线
+        configured.delete("dashscope");
+        assertThat(tts.isAvailable()).isFalse();
+        assertThat(asr.isAvailable()).isFalse();
     }
 }

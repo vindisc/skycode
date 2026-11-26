@@ -4,6 +4,7 @@ import com.aicodeassistant.exception.RequestValidationException;
 import com.aicodeassistant.llm.DbProviderRegistrySync;
 import com.aicodeassistant.llm.ProviderModelDiscovery;
 import com.aicodeassistant.prompt.optimize.ExternalLlmClient;
+import com.aicodeassistant.settings.ConfiguredProviderService;
 import com.aicodeassistant.settings.LlmProviderSettingsService;
 import com.aicodeassistant.settings.LlmProviderSettingsService.ProviderInput;
 import com.aicodeassistant.settings.LlmProviderSettingsService.ProviderView;
@@ -56,15 +57,18 @@ public class LlmProviderSettingsController {
     public record DiscoverResponse(List<String> models) {}
 
     private final LlmProviderSettingsService pool;
+    private final ConfiguredProviderService configured;
     private final DbProviderRegistrySync sync;
     private final ExternalLlmClient externalLlmClient;
     private final ProviderModelDiscovery discovery;
 
     public LlmProviderSettingsController(LlmProviderSettingsService pool,
+                                         ConfiguredProviderService configured,
                                          DbProviderRegistrySync sync,
                                          ExternalLlmClient externalLlmClient,
                                          ProviderModelDiscovery discovery) {
         this.pool = pool;
+        this.configured = configured;
         this.sync = sync;
         this.externalLlmClient = externalLlmClient;
         this.discovery = discovery;
@@ -123,6 +127,7 @@ public class LlmProviderSettingsController {
     @PostMapping("/reload")
     public ProviderListResponse reload() {
         pool.reload();
+        configured.reload();
         sync.sync();
         return list();
     }

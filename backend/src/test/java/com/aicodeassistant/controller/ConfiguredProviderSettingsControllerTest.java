@@ -33,8 +33,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * /api/settings/configured-providers — 配置文件里那批服务商的接口：
- * 改动之后立即同步运行时；响应里只有打码后的密钥。
+ * /api/settings/configured-providers — 设置页里带注册名的那批服务商的接口：
+ * 定义存在库里，改动之后立即同步运行时；响应里只有打码后的密钥。
  */
 class ConfiguredProviderSettingsControllerTest {
 
@@ -54,13 +54,20 @@ class ConfiguredProviderSettingsControllerTest {
     @BeforeEach
     void setUp() {
         jdbc = SettingsTestSupport.globalDb(temp);
+        configured = new ConfiguredProviderService(new LlmProvidersProperties(templates()), new SettingsRepository(jdbc),
+                SettingsTestSupport.encryption(), new ObjectMapper());
+        configured.seedIfNeeded();
+        controller = new ConfiguredProviderSettingsController(configured, sync, registry, external, discovery);
+        when(sync.sync()).thenReturn(new DbProviderRegistrySync.SyncResult(List.of()));
+    }
+
+    private static Map<String, LlmProvidersProperties.ProviderConfig> templates() {
         Map<String, LlmProvidersProperties.ProviderConfig> templates = new LinkedHashMap<>();
         templates.put("huoshenai", new LlmProvidersProperties.ProviderConfig(ENV_KEY, "https://huoshenai.net/v1",
                 "gpt-6.2-sol", List.of("gpt-6.2-sol", "gpt-6.1-sol")));
-        configured = new ConfiguredProviderService(new LlmProvidersProperties(templates), new SettingsRepository(jdbc),
-                SettingsTestSupport.encryption(), new ObjectMapper());
-        controller = new ConfiguredProviderSettingsController(configured, sync, registry, external, discovery);
-        when(sync.sync()).thenReturn(new DbProviderRegistrySync.SyncResult(List.of()));
+        templates.put("openai", new LlmProvidersProperties.ProviderConfig("", "https://api.openai.com/v1",
+                "gpt-6-astra", List.of("gpt-6-astra")));
+        return templates;
     }
 
     @Test
@@ -69,12 +76,12 @@ class ConfiguredProviderSettingsControllerTest {
 
         var response = controller.list();
 
+        // 第一次 list 之前服务已经 seedIfNeeded 过；只导入 .env 里配了密钥的
         assertThat(response).hasSize(1);
         var view = response.getFirst();
         assertThat(view.name()).isEqualTo("huoshenai");
         assertThat(view.displayName()).isEqualTo("HuoshenAI 中转站");
         assertThat(view.apiKeyMasked()).isEqualTo("••••3456");
-        assertThat(view.keyFromConfig()).isTrue();
         assertThat(view.active()).isFalse();
         assertThat(new ObjectMapper().writeValueAsString(response)).doesNotContain(ENV_KEY);
 
@@ -83,36 +90,13 @@ class ConfiguredProviderSettingsControllerTest {
     }
 
     @Test
-    void presetsWithoutAKeyAreNotListedUnlessTheyWereEditedOnThePage() {
-        Map<String, LlmProvidersProperties.ProviderConfig> templates = new LinkedHashMap<>();
-        templates.put("huoshenai", new LlmProvidersProperties.ProviderConfig(ENV_KEY, "https://huoshenai.net/v1",
-                "gpt-6.2-sol", List.of("gpt-6.2-sol")));
-        templates.put("openai", new LlmProvidersProperties.ProviderConfig("", "https://api.openai.com/v1",
-                "gpt-6-astra", List.of("gpt-6-astra")));
-        configured = new ConfiguredProviderService(new LlmProvidersProperties(templates), new SettingsRepository(jdbc),
-                SettingsTestSupport.encryption(), new ObjectMapper());
-        controller = new ConfiguredProviderSettingsController(configured, sync, registry, external, discovery);
-
-        // 设置页只列用户实际在用的：预置但没配密钥的不出现
-        assertThat(controller.list()).extracting(view -> view.name()).containsExactly("huoshenai");
-
-        // 在页面上改过的例外，否则用户找不到自己刚改的那一条
-        controller.save("openai", new ConfiguredProviderInput(null, null, List.of("gpt-6-astra", "gpt-6-astra-mini"), null, null));
-        assertThat(controller.list()).extracting(view -> view.name()).containsExactly("huoshenai", "openai");
-    }
-
-    @Test
     void savingResyncsTheRuntimeRegistryAndReturnsTheUpdatedProvider() {
-        when(sync.sync()).thenReturn(new DbProviderRegistrySync.SyncResult(List.of()));
-
         var response = controller.save("huoshenai",
                 new ConfiguredProviderInput(null, null, List.of("gpt-6.2-sol", "gpt-6.1-sol", "gpt-6-sol"), "gpt-6-sol", null));
 
         verify(sync, times(1)).sync();
         assertThat(response.provider().models()).containsExactly("gpt-6.2-sol", "gpt-6.1-sol", "gpt-6-sol");
         assertThat(response.provider().defaultModel()).isEqualTo("gpt-6-sol");
-        assertThat(response.provider().overridden()).isTrue();
-        assertThat(response.provider().keyFromConfig()).isTrue();
     }
 
     @Test
@@ -125,15 +109,12 @@ class ConfiguredProviderSettingsControllerTest {
     }
 
     @Test
-    void resetReturnsToTheConfigFileAndResyncs() {
-        controller.save("huoshenai", new ConfiguredProviderInput(null, null, List.of("gpt-6.2-sol"), null, null));
-        when(sync.sync()).thenReturn(new DbProviderRegistrySync.SyncResult(List.of()));
+    void deleteRemovesTheProviderAndResyncs() {
+        assertThat(controller.delete("huoshenai").getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(configured.effective("huoshenai")).isEmpty();
+        verify(sync, times(1)).sync();
 
-        assertThat(controller.reset("huoshenai").getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertThat(configured.effective("huoshenai").orElseThrow().overridden()).isFalse();
-
-        // 没改过的没有可恢复的
-        assertCode(() -> controller.reset("huoshenai"), "PROVIDER_NOT_FOUND");
+        assertCode(() -> controller.delete("huoshenai"), "PROVIDER_NOT_FOUND");
     }
 
     @Test

@@ -56,6 +56,7 @@ class SceneBindingControllerTest {
                 "MiniMax-M3", List.of("MiniMax-M3")));
         configured = new ConfiguredProviderService(new LlmProvidersProperties(templates),
                 new SettingsRepository(jdbc), SettingsTestSupport.encryption(), mapper);
+        configured.seedIfNeeded();
         ModelRegistry modelRegistry = new ModelRegistry(new LlmProviderRegistry(List.of(), new MockEnvironment()));
         service = new SceneBindingService(new SettingsRepository(jdbc), pool, configured, modelRegistry,
                 new LlmProviderRegistry(List.of(), new MockEnvironment()), mapper);

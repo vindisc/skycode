@@ -17,31 +17,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 
 /**
- * 配置文件（application.yml + 环境变量）里定义的那批服务商：OpenAI、百炼、DeepSeek、智谱、火神中转站……
- * 它们的接口地址和默认模型清单都写在配置里，通常只差一把密钥。
+ * 设置页「模型服务商」里带注册名的那一类服务商（deepseek、zhipu、huoshenai……）。
  * <p>
- * 这些条目也能在设置页里改：填密钥、改模型清单、启停。改动以"覆盖"的形式存库
- * （{@value #CATEGORY}），和配置文件合成一份生效配置；删掉覆盖就回到配置文件的值。
- * 注册名始终是配置里的名字（huoshenai、deepseek…），所以按名字生效的特殊行为
- * （ZenMux 的 Responses 接口、百炼 Token Plan 的模型 ID 映射等）都不受影响。
+ * 定义存在全局库里，页面是唯一来源：改密钥、改模型清单、停用、删除都只动库里的这份。
+ * 历史上这类服务商是"application.yml + .env 的定义，页面存覆盖"，.env 一直参与；
+ * 2026-11-26 起改为<b>一次性导入</b>：第一次启动把 .env 里配了密钥、能用的服务商复制进库
+ * （{@link #SEED_MARKER} 记录做过这件事），之后 .env 里那几行 {@code LLM_PROVIDER_*} 不再生效——
+ * 改了不生效，删了服务商也不会回来。
  * <p>
- * 覆盖记录只存用户明确改过的东西：没在页面上输入密钥时 {@code apiKey} 记为 null，
- * 表示沿用配置文件里的那把——配置文件里换了密钥照样生效。
+ * 它们保留注册名注册（不带 {@code db:} 前缀），所以按名字找服务商的链路不受影响：
+ * 压缩摘要的 {@code LLM_COMPACT_PROVIDER} 兜底、TTS/ASR 的 dashscope。
+ * 页面上"添加服务商"新建的走 {@link LlmProviderSettingsService} 那个池。
  */
 @Service
 public class ConfiguredProviderService {
 
     private static final Logger log = LoggerFactory.getLogger(ConfiguredProviderService.class);
 
-    public static final String CATEGORY = "configured_provider_override";
+    public static final String CATEGORY = "configured_provider";
 
-    /** 配置里接口地址可以被环境变量改掉的服务商；其余的地址是写死的，设置页里不给改。 */
-    private static final Set<String> BASE_URL_EDITABLE = Set.of("deepseek");
+    /** 一次性导入标记（存在即不再导入）。值是导入时间，仅供排查。 */
+    static final String SEED_MARKER = "__seeded__";
 
+    /** 导入时给知名服务商用的显示名；不认识的原样用注册名。 */
     private static final Map<String, String> DISPLAY_NAMES = Map.ofEntries(
             Map.entry("openai", "OpenAI"),
             Map.entry("dashscope", "阿里云百炼"),
@@ -56,9 +57,10 @@ public class ConfiguredProviderService {
             Map.entry("zenmux", "ZenMux"));
 
     /**
-     * 生效配置：配置文件里的定义叠加设置页里的覆盖。
+     * 库里存的服务商定义。
      *
-     * @param keyFromConfig 生效的密钥来自配置文件（而不是页面上填的）
+     * @param apiKey             明文密钥，仅进程内部使用；落库时加密。null 表示没有密钥
+     * @param keySelectionStrategy 多密钥时的选 key 策略（导入时从配置带过来），见 {@link ApiKeyRotationManager}
      */
     public record Effective(
             String name,
@@ -68,8 +70,6 @@ public class ConfiguredProviderService {
             List<String> models,
             String defaultModel,
             boolean enabled,
-            boolean overridden,
-            boolean keyFromConfig,
             ApiKeyRotationManager.KeySelectionStrategy keySelectionStrategy) {
 
         /** 已启用，且密钥、地址、模型都齐，可以注册进运行时。 */
@@ -88,23 +88,18 @@ public class ConfiguredProviderService {
             String baseUrl,
             String apiKeyMasked,
             boolean hasApiKey,
-            boolean keyFromConfig,
             List<String> models,
             String defaultModel,
             boolean enabled,
-            boolean overridden,
-            boolean active,
-            boolean baseUrlEditable) {}
+            boolean active) {}
 
-    /**
-     * 在设置页里保存时的入参。apiKey 为 null 或空白表示不改密钥；models、defaultModel 为 null 表示不改；
-     * enabled 为 null 表示启用。
-     */
+    /** 在设置页里保存时的入参。apiKey 为 null 或空白表示不改密钥；baseUrl、models、defaultModel 为 null 表示不改；
+     * enabled 为 null 表示启用。 */
     public record ConfiguredProviderInput(
             String apiKey, String baseUrl, List<String> models, String defaultModel, Boolean enabled) {}
 
-    /** 覆盖记录。apiKey 为 null 表示沿用配置文件里的密钥；落库时只有它是加密的。 */
-    record Override(String apiKey, String baseUrl, List<String> models, String defaultModel, boolean enabled) {}
+    record Stored(String apiKey, String baseUrl, List<String> models, String defaultModel,
+                  boolean enabled, String keySelectionStrategy) {}
 
     private final LlmProvidersProperties properties;
     private final SettingsRepository repository;
@@ -112,7 +107,7 @@ public class ConfiguredProviderService {
     private final ObjectMapper objectMapper;
     /** 保护缓存与库的一致性；缓存为 null 表示尚未从库加载。 */
     private final Object lock = new Object();
-    private volatile Map<String, Override> cache;
+    private volatile Map<String, Stored> cache;
 
     public ConfiguredProviderService(LlmProvidersProperties properties,
                                      SettingsRepository repository,
@@ -124,41 +119,61 @@ public class ConfiguredProviderService {
         this.objectMapper = objectMapper;
     }
 
-    /** 配置里定义的全部服务商名，按配置文件里的顺序。 */
-    public List<String> names() {
-        Map<String, LlmProvidersProperties.ProviderConfig> configs = properties.providers();
-        return configs == null ? List.of() : List.copyOf(configs.keySet());
+    /**
+     * 第一次启动时把 .env 里能用的服务商导入库，然后记下标记。之后调用只是查一下标记，
+     * 不会重复导入——用户在页面上删掉的服务商不会因为重启又回来。
+     */
+    public void seedIfNeeded() {
+        synchronized (lock) {
+            if (repository.find(CATEGORY, SEED_MARKER).isPresent()) return;
+            Map<String, LlmProvidersProperties.ProviderConfig> templates = properties.providers();
+            if (templates == null || templates.isEmpty()) {
+                repository.upsert(CATEGORY, SEED_MARKER, String.valueOf(System.currentTimeMillis()), null);
+                return;
+            }
+            Map<String, Stored> current = new LinkedHashMap<>(rows());
+            List<String> seeded = new ArrayList<>();
+            for (var entry : templates.entrySet()) {
+                if (current.containsKey(entry.getKey())) continue;
+                LlmProvidersProperties.ProviderConfig template = entry.getValue();
+                if (!template.isValid()) continue;
+                // 加密密钥不可用就先不带密钥导入（页面会显示"还没有填写密钥"，填上即可）
+                String key = encryption.keyIsPersistent() && template.apiKey() != null ? template.apiKey() : null;
+                Stored stored = new Stored(key,
+                        Objects.requireNonNullElse(template.baseUrl(), ""),
+                        template.models(), template.defaultModel(), true,
+                        strategyName(template.keySelectionStrategy()));
+                repository.upsert(CATEGORY, entry.getKey(), serialize(stored), null);
+                current.put(entry.getKey(), stored);
+                seeded.add(entry.getKey());
+            }
+            repository.upsert(CATEGORY, SEED_MARKER, String.valueOf(System.currentTimeMillis()), null);
+            cache = Collections.unmodifiableMap(current);
+            log.info("Imported providers from .env into the settings store (one-time): {} — LLM_PROVIDER_* no longer applies to them",
+                    seeded);
+        }
     }
 
-    public static String displayName(String name) {
-        return DISPLAY_NAMES.getOrDefault(name, name);
-    }
-
-    public static boolean baseUrlEditable(String name) {
-        return BASE_URL_EDITABLE.contains(name);
-    }
-
-    /** 全部配置里的服务商的生效配置，按配置文件里的顺序。 */
+    /** 全部服务商的生效定义，按库里的顺序（导入顺序）。 */
     public List<Effective> effectiveProviders() {
         List<Effective> result = new ArrayList<>();
-        for (String name : names()) effective(name).ifPresent(result::add);
+        for (var row : rows().entrySet()) {
+            result.add(new Effective(row.getKey(), displayName(row.getKey()), row.getValue().baseUrl(),
+                    row.getValue().apiKey(), row.getValue().models(), row.getValue().defaultModel(),
+                    row.getValue().enabled(), strategy(row.getValue().keySelectionStrategy())));
+        }
         return List.copyOf(result);
     }
 
     public Optional<Effective> effective(String name) {
-        LlmProvidersProperties.ProviderConfig template = template(name);
-        if (template == null) return Optional.empty();
-        Override override = overrides().get(name);
-        String apiKey = override != null && override.apiKey() != null ? override.apiKey()
-                : Objects.requireNonNullElse(template.apiKey(), "");
-        String baseUrl = override != null && override.baseUrl() != null ? override.baseUrl()
-                : Objects.requireNonNullElse(template.baseUrl(), "");
-        List<String> models = override != null ? override.models() : template.models();
-        String defaultModel = override != null ? override.defaultModel() : template.defaultModel();
-        boolean enabled = override == null || override.enabled();
-        return Optional.of(new Effective(name, displayName(name), baseUrl, apiKey, models, defaultModel,
-                enabled, override != null, override == null || override.apiKey() == null,
-                template.keySelectionStrategy()));
+        Stored stored = rows().get(name);
+        if (stored == null) return Optional.empty();
+        return Optional.of(new Effective(name, displayName(name), stored.baseUrl(), stored.apiKey(),
+                stored.models(), stored.defaultModel(), stored.enabled(), strategy(stored.keySelectionStrategy())));
+    }
+
+    public static String displayName(String name) {
+        return DISPLAY_NAMES.getOrDefault(name, name);
     }
 
     /**
@@ -166,30 +181,27 @@ public class ConfiguredProviderService {
      */
     public List<ConfiguredProviderView> views(Predicate<String> isActive) {
         List<ConfiguredProviderView> views = new ArrayList<>();
-        for (String name : names()) {
-            Effective effective = effective(name).orElseThrow();
-            views.add(new ConfiguredProviderView(name, effective.displayName(), effective.baseUrl(),
+        for (Effective effective : effectiveProviders()) {
+            views.add(new ConfiguredProviderView(effective.name(), effective.displayName(), effective.baseUrl(),
                     LlmProviderSettingsService.mask(effective.apiKey()),
                     effective.apiKey() != null && !effective.apiKey().isBlank(),
-                    effective.keyFromConfig(), effective.models(), effective.defaultModel(), effective.enabled(),
-                    effective.overridden(), isActive.test(name), baseUrlEditable(name)));
+                    effective.models(), effective.defaultModel(), effective.enabled(), isActive.test(effective.name())));
         }
         return views;
     }
 
-    /** 保存一条覆盖。留空的密钥表示不改密钥：之前在页面上填过就沿用那把，否则用配置文件里的。 */
+    /** 保存对某个服务商的修改。留空的密钥表示不改密钥；不传的项保持原值。 */
     public void save(String name, ConfiguredProviderInput input) {
-        LlmProvidersProperties.ProviderConfig template = template(name);
-        if (template == null) {
-            throw new RequestValidationException("PROVIDER_NOT_FOUND", "配置里没有这个服务商：" + name);
-        }
         if (input == null) {
             throw new RequestValidationException("INVALID_PROVIDER", "请求体不能为空");
         }
         synchronized (lock) {
-            Override previous = overrides().get(name);
+            Stored previous = rows().get(name);
+            if (previous == null) {
+                throw new RequestValidationException("PROVIDER_NOT_FOUND", "没有这个服务商：" + name);
+            }
             String submitted = input.apiKey() == null ? "" : input.apiKey().trim();
-            String storedKey = previous == null ? null : previous.apiKey();
+            String storedKey = previous.apiKey();
             if (!submitted.isEmpty()) {
                 if (!encryption.keyIsPersistent()) {
                     throw new RequestValidationException("ENCRYPTION_KEY_REQUIRED",
@@ -200,17 +212,13 @@ public class ConfiguredProviderService {
             }
             // 模型清单不传表示不改（比如只想停用）；传了就整体替换
             List<String> models = input.models() == null ? null : normalizeModels(input.models());
-            if (models == null) {
-                models = effective(name).orElseThrow().models();
-            }
+            if (models == null) models = previous.models();
             if (models.isEmpty()) {
                 throw new RequestValidationException("INVALID_PROVIDER", "至少要填写一个模型");
             }
-            // 默认模型不传表示不改（比如只想停用）；传了就以传的为准。它不在清单里时退到第一个
+            // 默认模型不传表示不改；它不在清单里时退到第一个
             String defaultModel = input.defaultModel() == null ? null : input.defaultModel().trim();
-            if (defaultModel == null || defaultModel.isEmpty()) {
-                defaultModel = effective(name).orElseThrow().defaultModel();
-            }
+            if (defaultModel == null || defaultModel.isEmpty()) defaultModel = previous.defaultModel();
             if (!models.contains(defaultModel)) defaultModel = models.getFirst();
             // 同一个模型出现在两个服务商名下，运行时按模型找服务商会直接报"路由有歧义"
             for (Effective other : effectiveProviders()) {
@@ -222,8 +230,8 @@ public class ConfiguredProviderService {
                             "模型 " + clash + " 已经由 " + other.displayName() + " 提供，同一个模型只能放在一个服务商下");
                 }
             }
-            String baseUrl = Objects.requireNonNullElse(template.baseUrl(), "");
-            if (baseUrlEditable(name) && input.baseUrl() != null && !input.baseUrl().isBlank()) {
+            String baseUrl = previous.baseUrl();
+            if (input.baseUrl() != null && !input.baseUrl().isBlank()) {
                 baseUrl = input.baseUrl().trim().replaceAll("/+$", "");
                 if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
                     throw new RequestValidationException("INVALID_PROVIDER", "接口地址必须以 http:// 或 https:// 开头");
@@ -233,24 +241,25 @@ public class ConfiguredProviderService {
                             "接口地址不是一个完整的网址，形如 https://api.example.com/v1");
                 }
             }
-            Override override = new Override(storedKey, baseUrl, models, defaultModel,
-                    input.enabled() == null || input.enabled());
-            repository.upsert(CATEGORY, name, serialize(override), null);
-            Map<String, Override> current = new LinkedHashMap<>(overrides());
-            current.put(name, override);
+            Stored stored = new Stored(storedKey, baseUrl, models, defaultModel,
+                    input.enabled() == null || input.enabled(), previous.keySelectionStrategy());
+            repository.upsert(CATEGORY, name, serialize(stored), null);
+            Map<String, Stored> current = new LinkedHashMap<>(rows());
+            current.put(name, stored);
             cache = Collections.unmodifiableMap(current);
-            log.info("Configured provider '{}' overridden from settings: models={}, enabled={}, keyChanged={}",
-                    name, models, override.enabled(), !submitted.isEmpty());
+            log.info("Configured provider '{}' saved from settings: models={}, enabled={}, keyChanged={}",
+                    name, models, stored.enabled(), !submitted.isEmpty());
         }
     }
 
-    /** 删掉覆盖，回到配置文件里的值。 */
-    public boolean reset(String name) {
+    /** 删掉一个服务商。删了就是删了：模型从选择器消失，指向它的场景分派会失效。 */
+    public boolean delete(String name) {
         synchronized (lock) {
             boolean removed = repository.delete(CATEGORY, name);
-            Map<String, Override> current = new LinkedHashMap<>(overrides());
+            Map<String, Stored> current = new LinkedHashMap<>(rows());
             current.remove(name);
             cache = Collections.unmodifiableMap(current);
+            if (removed) log.info("Configured provider '{}' deleted from settings", name);
             return removed;
         }
     }
@@ -259,30 +268,25 @@ public class ConfiguredProviderService {
     public void reload() {
         synchronized (lock) {
             cache = null;
-            overrides();
+            rows();
         }
     }
 
     // ───── 内部 ─────
 
-    private LlmProvidersProperties.ProviderConfig template(String name) {
-        Map<String, LlmProvidersProperties.ProviderConfig> configs = properties.providers();
-        return configs == null ? null : configs.get(name);
-    }
-
-    private Map<String, Override> overrides() {
-        Map<String, Override> snapshot = cache;
+    private Map<String, Stored> rows() {
+        Map<String, Stored> snapshot = cache;
         if (snapshot != null) return snapshot;
         synchronized (lock) {
             if (cache != null) return cache;
-            Map<String, Override> loaded = new LinkedHashMap<>();
+            Map<String, Stored> loaded = new LinkedHashMap<>();
             for (var stored : repository.list(CATEGORY)) {
+                if (SEED_MARKER.equals(stored.key())) continue;
                 try {
                     loaded.put(stored.key(), deserialize(stored.value()));
                 } catch (RuntimeException failure) {
                     // 单条损坏不该让整个设置页打不开；跳过它并留下可定位的日志
-                    log.warn("Skipping unreadable configured provider override '{}': {}",
-                            stored.key(), failure.getMessage());
+                    log.warn("Skipping unreadable configured provider '{}': {}", stored.key(), failure.getMessage());
                 }
             }
             cache = Collections.unmodifiableMap(loaded);
@@ -296,21 +300,35 @@ public class ConfiguredProviderService {
                 .toList();
     }
 
-    private String serialize(Override override) {
-        Map<String, Object> plain = new LinkedHashMap<>();
-        plain.put("apiKey", override.apiKey() == null ? null : encryption.encrypt(override.apiKey()));
-        plain.put("baseUrl", override.baseUrl());
-        plain.put("models", override.models());
-        plain.put("defaultModel", override.defaultModel());
-        plain.put("enabled", override.enabled());
+    private static ApiKeyRotationManager.KeySelectionStrategy strategy(String name) {
+        if (name == null) return ApiKeyRotationManager.KeySelectionStrategy.ROUND_ROBIN;
         try {
-            return objectMapper.writeValueAsString(plain);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Failed to serialize configured provider override", e);
+            return ApiKeyRotationManager.KeySelectionStrategy.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            return ApiKeyRotationManager.KeySelectionStrategy.ROUND_ROBIN;
         }
     }
 
-    private Override deserialize(String json) {
+    private static String strategyName(ApiKeyRotationManager.KeySelectionStrategy strategy) {
+        return strategy == null ? null : strategy.name();
+    }
+
+    private String serialize(Stored stored) {
+        Map<String, Object> plain = new LinkedHashMap<>();
+        plain.put("apiKey", stored.apiKey() == null ? null : encryption.encrypt(stored.apiKey()));
+        plain.put("baseUrl", stored.baseUrl());
+        plain.put("models", stored.models());
+        plain.put("defaultModel", stored.defaultModel());
+        plain.put("enabled", stored.enabled());
+        plain.put("keySelectionStrategy", stored.keySelectionStrategy());
+        try {
+            return objectMapper.writeValueAsString(plain);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to serialize configured provider", e);
+        }
+    }
+
+    private Stored deserialize(String json) {
         try {
             var node = objectMapper.readTree(json);
             var keyNode = node.path("apiKey");
@@ -320,17 +338,20 @@ public class ConfiguredProviderService {
                 try {
                     apiKey = encryption.decrypt(encryptedKey);
                 } catch (RuntimeException failure) {
-                    // 解不开的密钥（例如换了加密密钥）当作没填过：回落到配置文件里的，等用户重新输入
-                    log.warn("Stored API key of a configured provider override cannot be decrypted; "
-                            + "using the configured key until it is re-entered");
+                    // 解不开的密钥（例如换了加密密钥）当作没填过，等用户重新输入
+                    log.warn("Stored API key of provider '{}' cannot be decrypted; treating it as not set",
+                            node.path("name").asText("?"));
                 }
             }
             List<String> models = new ArrayList<>();
             node.path("models").forEach(m -> models.add(m.asText()));
-            return new Override(apiKey, node.path("baseUrl").asText(null), normalizeModels(models),
-                    node.path("defaultModel").asText(null), node.path("enabled").asBoolean(true));
+            return new Stored(apiKey, node.path("baseUrl").asText(""),
+                    normalizeModels(models), node.path("defaultModel").asText(null),
+                    node.path("enabled").asBoolean(true),
+                    node.has("keySelectionStrategy") && !node.path("keySelectionStrategy").isNull()
+                            ? node.path("keySelectionStrategy").asText() : null);
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Stored configured provider override is not valid JSON", e);
+            throw new IllegalStateException("Stored configured provider is not valid JSON", e);
         }
     }
 }

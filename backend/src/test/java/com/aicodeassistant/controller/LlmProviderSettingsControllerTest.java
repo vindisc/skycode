@@ -61,7 +61,7 @@ class LlmProviderSettingsControllerTest {
                 new ObjectMapper());
         relay = new MockWebServer();
         relay.start();
-        controller = new LlmProviderSettingsController(pool, sync, external, new ProviderModelDiscovery(
+        controller = new LlmProviderSettingsController(pool, mock(com.aicodeassistant.settings.ConfiguredProviderService.class), sync, external, new ProviderModelDiscovery(
                 new LlmHttpProperties(new LlmHttpProperties.PoolProperties(1, 5), 5, 5, false), new ObjectMapper()));
     }
 

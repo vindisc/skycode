@@ -187,8 +187,8 @@ export const settingsApi = {
 };
 
 /**
- * 配置文件（application.yml + 环境变量）里定义的一个服务商，叠加设置页里对它的修改。
- * name 是注册名；改它存的是"覆盖"，删掉覆盖就回到配置文件的值。
+ * 设置页里带注册名的一个服务商（deepseek、zhipu……）。定义存在库里，页面是唯一来源；
+ * 第一次启动时从 .env 一次性导入过初始值，之后 .env 不再参与。
  */
 export interface ConfiguredProviderView {
     name: string;
@@ -197,21 +197,15 @@ export interface ConfiguredProviderView {
     /** 打码后的密钥；没有密钥时为空串 */
     apiKeyMasked: string;
     hasApiKey: boolean;
-    /** 生效的密钥来自配置文件，而不是页面上填的 */
-    keyFromConfig: boolean;
     models: string[];
     defaultModel: string;
     /** 页面上有没有把它停用 */
     enabled: boolean;
-    /** 在设置页里改过（存了覆盖） */
-    overridden: boolean;
     /** 已经注册进运行时：已启用、有密钥、有模型 */
     active: boolean;
-    /** 接口地址能不能在页面上改（目前只有 DeepSeek，其余写死在配置里） */
-    baseUrlEditable: boolean;
 }
 
-/** 修改配置里的服务商。apiKey 留空表示不改密钥；models 不传表示不改模型清单。 */
+/** 修改这类服务商。apiKey 留空表示不改密钥；不传的字段保持原值。 */
 export interface ConfiguredProviderInput {
     apiKey?: string | null;
     baseUrl?: string | null;
@@ -236,8 +230,8 @@ export const configuredProvidersApi = {
             body: JSON.stringify(input),
         }),
 
-    /** 删掉设置页里的修改，回到配置文件的值 */
-    reset: (name: string) => request<void>(`${CONFIGURED_PROVIDERS}/${segment(name)}`, { method: 'DELETE' }),
+    /** 删掉这个服务商。模型从选择器消失，指向它的场景分派会失效 */
+    delete: (name: string) => request<void>(`${CONFIGURED_PROVIDERS}/${segment(name)}`, { method: 'DELETE' }),
 
     /** 连通性测试：按此刻生效的配置发一次最小对话请求；model 留空表示测默认模型 */
     test: (name: string, model?: string) =>

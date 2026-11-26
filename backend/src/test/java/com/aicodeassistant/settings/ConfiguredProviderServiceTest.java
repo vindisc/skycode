@@ -21,7 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * 配置文件里定义的服务商 + 设置页里的覆盖：页面只存用户改过的部分，其余沿用配置。
+ * 设置页里带注册名的那批服务商：定义存在库里、页面是唯一来源；
+ * .env 只在第一次启动时提供一次性导入的初始值。
  */
 class ConfiguredProviderServiceTest {
 
@@ -49,75 +50,89 @@ class ConfiguredProviderServiceTest {
     }
 
     @Test
-    void withoutAnOverrideTheConfiguredValuesApply() {
-        var huoshen = service.effective("huoshenai").orElseThrow();
+    void firstRunImportsUsableProvidersFromTheEnvOnce() {
+        service.seedIfNeeded();
 
+        // 导入的是配了密钥、能用的那几个；没配密钥的不进库
+        assertThat(service.effectiveProviders()).extracting(e -> e.name())
+                .containsExactly("huoshenai", "deepseek");
+        var huoshen = service.effective("huoshenai").orElseThrow();
         assertThat(huoshen.usable()).isTrue();
         assertThat(huoshen.apiKey()).isEqualTo(ENV_KEY);
-        assertThat(huoshen.keyFromConfig()).isTrue();
-        assertThat(huoshen.overridden()).isFalse();
         assertThat(huoshen.models()).containsExactly("gpt-6.2-sol", "gpt-6.1-sol");
         assertThat(huoshen.displayName()).isEqualTo("HuoshenAI 中转站");
         assertThat(huoshen.keySelectionStrategy()).isEqualTo(ApiKeyRotationManager.KeySelectionStrategy.ROUND_ROBIN);
 
-        // 配置里没配密钥的：不算可用
-        assertThat(service.effective("zhipu").orElseThrow().usable()).isFalse();
-        assertThat(service.effective("no-such-provider")).isEmpty();
-        assertThat(service.names()).containsExactly("huoshenai", "zhipu", "deepseek");
+        // .env 后来怎么改都不再生效：导入是一次性的
+        templates.put("moonshot", new LlmProvidersProperties.ProviderConfig("sk-new", "https://api.moonshot.cn/v1",
+                "kimi-k3.1", List.of("kimi-k3.1")));
+        templates.put("huoshenai", new LlmProvidersProperties.ProviderConfig("sk-rotated-in-env",
+                "https://huoshenai.net/v1", "gpt-6.2-sol", List.of("gpt-6.2-sol")));
+        var restarted = newService();
+        restarted.seedIfNeeded();
+        assertThat(restarted.effectiveProviders()).extracting(e -> e.name()).containsExactly("huoshenai", "deepseek");
+        assertThat(restarted.effective("huoshenai").orElseThrow().apiKey()).isEqualTo(ENV_KEY);
+        assertThat(restarted.effective("moonshot")).isEmpty();
+
+        // 页面上删掉的，重启也不会因为 .env 里还有而回来
+        restarted.delete("deepseek");
+        newService().seedIfNeeded();
+        assertThat(newService().effective("deepseek")).isEmpty();
+    }
+
+    @Test
+    void seedingWithoutAStableEncryptionKeyImportsTheProviderWithoutItsKey() {
+        var unstable = new ConfiguredProviderService(new LlmProvidersProperties(templates),
+                new SettingsRepository(jdbc), new StubEncryptionService(false), new com.fasterxml.jackson.databind.ObjectMapper());
+
+        unstable.seedIfNeeded();
+
+        var huoshen = unstable.effective("huoshenai").orElseThrow();
+        assertThat(huoshen.apiKey()).isNull();
+        assertThat(huoshen.usable()).isFalse();
+        assertThat(huoshen.baseUrl()).isEqualTo("https://huoshenai.net/v1");
     }
 
     @Test
     void aTypedKeyIsStoredEncryptedAndViewsOnlyShowItMasked() {
-        service.save("zhipu", new ConfiguredProviderInput(PAGE_KEY, null, List.of("glm-5.3", "glm-5.4"), null, null));
+        service.seedIfNeeded();
+        service.save("huoshenai", new ConfiguredProviderInput(PAGE_KEY, null, List.of("gpt-6.2-sol", "gpt-6.1-sol", "gpt-6-sol"), null, null));
 
         String stored = jdbc.queryForObject(
-                "SELECT value FROM settings WHERE category = 'configured_provider_override' AND key = 'zhipu'", String.class);
-        assertThat(stored).doesNotContain(PAGE_KEY).contains("ENC:");
+                "SELECT value FROM settings WHERE category = 'configured_provider' AND key = 'huoshenai'", String.class);
+        assertThat(stored).doesNotContain(PAGE_KEY).doesNotContain(ENV_KEY).contains("ENC:");
 
-        var effective = newService().effective("zhipu").orElseThrow();
+        var effective = newService().effective("huoshenai").orElseThrow();
         assertThat(effective.usable()).isTrue();
         assertThat(effective.apiKey()).isEqualTo(PAGE_KEY);
-        assertThat(effective.keyFromConfig()).isFalse();
-        assertThat(effective.overridden()).isTrue();
         // 清单里没填默认模型：取第一个
-        assertThat(effective.defaultModel()).isEqualTo("glm-5.3");
+        assertThat(effective.defaultModel()).isEqualTo("gpt-6.2-sol");
 
-        ConfiguredProviderView view = service.views(name -> false).get(1);
-        assertThat(view.name()).isEqualTo("zhipu");
+        ConfiguredProviderView view = service.views(name -> false).get(0);
+        assertThat(view.name()).isEqualTo("huoshenai");
         assertThat(view.apiKeyMasked()).isEqualTo("••••7890");
         assertThat(view.hasApiKey()).isTrue();
-        assertThat(view.keyFromConfig()).isFalse();
-        assertThat(view.overridden()).isTrue();
         assertThat(view.active()).isFalse();
     }
 
     @Test
-    void aBlankKeyKeepsWhicheverKeyWasAlreadyInEffect() {
-        // 只改模型清单：密钥继续用配置文件里的那把
+    void aBlankKeyKeepsTheStoredKeyAndNullFieldsKeepTheirValues() {
+        service.seedIfNeeded();
+        // 只改模型清单：密钥继续用导入时那把
         service.save("huoshenai", new ConfiguredProviderInput("  ", null, List.of("gpt-6.2-sol"), null, null));
         var effective = service.effective("huoshenai").orElseThrow();
         assertThat(effective.apiKey()).isEqualTo(ENV_KEY);
-        assertThat(effective.keyFromConfig()).isTrue();
         assertThat(effective.models()).containsExactly("gpt-6.2-sol");
-
-        // 配置文件里后来换了密钥，照样生效（页面上没存这把密钥）
-        templates.put("huoshenai", new LlmProvidersProperties.ProviderConfig("sk-rotated-in-env",
-                "https://huoshenai.net/v1", "gpt-6.2-sol", List.of("gpt-6.2-sol")));
-        assertThat(service.effective("huoshenai").orElseThrow().apiKey()).isEqualTo("sk-rotated-in-env");
 
         // 在页面上填过密钥之后，再留空保存：沿用页面上那把
         service.save("huoshenai", new ConfiguredProviderInput(PAGE_KEY, null, List.of("gpt-6.2-sol"), null, null));
         service.save("huoshenai", new ConfiguredProviderInput(null, null, List.of("gpt-6.2-sol", "gpt-6.1-sol"), "gpt-6.1-sol", null));
         var typed = service.effective("huoshenai").orElseThrow();
         assertThat(typed.apiKey()).isEqualTo(PAGE_KEY);
-        assertThat(typed.keyFromConfig()).isFalse();
         assertThat(typed.defaultModel()).isEqualTo("gpt-6.1-sol");
-    }
 
-    @Test
-    void aNullModelListAndANullEnabledMeanKeepAndOnlyToggleWhatIsGiven() {
+        // 只停用：其余保持
         service.save("huoshenai", new ConfiguredProviderInput(null, null, null, null, false));
-
         var disabled = service.effective("huoshenai").orElseThrow();
         assertThat(disabled.enabled()).isFalse();
         assertThat(disabled.usable()).isFalse();
@@ -125,73 +140,73 @@ class ConfiguredProviderServiceTest {
     }
 
     @Test
-    void resetReturnsToTheConfiguredValues() {
-        service.save("zhipu", new ConfiguredProviderInput(PAGE_KEY, null, List.of("glm-5.4"), null, null));
-        assertThat(service.reset("zhipu")).isTrue();
-
-        assertThat(service.effective("zhipu").orElseThrow().usable()).isFalse();
-        assertThat(service.reset("zhipu")).isFalse();
-        assertThat(jdbc.queryForObject(
-                "SELECT COUNT(*) FROM settings WHERE category = 'configured_provider_override'", Integer.class)).isZero();
+    void deleteRemovesTheProviderForGood() {
+        service.seedIfNeeded();
+        assertThat(service.delete("deepseek")).isTrue();
+        assertThat(service.delete("deepseek")).isFalse();
+        assertThat(service.effective("deepseek")).isEmpty();
+        assertThat(service.views(ignored -> true)).extracting(ConfiguredProviderView::name).containsExactly("huoshenai");
+        // 标记还在：重启不会把删掉的又导回来
+        newService().seedIfNeeded();
+        assertThat(newService().effective("deepseek")).isEmpty();
     }
 
     @Test
-    void onlyDeepSeekAllowsEditingTheBaseUrl() {
-        assertThat(ConfiguredProviderService.baseUrlEditable("deepseek")).isTrue();
-        assertThat(ConfiguredProviderService.baseUrlEditable("huoshenai")).isFalse();
+    void theBaseUrlIsEditableForEveryProvider() {
+        service.seedIfNeeded();
 
-        service.save("deepseek", new ConfiguredProviderInput(null, "https://relay.example/v1/", null, null, null));
-        assertThat(service.effective("deepseek").orElseThrow().baseUrl()).isEqualTo("https://relay.example/v1");
+        service.save("huoshenai", new ConfiguredProviderInput(null, "https://relay.example/v1/", null, null, null));
+        assertThat(service.effective("huoshenai").orElseThrow().baseUrl()).isEqualTo("https://relay.example/v1");
 
-        // 其余服务商的地址是写死的：传了也不改
-        service.save("huoshenai", new ConfiguredProviderInput(null, "https://evil.example/v1", null, null, null));
-        assertThat(service.effective("huoshenai").orElseThrow().baseUrl()).isEqualTo("https://huoshenai.net/v1");
-        assertThat(service.views(name -> true).stream().filter(v -> v.name().equals("huoshenai")).findFirst().orElseThrow()
-                .baseUrlEditable()).isFalse();
-
-        assertCode(() -> service.save("deepseek", new ConfiguredProviderInput(null, "https://", null, null, null)),
+        assertCode(() -> service.save("huoshenai", new ConfiguredProviderInput(null, "https://", null, null, null)),
                 "INVALID_PROVIDER");
-        assertCode(() -> service.save("deepseek", new ConfiguredProviderInput(null, "relay.example/v1", null, null, null)),
+        assertCode(() -> service.save("huoshenai", new ConfiguredProviderInput(null, "relay.example/v1", null, null, null)),
                 "INVALID_PROVIDER");
     }
 
     @Test
     void rejectsUnknownProvidersBadInputAndModelsOwnedByAnotherProvider() {
+        service.seedIfNeeded();
         assertCode(() -> service.save("nope", new ConfiguredProviderInput(null, null, null, null, null)), "PROVIDER_NOT_FOUND");
-        assertCode(() -> service.save("zhipu", null), "INVALID_PROVIDER");
-        assertCode(() -> service.save("zhipu", new ConfiguredProviderInput(null, null, List.of(" , "), null, null)),
+        assertCode(() -> service.save("huoshenai", null), "INVALID_PROVIDER");
+        assertCode(() -> service.save("huoshenai", new ConfiguredProviderInput(null, null, List.of(" , "), null, null)),
                 "INVALID_PROVIDER");
-        // gpt-6.2-sol 已经由 huoshenai 提供：同一个模型不能放在两个服务商下，否则运行时按模型找服务商会报歧义
-        assertCode(() -> service.save("zhipu", new ConfiguredProviderInput(PAGE_KEY, null, List.of("glm-5.3", "gpt-6.2-sol"), null, null)),
+        // deepseek-flash 已经由 deepseek 提供：同一个模型不能放在两个服务商下，否则运行时按模型找服务商会报歧义
+        assertCode(() -> service.save("huoshenai", new ConfiguredProviderInput(null, null, List.of("gpt-6.2-sol", "deepseek-flash"), null, null)),
                 "INVALID_PROVIDER");
         // 已下架的模型不收
-        service.save("zhipu", new ConfiguredProviderInput(PAGE_KEY, null, List.of("glm-5.3", "qwen3.8-flash"), null, null));
-        assertThat(service.effective("zhipu").orElseThrow().models()).containsExactly("glm-5.3");
+        service.save("huoshenai", new ConfiguredProviderInput(null, null, List.of("gpt-6.2-sol", "qwen3.8-flash"), null, null));
+        assertThat(service.effective("huoshenai").orElseThrow().models()).containsExactly("gpt-6.2-sol");
     }
 
     @Test
     void savingAKeyRequiresAStableEncryptionKey() {
+        service.seedIfNeeded();
         var unstable = new ConfiguredProviderService(new LlmProvidersProperties(templates),
                 new SettingsRepository(jdbc), new StubEncryptionService(false), new com.fasterxml.jackson.databind.ObjectMapper());
 
-        assertThatThrownBy(() -> unstable.save("zhipu", new ConfiguredProviderInput(PAGE_KEY, null, null, null, null)))
+        assertThatThrownBy(() -> unstable.save("huoshenai", new ConfiguredProviderInput(PAGE_KEY, null, null, null, null)))
                 .isInstanceOf(RequestValidationException.class).extracting("code").isEqualTo("ENCRYPTION_KEY_REQUIRED");
     }
 
     @Test
     void unreadableRowsAreSkippedAndReloadPicksUpOutsideEdits() {
+        service.seedIfNeeded();
         jdbc.update("""
-                INSERT INTO settings(category, key, value, metadata, updated_at)
-                VALUES ('configured_provider_override', 'zhipu', 'not json', NULL, '2026-11-25T00:00:00Z')
+                UPDATE settings SET value = 'not json'
+                WHERE category = 'configured_provider' AND key = 'deepseek'
                 """);
-        assertThat(service.effective("zhipu").orElseThrow().overridden()).isFalse();
+        service.reload();
+        assertThat(service.effective("deepseek")).isEmpty();
+        assertThat(service.effective("huoshenai")).isPresent();
 
         jdbc.update("""
                 UPDATE settings SET value = ?
-                WHERE category = 'configured_provider_override' AND key = 'zhipu'
-                """, "{\"apiKey\":null,\"baseUrl\":null,\"models\":[\"glm-5.4\"],\"defaultModel\":\"glm-5.4\",\"enabled\":true}");
+                WHERE category = 'configured_provider' AND key = 'huoshenai'
+                """, "{\"apiKey\":null,\"baseUrl\":\"https://huoshenai.net/v1\",\"models\":[\"gpt-6.2-sol\",\"gpt-6.1-sol\"],"
+                        + "\"defaultModel\":\"gpt-6.1-sol\",\"enabled\":true,\"keySelectionStrategy\":null}");
         service.reload();
-        assertThat(service.effective("zhipu").orElseThrow().models()).containsExactly("glm-5.4");
+        assertThat(service.effective("huoshenai").orElseThrow().defaultModel()).isEqualTo("gpt-6.1-sol");
     }
 
     // ───── 辅助 ─────

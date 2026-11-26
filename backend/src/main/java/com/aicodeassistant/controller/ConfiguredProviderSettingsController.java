@@ -21,10 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 配置文件里定义的那批服务商（OpenAI、百炼、DeepSeek、智谱、火神中转站……）的接口：查看、在设置页里修改、
- * 恢复为配置文件的值、连通性测试、从接口获取模型清单。
+ * 设置页里带注册名的那批服务商的接口：查看、修改、删除、连通性测试、从接口获取模型清单。
  * <p>
- * 修改以"覆盖"的形式存库并立即生效，不用改 .env、不用重启容器。响应只下发打码后的密钥。
+ * 定义存在库里，页面是唯一来源（第一次启动时从 .env 一次性导入过一次）。响应只下发打码后的密钥。
  */
 @RestController
 @RequestMapping("/api/settings/configured-providers")
@@ -55,15 +54,10 @@ public class ConfiguredProviderSettingsController {
         this.discovery = discovery;
     }
 
-    /**
-     * 只列配了密钥的、以及在页面上改过的。配置里预置但没配密钥的那几个不下发——
-     * 设置页只显示用户实际在用的服务商，要别的自己加。
-     */
     @GetMapping
     public List<ConfiguredProviderView> list() {
-        return configured.views(this::isActive).stream()
-                .filter(view -> view.hasApiKey() || view.overridden())
-                .toList();
+        configured.seedIfNeeded();
+        return configured.views(this::isActive);
     }
 
     @PutMapping("/{name}")
@@ -74,11 +68,11 @@ public class ConfiguredProviderSettingsController {
         return new ConfiguredProviderResponse(view(name), result.providers());
     }
 
-    /** 删掉设置页里的修改，回到配置文件的值。 */
+    /** 删掉这个服务商。删了就是删了：模型从选择器消失，指向它的场景分派会失效。 */
     @DeleteMapping("/{name}")
-    public ResponseEntity<Void> reset(@PathVariable String name) {
-        if (!configured.reset(name)) {
-            throw new RequestValidationException("PROVIDER_NOT_FOUND", "这个服务商在设置页里没有改过");
+    public ResponseEntity<Void> delete(@PathVariable String name) {
+        if (!configured.delete(name)) {
+            throw new RequestValidationException("PROVIDER_NOT_FOUND", "没有这个服务商：" + name);
         }
         sync.sync();
         return ResponseEntity.noContent().build();

@@ -55,6 +55,7 @@ class SceneBindingServiceTest {
                 "MiniMax-M3", List.of("MiniMax-M3")));
         configured = new ConfiguredProviderService(new LlmProvidersProperties(templates),
                 new SettingsRepository(jdbc), SettingsTestSupport.encryption(), mapper);
+        configured.seedIfNeeded();
         registry = new LlmProviderRegistry(List.of(), new MockEnvironment());
         ModelRegistry modelRegistry = new ModelRegistry(registry);
         service = new SceneBindingService(new SettingsRepository(jdbc), pool, configured, modelRegistry, registry, mapper);
@@ -204,12 +205,10 @@ class SceneBindingServiceTest {
     }
 
     @Test
-    void aConfiguredProviderWithoutAKeyOrAModelItDoesNotListCannotBeResolved() {
-        service.save(ModelScenes.MAIN_DEFAULT, SceneBindingService.SOURCE_CONFIGURED, "minimax", "MiniMax-M3");
-
-        // minimax 在配置里没有密钥：绑定存得下来（用户可以先配好再填密钥），但不生效
-        assertThat(service.find(ModelScenes.MAIN_DEFAULT)).isPresent();
-        assertThat(service.resolve(ModelScenes.MAIN_DEFAULT)).isEmpty();
+    void aProviderThatIsNotInTheSettingsStoreIsRejected() {
+        // minimax 在 .env 里没配密钥：一次性导入不进库，设置页里没有它，绑定直接被拒
+        assertCode(() -> service.save(ModelScenes.MAIN_DEFAULT, SceneBindingService.SOURCE_CONFIGURED, "minimax", "MiniMax-M3"),
+                "PROVIDER_NOT_FOUND");
         assertCode(() -> service.save(ModelScenes.MAIN_DEFAULT, SceneBindingService.SOURCE_CONFIGURED,
                 "no-such-provider", "x"), "PROVIDER_NOT_FOUND");
         assertCode(() -> service.save(ModelScenes.MAIN_DEFAULT, "elsewhere", "huoshenai", "gpt-6.2-sol"),
