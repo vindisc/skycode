@@ -9,9 +9,9 @@ package com.aicodeassistant.model;
 public enum PermissionRuleSource {
     /** 用户全局配置 (~/.config/.../settings.json) */
     USER_SETTINGS,
-    /** 项目级配置 (.zhikun/settings.json) */
+    /** 项目级配置 (.skycode/settings.json) */
     PROJECT_SETTINGS,
-    /** 本地配置 (.zhikun/settings.local.json) */
+    /** 本地配置 (.skycode/settings.local.json) */
     LOCAL_SETTINGS,
     /** 特性标志推送的设置 */
     FLAG_SETTINGS,

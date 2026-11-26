@@ -132,7 +132,7 @@ public class SnipService {
 
     private void persistToolResult(String toolUseId, String content) {
         try {
-            Path dir = Path.of(System.getProperty("java.io.tmpdir"), "zhikun-tool-results");
+            Path dir = Path.of(System.getProperty("java.io.tmpdir"), "skycode-tool-results");
             Files.createDirectories(dir);
             Path file = dir.resolve(toolUseId + ".txt");
             Files.writeString(file, content != null ? content : "");
@@ -145,6 +145,6 @@ public class SnipService {
 
     private String getPersistedPath(String toolUseId) {
         return Path.of(System.getProperty("java.io.tmpdir"), 
-                "zhikun-tool-results", toolUseId + ".txt").toString();
+                "skycode-tool-results", toolUseId + ".txt").toString();
     }
 }

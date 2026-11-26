@@ -454,12 +454,12 @@ describe('SpiderAnchorRegistry', () => {
     });
 
     it('ignores fenced blocks and brand fallback when messages exist', () => {
-        mount('<span data-spider-anchor="brand">zhikuncode</span><div data-message-uuid="m"><div data-spider-anchor="text"><pre>code block</pre><span>body text</span></div></div>');
+        mount('<span data-spider-anchor="brand">skycode</span><div data-message-uuid="m"><div data-spider-anchor="text"><pre>code block</pre><span>body text</span></div></div>');
         expect(registry.sample().map(anchor => anchor.text)).toEqual(['body text']);
     });
 
     it('uses brand only in the empty state and unregisters observers/listeners on dispose', () => {
-        mount('<span data-spider-anchor="brand">zhikuncode</span>');
+        mount('<span data-spider-anchor="brand">skycode</span>');
         expect(registry.sample()[0].kind).toBe('brand');
         const removeWindow = vi.spyOn(window, 'removeEventListener');
         const removeDocument = vi.spyOn(document, 'removeEventListener');

@@ -2,7 +2,7 @@
  * EmptyHero — §7.1 空态 Hero（记忆点①）
  *
  * 结构（ui EmptyState hero 变体承载）：
- * 1. 徽章：现有品牌 Logo + zhikuncode；
+ * 1. 徽章：现有品牌 Logo + skycode；
  * 2. 标题：今天想<b>创造</b>什么？（clamp(34px,5.4vw,50px)/300/-0.02em，<b>=650+accent，
  *    移动端固定 34px —— 经 [&_h1]:max-md 覆盖）；
  * 3. 副文案（text-t3 档、1.7 行高，EmptyState hero 内置）；

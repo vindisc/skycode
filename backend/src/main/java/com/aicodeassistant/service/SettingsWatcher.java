@@ -32,7 +32,7 @@ public class SettingsWatcher {
     public void init() {
         try {
             watchService = FileSystems.getDefault().newWatchService();
-            Path configDir = Path.of(System.getProperty("user.home"), ".zhikun");
+            Path configDir = Path.of(System.getProperty("user.home"), ".skycode");
             if (Files.isDirectory(configDir)) {
                 configDir.register(watchService,
                     StandardWatchEventKinds.ENTRY_MODIFY,

@@ -166,7 +166,7 @@ export function LlmProviderForm({
                 <p className={HINT}>
                     {apiKeyStorageReady
                         ? '保存前会加密，保存后只显示末 4 位。'
-                        : '当前运行环境没有稳定的加密密钥，暂时不能保存 API Key。请通过环境变量 ZHIKU_ENCRYPTION_KEY 提供密钥后重启服务。'}
+                        : '当前运行环境没有稳定的加密密钥，暂时不能保存 API Key。请通过环境变量 SKYCODE_ENCRYPTION_KEY 提供密钥后重启服务。'}
                 </p>
             </div>
 

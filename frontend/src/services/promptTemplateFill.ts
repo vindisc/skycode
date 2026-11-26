@@ -6,7 +6,7 @@
  * 后者（usePromptState）挂载时监听，写入当前会话草稿并聚焦；卸载时移除监听。
  */
 
-export const PROMPT_TEMPLATE_FILL_EVENT = 'zhikun:prompt-template-fill';
+export const PROMPT_TEMPLATE_FILL_EVENT = 'skycode:prompt-template-fill';
 
 export interface PromptTemplateFillDetail {
     text: string;

@@ -16,7 +16,7 @@ import java.nio.file.Path;
  *   <li>LLM_API_KEY 环境变量 — 通用 LLM API 密钥 (P0 推荐)</li>
  *   <li>OPENAI_API_KEY 环境变量 — OpenAI 兼容密钥</li>
  *   <li>配置文件 API Key — llm.openai.api-key</li>
- *   <li>ZHIKUN_OAUTH_TOKEN 环境变量 — OAuth Token</li>
+ *   <li>SKYCODE_OAUTH_TOKEN 环境变量 — OAuth Token</li>
  * </ol>
  */
 @Service
@@ -62,10 +62,10 @@ public class AuthenticationService {
             return AuthResult.apiKey(fileKey, "config_file");
         }
 
-        // 5. ZHIKUN_OAUTH_TOKEN — OAuth Token 注入
-        String oauthToken = System.getenv("ZHIKUN_OAUTH_TOKEN");
+        // 5. SKYCODE_OAUTH_TOKEN — OAuth Token 注入
+        String oauthToken = System.getenv("SKYCODE_OAUTH_TOKEN");
         if (oauthToken != null && !oauthToken.isBlank()) {
-            log.debug("Auth: using ZHIKUN_OAUTH_TOKEN");
+            log.debug("Auth: using SKYCODE_OAUTH_TOKEN");
             return AuthResult.oauthToken(oauthToken);
         }
 

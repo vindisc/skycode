@@ -22,7 +22,7 @@
 - 新增 `deepseek-v4-flash-vision-exp` 图片理解模型，作为 DeepSeek 系列的专属视觉兜底。
 - 同一 LLM Provider 支持逗号分隔多 API Key（ZenMux 订阅 Key `sk-ss-v1-` 优先、按量 Key `sk-ai-v1-` 兜底），402 quote_exceeded / 404 model_not_available / 429 时自动冷却切换。
 - 新增 OpenRouter Provider：强推理模型 `openrouter/anthropic/claude-fable-5.1`（默认 `reasoning.effort=max`）；内部 `openrouter/` 前缀用于渠道隔离，复用 OpenAI 兼容链路与 Key 轮换。
-- 新增可选的删除会话二次确认验证码：配置 `ZHIKUN_DELETE_CONFIRM_CODE` 后，Web 删除会话须在确认气泡中输入该验证码（随 `X-Delete-Confirm-Code` 请求头由后端校验）；未配置时维持原确认流程，配置查询失败不缓存失败结果，下次挂载重试。
+- 新增可选的删除会话二次确认验证码：配置 `SKYCODE_DELETE_CONFIRM_CODE` 后，Web 删除会话须在确认气泡中输入该验证码（随 `X-Delete-Confirm-Code` 请求头由后端校验）；未配置时维持原确认流程，配置查询失败不缓存失败结果，下次挂载重试。
 - Run API 新增 `usageStatus`（`known/partial/unknown`）与 `verificationScope`（`artifact_manifest/unknown`）字段：用量口径限定为「本 Run 的已观测消费」，任务概览按同一 Run 联展示用量与状态，unknown 显示未报告、partial 仅统计已报告部分，不估算、不归集子 Run；产物验证字段范围限定为 `artifact_manifest`，未知状态安全标为范围未知。
 - 附件存储新增 `.metadata/<uuid>.json` 侧车文件保存原始显示名（版本、UUID、存储文件名、原名，不新增数据库表）；上传改为同文件系统临时文件 + 先发布元数据、再原子发布 payload，失败只清理本次文件。
 - 新增第四主题「星舰 HUD」：深空 HUD 视觉（切角面板/机械角标/罗盘雷达/网格地板/扫描线）、三个独立特效开关（电影级视觉/事件特效/动效三档）、TOKEN 警告琥珀脉冲、开机自检过渡、DRIFT 同步徽章；支持移动端面板开关。
@@ -57,7 +57,7 @@
 - 模型列表、默认模型、会话创建和恢复统一以当前已注册 Provider 为权威；无效或已下线模型不再显示为 `Unknown Model`，历史会话仅在当前连接中回退到可用默认模型。
 - Docker 运行时升级到 Python 3.12 并内置可选的受管 Python 服务；基础 Compose 保持默认不启动 Python，部署方须通过显式 override 启用。
 - **Breaking:** Query 不再接受客户端提供的 `workingDirectory`。CLI 本地连接会登记当前目录，远程连接应使用 `--project-id` 或服务端默认工作区。
-- 无 allowed roots 时，本机目录选择默认关闭；直连本机桌面服务须显式设置 `ZHIKUN_LOCAL_PICKER_ENABLED=true`，远程或反向代理部署须配置 `ZHIKUN_WORKSPACE_ALLOWED_ROOTS`。
+- 无 allowed roots 时，本机目录选择默认关闭；直连本机桌面服务须显式设置 `SKYCODE_LOCAL_PICKER_ENABLED=true`，远程或反向代理部署须配置 `SKYCODE_WORKSPACE_ALLOWED_ROOTS`。
 - 顶栏的模型选择器、模型重试与成本指示改为桌面端常驻（≥768px）。
 - 上下文压缩引擎重构为 ContextCompactor / CompactConfiguration / CompactionContext / CompactionHistory：摘要失败时按完整工具事务本地选择，用户原文永不省略且不再尾部截断，工具终止未确认不宣告成功。
 - `BACKGROUND_AGENT_WAIT` 默认开启：主 Run 等待本轮后台代理完成再汇总结果，默认预算 31 分钟，可用 `FEATURE_BACKGROUND_AGENT_WAIT=false` 关闭或 `AGENT_TIMEOUT_MAX_WAIT_MINUTES` 调整。
@@ -179,7 +179,7 @@
 ## [1.0.1] - 2026-04-23
 
 ### Added
-- 新增品牌目录统一：`.qoder` → `.zhikun`
+- 新增品牌目录统一：`.qoder` → `.skycode`
 - 新增 CLI 工具文档章节（中英文 README）
 - 新增记忆系统、技能系统、多 Agent 协作文档章节
 - 新增质量保障章节与测试报告
@@ -212,7 +212,7 @@
 - 命令注入防护
 - 基于权限的工具执行机制
 
-[1.2.0]: https://github.com/zhikuncode/zhikuncode/compare/v1.1.0...HEAD
-[1.1.0]: https://github.com/zhikuncode/zhikuncode/compare/v1.0.1...v1.1.0
-[1.0.1]: https://github.com/zhikuncode/zhikuncode/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/zhikuncode/zhikuncode/releases/tag/v1.0.0
+[1.2.0]: https://github.com/skycode/skycode/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/skycode/skycode/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/skycode/skycode/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/skycode/skycode/releases/tag/v1.0.0

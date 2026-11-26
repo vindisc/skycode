@@ -313,7 +313,7 @@ public class BridgeServer {
     private void handleAuth(String sessionId, BridgeMessage message) {
         Object issuer = message.payload().get("issuer");
         log.info("Bridge auth: session={}, issuer={}", sessionId, issuer);
-        // 验证 issuer — REPL: "zhikun-ide-extension", Remote: "zhikun-remote"
+        // 验证 issuer — REPL: "skycode-ide-extension", Remote: "skycode-remote"
     }
 
     private void handleSubscribe(String sessionId, BridgeMessage message) {

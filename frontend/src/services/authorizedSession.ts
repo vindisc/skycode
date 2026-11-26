@@ -6,7 +6,7 @@ import { useSessionStore } from '@/store/sessionStore';
 let pendingCreation: Promise<string | null> | null = null;
 
 export const NEW_AUTHORIZED_SESSION_EVENT =
-    'zhikuncode:new-authorized-session';
+    'skycode:new-authorized-session';
 
 export function dispatchNewAuthorizedSessionRequest(): void {
     window.dispatchEvent(new Event(NEW_AUTHORIZED_SESSION_EVENT));

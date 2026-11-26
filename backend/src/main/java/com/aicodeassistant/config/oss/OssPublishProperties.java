@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 /** Non-secret configuration and fail-closed validation for OSS publication. */
 @Component
-@ConfigurationProperties(prefix = "zhikuncode.oss")
+@ConfigurationProperties(prefix = "skycode.oss")
 public class OssPublishProperties {
     private static final Pattern BUCKET = Pattern.compile("[a-z0-9][a-z0-9-]{1,61}[a-z0-9]");
     private static final Pattern REGION = Pattern.compile("[a-z0-9]+(?:-[a-z0-9]+)+");
@@ -28,7 +28,7 @@ public class OssPublishProperties {
     private String bucket = "";
     private String publicBaseUrl = "";
     private boolean previewEnabled;
-    private String prefix = "zhikuncode-artifacts";
+    private String prefix = "skycode-artifacts";
     private String ecsRoleName = "";
     private String credentialMode = "auto";
     private long maxFileBytes = 1024L * 1024 * 1024;

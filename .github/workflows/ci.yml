@@ -149,6 +149,6 @@ jobs:
         with:
           context: .
           push: false
-          tags: zhikuncode:ci-${{ github.sha }}
+          tags: skycode:ci-${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

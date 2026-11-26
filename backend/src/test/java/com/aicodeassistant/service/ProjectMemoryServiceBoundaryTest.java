@@ -25,8 +25,8 @@ class ProjectMemoryServiceBoundaryTest {
     void loadMemoryReadsOnlyFilesInSelectedProjectRoot() throws Exception {
         Path project = Files.createDirectory(temp.resolve("project")).toRealPath();
         Path selected = Files.createDirectory(project.resolve("selected")).toRealPath();
-        Files.writeString(project.resolve("zhikun.md"), "parent-secret");
-        Files.writeString(selected.resolve("zhikun.local.md"), "selected-memory");
+        Files.writeString(project.resolve("skycode.md"), "parent-secret");
+        Files.writeString(selected.resolve("skycode.local.md"), "selected-memory");
 
         String loaded = memory.loadMemory(selected);
 
@@ -39,7 +39,7 @@ class ProjectMemoryServiceBoundaryTest {
         Path project = Files.createDirectory(temp.resolve("symlink-project")).toRealPath();
         Path outside = Files.writeString(temp.resolve("outside-memory.md"), "outside-secret")
                 .toRealPath();
-        Files.createSymbolicLink(project.resolve("zhikun.md"), outside);
+        Files.createSymbolicLink(project.resolve("skycode.md"), outside);
 
         String loaded = memory.loadMemory(project);
 
@@ -51,7 +51,7 @@ class ProjectMemoryServiceBoundaryTest {
     void loadMemoryReadsAtMostOneHundredKiB() throws Exception {
         Path project = Files.createDirectory(temp.resolve("large-project")).toRealPath();
         String allowedPrefix = "A".repeat(100 * 1024);
-        Files.writeString(project.resolve("zhikun.md"),
+        Files.writeString(project.resolve("skycode.md"),
                 allowedPrefix + "must-not-be-read", StandardCharsets.UTF_8);
 
         String loaded = memory.loadMemory(project);
@@ -67,7 +67,7 @@ class ProjectMemoryServiceBoundaryTest {
     @Test
     void loadMemoryHandlesFileBecomingEmptyBeforeRead() throws Exception {
         Path project = Files.createDirectory(temp.resolve("shrinking-project")).toRealPath();
-        Path file = Files.writeString(project.resolve("zhikun.md"), "");
+        Path file = Files.writeString(project.resolve("skycode.md"), "");
 
         // Model stale metadata from before a concurrent truncate: size reports a large
         // file, while the real stream is already empty. Reading must use actual bytes.
@@ -81,7 +81,7 @@ class ProjectMemoryServiceBoundaryTest {
     void loadMemoryAtExactLimitDoesNotAddTruncationMarker() throws Exception {
         Path project = Files.createDirectory(temp.resolve("exact-limit-project")).toRealPath();
         String content = "A".repeat(100 * 1024);
-        Path file = Files.writeString(project.resolve("zhikun.md"), content);
+        Path file = Files.writeString(project.resolve("skycode.md"), content);
 
         assertThat(memory.loadMemory(project)).isEqualTo("<!-- " + file + " -->\n" + content);
     }
@@ -90,7 +90,7 @@ class ProjectMemoryServiceBoundaryTest {
     @ValueSource(strings = {"é", "中", "😀"})
     void loadMemoryPreservesOnlyCompleteUtf8CharactersAtLimit(String character) throws Exception {
         Path project = Files.createDirectory(temp.resolve("utf8-project")).toRealPath();
-        Path file = project.resolve("zhikun.md");
+        Path file = project.resolve("skycode.md");
         int limit = 100 * 1024;
         String marker = "\n<!-- truncated: exceeded " + limit + " bytes -->";
         String header = "<!-- " + file + " -->\n";
@@ -113,7 +113,7 @@ class ProjectMemoryServiceBoundaryTest {
         org.assertj.core.api.Assertions.assertThatThrownBy(
                 () -> memory.createMemoryIfAbsent(project, "SECOND", false))
                 .isInstanceOf(java.nio.file.FileAlreadyExistsException.class);
-        assertThat(Files.readString(project.resolve("zhikun.md"))).isEqualTo("FIRST");
+        assertThat(Files.readString(project.resolve("skycode.md"))).isEqualTo("FIRST");
     }
 
     @Test
@@ -124,7 +124,7 @@ class ProjectMemoryServiceBoundaryTest {
         Path environment = Files.writeString(
                 project.resolve(".env"), "TOKEN=keep-me");
         Files.createSymbolicLink(
-                project.resolve("zhikun.md"), environment);
+                project.resolve("skycode.md"), environment);
 
         assertThatThrownBy(() -> memory.writeMemory(
                 project, "replacement", false))
@@ -141,7 +141,7 @@ class ProjectMemoryServiceBoundaryTest {
                 temp.resolve("write-dangling-project")).toRealPath();
         Path missingTarget = project.resolve("missing-memory-target");
         Files.createSymbolicLink(
-                project.resolve("zhikun.md"), missingTarget);
+                project.resolve("skycode.md"), missingTarget);
 
         assertThatThrownBy(() -> memory.writeMemory(
                 project, "replacement", false))
@@ -159,7 +159,7 @@ class ProjectMemoryServiceBoundaryTest {
         memory.writeMemory(project, "first", false);
         memory.writeMemory(project, "second", false);
 
-        assertThat(Files.readString(project.resolve("zhikun.md")))
+        assertThat(Files.readString(project.resolve("skycode.md")))
                 .isEqualTo("second");
     }
 }

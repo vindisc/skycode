@@ -27,7 +27,7 @@ public class McpServerStdioTransport {
     private static final Logger log = LoggerFactory.getLogger(McpServerStdioTransport.class);
     private static final String JSONRPC_VERSION = "2.0";
     private static final String MCP_PROTOCOL_VERSION = "2024-11-05";
-    private static final String SERVER_NAME = "zhikuncode-mcp-server";
+    private static final String SERVER_NAME = "skycode-mcp-server";
     private static final String SERVER_VERSION = "1.0.0";
 
     private final McpServerToolHandler toolHandler;

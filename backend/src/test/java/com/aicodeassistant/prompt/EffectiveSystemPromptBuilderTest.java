@@ -117,7 +117,7 @@ class EffectiveSystemPromptBuilderTest {
     @Test
     void testPriority1_AutomaticCoordinatorPromptReceivesSessionWorkingDirectory() {
         when(coordinatorService.isCoordinatorTopLevel(null)).thenReturn(true);
-        Path workingDir = Path.of("/Users/zhikun/Desktop/郭庆涛/测试 zk");
+        Path workingDir = Path.of("/Users/skycode/Desktop/郭庆涛/测试 zk");
         when(coordinatorPromptBuilder.buildCoordinatorPromptForProject(
                 "session-project", workingDir))
                 .thenReturn("COORDINATOR_PROJECT_PROMPT: " + workingDir);

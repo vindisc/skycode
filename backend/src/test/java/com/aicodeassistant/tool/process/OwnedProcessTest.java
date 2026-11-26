@@ -195,10 +195,10 @@ class OwnedProcessTest {
 
     @Test
     @EnabledOnOs(OS.LINUX)
-    @EnabledIfEnvironmentVariable(named = "ZHIKUN_REAL_BROWSER_PROCESS_TEST", matches = "1")
+    @EnabledIfEnvironmentVariable(named = "SKYCODE_REAL_BROWSER_PROCESS_TEST", matches = "1")
     void stoppedRealChromiumIsReapedByForcedServiceCleanup() throws Exception {
         // Opt-in: isolated --init container with this Python/Playwright runtime.
-        String python = System.getenv("ZHIKUN_TEST_PYTHON");
+        String python = System.getenv("SKYCODE_TEST_PYTHON");
         OwnedProcess process = OwnedProcess.start(new ProcessBuilder(python, "-c", """
                 from pathlib import Path
                 import time

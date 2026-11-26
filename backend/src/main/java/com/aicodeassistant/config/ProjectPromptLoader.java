@@ -16,11 +16,11 @@ import java.util.regex.Pattern;
  * <p>
  * 加载顺序（优先级从低到高）:
  * <ol>
- *     <li>用户级: ~/.zhikun/PROJECT.md</li>
+ *     <li>用户级: ~/.skycode/PROJECT.md</li>
  *     <li>项目级: {cwd}/PROJECT.md</li>
- *     <li>项目级: {cwd}/.zhikun/PROJECT.md</li>
- *     <li>本地级: {cwd}/.zhikun/PROJECT.local.md</li>
- *     <li>rules 目录: {cwd}/.zhikun/rules/*.md</li>
+ *     <li>项目级: {cwd}/.skycode/PROJECT.md</li>
+ *     <li>本地级: {cwd}/.skycode/PROJECT.local.md</li>
+ *     <li>rules 目录: {cwd}/.skycode/rules/*.md</li>
  *     <li>父目录向上遍历的 PROJECT.md</li>
  * </ol>
  * <p>
@@ -33,7 +33,7 @@ public class ProjectPromptLoader {
     private static final Logger log = LoggerFactory.getLogger(ProjectPromptLoader.class);
 
     private static final String PROJECT_MD = "PROJECT.md";
-    private static final String PROJECT_DIR = ".zhikun";
+    private static final String PROJECT_DIR = ".skycode";
 
     /** 缓存: 工作目录 → 合并后的配置内容 */
     private final ConcurrentHashMap<Path, CachedConfig> cache = new ConcurrentHashMap<>();
@@ -62,14 +62,14 @@ public class ProjectPromptLoader {
 
         List<ProjectMdSection> sections = new ArrayList<>();
 
-        // Layer 1: 用户级 ~/.zhikun/PROJECT.md
+        // Layer 1: 用户级 ~/.skycode/PROJECT.md
         sections.addAll(loadUserLevel());
 
         // Layer 2: 项目级 {cwd}/PROJECT.md
         loadFile(normalizedCwd.resolve(PROJECT_MD), "project")
                 .ifPresent(sections::add);
 
-        // Layer 3: 项目级 {cwd}/.zhikun/PROJECT.md
+        // Layer 3: 项目级 {cwd}/.skycode/PROJECT.md
         loadFile(normalizedCwd.resolve(PROJECT_DIR).resolve(PROJECT_MD), "project-local")
                 .ifPresent(sections::add);
 

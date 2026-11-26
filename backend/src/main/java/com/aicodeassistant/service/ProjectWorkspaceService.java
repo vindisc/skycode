@@ -46,11 +46,11 @@ public class ProjectWorkspaceService {
     @Autowired
     public ProjectWorkspaceService(
             ProjectRepository projects,
-            @Value("${zhikuncode.workspace.allowed-roots:}")
+            @Value("${skycode.workspace.allowed-roots:}")
             String configuredAllowedRoots,
-            @Value("${zhikuncode.workspace.default-root:${user.dir}}")
+            @Value("${skycode.workspace.default-root:${user.dir}}")
             String configuredDefaultRoot,
-            @Value("${zhikuncode.workspace.local-picker-enabled:false}")
+            @Value("${skycode.workspace.local-picker-enabled:false}")
             boolean localPickerEnabled) {
         this(projects, configuredAllowedRoots, configuredDefaultRoot,
                 localPickerEnabled, new SystemNativeDirectoryPicker());
@@ -424,7 +424,7 @@ public class ProjectWorkspaceService {
                     HttpStatus.FORBIDDEN,
                     "REMOTE_PROJECT_CREATE_FORBIDDEN",
                     "Remote Project creation requires "
-                            + "ZHIKUN_WORKSPACE_ALLOWED_ROOTS");
+                            + "SKYCODE_WORKSPACE_ALLOWED_ROOTS");
         }
     }
 
@@ -436,7 +436,7 @@ public class ProjectWorkspaceService {
                     HttpStatus.FORBIDDEN,
                     "REMOTE_DIRECTORY_BROWSE_FORBIDDEN",
                     "Remote directory browsing requires "
-                            + "ZHIKUN_WORKSPACE_ALLOWED_ROOTS");
+                            + "SKYCODE_WORKSPACE_ALLOWED_ROOTS");
         }
     }
 
@@ -462,9 +462,9 @@ public class ProjectWorkspaceService {
                     "LOCAL_PICKER_DISABLED",
                     "Directory selection is disabled. For a direct local "
                             + "desktop server, set "
-                            + "ZHIKUN_LOCAL_PICKER_ENABLED=true; for remote "
+                            + "SKYCODE_LOCAL_PICKER_ENABLED=true; for remote "
                             + "or proxied deployments, configure "
-                            + "ZHIKUN_WORKSPACE_ALLOWED_ROOTS instead");
+                            + "SKYCODE_WORKSPACE_ALLOWED_ROOTS instead");
         }
     }
 

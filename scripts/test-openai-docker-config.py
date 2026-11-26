@@ -35,7 +35,7 @@ class OpenAiDockerConfigTest(unittest.TestCase):
             cwd=REPO, env={**env, **overrides},
             text=True, capture_output=True, check=True, timeout=30,
         )
-        container_env = json.loads(result.stdout)["services"]["zhikuncode"]["environment"]
+        container_env = json.loads(result.stdout)["services"]["skycode"]["environment"]
         self.assertEqual(container_env.get("LLM_PROVIDER_OPENAI_API_KEY"),
                          overrides.get("LLM_PROVIDER_OPENAI_API_KEY", ""))
         self.assertEqual(container_env.get("LLM_PROVIDER_OPENAI_MODELS"),

@@ -35,7 +35,7 @@ class CoordinatorPromptBuilderTest {
         CoordinatorPromptBuilder builder =
                 new CoordinatorPromptBuilder(coordinatorService, mcpClientManager);
         String prompt = builder.buildCoordinatorPrompt(
-                "session-1", Path.of("/tmp/zhikun-scratchpad"));
+                "session-1", Path.of("/tmp/skycode-scratchpad"));
 
         assertTrue(prompt.contains("将结果视为部分结果"));
         assertTrue(prompt.contains("最多创建一个范围明确的续作 worker"));
@@ -54,8 +54,8 @@ class CoordinatorPromptBuilderTest {
     void promptDistinguishesProjectRootFromScratchpad() {
         CoordinatorService coordinatorService = mock(CoordinatorService.class);
         McpClientManager mcpClientManager = mock(McpClientManager.class);
-        Path projectRoot = Path.of("/Users/zhikun/Desktop/郭庆涛/测试 zk");
-        Path scratchpadRoot = Path.of("/tmp/zhikun-scratchpad/session-1");
+        Path projectRoot = Path.of("/Users/skycode/Desktop/郭庆涛/测试 zk");
+        Path scratchpadRoot = Path.of("/tmp/skycode-scratchpad/session-1");
         when(coordinatorService.getWorkerToolsContext("session-1"))
                 .thenReturn(Map.of("workerToolsContext", "standard tools"));
         when(coordinatorService.getScratchpadDir("session-1"))
@@ -90,7 +90,7 @@ class CoordinatorPromptBuilderTest {
         CoordinatorPromptBuilder builder =
                 new CoordinatorPromptBuilder(coordinatorService, mcpClientManager);
         String prompt = builder.buildCoordinatorPrompt(
-                "session-1", Path.of("/tmp/zhikun-scratchpad"));
+                "session-1", Path.of("/tmp/skycode-scratchpad"));
 
         assertTrue(prompt.contains("content compressed by system"));
         assertTrue(prompt.contains(
@@ -110,7 +110,7 @@ class CoordinatorPromptBuilderTest {
         CoordinatorPromptBuilder builder =
                 new CoordinatorPromptBuilder(coordinatorService, mcpClientManager);
         String prompt = builder.buildCoordinatorPrompt(
-                "session-1", Path.of("/tmp/zhikun-scratchpad"));
+                "session-1", Path.of("/tmp/skycode-scratchpad"));
 
         String goal = com.aicodeassistant.prompt.SystemPromptBuilder.GOAL_QUALITY_SECTION;
         String markers = com.aicodeassistant.prompt.SystemPromptBuilder
@@ -180,7 +180,7 @@ class CoordinatorPromptBuilderTest {
         CoordinatorPromptBuilder builder =
                 new CoordinatorPromptBuilder(coordinatorService, mcpClientManager);
         String prompt = builder.buildCoordinatorPrompt(
-                "session-1", Path.of("/tmp/zhikun-scratchpad"));
+                "session-1", Path.of("/tmp/skycode-scratchpad"));
 
         LlmProviderRegistry providers = mock(LlmProviderRegistry.class);
         when(providers.getBuiltinAliases()).thenReturn(List.of("standard"));
@@ -213,7 +213,7 @@ class CoordinatorPromptBuilderTest {
         CoordinatorPromptBuilder builder =
                 new CoordinatorPromptBuilder(coordinatorService, mcpClientManager);
         String prompt = builder.buildCoordinatorPrompt(
-                "session-1", Path.of("/tmp/zhikun-scratchpad"));
+                "session-1", Path.of("/tmp/skycode-scratchpad"));
 
         // 现实能力：worker 一次启动、运行到完成，不可停止/续传/中途纠正
         assertTrue(prompt.contains("无法停止、无法续传、无法中途纠正"));
@@ -286,7 +286,7 @@ class CoordinatorPromptBuilderTest {
         CoordinatorPromptBuilder builder =
                 new CoordinatorPromptBuilder(coordinatorService, mcpClientManager);
         String prompt = builder.buildCoordinatorPrompt(
-                "session-1", Path.of("/tmp/zhikun-scratchpad"));
+                "session-1", Path.of("/tmp/skycode-scratchpad"));
 
         assertTrue(prompt.contains("新 worker 的任务文本示例"));
         assertTrue(prompt.contains("Check the agreed error-message contract"));
@@ -364,7 +364,7 @@ class CoordinatorPromptBuilderTest {
                 .thenReturn(Map.of("workerToolsContext", "standard tools"));
         when(mcpClientManager.getConnectedServers()).thenReturn(List.of());
         return new CoordinatorPromptBuilder(coordinatorService, mcpClientManager)
-                .buildCoordinatorPrompt("session-1", Path.of("/tmp/zhikun-scratchpad"));
+                .buildCoordinatorPrompt("session-1", Path.of("/tmp/skycode-scratchpad"));
     }
 
     @Test
@@ -392,7 +392,7 @@ class CoordinatorPromptBuilderTest {
     @DisplayName("Coordinator 基础提示不自行注入记忆（由 EffectiveSystemPromptBuilder 统一追加）")
     void coordinatorPromptDoesNotInjectMemoryItself(@TempDir Path temp) throws Exception {
         Path projectRoot = Files.createDirectories(temp.resolve("project")).toRealPath();
-        Files.writeString(projectRoot.resolve("zhikun.md"), "PROJECT-RULE");
+        Files.writeString(projectRoot.resolve("skycode.md"), "PROJECT-RULE");
         CoordinatorService coordinatorService = mock(CoordinatorService.class);
         McpClientManager mcpClientManager = mock(McpClientManager.class);
         when(coordinatorService.getWorkerToolsContext("session-1"))

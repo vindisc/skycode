@@ -82,7 +82,7 @@ public class PythonProcessManager {
     }
 
     void startAsync() {
-        Thread.ofVirtual().name("zhikun-python-startup").start(this::startWithRetry);
+        Thread.ofVirtual().name("skycode-python-startup").start(this::startWithRetry);
     }
 
     void startWithRetry() {
@@ -146,7 +146,7 @@ public class PythonProcessManager {
             process = OwnedProcess.start(builder);
             processRef.set(process);
             Process started = process;
-            Thread.ofVirtual().name("zhikun-python-drain")
+            Thread.ofVirtual().name("skycode-python-drain")
                     .start(() -> drainOutput(started));
 
             if (waitUntilHealthy(process)) {
@@ -248,7 +248,7 @@ public class PythonProcessManager {
         if (!healthCheckInProgress.compareAndSet(false, true)) {
             return;
         }
-        Thread.ofVirtual().name("zhikun-python-health")
+        Thread.ofVirtual().name("skycode-python-health")
                 .start(() -> {
                     try {
                         runHealthCheckCycle();

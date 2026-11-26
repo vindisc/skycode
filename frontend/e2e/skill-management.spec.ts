@@ -22,7 +22,7 @@ async function mockBackend(context: BrowserContext, theme: Theme = 'dark') {
   let failNextSave = false;
   let stateError: string | null = null;
   await context.addInitScript(mode => {
-    localStorage.setItem('zhikun.workbench.default-view', 'development');
+    localStorage.setItem('skycode.workbench.default-view', 'development');
     localStorage.setItem('ai-coder-config', JSON.stringify({ state: {
       theme: { mode, accentColor: '#0D9488', fontSize: 'medium', fontFamily: 'monospace', borderRadius: 'md' },
       themePreferenceSet: true, locale: 'zh-CN',

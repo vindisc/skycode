@@ -29,7 +29,7 @@ class ShellStateManagerTest {
 
         try {
             String wrapped = manager.wrapCommand(
-                    "export ZHIKUN_TEST_SECRET='" + marker + "'; false; cd " + quote(child)
+                    "export SKYCODE_TEST_SECRET='" + marker + "'; false; cd " + quote(child)
                             + "; (exit " + exitCode + ")", sessionId);
             ShellResult result = runShell(wrapped);
 

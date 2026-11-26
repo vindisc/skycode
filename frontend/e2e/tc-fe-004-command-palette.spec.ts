@@ -145,7 +145,7 @@ test.describe('TC-FE-004 命令面板与 Skill 触发', () => {
     await viewCommand.click();
     await expect(footerHint).toBeHidden();
     await expect.poll(() => page.evaluate(() =>
-      JSON.parse(localStorage.getItem('zhikun.turn-view.v1') ?? '{}').state?.density,
+      JSON.parse(localStorage.getItem('skycode.turn-view.v1') ?? '{}').state?.density,
     )).toBe('detailed');
     await screenshot(page, 'tc-fe-004d-after-select');
   });

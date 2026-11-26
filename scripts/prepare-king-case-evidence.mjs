@@ -235,7 +235,7 @@ const sourceLogs = [
 
 writeJson(join(assetRoot, 'provenance.json'), {
   schemaVersion: 1,
-  caseId: 'zhikuncode-king-20260809',
+  caseId: 'skycode-king-20260809',
   generatedAt: new Date().toISOString(),
   sessionId,
   timeZone: 'Asia/Shanghai',

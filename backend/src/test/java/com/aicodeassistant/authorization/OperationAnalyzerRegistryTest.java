@@ -866,7 +866,7 @@ class OperationAnalyzerRegistryTest {
                 temp.resolve("scratchpad-alias-workspace"))
                 .toRealPath();
         Path scratchpad = Files.createDirectories(
-                workspace.resolve(".zhikun/scratchpad"));
+                workspace.resolve(".skycode/scratchpad"));
         Path ordinaryDirectory = Files.createDirectory(
                 scratchpad.resolve("ordinary"));
         Path ordinaryFile = Files.writeString(

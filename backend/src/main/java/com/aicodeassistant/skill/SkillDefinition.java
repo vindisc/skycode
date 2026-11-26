@@ -41,8 +41,8 @@ public record SkillDefinition(
     public enum SkillSource {
         BUNDLED,    // 内置技能
         MANAGED,    // 企业管理技能
-        USER,       // 用户全局技能 (~/.zhikun/skills/)
-        PROJECT,    // 项目技能 (.zhikun/skills/)
+        USER,       // 用户全局技能 (~/.skycode/skills/)
+        PROJECT,    // 项目技能 (.skycode/skills/)
         PLUGIN,     // 插件提供的技能
         MCP         // MCP 构建的技能
     }

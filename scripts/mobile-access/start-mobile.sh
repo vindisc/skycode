@@ -122,7 +122,7 @@ if [ ! -f "$AUTH_FILE" ]; then
     NEW_PASSWORD="$(openssl rand -hex 16)"
     NEW_HASH="$(caddy hash-password --plaintext "$NEW_PASSWORD")"
     {
-        printf "MOBILE_AUTH_USERNAME='zhikun'\n"
+        printf "MOBILE_AUTH_USERNAME='skycode'\n"
         printf "MOBILE_AUTH_PASSWORD='%s'\n" "$NEW_PASSWORD"
         printf "MOBILE_AUTH_PASSWORD_HASH='%s'\n" "$NEW_HASH"
     } >"$AUTH_FILE"

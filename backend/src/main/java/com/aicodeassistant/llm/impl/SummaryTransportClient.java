@@ -17,7 +17,7 @@ final class SummaryTransportClient {
     static final String BAILIAN_ENDPOINT = "https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1";
     static final String DEEPSEEK_ENDPOINT = "https://api.deepseek.com/v1";
     /** DeepSeek 中转站前缀白名单（逗号分隔）。只有官方域名时摘要链路才被采纳，走中转站会被整体拒绝。 */
-    static final String RELAY_PREFIXES_ENV = "ZHIKUN_SUMMARY_DEEPSEEK_RELAY_PREFIXES";
+    static final String RELAY_PREFIXES_ENV = "SKYCODE_SUMMARY_DEEPSEEK_RELAY_PREFIXES";
     private SummaryTransportClient() {}
 
     static boolean supportsEndpoint(String baseUrl) {

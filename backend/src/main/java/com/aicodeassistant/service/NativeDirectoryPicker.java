@@ -38,7 +38,7 @@ interface NativeDirectoryPicker {
 
 final class SystemNativeDirectoryPicker implements NativeDirectoryPicker {
 
-    private static final String CANCELLED = "__ZHIKUN_CANCELLED__";
+    private static final String CANCELLED = "__SKYCODE_CANCELLED__";
     private static final int MAX_OUTPUT_BYTES = 16 * 1024;
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(5);
 

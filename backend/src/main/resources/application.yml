@@ -20,41 +20,41 @@ spring:
       max-file-size: 6MB
       max-request-size: 6MB
 
-zhikuncode:
+skycode:
   database:
-    global-path: ${ZHIKUN_GLOBAL_DB_PATH:}
+    global-path: ${SKYCODE_GLOBAL_DB_PATH:}
   workspace:
-    allowed-roots: ${ZHIKUN_WORKSPACE_ALLOWED_ROOTS:}
+    allowed-roots: ${SKYCODE_WORKSPACE_ALLOWED_ROOTS:}
     # Direct local-desktop mode only. Keep disabled behind proxies and in production.
-    local-picker-enabled: ${ZHIKUN_LOCAL_PICKER_ENABLED:false}
+    local-picker-enabled: ${SKYCODE_LOCAL_PICKER_ENABLED:false}
     # Server-owned fallback; Query and Session APIs cannot override it with a raw path.
-    default-root: ${ZHIKUN_DEFAULT_WORKSPACE:${app.working-dir:${user.dir}}}
+    default-root: ${SKYCODE_DEFAULT_WORKSPACE:${app.working-dir:${user.dir}}}
   scratchpad:
     # Server-owned shared root used by coordinator and swarm runs.
-    system-root: ${app.working-dir:${user.dir}}/.zhikun/scratchpad
+    system-root: ${app.working-dir:${user.dir}}/.skycode/scratchpad
   meoo:
-    enabled: ${ZHIKUN_MEOO_ENABLED:false}
-    credentials-file: ${ZHIKUN_MEOO_CREDENTIALS_FILE:${user.home}/.meoo/credentials.json}
-    executable: ${ZHIKUN_MEOO_EXECUTABLE:meoo}
+    enabled: ${SKYCODE_MEOO_ENABLED:false}
+    credentials-file: ${SKYCODE_MEOO_CREDENTIALS_FILE:${user.home}/.meoo/credentials.json}
+    executable: ${SKYCODE_MEOO_EXECUTABLE:meoo}
     # 本地发布配额（未压缩总字节）。全栈发布另有平台 100MiB 源码 zip 硬限，按 98% 缓冲提前判定；
     # 静态发布走本地产物 CDN 上传，无平台包大小限制。
-    max-bytes: ${ZHIKUN_MEOO_MAX_BYTES:104857600}
-    max-files: ${ZHIKUN_MEOO_MAX_FILES:10000}
-    timeout-seconds: ${ZHIKUN_MEOO_TIMEOUT_SECONDS:1200}
+    max-bytes: ${SKYCODE_MEOO_MAX_BYTES:104857600}
+    max-files: ${SKYCODE_MEOO_MAX_FILES:10000}
+    timeout-seconds: ${SKYCODE_MEOO_TIMEOUT_SECONDS:1200}
   oss:
     # Disabled by default. auto prefers local ALIBABA_CLOUD_* credentials, then a named ECS RAM Role.
-    enabled: ${ZHIKUN_OSS_ENABLED:false}
-    endpoint: ${ZHIKUN_OSS_ENDPOINT:}
-    region: ${ZHIKUN_OSS_REGION:}
-    bucket: ${ZHIKUN_OSS_BUCKET:}
-    public-base-url: ${ZHIKUN_OSS_PUBLIC_BASE_URL:}
-    preview-enabled: ${ZHIKUN_OSS_PREVIEW_ENABLED:false}
-    prefix: ${ZHIKUN_OSS_PREFIX:zhikuncode-artifacts}
-    ecs-role-name: ${ZHIKUN_OSS_ECS_ROLE_NAME:}
-    credential-mode: ${ZHIKUN_OSS_CREDENTIAL_MODE:auto}
-    max-file-bytes: ${ZHIKUN_OSS_MAX_FILE_BYTES:1073741824}
-    connect-timeout-ms: ${ZHIKUN_OSS_CONNECT_TIMEOUT_MS:10000}
-    request-timeout-ms: ${ZHIKUN_OSS_REQUEST_TIMEOUT_MS:120000}
+    enabled: ${SKYCODE_OSS_ENABLED:false}
+    endpoint: ${SKYCODE_OSS_ENDPOINT:}
+    region: ${SKYCODE_OSS_REGION:}
+    bucket: ${SKYCODE_OSS_BUCKET:}
+    public-base-url: ${SKYCODE_OSS_PUBLIC_BASE_URL:}
+    preview-enabled: ${SKYCODE_OSS_PREVIEW_ENABLED:false}
+    prefix: ${SKYCODE_OSS_PREFIX:skycode-artifacts}
+    ecs-role-name: ${SKYCODE_OSS_ECS_ROLE_NAME:}
+    credential-mode: ${SKYCODE_OSS_CREDENTIAL_MODE:auto}
+    max-file-bytes: ${SKYCODE_OSS_MAX_FILE_BYTES:1073741824}
+    connect-timeout-ms: ${SKYCODE_OSS_CONNECT_TIMEOUT_MS:10000}
+    request-timeout-ms: ${SKYCODE_OSS_REQUEST_TIMEOUT_MS:120000}
 
 # Python 服务配置
 python:
@@ -98,7 +98,7 @@ llm:
       models: ${LLM_PROVIDER_DASHSCOPE_TOKEN_PLAN_MODELS:deepseek-v4.1-flash,bailian/glm-5.3,qwen4-max-preview,qwen4-max}
     deepseek:
       api-key: ${LLM_PROVIDER_DEEPSEEK_API_KEY:}
-      # 默认官方直连；走中转站时同时要在 compose 里透传 ZHIKUN_SUMMARY_DEEPSEEK_RELAY_PREFIXES，
+      # 默认官方直连；走中转站时同时要在 compose 里透传 SKYCODE_SUMMARY_DEEPSEEK_RELAY_PREFIXES，
       # 否则摘要端点白名单不放行，压缩摘要会返回 unsupported_summary
       base-url: ${LLM_PROVIDER_DEEPSEEK_BASE_URL:https://api.deepseek.com/v1}
       default-model: deepseek-flash
@@ -237,12 +237,12 @@ process:
 
 skill:
   # 后端全局 Skill 开关，默认全部启用；保存后对后续请求生效。
-  state-path: ${SKILL_STATE_PATH:${user.home}/.zhikun/skill-states.json}
+  state-path: ${SKILL_STATE_PATH:${user.home}/.skycode/skill-states.json}
 
 mcp:
   capability-registry-path: ${MCP_REGISTRY_PATH:${user.dir}/../configuration/mcp/mcp_capability_registry.json}
   # 用户开关状态；低频或高风险 MCP 默认关闭，其他服务保持默认启用。
-  service-state-path: ${MCP_SERVICE_STATE_PATH:${user.home}/.zhikun/mcp-service-states.json}
+  service-state-path: ${MCP_SERVICE_STATE_PATH:${user.home}/.skycode/mcp-service-states.json}
   servers: {}
     # 智谱 WebSearch MCP（通过阿里云百炼）已由能力注册表管理；以下仅为手动 server 配置示例
     # zhipu-websearch:
@@ -429,4 +429,4 @@ management:
       show-details: always
   metrics:
     tags:
-      application: zhikuncode
+      application: skycode

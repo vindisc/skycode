@@ -59,7 +59,7 @@ public class WorktreeTool implements Tool {
                 Examples:
                 - {"subcommand": "list"}
                 - {"subcommand": "add", "agent_id": "coder-1"}
-                - {"subcommand": "remove", "path": "/tmp/.zhikun-agent-coder-1"}
+                - {"subcommand": "remove", "path": "/tmp/.skycode-agent-coder-1"}
                 """;
     }
 

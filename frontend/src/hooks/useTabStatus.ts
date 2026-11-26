@@ -56,7 +56,7 @@ export function computeTabTitle(
  * - 待审批（最高优先级）: 🔴 (N) 待审批 · {会话标题}（静态）
  * - 运行中: ◐ 运行中 · {会话标题}（半月旋转动画，对齐主界面 Loader2 徽章观感与转速）
  * - 压缩中: ● 压缩中 · {会话标题}（脉冲帧动画，对齐主界面徽章脉冲）
- * - 空闲: zhikuncode
+ * - 空闲: skycode
  *
  * 会话标题与 Header 顶栏同源（第一条用户消息文本，兜底「任务」）。
  * 挂载在 App 根组件（usePageExitGuard 旁）。

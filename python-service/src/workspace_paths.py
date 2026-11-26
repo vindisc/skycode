@@ -31,7 +31,7 @@ def workspace_root() -> Path:
 
 
 def _local_picker_enabled() -> bool:
-    return os.getenv("ZHIKUN_LOCAL_PICKER_ENABLED", "").strip().lower() in {
+    return os.getenv("SKYCODE_LOCAL_PICKER_ENABLED", "").strip().lower() in {
         "1", "true", "yes", "on",
     }
 
@@ -41,12 +41,12 @@ def _allowed_roots(default_root: Path) -> tuple[Path, ...] | None:
 
     ``WORKSPACE_ROOT`` remains the anchor for relative requests. Production
     and remote deployments restrict absolute requests with
-    ``ZHIKUN_WORKSPACE_ALLOWED_ROOTS``; when no allowed roots are configured,
+    ``SKYCODE_WORKSPACE_ALLOWED_ROOTS``; when no allowed roots are configured,
     the default root remains the fail-closed boundary. Only the existing,
     explicitly enabled local picker mode may select an absolute Project
     elsewhere on the local machine.
     """
-    configured = os.getenv("ZHIKUN_WORKSPACE_ALLOWED_ROOTS", "")
+    configured = os.getenv("SKYCODE_WORKSPACE_ALLOWED_ROOTS", "")
     values = [value.strip() for value in configured.split(",")
               if value.strip()]
     if values:

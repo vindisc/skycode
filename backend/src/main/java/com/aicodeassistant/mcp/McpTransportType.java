@@ -20,5 +20,5 @@ public enum McpTransportType {
     /** SDK 内嵌 — P2 */
     SDK,
     /** AI 平台代理 — P2 */
-    ZHIKUN_AI_PROXY
+    SKYCODE_AI_PROXY
 }

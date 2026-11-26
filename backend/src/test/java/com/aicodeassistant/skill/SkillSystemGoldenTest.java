@@ -411,11 +411,11 @@ class SkillSystemGoldenTest {
         }
 
         @Test
-        @DisplayName("目录扫描 — .zhikun/skills/")
+        @DisplayName("目录扫描 — .skycode/skills/")
         void directoryScanning() throws IOException {
             // 创建临时目录结构
             Path tempDir = Files.createTempDirectory("skill-test");
-            Path skillsDir = tempDir.resolve(".zhikun/skills");
+            Path skillsDir = tempDir.resolve(".skycode/skills");
             Files.createDirectories(skillsDir);
 
             String skillContent = """
@@ -436,7 +436,7 @@ class SkillSystemGoldenTest {
             // 清理
             Files.deleteIfExists(skillsDir.resolve("test-scan.md"));
             Files.deleteIfExists(skillsDir);
-            Files.deleteIfExists(tempDir.resolve(".zhikun"));
+            Files.deleteIfExists(tempDir.resolve(".skycode"));
             Files.deleteIfExists(tempDir);
         }
 

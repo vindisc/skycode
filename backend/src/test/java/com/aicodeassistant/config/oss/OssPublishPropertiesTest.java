@@ -76,8 +76,8 @@ class OssPublishPropertiesTest {
         OssPublishProperties properties = valid();
         properties.setPublicBaseUrl("https://files.example.com");
         for (String host : new String[] { "files.example.com", "test-artifacts.oss-cn-beijing.aliyuncs.com" }) {
-            String clipboard = "https://" + host + "/zhikuncode-artifacts/clipboard/session/image.png";
-            String localFile = "https://" + host + "/zhikuncode-artifacts/local-files/session/report.pdf";
+            String clipboard = "https://" + host + "/skycode-artifacts/clipboard/session/image.png";
+            String localFile = "https://" + host + "/skycode-artifacts/local-files/session/report.pdf";
             assertThat(properties.isTrustedClipboardImageUrl(clipboard)).isTrue();
             assertThat(properties.isTrustedLocalFileUrl(localFile)).isTrue();
             assertThat(properties.isTrustedLocalFileUrl(clipboard)).isFalse();
@@ -86,11 +86,11 @@ class OssPublishPropertiesTest {
             assertThat(properties.isTrustedLocalFileUrl(localFile + "#fragment")).isFalse();
         }
         for (String value : new String[] {
-                "https://files.example.com.attacker.test/zhikuncode-artifacts/clipboard/image.png",
-                "https://user@files.example.com/zhikuncode-artifacts/clipboard/image.png",
-                "https://files.example.com:443/zhikuncode-artifacts/clipboard/image.png",
-                "https://files.example.com/zhikuncode-artifacts/clipboard/../private/image.png",
-                "https://files.example.com/zhikuncode-artifacts/clipboard/%2e%2e/private/image.png" }) {
+                "https://files.example.com.attacker.test/skycode-artifacts/clipboard/image.png",
+                "https://user@files.example.com/skycode-artifacts/clipboard/image.png",
+                "https://files.example.com:443/skycode-artifacts/clipboard/image.png",
+                "https://files.example.com/skycode-artifacts/clipboard/../private/image.png",
+                "https://files.example.com/skycode-artifacts/clipboard/%2e%2e/private/image.png" }) {
             assertThat(properties.isTrustedClipboardImageUrl(value)).as(value).isFalse();
         }
     }
@@ -195,20 +195,20 @@ class OssPublishPropertiesTest {
     void onlyConfiguredClipboardPrefixIsTrusted() {
         OssPublishProperties properties = valid();
         String trusted = "https://test-artifacts.oss-cn-beijing.aliyuncs.com/"
-                + "zhikuncode-artifacts/clipboard/session/artifact/image.png";
+                + "skycode-artifacts/clipboard/session/artifact/image.png";
 
         assertThat(properties.isTrustedClipboardImageUrl(trusted)).isTrue();
         assertThat(properties.isTrustedClipboardImageUrl(
-                "https://test-artifacts.oss-cn-beijing.aliyuncs.com/zhikuncode-artifacts/other/image.png"))
+                "https://test-artifacts.oss-cn-beijing.aliyuncs.com/skycode-artifacts/other/image.png"))
                 .isFalse();
         assertThat(properties.isTrustedClipboardImageUrl(
-                "https://attacker.example/zhikuncode-artifacts/clipboard/image.png"))
+                "https://attacker.example/skycode-artifacts/clipboard/image.png"))
                 .isFalse();
         assertThat(properties.isTrustedClipboardImageUrl(trusted + "?signature=unexpected"))
                 .isFalse();
         assertThat(properties.isTrustedClipboardImageUrl(
                 "https://test-artifacts.oss-cn-beijing.aliyuncs.com/"
-                        + "zhikuncode-artifacts/clipboard/../private/image.png"))
+                        + "skycode-artifacts/clipboard/../private/image.png"))
                 .isFalse();
     }
 
@@ -216,13 +216,13 @@ class OssPublishPropertiesTest {
     void onlyConfiguredLocalFilePrefixIsTrusted() {
         OssPublishProperties properties = valid();
         String trusted = "https://test-artifacts.oss-cn-beijing.aliyuncs.com/"
-                + "zhikuncode-artifacts/local-files/session/file.txt";
+                + "skycode-artifacts/local-files/session/file.txt";
 
         assertThat(properties.isTrustedLocalFileUrl(trusted)).isTrue();
         assertThat(properties.isTrustedLocalFileUrl(trusted + "?signature=unexpected"))
                 .isFalse();
         assertThat(properties.isTrustedLocalFileUrl(
-                "https://attacker.example/zhikuncode-artifacts/local-files/file.txt"))
+                "https://attacker.example/skycode-artifacts/local-files/file.txt"))
                 .isFalse();
         assertThat(properties.isTrustedClipboardImageUrl(trusted)).isFalse();
     }
@@ -233,7 +233,7 @@ class OssPublishPropertiesTest {
         properties.setEndpoint("https://oss-cn-beijing.aliyuncs.com");
         properties.setRegion("cn-beijing");
         properties.setBucket("test-artifacts");
-        properties.setPrefix("zhikuncode-artifacts");
+        properties.setPrefix("skycode-artifacts");
         properties.setEcsRoleName("TestEcsRole");
         return properties;
     }

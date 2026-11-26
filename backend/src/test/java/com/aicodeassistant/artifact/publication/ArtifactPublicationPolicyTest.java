@@ -219,7 +219,7 @@ class ArtifactPublicationPolicyTest {
         properties.setEndpoint("https://oss-cn-beijing.aliyuncs.com");
         properties.setRegion("cn-beijing");
         properties.setBucket("test-artifacts");
-        properties.setPrefix("zhikuncode-artifacts");
+        properties.setPrefix("skycode-artifacts");
         properties.setEcsRoleName("TestEcsRole");
         return properties;
     }

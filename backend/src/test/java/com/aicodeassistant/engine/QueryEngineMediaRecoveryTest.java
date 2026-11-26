@@ -130,7 +130,7 @@ class QueryEngineMediaRecoveryTest {
     @Mock RunTracker runTracker;
 
     private static final String TRUSTED_URL =
-            "https://zhikunshare.oss-cn-beijing.aliyuncs.com/zhikuncode-artifacts/clipboard/abc123.png";
+            "https://skycodeshare.oss-cn-beijing.aliyuncs.com/skycode-artifacts/clipboard/abc123.png";
     private static final String MEDIA_400_MESSAGE = "unsupported image url";
     private static final byte[] FAKE_PNG = new byte[]{
             (byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3, 4};
@@ -278,7 +278,7 @@ class QueryEngineMediaRecoveryTest {
         })
         void realBudgetAndCapabilitiesAcceptLargePngWithoutChangingHistory(String model) throws Exception {
             OssPublishProperties ossProperties = new OssPublishProperties();
-            ossProperties.setBucket("zhikunshare");
+            ossProperties.setBucket("skycodeshare");
             ossProperties.setEndpoint("https://oss-cn-beijing.aliyuncs.com");
             StubTranscoder transcoder = new StubTranscoder(ossProperties);
 

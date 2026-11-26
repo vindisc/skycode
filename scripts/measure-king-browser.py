@@ -2,7 +2,7 @@
 """Re-measure the frozen King case browser evidence against the current case HTML.
 
 Runs a real Chromium (Playwright) session against a locally served copy of
-docs/case-studies/zhikuncode开发王者荣耀.html and emits the direct-browser
+docs/case-studies/skycode开发王者荣耀.html and emits the direct-browser
 measurement JSON consumed by scripts/update-king-browser-v14.mjs on stdin.
 
 Every emitted number comes from the live DOM / real network session; nothing is
@@ -35,8 +35,8 @@ Measurement semantics (kept consistent with the frozen evidence schema):
   the frozen evidence; log-viz stages are not part of this field).
 - interactions are exercised at 1600x900 because #auditToggle only renders at
   >=1600px while #motionToggle (topbar) only renders below ~1880px.
-- onlineDeployment is measured by loading https://king.zhikun.xin/ and
-  https://king.zhikun.xin/?demo=1 in Chromium and observing the real pages.
+- onlineDeployment is measured by loading https://king.skycode.xin/ and
+  https://king.skycode.xin/?demo=1 in Chromium and observing the real pages.
 """
 
 from __future__ import annotations
@@ -55,14 +55,14 @@ from urllib.request import Request, urlopen
 from playwright.sync_api import sync_playwright
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_HTML = REPO_ROOT / "docs/case-studies/zhikuncode开发王者荣耀.html"
+DEFAULT_HTML = REPO_ROOT / "docs/case-studies/skycode开发王者荣耀.html"
 DEFAULT_BASE_URL = "http://127.0.0.1:8123"
 VIEWPORTS = [(1280, 720), (1440, 900), (1920, 1080), (390, 844)]
 PRIMARY_VIEWPORT = (1280, 720)
 INTERACTION_VIEWPORT = (1600, 900)
 EXPECTED_FIGURE_COUNT = 91
-STANDARD_ONLINE_URL = "https://king.zhikun.xin/"
-DEMO_ONLINE_URL = "https://king.zhikun.xin/?demo=1"
+STANDARD_ONLINE_URL = "https://king.skycode.xin/"
+DEMO_ONLINE_URL = "https://king.skycode.xin/?demo=1"
 ONLINE_CLASSIFICATION = "OUTSIDE_DEVELOPMENT_WINDOW_ALIYUN_HTTPS_DEPLOYMENT"
 ONLINE_BOOT_TITLE = "KING_OK"
 

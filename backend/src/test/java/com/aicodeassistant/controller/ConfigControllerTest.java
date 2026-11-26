@@ -36,7 +36,7 @@ class ConfigControllerTest {
 
     @Test
     void reportsNotRequiredWhenCodeEmpty() {
-        // 未配置 ZHIKUN_DELETE_CONFIRM_CODE 时注入默认值 ""
+        // 未配置 SKYCODE_DELETE_CONFIRM_CODE 时注入默认值 ""
         ConfigController controller = new ConfigController(mock(ConfigService.class), "");
 
         var response = controller.getDeleteConfirmConfig();

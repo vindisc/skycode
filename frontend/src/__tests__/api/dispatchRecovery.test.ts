@@ -613,7 +613,7 @@ describe('transport-scoped bind recovery', () => {
 
         await expect(bound).resolves.toBe(false);
         expect(useSessionStore.getState().sessionId).toBe('');
-        expect(window.sessionStorage.getItem('zhikuncode.activeSessionId')).toBeNull();
+        expect(window.sessionStorage.getItem('skycode.activeSessionId')).toBeNull();
         expect(useNotificationStore.getState().notifications.at(-1)?.message)
             .toBe('原会话已不存在，已清除本地恢复状态');
     });
@@ -634,7 +634,7 @@ describe('transport-scoped bind recovery', () => {
 
         await expect(oldBind).resolves.toBe(false);
         expect(useSessionStore.getState().sessionId).toBe('session-new');
-        expect(window.sessionStorage.getItem('zhikuncode.activeSessionId')).toBe('session-new');
+        expect(window.sessionStorage.getItem('skycode.activeSessionId')).toBe('session-new');
         expect(useNotificationStore.getState().notifications.at(-1)?.message)
             .toBe('请求恢复的会话已不存在，当前会话未受影响');
     });

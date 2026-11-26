@@ -46,7 +46,7 @@ ZhikunCode 将**多 Agent 分工、上下文管理、工具执行和运行验证
 
 [![真实录屏画面：手机操作 ZhikunCode、网页游戏与 Android 实机试玩](docs/case-studies/assets/mobile-to-android-20261028/cover.jpg)](https://zhikunqingtao.github.io/zhikuncode/case-studies/assets/mobile-to-android-20261028/demo.mp4)
 
-**[在线试玩《荣耀峡谷》 →](https://ug4saov9xkks.meoo.pub)** · **[下载游戏 Android APK →](https://share.zhikun.xin/zhikuncode-artifacts/workspace/workspace-63ac928c7693d6607179fd930e29b622/8d3cda9669bb39d3f95258a52f78fbd75b6aebf5699a66caa42db3c4f00128f5-canyon-moba.apk)**
+**[在线试玩《荣耀峡谷》 →](https://ug4saov9xkks.meoo.pub)** · **[下载游戏 Android APK →](https://share.skycode.xin/skycode-artifacts/workspace/workspace-63ac928c7693d6607179fd930e29b622/8d3cda9669bb39d3f95258a52f78fbd75b6aebf5699a66caa42db3c4f00128f5-canyon-moba.apk)**
 
 > 🏗️ **[查看完整系统架构图 →](https://zhikunqingtao.github.io/zhikuncode/ZhikunCode-Architecture.html)**  
 > Java Agent Runtime · React 浏览器操作面 · Python Capability Service · 全景可视化
@@ -56,17 +56,17 @@ ZhikunCode 将**多 Agent 分工、上下文管理、工具执行和运行验证
 
 > **历史代码规模快照（非当前版本统计）：** `ea0170c` · 2026-08-09 · Git 跟踪的产品源代码 134,826 行 / 863 文件（Java 93,118 / 622、React 33,642 / 209、Python 服务与 CLI 8,066 / 32；不统计本地忽略文件）
 
-> 🔎 **[实时黄金监控：ZhikunCode vs Codex 同题 PK →](https://zhikunqingtao.github.io/zhikuncode/case-studies/zhikuncode-codex-gold-monitor-audit.html)**
+> 🔎 **[实时黄金监控：ZhikunCode vs Codex 同题 PK →](https://zhikunqingtao.github.io/zhikuncode/case-studies/skycode-codex-gold-monitor-audit.html)**
 > ZhikunCode × Codex · 同一需求两套实现，14 维评分、过程截图与公开日志摘录
 
-> 🚄 **[12306 候补全链路可视化：单文件零依赖交付 →](https://zhikunqingtao.github.io/zhikuncode/case-studies/zhikuncode-codex-12306-audit.html)**
+> 🚄 **[12306 候补全链路可视化：单文件零依赖交付 →](https://zhikunqingtao.github.io/zhikuncode/case-studies/skycode-codex-12306-audit.html)**
 > ZhikunCode/KimiK3 × Codex/GPT-5.6 Sol · 7 维对比评估，附公开源码与 ZhikunCode 单文件演示
 
-> 🎮 **[5小时 AI 从零写出可玩的《王者荣耀》网页版 →](https://zhikunqingtao.github.io/zhikuncode/case-studies/zhikuncode%E5%BC%80%E5%8F%91%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80.html)**
+> 🎮 **[5小时 AI 从零写出可玩的《王者荣耀》网页版 →](https://zhikunqingtao.github.io/zhikuncode/case-studies/skycode%E5%BC%80%E5%8F%91%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80.html)**
 > Kimi K3 · 一次连续开发 5 小时 29 分 · 19 个文件 / 7,979 行纯静态 Three.js · 打开浏览器即可试玩
 
 > 📊 **[AI 办公工具对比测评（宇树科技 · 截至 2026-08-30）→](https://zhikunqingtao.github.io/aireport/case-studies/AI%E5%8A%9E%E5%85%AC%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94%E6%B5%8B%E8%AF%84_%E5%AE%87%E6%A0%91%E7%A7%91%E6%8A%80_%E6%88%AA%E8%87%B32026-08-30.html)**
-> 五款工具 × 六任务连续链路 · 30 件固定终稿证据复核 · 同一报告阿里云 OSS 镜像：[oss.zhikun.xin](https://oss.zhikun.xin/zhikuncode/aireport/case-studies/AI%E5%8A%9E%E5%85%AC%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94%E6%B5%8B%E8%AF%84_%E5%AE%87%E6%A0%91%E7%A7%91%E6%8A%80_%E6%88%AA%E8%87%B32026-08-30.html)
+> 五款工具 × 六任务连续链路 · 30 件固定终稿证据复核 · 同一报告阿里云 OSS 镜像：[oss.skycode.xin](https://oss.skycode.xin/skycode/aireport/case-studies/AI%E5%8A%9E%E5%85%AC%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94%E6%B5%8B%E8%AF%84_%E5%AE%87%E6%A0%91%E7%A7%91%E6%8A%80_%E6%88%AA%E8%87%B32026-08-30.html)
 
 > 🔍 **AI Coding 代码审查对比：17 份报告**
 > [Claude Opus5.5：排名分析、方法与证据 →](https://github.com/zhikunqingtao/zhikuncode/blob/aicoding-eval-0923/docs/case-studies/assets/aicoding%E8%AF%84%E6%B5%8B/Claude%20Opus5.5-17%E4%BB%BD%E5%AE%A1%E6%9F%A5%E6%8A%A5%E5%91%8A%E6%8E%92%E5%90%8D%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95%E8%BF%87%E7%A8%8B%E8%AF%81%E6%8D%AE%E4%B8%8E%E7%BB%93%E8%AE%BA.md) · [GPT-6 Astra Ultra：公平排名与可复核证据 →](https://github.com/zhikunqingtao/zhikuncode/blob/aicoding-eval-0923/docs/case-studies/assets/aicoding%E8%AF%84%E6%B5%8B/GPT-6%20Astra%20Ultra-17%E4%BB%BD%E5%AE%A1%E6%9F%A5%E6%8A%A5%E5%91%8A%E5%85%AC%E5%B9%B3%E6%8E%92%E5%90%8D%E4%B8%8E%E5%8F%AF%E5%A4%8D%E6%A0%B8%E8%AF%81%E6%8D%AE.md)
@@ -75,7 +75,7 @@ ZhikunCode 将**多 Agent 分工、上下文管理、工具执行和运行验证
 > 八份原报告 · 六维评分 · 可复核证据与约1小时57分钟过程录屏
 
 > 🏆 **[SWE-bench Lite 技术报告 →](https://zhikunqingtao.github.io/zhikuncode/swe-bench-report.html)**  
-> 提交命名空间 `20260525_zhikuncode` · 历史 harness 结果 **168 / 300 (56.0%)**；公开轨迹存在参考修复暴露，评测边界见[正文](#swe-bench)。
+> 提交命名空间 `20260525_skycode` · 历史 harness 结果 **168 / 300 (56.0%)**；公开轨迹存在参考修复暴露，评测边界见[正文](#swe-bench)。
 
 ---
 
@@ -89,9 +89,9 @@ ZhikunCode 将**多 Agent 分工、上下文管理、工具执行和运行验证
 
 **子任务达到轮次上限后，主 Agent 接管、修复问题并完成验证。** 开发介绍页记录了 **17 项 Vitest 测试、27 项浏览器检查**通过。
 
-**[观看完整实录 →](https://zhikunqingtao.github.io/zhikuncode/case-studies/assets/mobile-to-android-20261028/demo.mp4)** · **[在线试玩 →](https://ug4saov9xkks.meoo.pub)** · **[开发过程介绍 →](https://kfep92yogbmk.meoo.pub)** · **[下载 Android APK →](https://share.zhikun.xin/zhikuncode-artifacts/workspace/workspace-63ac928c7693d6607179fd930e29b622/8d3cda9669bb39d3f95258a52f78fbd75b6aebf5699a66caa42db3c4f00128f5-canyon-moba.apk)**
+**[观看完整实录 →](https://zhikunqingtao.github.io/zhikuncode/case-studies/assets/mobile-to-android-20261028/demo.mp4)** · **[在线试玩 →](https://ug4saov9xkks.meoo.pub)** · **[开发过程介绍 →](https://kfep92yogbmk.meoo.pub)** · **[下载 Android APK →](https://share.skycode.xin/skycode-artifacts/workspace/workspace-63ac928c7693d6607179fd930e29b622/8d3cda9669bb39d3f95258a52f78fbd75b6aebf5699a66caa42db3c4f00128f5-canyon-moba.apk)**
 
-**下载源码：[网页游戏（ZIP）→](https://share.zhikun.xin/zhikuncode-artifacts/d6f617ce-2d22-40d1-88c4-15f5b571b35b/10a540fa-598e-458d-8423-730c52ec6168/e0c5474537a23cc8081282eae4b33a9e2d951961ad51fbe59312b115a02df483-canyon-moba-complete.zip) · [Android 工程（ZIP）→](https://share.zhikun.xin/zhikuncode-artifacts/workspace/workspace-7bdd768f8c3b43c299bc8e26ac4bb526/a37117559e5804f8de0a5b66b19b2679262050cbdd25398d5a64d7aab9c1a26b-canyon-moba-android-source.zip)**
+**下载源码：[网页游戏（ZIP）→](https://share.skycode.xin/skycode-artifacts/d6f617ce-2d22-40d1-88c4-15f5b571b35b/10a540fa-598e-458d-8423-730c52ec6168/e0c5474537a23cc8081282eae4b33a9e2d951961ad51fbe59312b115a02df483-canyon-moba-complete.zip) · [Android 工程（ZIP）→](https://share.skycode.xin/skycode-artifacts/workspace/workspace-7bdd768f8c3b43c299bc8e26ac4bb526/a37117559e5804f8de0a5b66b19b2679262050cbdd25398d5a64d7aab9c1a26b-canyon-moba-android-source.zip)**
 
 <details>
 <summary>视频时间索引与文件校验</summary>
@@ -196,10 +196,10 @@ zkcode 是 ZhikunCode 的手机部署版本。四段真实操作录像展示手�
 - Codex：GPT-5.6 Sol，推理强度 High。
 - 最终评分 ZhikunCode 68.3、Codex 68.4，两者接近；截图为历史行情，银行价格含估算，全球数据覆盖仍有缺口。
 
-[![黄金监控应用的历史成品截图](docs/case-studies/assets/gold-audit/zhikuncode-product.jpg)](https://zhikunqingtao.github.io/zhikuncode/case-studies/zhikuncode-codex-gold-monitor-audit.html)
+[![黄金监控应用的历史成品截图](docs/case-studies/assets/gold-audit/skycode-product.jpg)](https://zhikunqingtao.github.io/zhikuncode/case-studies/skycode-codex-gold-monitor-audit.html)
 
-**[查看对比报告 →](https://zhikunqingtao.github.io/zhikuncode/case-studies/zhikuncode-codex-gold-monitor-audit.html)** ·
-**[下载原始数据 →](docs/case-studies/zhikuncode-codex-gold-monitor-evidence.json)** ·
+**[查看对比报告 →](https://zhikunqingtao.github.io/zhikuncode/case-studies/skycode-codex-gold-monitor-audit.html)** ·
+**[下载原始数据 →](docs/case-studies/skycode-codex-gold-monitor-evidence.json)** ·
 **[了解评测方法 →](docs/case-studies/README.md)**
 
 ### 12306 候补全链路可视化：单文件零依赖交付
@@ -211,11 +211,11 @@ zkcode 是 ZhikunCode 的手机部署版本。四段真实操作录像展示手�
 - 最终加权评分 ZhikunCode 8.68、Codex 8.45，差距小于报告的 0.5 分区分阈值，不据此判断总体能力高低。
 - 作品含 8 幕自动播放、13 节点关系图与 6 张数学原理卡；这是候补流程概念演示，图中架构与数值不是铁路系统内部资料或实测。
 
-[![12306 候补概念可视化：系统关系动画](docs/case-studies/assets/12306-comparison/zhikuncode-02-arch.png)](https://zhikunqingtao.github.io/zhikuncode/case-studies/assets/12306-comparison/artifacts/zhikuncode/12306-houbu.html)
+[![12306 候补概念可视化：系统关系动画](docs/case-studies/assets/12306-comparison/skycode-02-arch.png)](https://zhikunqingtao.github.io/zhikuncode/case-studies/assets/12306-comparison/artifacts/skycode/12306-houbu.html)
 
-**[查看对比报告 →](https://zhikunqingtao.github.io/zhikuncode/case-studies/zhikuncode-codex-12306-audit.html)** ·
-**[产物在线 Demo →](https://zhikunqingtao.github.io/zhikuncode/case-studies/assets/12306-comparison/artifacts/zhikuncode/12306-houbu.html)** ·
-**[下载原始数据 →](docs/case-studies/zhikuncode-codex-12306-evidence.json)** ·
+**[查看对比报告 →](https://zhikunqingtao.github.io/zhikuncode/case-studies/skycode-codex-12306-audit.html)** ·
+**[产物在线 Demo →](https://zhikunqingtao.github.io/zhikuncode/case-studies/assets/12306-comparison/artifacts/skycode/12306-houbu.html)** ·
+**[下载原始数据 →](docs/case-studies/skycode-codex-12306-evidence.json)** ·
 **[了解评测方法 →](docs/case-studies/README.md)**
 
 ### 5小时，AI 从零写出可玩的《王者荣耀》网页版
@@ -227,13 +227,13 @@ ZhikunCode 使用 Kimi K3 在 2026-08-09 的连续开发记录中完成一个纯
 - 纯静态交付，无后端、无外部网络依赖，浏览器直接运行。
 - 公开材料包括代码、日志摘录、43 个 PNG 文件（42 个不同内容）及 5 段派生视频预览；预览不等于原始录屏。
 
-[![MOBA 原型录屏中的河道战斗](docs/case-studies/assets/king/videos/storyboard-frames/05-02.jpg)](https://king.zhikun.xin/?demo=1)
+[![MOBA 原型录屏中的河道战斗](docs/case-studies/assets/king/videos/storyboard-frames/05-02.jpg)](https://king.skycode.xin/?demo=1)
 
 **具体如何调试：** 浏览器运行状态显示约 100 个小兵聚集在地图拐角 `(-80,60)`；主 Agent 据此委派路径与分离逻辑修复，再运行长局检查。后续又定位并修复终局僵持、基地贴墙等问题。报告保留“运行取证→代码修改→复验”的记录，可用来核查分工和验证实际发生了什么。
 
-**[查看详细案例 →](https://zhikunqingtao.github.io/zhikuncode/case-studies/zhikuncode%E5%BC%80%E5%8F%91%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80.html)** ·
-**[在线试玩（5英雄选将）→](https://king.zhikun.xin/)** ·
-**[自动演示（直接进入对局）→](https://king.zhikun.xin/?demo=1)** ·
+**[查看详细案例 →](https://zhikunqingtao.github.io/zhikuncode/case-studies/skycode%E5%BC%80%E5%8F%91%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80.html)** ·
+**[在线试玩（5英雄选将）→](https://king.skycode.xin/)** ·
+**[自动演示（直接进入对局）→](https://king.skycode.xin/?demo=1)** ·
 **[了解评测方法 →](docs/case-studies/README.md)**
 
 ### AI 办公工具对比测评（宇树科技 · 截至 2026-08-30）
@@ -243,11 +243,11 @@ ZhikunCode 使用 Kimi K3 在 2026-08-09 的连续开发记录中完成一个纯
 六任务等权评分 ZhikunCode 93.77、千问 93.57；投研实务权重评分 ZhikunCode 92.65、千问 93.32，两榜均处于近分组。ZhikunCode 六件终稿均为 G1，需修正后采用。这是单次固定样本、不同模型条件下的产物评测，不外推为产品总体排名。
 
 **[查看完整报告（GitHub Pages）→](https://zhikunqingtao.github.io/aireport/case-studies/AI%E5%8A%9E%E5%85%AC%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94%E6%B5%8B%E8%AF%84_%E5%AE%87%E6%A0%91%E7%A7%91%E6%8A%80_%E6%88%AA%E8%87%B32026-08-30.html)** ·
-**[阿里云 OSS 镜像 →](https://oss.zhikun.xin/zhikuncode/aireport/case-studies/AI%E5%8A%9E%E5%85%AC%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94%E6%B5%8B%E8%AF%84_%E5%AE%87%E6%A0%91%E7%A7%91%E6%8A%80_%E6%88%AA%E8%87%B32026-08-30.html)**
+**[阿里云 OSS 镜像 →](https://oss.skycode.xin/skycode/aireport/case-studies/AI%E5%8A%9E%E5%85%AC%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94%E6%B5%8B%E8%AF%84_%E5%AE%87%E6%A0%91%E7%A7%91%E6%8A%80_%E6%88%AA%E8%87%B32026-08-30.html)**
 
 ### 教学 Word 与 PPT
 
-与 WorkBuddy 完成同题教学材料，检查文档结构、25 页课件、配图和要求落实情况；这是固定产物比较，不代表教学效果评估。[查看产物对比](https://zhikunqingtao.github.io/zhikuncode/case-studies/zhikuncode对比workbuddy.html)。
+与 WorkBuddy 完成同题教学材料，检查文档结构、25 页课件、配图和要求落实情况；这是固定产物比较，不代表教学效果评估。[查看产物对比](https://zhikunqingtao.github.io/zhikuncode/case-studies/skycode对比workbuddy.html)。
 
 ### AI Coding 代码审查对比：17 份报告
 
@@ -331,7 +331,7 @@ ZhikunCode 在八方审查中找到工具输出 `outputTruncated` 与上层读�
 
 ### 语音识别热词配置
 
-语音识别需配置 `LLM_PROVIDER_DASHSCOPE_API_KEY`（不能用 Token Plan Key），热词纠正在根目录 `.env` 设置 `ASR_CORRECTIONS` 后重启后端生效。格式为 `标准写法:变体1,变体2;标准写法2:变体3`，例如 `zhikuncode:zhi kun code,zkun code,智坤code;PostgreSQL:post gre sql`。配置项见 [`.env.example`](.env.example)。
+语音识别需配置 `LLM_PROVIDER_DASHSCOPE_API_KEY`（不能用 Token Plan Key），热词纠正在根目录 `.env` 设置 `ASR_CORRECTIONS` 后重启后端生效。格式为 `标准写法:变体1,变体2;标准写法2:变体3`，例如 `skycode:zhi kun code,zkun code,智坤code;PostgreSQL:post gre sql`。配置项见 [`.env.example`](.env.example)。
 
 <a id="quickstart"></a>
 ## ⚡ 快速开始
@@ -356,7 +356,7 @@ Docker 入口检查 OpenAI、DashScope、Token Plan、DeepSeek、Moonshot、Zhip
 
 ```bash
 git clone https://github.com/zhikunqingtao/zhikuncode.git
-cd zhikuncode
+cd skycode
 cp .env.example .env
 # 编辑 .env，填写自己的 Key，例如 LLM_PROVIDER_DASHSCOPE_API_KEY
 # 设置 WORKSPACE_PATH=/你的项目绝对路径；目录需存在且允许容器用户读写
@@ -366,7 +366,7 @@ docker compose ps
 curl -fsS http://localhost:8080/actuator/health
 ```
 
-已有 `.env` 时保留自己的配置。健康检查应包含 `"status":"UP"`；打开 [localhost:8080](http://localhost:8080)，选择模型并授权容器内 `/app/workspace` 下的项目。端口改动需按 `.env` 中 `ZHIKUN_PORT` 同步访问；启动失败看 `docker compose logs --tail=100 zhikuncode`。停止用 `docker compose stop`，保留数据时不要使用 `down -v`。
+已有 `.env` 时保留自己的配置。健康检查应包含 `"status":"UP"`；打开 [localhost:8080](http://localhost:8080)，选择模型并授权容器内 `/app/workspace` 下的项目。端口改动需按 `.env` 中 `SKYCODE_PORT` 同步访问；启动失败看 `docker compose logs --tail=100 skycode`。停止用 `docker compose stop`，保留数据时不要使用 `down -v`。
 
 新会话默认完全访问（`AUTO_APPROVE`）；需要审批时先切换权限模式。基础 Compose 不启动 Python，相关验证能力见[可选配置](#docker-python)。默认容器入口会放行到达后端的来源，首次试用应在受控网络，远程部署先处理[访问边界](#security)。
 
@@ -393,9 +393,9 @@ npm --prefix frontend ci
 set -a
 source .env
 set +a
-export ZHIKUN_DEFAULT_WORKSPACE="$PWD"
+export SKYCODE_DEFAULT_WORKSPACE="$PWD"
 export WORKSPACE_ROOT="$PWD"
-export ZHIKUN_LOCAL_PICKER_ENABLED=true
+export SKYCODE_LOCAL_PICKER_ENABLED=true
 export PATH="$PWD/scripts/mcp:$PATH"
 ```
 
@@ -487,14 +487,14 @@ bash scripts/mobile-access/start-mobile.sh --check
 ```bash
 docker compose -f docker-compose.yml -f - up -d --build <<'YAML'
 services:
-  zhikuncode:
+  skycode:
     environment:
       PYTHON_SERVICE_AUTO_START: "true"
       PYTHON_SERVICE_PATH: /app/python-service
       PYTHON_SERVICE_EXECUTABLE: /app/python-service/.venv/bin/python
       WORKSPACE_ROOT: /app/workspace
 YAML
-docker compose exec zhikuncode curl -fsS http://127.0.0.1:8000/api/health/capabilities
+docker compose exec skycode curl -fsS http://127.0.0.1:8000/api/health/capabilities
 ```
 
 这条路径使 Java 能调用容器内 Python，仍需检查 Feature Flag 和实际能力状态。前端直连 Python 的文件／Git／分析界面还需同源代理，不能只开进程就视为全部界面就绪。代理范围以 [Vite 配置](frontend/vite.config.ts)与 [Python 路由](python-service/src/main.py)为准；保留 Java 的文件选择、引用和搜索入口，并让 Java、Python 与 WebSocket 共用访问控制。不要直接公开 Python 端口。
@@ -505,12 +505,12 @@ docker compose exec zhikuncode curl -fsS http://127.0.0.1:8000/api/health/capabi
 <details>
 <summary>首次任务：准备两个文件，让模型改代码，再独立验收</summary>
 
-本练习不安装第三方包。先保留一个专用终端；**从 zhikuncode 仓库根目录执行**下面的准备命令，创建独立临时项目（两种部署方式共用）：
+本练习不安装第三方包。先保留一个专用终端；**从 skycode 仓库根目录执行**下面的准备命令，创建独立临时项目（两种部署方式共用）：
 
 ```bash
-ZHIKUN_DEMO=$(mktemp -d "${TMPDIR:-/tmp}/zhikuncode-first-task.XXXXXX")
-mkdir -p "$ZHIKUN_DEMO/src" "$ZHIKUN_DEMO/test"
-cat > "$ZHIKUN_DEMO/src/shipping.mjs" <<'JS'
+SKYCODE_DEMO=$(mktemp -d "${TMPDIR:-/tmp}/skycode-first-task.XXXXXX")
+mkdir -p "$SKYCODE_DEMO/src" "$SKYCODE_DEMO/test"
+cat > "$SKYCODE_DEMO/src/shipping.mjs" <<'JS'
 /** Amounts are in yuan. Existing rule: free shipping at 100, otherwise 6. */
 export function shippingFee(subtotal) {
   if (!Number.isFinite(subtotal) || subtotal < 0) {
@@ -519,7 +519,7 @@ export function shippingFee(subtotal) {
   return subtotal >= 100 ? 0 : 6;
 }
 JS
-cat > "$ZHIKUN_DEMO/test/shipping.test.mjs" <<'JS'
+cat > "$SKYCODE_DEMO/test/shipping.test.mjs" <<'JS'
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { shippingFee } from '../src/shipping.mjs';
@@ -543,26 +543,26 @@ JS
 **本地三服务用户**在同一终端继续；需要 Node.js 22+：
 
 ```bash
-git -C "$ZHIKUN_DEMO" init -q
-git -C "$ZHIKUN_DEMO" add .
-ZHIKUN_BASE=$(git -C "$ZHIKUN_DEMO" write-tree)
-(cd "$ZHIKUN_DEMO" && pwd -P && node --test test/shipping.test.mjs)
+git -C "$SKYCODE_DEMO" init -q
+git -C "$SKYCODE_DEMO" add .
+SKYCODE_BASE=$(git -C "$SKYCODE_DEMO" write-tree)
+(cd "$SKYCODE_DEMO" && pwd -P && node --test test/shipping.test.mjs)
 ```
 
 **Docker 用户**在同一终端继续；使用容器自带 Node，不要求宿主安装 Node。第一行需成功确认挂载可写：
 
 ```bash
-docker compose exec -T zhikuncode sh -c 'test -w /app/workspace'
-ZHIKUN_CONTAINER_DEMO=$(docker compose exec -T zhikuncode mktemp -d /app/workspace/first-task.XXXXXX)
-tar -C "$ZHIKUN_DEMO" -cf - src test | docker compose exec -T zhikuncode tar -C "$ZHIKUN_CONTAINER_DEMO" -xf -
-docker compose exec -T -w "$ZHIKUN_CONTAINER_DEMO" zhikuncode git init -q
-docker compose exec -T -w "$ZHIKUN_CONTAINER_DEMO" zhikuncode git add .
-ZHIKUN_BASE=$(docker compose exec -T -w "$ZHIKUN_CONTAINER_DEMO" zhikuncode git write-tree)
-printf '%s\n' "$ZHIKUN_CONTAINER_DEMO"
-docker compose exec -T -w "$ZHIKUN_CONTAINER_DEMO" zhikuncode node --test test/shipping.test.mjs
+docker compose exec -T skycode sh -c 'test -w /app/workspace'
+SKYCODE_CONTAINER_DEMO=$(docker compose exec -T skycode mktemp -d /app/workspace/first-task.XXXXXX)
+tar -C "$SKYCODE_DEMO" -cf - src test | docker compose exec -T skycode tar -C "$SKYCODE_CONTAINER_DEMO" -xf -
+docker compose exec -T -w "$SKYCODE_CONTAINER_DEMO" skycode git init -q
+docker compose exec -T -w "$SKYCODE_CONTAINER_DEMO" skycode git add .
+SKYCODE_BASE=$(docker compose exec -T -w "$SKYCODE_CONTAINER_DEMO" skycode git write-tree)
+printf '%s\n' "$SKYCODE_CONTAINER_DEMO"
+docker compose exec -T -w "$SKYCODE_CONTAINER_DEMO" skycode node --test test/shipping.test.mjs
 ```
 
-`git write-tree` 将初始文件快照的 tree ID 保存到 `ZHIKUN_BASE`，不创建提交；后续即使索引改变，仍与这份固定快照比较。保留当前终端及变量供验收使用。初始应是 **10 通过、2 失败，退出码 1**；失败项为 `member: exactly 80 is free` 与 `member: below 100 is free`。若出现其他错误，先处理环境。
+`git write-tree` 将初始文件快照的 tree ID 保存到 `SKYCODE_BASE`，不创建提交；后续即使索引改变，仍与这份固定快照比较。保留当前终端及变量供验收使用。初始应是 **10 通过、2 失败，退出码 1**；失败项为 `member: exactly 80 is free` 与 `member: below 100 is free`。若出现其他错误，先处理环境。
 
 打开工作台，新建会话并授权打印出的项目路径。本地使用 `pwd -P` 的路径，Docker 使用 `/app/workspace/first-task.…`；选择支持工具调用的模型，发送：
 
@@ -579,21 +579,21 @@ docker compose exec -T -w "$ZHIKUN_CONTAINER_DEMO" zhikuncode node --test test/s
 在工具卡片中查看实际读写和命令输出。完成后，**本地用户**回到原终端独立验收：
 
 ```bash
-(cd "$ZHIKUN_DEMO" && node --test test/shipping.test.mjs)
-git -C "$ZHIKUN_DEMO" diff "$ZHIKUN_BASE" -- src/shipping.mjs
-git -C "$ZHIKUN_DEMO" diff --name-only "$ZHIKUN_BASE"
-git -C "$ZHIKUN_DEMO" diff --exit-code "$ZHIKUN_BASE" -- test/shipping.test.mjs
-git -C "$ZHIKUN_DEMO" ls-files --others --exclude-standard
+(cd "$SKYCODE_DEMO" && node --test test/shipping.test.mjs)
+git -C "$SKYCODE_DEMO" diff "$SKYCODE_BASE" -- src/shipping.mjs
+git -C "$SKYCODE_DEMO" diff --name-only "$SKYCODE_BASE"
+git -C "$SKYCODE_DEMO" diff --exit-code "$SKYCODE_BASE" -- test/shipping.test.mjs
+git -C "$SKYCODE_DEMO" ls-files --others --exclude-standard
 ```
 
 **Docker 用户**在原仓库终端验收容器中的同一个项目：
 
 ```bash
-docker compose exec -T -w "$ZHIKUN_CONTAINER_DEMO" zhikuncode node --test test/shipping.test.mjs
-docker compose exec -T -w "$ZHIKUN_CONTAINER_DEMO" zhikuncode git diff "$ZHIKUN_BASE" -- src/shipping.mjs
-docker compose exec -T -w "$ZHIKUN_CONTAINER_DEMO" zhikuncode git diff --name-only "$ZHIKUN_BASE"
-docker compose exec -T -w "$ZHIKUN_CONTAINER_DEMO" zhikuncode git diff --exit-code "$ZHIKUN_BASE" -- test/shipping.test.mjs
-docker compose exec -T -w "$ZHIKUN_CONTAINER_DEMO" zhikuncode git ls-files --others --exclude-standard
+docker compose exec -T -w "$SKYCODE_CONTAINER_DEMO" skycode node --test test/shipping.test.mjs
+docker compose exec -T -w "$SKYCODE_CONTAINER_DEMO" skycode git diff "$SKYCODE_BASE" -- src/shipping.mjs
+docker compose exec -T -w "$SKYCODE_CONTAINER_DEMO" skycode git diff --name-only "$SKYCODE_BASE"
+docker compose exec -T -w "$SKYCODE_CONTAINER_DEMO" skycode git diff --exit-code "$SKYCODE_BASE" -- test/shipping.test.mjs
+docker compose exec -T -w "$SKYCODE_CONTAINER_DEMO" skycode git ls-files --others --exclude-standard
 ```
 
 验收终点：**12 通过、0 失败**；相对固定基线的 diff 只有 `src/shipping.mjs`，测试文件无变化；检查未跟踪文件，区分应用元数据与额外业务文件。这验证基本改码与测试流程，不代表已经验证并行 Agent、浏览器或发布能力，也不是模型成绩保证。
@@ -606,28 +606,28 @@ ZhikunCode 提供 `/publish-oss` 命令，将工作区内单个普通文件发�
 
 启用同一套 OSS 配置后，浏览器还能感知从其他应用复制并粘贴到对话框的 PNG/JPEG/WebP 截图（单张不超过 5 MiB），通过固定后端通道立即上传，并将服务端验证过的 OSS 图片地址直接交给视觉模型。这个路径不调用 `/publish-oss` Skill，也不额外调用 LLM；OSS 未配置时自动降级为 Base64 直传，无需额外配置即可使用图片分析能力。
 
-“引用本地文件”会按实际访问能力选择路径：只有直接 loopback、无代理转发且原生选择器安全门禁全部满足时，才只发送 canonical 路径；ECS、远程和代理访问则使用浏览器文件选择器，选中后立即上传到 `${ZHIKUN_OSS_PREFIX}/local-files/`，并把文件名与 OSS 地址加入提示词。远程文件默认沿用 `ZHIKUN_OSS_MAX_FILE_BYTES`（1 GiB）上限，OSS 未配置时该入口不可用且不会降级为 Base64。该通道接受任意文件类型，不执行敏感文件名或内容扫描；对象发布为永久 `public-read`，移除标签、切换 Session 或放弃消息都不会删除它，使用前请确认文件可以公开。
+“引用本地文件”会按实际访问能力选择路径：只有直接 loopback、无代理转发且原生选择器安全门禁全部满足时，才只发送 canonical 路径；ECS、远程和代理访问则使用浏览器文件选择器，选中后立即上传到 `${SKYCODE_OSS_PREFIX}/local-files/`，并把文件名与 OSS 地址加入提示词。远程文件默认沿用 `SKYCODE_OSS_MAX_FILE_BYTES`（1 GiB）上限，OSS 未配置时该入口不可用且不会降级为 Base64。该通道接受任意文件类型，不执行敏感文件名或内容扫描；对象发布为永久 `public-read`，移除标签、切换 Session 或放弃消息都不会删除它，使用前请确认文件可以公开。
 
-凭证模式默认为 `auto`：本机存在完整的标准 `ALIBABA_CLOUD_ACCESS_KEY_ID`/`ALIBABA_CLOUD_ACCESS_KEY_SECRET` 时优先使用阿里云默认凭证链；否则，配置了 `ZHIKUN_OSS_ECS_ROLE_NAME` 时使用 **ECS RAM Role + IMDSv2**；两者都没有时仍尝试默认凭证链（例如阿里云 CLI 默认 Profile）。因此同一套非密钥配置可同时支持本地一键启动和 ECS。每个部署者都必须使用自己的 Bucket 与最小权限身份；仓库不包含维护者的 OSS 凭证。
+凭证模式默认为 `auto`：本机存在完整的标准 `ALIBABA_CLOUD_ACCESS_KEY_ID`/`ALIBABA_CLOUD_ACCESS_KEY_SECRET` 时优先使用阿里云默认凭证链；否则，配置了 `SKYCODE_OSS_ECS_ROLE_NAME` 时使用 **ECS RAM Role + IMDSv2**；两者都没有时仍尝试默认凭证链（例如阿里云 CLI 默认 Profile）。因此同一套非密钥配置可同时支持本地一键启动和 ECS。每个部署者都必须使用自己的 Bucket 与最小权限身份；仓库不包含维护者的 OSS 凭证。
 
 在 `.env` 中配置：
 
 ```bash
-ZHIKUN_OSS_ENABLED=true
-ZHIKUN_OSS_ENDPOINT=https://oss-cn-your-region.aliyuncs.com
-ZHIKUN_OSS_REGION=cn-your-region
-ZHIKUN_OSS_BUCKET=your-bucket
-ZHIKUN_OSS_PUBLIC_BASE_URL=
-ZHIKUN_OSS_PREVIEW_ENABLED=false
-ZHIKUN_OSS_PREFIX=zhikuncode-artifacts
-ZHIKUN_OSS_ECS_ROLE_NAME=your-ecs-ram-role
-ZHIKUN_OSS_CREDENTIAL_MODE=auto
-ZHIKUN_OSS_MAX_FILE_BYTES=1073741824
-ZHIKUN_OSS_CONNECT_TIMEOUT_MS=10000
-ZHIKUN_OSS_REQUEST_TIMEOUT_MS=120000
+SKYCODE_OSS_ENABLED=true
+SKYCODE_OSS_ENDPOINT=https://oss-cn-your-region.aliyuncs.com
+SKYCODE_OSS_REGION=cn-your-region
+SKYCODE_OSS_BUCKET=your-bucket
+SKYCODE_OSS_PUBLIC_BASE_URL=
+SKYCODE_OSS_PREVIEW_ENABLED=false
+SKYCODE_OSS_PREFIX=skycode-artifacts
+SKYCODE_OSS_ECS_ROLE_NAME=your-ecs-ram-role
+SKYCODE_OSS_CREDENTIAL_MODE=auto
+SKYCODE_OSS_MAX_FILE_BYTES=1073741824
+SKYCODE_OSS_CONNECT_TIMEOUT_MS=10000
+SKYCODE_OSS_REQUEST_TIMEOUT_MS=120000
 ```
 
-可选自定义域名与预览：先自行完成目标 Bucket 的域名绑定、DNS 和 HTTPS 配置，再将 `ZHIKUN_OSS_PUBLIC_BASE_URL` 设为自己的 HTTPS 域名根地址（例如 `https://files.example.com`，不带端口、路径前缀、查询参数或片段）。产物发布、截图粘贴和远程文件引用会统一使用该域名，上传 Endpoint 不变。设置 `ZHIKUN_OSS_PREVIEW_ENABLED=true` 后，仅新上传的 HTML、纯文本、PDF、PNG/JPEG/GIF/WebP 使用 `inline`，其他类型仍作为附件；开启预览必须配置自定义域名，不能使用 OSS 默认域名。默认留空且关闭时保持原下载行为。
+可选自定义域名与预览：先自行完成目标 Bucket 的域名绑定、DNS 和 HTTPS 配置，再将 `SKYCODE_OSS_PUBLIC_BASE_URL` 设为自己的 HTTPS 域名根地址（例如 `https://files.example.com`，不带端口、路径前缀、查询参数或片段）。产物发布、截图粘贴和远程文件引用会统一使用该域名，上传 Endpoint 不变。设置 `SKYCODE_OSS_PREVIEW_ENABLED=true` 后，仅新上传的 HTML、纯文本、PDF、PNG/JPEG/GIF/WebP 使用 `inline`，其他类型仍作为附件；开启预览必须配置自定义域名，不能使用 OSS 默认域名。默认留空且关闭时保持原下载行为。
 
 OSS 关闭时，无效的自定义域／预览配置会产生警告并从 CSP 省略，不阻断启动；开启时仍会阻止启动。合法自定义域在 OSS 关闭时仍保留在 CSP 中，以支持历史图片。发布入口始终保留严格配置校验。剪贴板 API 会规范化 HEAD 返回的具体图片 MIME（统一大小写、去除参数），保留有效 CDN 转码类型；其他类型回退到文件字节检测结果。客户端声明的图片类型仍须匹配上传内容。
 
@@ -644,7 +644,7 @@ OSS 关闭时，无效的自定义域／预览配置会产生警告并从 CSP �
 
 安全边界与当前限制：
 
-- 只发布 workspace 内单个普通文件，默认及最大上限为 1 GiB（1,073,741,824 字节），可通过 `ZHIKUN_OSS_MAX_FILE_BYTES` 设置更小上限；已有显式配置不会自动提高。有匹配 Manifest 时复核其归属、条目状态和哈希。无 Manifest 的工作区文件回退不等于已经做过运行验证。
+- 只发布 workspace 内单个普通文件，默认及最大上限为 1 GiB（1,073,741,824 字节），可通过 `SKYCODE_OSS_MAX_FILE_BYTES` 设置更小上限；已有显式配置不会自动提高。有匹配 Manifest 时复核其归属、条目状态和哈希。无 Manifest 的工作区文件回退不等于已经做过运行验证。
 - 拒绝目录、批量上传、符号链接、workspace 外路径、`.env`、私钥、数据库、凭证配置及检测到敏感内容的文件。
 - 对象先私有上传，远端校验成功后才切换为 `public-read`；失败时清理本次新建的私有对象。
 - 返回地址为**永久公开链接**。卡片依据公开地址的响应判断预览或下载；检查失败时保守显示“下载”，不会撤销已成功的发布。OSS 默认域名通常会下载 HTML。
@@ -652,7 +652,7 @@ OSS 关闭时，无效的自定义域／预览配置会产生警告并从 CSP �
 - HTML 预览会执行页面脚本。分享域不得共享应用登录 Cookie 或加入应用认证接口的跨域白名单；同站子域名不等于完整安全隔离。注意 HTTPS 证书续签，不承诺所有浏览器均可预览所有格式。
 - 当前精简版不提供批量发布、发布历史或撤销入口；删除公开对象需要运维人员在 OSS 侧显式执行。
 - 本地与 ECS 都支持真实上传；本地使用默认凭证链，ECS 建议使用自动轮换的 RAM Role 临时凭证。
-- 远程文件引用使用原始请求体流式上传，不扩大 Spring 的全局 multipart 限制；若 ECS 前还有反向代理，代理的请求体上限也必须不低于 `ZHIKUN_OSS_MAX_FILE_BYTES`。
+- 远程文件引用使用原始请求体流式上传，不扩大 Spring 的全局 multipart 限制；若 ECS 前还有反向代理，代理的请求体上限也必须不低于 `SKYCODE_OSS_MAX_FILE_BYTES`。
 
 秒悟 `/publish-meoo` 的策略不同：要求绑定实际通过的 VerifyJourney 证据、项目目录、运行方式和发布快照，发布前复检；每次创建新站点并消耗平台额度。配置与步骤见[秒悟发布指南](docs/deployment/meoo.md)。
 
@@ -772,7 +772,7 @@ ZhikunCode 当前预置了 17 个阿里云百炼 MCP 服务、共 83 个白名�
 | 单实例预算 | 历史材料口径不同 | 原主 README、归档说明和当前脚本不一致，不能用当前默认值反推历史条件 |
 | 说明中的并发 worker | 1 | 历史说明，不作为当前部署默认值 |
 | 网络 / Sub-agent | 无子 Agent；联网状态不能仅凭提示声明认定 | 已发现参考修复内容，详见上文 |
-| 提交命名空间 | `20260525_zhikuncode` | `metadata.yaml` |
+| 提交命名空间 | `20260525_skycode` | `metadata.yaml` |
 
 ### 仓库级表现（`results/resolved_by_repo.json`）
 
@@ -808,14 +808,14 @@ ZhikunCode 当前预置了 17 个阿里云百炼 MCP 服务、共 83 个白名�
 
 两份原 SHA-256 清单对应 `cd9261c7`（2026-07-28）；[该历史版本](https://github.com/zhikunqingtao/zhikuncode/tree/cd9261c755ecda8fc9528cca6383a7f375b532b4/docs/case-studies)的黄金 10/10、12306 21/21 文件匹配。当前 HTML 和共用案例 README 有后续导航／说明变更，不再逐字匹配原清单；已核对的评分 JSON、日志摘录、图片和 12306 产物保持匹配。不要把当前整包写成全部通过，也不要将哈希一致当成业务内容或评分正确的证明。
 
-原始材料：[黄金证据](docs/case-studies/zhikuncode-codex-gold-monitor-evidence.json) · [12306 证据](docs/case-studies/zhikuncode-codex-12306-evidence.json) · [黄金清单](docs/case-studies/zhikuncode-codex-gold-monitor-SHA256SUMS.txt) · [12306 清单](docs/case-studies/zhikuncode-codex-12306-SHA256SUMS.txt)。
+原始材料：[黄金证据](docs/case-studies/skycode-codex-gold-monitor-evidence.json) · [12306 证据](docs/case-studies/skycode-codex-12306-evidence.json) · [黄金清单](docs/case-studies/skycode-codex-gold-monitor-SHA256SUMS.txt) · [12306 清单](docs/case-studies/skycode-codex-12306-SHA256SUMS.txt)。
 
 从仓库根检查当前文件：
 
 ```bash
 cd docs/case-studies
-shasum -a 256 -c zhikuncode-codex-gold-monitor-SHA256SUMS.txt
-shasum -a 256 -c zhikuncode-codex-12306-SHA256SUMS.txt
+shasum -a 256 -c skycode-codex-gold-monitor-SHA256SUMS.txt
+shasum -a 256 -c skycode-codex-12306-SHA256SUMS.txt
 ```
 
 报告和共用 README 的已知差异会返回校验失败；不要重生成清单来掩盖这些差异。
@@ -905,7 +905,7 @@ ZhikunCode 采用三端分离架构，Java 后端负责核心编排，React 前�
 │  │  :8080     │  │  :8000    │  │  (静态文件)   │ │
 │  └───────────┘  └───────────┘  └──────────────┘ │
 │                                                  │
-│  Volume: zhikun-data (SQLite + 会话数据)          │
+│  Volume: skycode-data (SQLite + 会话数据)          │
 │  Volume: workspace (用户项目代码)                  │
 ├──────────────────────────────────────────────────┤
 │  Port: 8080 → 宿主机                              │
@@ -1035,8 +1035,8 @@ Web 新会话必须先选择一个已授权目录。远程和 Docker 部署的�
 - 撤销 Project 会停止后续普通写入的持久自动授权。已有 Session 仍以原目录作为默认相对路径根；安全读取仍按 Session 策略执行，其他受控操作重新进入正常授权流程。
 - Session、Query 和文件搜索使用 `projectId` 或 `sessionId`；客户端提交任意 `workingDirectory` 会被拒绝。
 - 普通目录和 Git 子目录都可授权；只有所选目录本身就是 Git worktree 根目录时，才提供内置仓库上下文和 Git slash 命令。Bash 不是目录沙箱，但始终走独立的命令授权，不会因 Project 选择而自动获准。
-- 后端的 `ZHIKUN_LOCAL_PICKER_ENABLED` 安全默认值为 `false`。使用 `./start.sh` 本地快速启动时，如果 `ZHIKUN_WORKSPACE_ALLOWED_ROOTS` 和该变量均无非空配置，脚本会为直连本机桌面场景启用 picker；显式设置 `false` 或配置 allowed roots 时不会被覆盖或隐式启用。远程、反向代理和生产部署应显式保持关闭并配置 allowed roots。
-- Python 的 `WORKSPACE_ROOT` 是相对路径的默认锚点。配置 `ZHIKUN_WORKSPACE_ALLOWED_ROOTS` 后，Python 路由同样严格限制在这些根目录内；只有未配置 allowed roots 且显式启用本机 picker 的 loopback 开发模式，才允许分析用户选择的其他绝对路径。
+- 后端的 `SKYCODE_LOCAL_PICKER_ENABLED` 安全默认值为 `false`。使用 `./start.sh` 本地快速启动时，如果 `SKYCODE_WORKSPACE_ALLOWED_ROOTS` 和该变量均无非空配置，脚本会为直连本机桌面场景启用 picker；显式设置 `false` 或配置 allowed roots 时不会被覆盖或隐式启用。远程、反向代理和生产部署应显式保持关闭并配置 allowed roots。
+- Python 的 `WORKSPACE_ROOT` 是相对路径的默认锚点。配置 `SKYCODE_WORKSPACE_ALLOWED_ROOTS` 后，Python 路由同样严格限制在这些根目录内；只有未配置 allowed roots 且显式启用本机 picker 的 loopback 开发模式，才允许分析用户选择的其他绝对路径。
 
 ### 授权范围与子 Agent 继承
 
@@ -1222,7 +1222,7 @@ ZhikunCode 的skill技能系统（Skill System）是一个 **Markdown 驱动的�
 
 ### 管理与启停
 
-PC 和平板通过顶部 **Skill** 入口、手机通过 **更多 → Skill 管理** 打开管理页，可搜索技能、查看来源与正文，并分别开启或关闭。现有与新增技能默认开启。设置由同一后端的所有设备和会话共享，默认保存到 `~/.zhikun/skill-states.json`；可通过 `SKILL_STATE_PATH` 指定位置，Docker 使用持久化目录中的 `/app/data/skill-states.json`。
+PC 和平板通过顶部 **Skill** 入口、手机通过 **更多 → Skill 管理** 打开管理页，可搜索技能、查看来源与正文，并分别开启或关闭。现有与新增技能默认开启。设置由同一后端的所有设备和会话共享，默认保存到 `~/.skycode/skill-states.json`；可通过 `SKILL_STATE_PATH` 指定位置，Docker 使用持久化目录中的 `/app/data/skill-states.json`。
 
 开关按技能内部名称保存，同名覆盖、文件热加载或删除后重建同名技能都会保留原有选择。
 
@@ -1265,15 +1265,15 @@ bundled → project → user
 | 来源 | 目录 | 说明 | 状态 |
 |------|------|------|------|
 | **managed** | 策略管理目录 | 企业统一下发的技能 | 预留 |
-| **user** | `~/.zhikun/skills/` | 用户全局自定义技能 | ✅ 已实现 |
-| **project** | `.zhikun/skills/` | 项目级技能；是否纳入版本控制取决于 Git 忽略规则 | ✅ 已实现 |
+| **user** | `~/.skycode/skills/` | 用户全局自定义技能 | ✅ 已实现 |
+| **project** | `.skycode/skills/` | 项目级技能；是否纳入版本控制取决于 Git 忽略规则 | ✅ 已实现 |
 | **plugin** | 插件提供 | JAR 插件内嵌的技能 | 预留 |
 | **bundled** | 内置 | 13 个工作流定义，执行依赖各自条件 | ✅ 已实现 |
 | **mcp** | MCP 构建 | 通过 MCP 协议注册的技能 | 预留 |
 
 ### 自定义技能
 
-在后端运行用户的 `~/.zhikun/skills/translate.md` 中保存以下示例，重启后端加载。`project` 来源的 `.zhikun/skills/` 按后端启动目录解析，不随界面选择的 Project 切换：
+在后端运行用户的 `~/.skycode/skills/translate.md` 中保存以下示例，重启后端加载。`project` 来源的 `.skycode/skills/` 按后端启动目录解析，不随界面选择的 Project 切换：
 
 ```markdown
 ---
@@ -1397,7 +1397,7 @@ public class MyPlugin implements PluginExtension {
 com.example.MyPlugin
 ```
 
-**3. 将 JAR 放入 `~/.zhikun/plugins/` 目录**
+**3. 将 JAR 放入 `~/.skycode/plugins/` 目录**
 
 **4. 重启服务或执行 `/reload-plugins` 热重载**
 
@@ -1415,8 +1415,8 @@ ZhikunCode 提供个人记忆与项目约定管理，也有团队 Markdown 组�
 | 层级 | 文件 | 作用域 | 说明 |
 |------|------|--------|------|
 | **个人记忆** | `~/.ai-code-assistant/MEMORY.md` | 全局跨项目 | 通过 Memory 工具或页面读写，主会话请求自动限量加载 |
-| **项目记忆** | `zhikun.md` / `zhikun.local.md` | 当前项目 | 项目级编码约定、架构决策、构建流程 |
-| **团队记忆** | `.zhikun/team-memories/*.md` | 团队共享 | 随代码库分发，经普通文件读取按需使用；未自动注入普通会话 |
+| **项目记忆** | `skycode.md` / `skycode.local.md` | 当前项目 | 项目级编码约定、架构决策、构建流程 |
+| **团队记忆** | `.skycode/team-memories/*.md` | 团队共享 | 随代码库分发，经普通文件读取按需使用；未自动注入普通会话 |
 
 ### 记忆分类
 
@@ -1431,8 +1431,8 @@ ZhikunCode 提供个人记忆与项目约定管理，也有团队 Markdown 组�
 
 ### 自动记忆与搜索
 
-- **主会话自动加载** — 普通主会话与 Coordinator 主模式每次请求重新读取个人 `MEMORY.md`，并加载所选 Project 根的 `zhikun.md` 与 `zhikun.local.md`，不向父目录搜索。页面保存成功后，下一次请求生效；同一次请求内的工具循环不会中途刷新。
-- **范围与优先级** — Override 完全替换系统提示时跳过记忆注入和 append；custom system prompt 实际被选为基础提示时，也不自动注入记忆，但保留 append。仅提供 custom 字段而由更高优先级的 Coordinator／Agent 分支胜出时，仍按该分支加载记忆。子代理尚未统一接入这条加载链路。记忆冲突时，`zhikun.local.md > zhikun.md > MEMORY.md`，记忆不凌驾于用户当前的明确指令。
+- **主会话自动加载** — 普通主会话与 Coordinator 主模式每次请求重新读取个人 `MEMORY.md`，并加载所选 Project 根的 `skycode.md` 与 `skycode.local.md`，不向父目录搜索。页面保存成功后，下一次请求生效；同一次请求内的工具循环不会中途刷新。
+- **范围与优先级** — Override 完全替换系统提示时跳过记忆注入和 append；custom system prompt 实际被选为基础提示时，也不自动注入记忆，但保留 append。仅提供 custom 字段而由更高优先级的 Coordinator／Agent 分支胜出时，仍按该分支加载记忆。子代理尚未统一接入这条加载链路。记忆冲突时，`skycode.local.md > skycode.md > MEMORY.md`，记忆不凌驾于用户当前的明确指令。
 - **个人记忆工具** — Memory 提供 read／write／delete；实际是否写入取决于调用，不保证每轮自动记忆。
 - **团队资料** — 可用普通文件读取工具按需查看团队 Markdown；没有全量自动注入保证。
 - **来源记录** — 条目支持 source 等元数据。
@@ -1455,7 +1455,7 @@ ZhikunCode 提供个人记忆与项目约定管理，也有团队 Markdown 组�
 在所选 Project 根目录创建以下文件，其内容会进入系统提示；是否准确执行仍需检查实际输出，不要在其中写凭证：
 
 ```markdown
-# zhikun.md — 项目约定（随代码库提交）
+# skycode.md — 项目约定（随代码库提交）
 
 ## 编码规范
 - Java 方法命名使用 camelCase
@@ -1467,14 +1467,14 @@ ZhikunCode 提供个人记忆与项目约定管理，也有团队 Markdown 组�
 ```
 
 ```markdown
-# zhikun.local.md — 本地配置（不提交，加入 .gitignore）
+# skycode.local.md — 本地配置（不提交，加入 .gitignore）
 
 ## 本地环境
 - 我的 API Key 在 .env 文件中
 - 本地数据库端口: 5432
 ```
 
-> 项目记忆仅从所选 Project 根目录加载 `zhikun.md` 和 `zhikun.local.md`，不向父目录搜索；每个文件注入提示的正文最多保留 100 KiB（102,400 字节），超出时追加截断标记。`zhikun.md` 随代码库提交用于团队共享，`zhikun.local.md` 用于个人本地配置。
+> 项目记忆仅从所选 Project 根目录加载 `skycode.md` 和 `skycode.local.md`，不向父目录搜索；每个文件注入提示的正文最多保留 100 KiB（102,400 字节），超出时追加截断标记。`skycode.md` 随代码库提交用于团队共享，`skycode.local.md` 用于个人本地配置。
 
 ### 安全保护
 
@@ -1724,7 +1724,7 @@ ZhikunCode 的 [MCP（Model Context Protocol）](https://modelcontextprotocol.io
 - **默认开启（4 个）**：智谱联网搜索、高德地图、千问图像、万相视频。
 - **默认关闭（13 个）**：新闻、法律、企业信息、文本内容审核、A 股金融数据、企业知识产权、万方文献、arXiv、1688 选品、物流、贵金属、零售洞察、旅游消费。
 - **上下文隔离**：关闭的服务不连接、不注册、不注入模型工具上下文，直接调用返回拒绝结果。
-- **用户控制**：点击页面顶部的 **MCP** 徽章进入 **MCP 管理**。开关即时生效，状态默认保存在 `~/.zhikun/mcp-service-states.json`；Docker 使用持久化路径 `/app/data/mcp-service-states.json`。
+- **用户控制**：点击页面顶部的 **MCP** 徽章进入 **MCP 管理**。开关即时生效，状态默认保存在 `~/.skycode/mcp-service-states.json`；Docker 使用持久化路径 `/app/data/mcp-service-states.json`。
 
 | 工具 | 说明 | 来源 |
 |------|------|------|
@@ -1745,7 +1745,7 @@ ZhikunCode 的 [MCP（Model Context Protocol）](https://modelcontextprotocol.io
 
 ### 可选外部 MCP 服务
 
-GitHub、Context7 和 Alibaba Cloud Ops 通过 `.env` 中的 `ZHIKUN_MCP_SERVERS` 配置。配置只会让服务进入可选列表，三个服务均默认关闭，必须由用户在 **MCP 管理** 页面手动启用。不要使用 `MCP_SERVERS`：该名称会与 Spring Boot 的 `mcp.servers` 配置绑定冲突。完整 JSON 模板见 [`.env.example`](.env.example)，真实密钥不得提交到 Git。
+GitHub、Context7 和 Alibaba Cloud Ops 通过 `.env` 中的 `SKYCODE_MCP_SERVERS` 配置。配置只会让服务进入可选列表，三个服务均默认关闭，必须由用户在 **MCP 管理** 页面手动启用。不要使用 `MCP_SERVERS`：该名称会与 Spring Boot 的 `mcp.servers` 配置绑定冲突。完整 JSON 模板见 [`.env.example`](.env.example)，真实密钥不得提交到 Git。
 
 | 服务 | 默认状态（配置后） | 工具白名单 |
 |------|------------------|------------|
@@ -1762,12 +1762,12 @@ GITHUB_TOOLS=get_me,get_file_contents,search_code,list_branches,list_commits,lis
 GITHUB_READ_ONLY=1
 GITHUB_LOCKDOWN_MODE=1
 ALIBABA_CLOUD_OPS_VISIBLE_TOOLS=ECS_DescribeInstances,ECS_DescribeRegions,ECS_DescribeSecurityGroups,OSS_ListBuckets,OSS_ListObjects
-# ZHIKUN_MCP_SERVERS=<从 .env.example 复制 JSON 模板>
+# SKYCODE_MCP_SERVERS=<从 .env.example 复制 JSON 模板>
 ```
 
 修改 `.env` 或外部 MCP 连接配置后需要重启；重启后还需在 **MCP 管理** 页面手动启用所需服务。之后在管理页启用或关闭服务无需再次重启。
 
-本地外部服务还需要对应运行程序：GitHub wrapper 需要官方二进制或可用 Docker；Alibaba Cloud Ops wrapper 需要专用运行环境或 `uvx`。镜像已包含对应运行依赖；本地仅把 `scripts/mcp` 加到 PATH 或填写 Key 并不会安装它们。参见 [GitHub wrapper](scripts/mcp/zhikun-github-mcp) 和 [Alibaba wrapper](scripts/mcp/zhikun-alibaba-cloud-ops-mcp)。
+本地外部服务还需要对应运行程序：GitHub wrapper 需要官方二进制或可用 Docker；Alibaba Cloud Ops wrapper 需要专用运行环境或 `uvx`。镜像已包含对应运行依赖；本地仅把 `scripts/mcp` 加到 PATH 或填写 Key 并不会安装它们。参见 [GitHub wrapper](scripts/mcp/skycode-github-mcp) 和 [Alibaba wrapper](scripts/mcp/skycode-alibaba-cloud-ops-mcp)。
 
 ### 自定义 MCP 工具
 
@@ -1949,15 +1949,15 @@ Claude Fable 5.2 使用已有 OpenRouter Key，默认请求 `reasoning.effort=ma
 
 | 变量 | 必填 | 默认值 | 说明 |
 |------|:---:|--------|------|
-| `ZHIKUN_PORT` | — | 8080 | Docker 映射的宿主机端口 |
+| `SKYCODE_PORT` | — | 8080 | Docker 映射的宿主机端口 |
 | `SPRING_PROFILES_ACTIVE` | — | production | Spring 配置文件 |
 | `JAVA_OPTS` | — | -Xms256m -Xmx1024m | JVM 参数 |
 | `WORKSPACE_PATH` | — | ./workspace | 挂载到容器的工作目录 |
-| `ZHIKUN_DEFAULT_WORKSPACE` | — | 服务进程目录；`./start.sh` 为仓库根 | 非 Web 客户端未指定 Project 时的服务端兜底目录，不自动授予普通编辑权限 |
-| `ZHIKUN_WORKSPACE_ALLOWED_ROOTS` | — | 空 | 允许登记和浏览的服务端根目录，多个目录用逗号分隔；远程登记时必须配置 |
-| `ZHIKUN_LOCAL_PICKER_ENABLED` | — | false（后端）；true（`./start.sh` 且两个相关变量均无非空配置） | 仅供直连本机桌面服务浏览本机文件系统；显式 `false` 和 allowed roots 配置均会保留，反向代理和生产部署应保持关闭并配置 allowed roots |
-| `ZHIKUN_GLOBAL_DB_PATH` | — | `~/.config/ai-code-assistant/global.db` | Project 授权和全局配置数据库文件路径 |
-| `ZHIKUNCODE_DATABASE_PROJECT_ROOT` | — | Project 工作目录 | Session 数据库根目录；Docker Compose 固定为 `/app/data` |
+| `SKYCODE_DEFAULT_WORKSPACE` | — | 服务进程目录；`./start.sh` 为仓库根 | 非 Web 客户端未指定 Project 时的服务端兜底目录，不自动授予普通编辑权限 |
+| `SKYCODE_WORKSPACE_ALLOWED_ROOTS` | — | 空 | 允许登记和浏览的服务端根目录，多个目录用逗号分隔；远程登记时必须配置 |
+| `SKYCODE_LOCAL_PICKER_ENABLED` | — | false（后端）；true（`./start.sh` 且两个相关变量均无非空配置） | 仅供直连本机桌面服务浏览本机文件系统；显式 `false` 和 allowed roots 配置均会保留，反向代理和生产部署应保持关闭并配置 allowed roots |
+| `SKYCODE_GLOBAL_DB_PATH` | — | `~/.config/ai-code-assistant/global.db` | Project 授权和全局配置数据库文件路径 |
+| `SKYCODE_DATABASE_PROJECT_ROOT` | — | Project 工作目录 | Session 数据库根目录；Docker Compose 固定为 `/app/data` |
 | `ALLOW_PRIVATE_NETWORK` | — | true（Docker） | 放行所有到达后端的来源，并非仅私网；远程部署见安全章节 |
 | `LOG_DIR` | — | /app/log | 容器内日志目录 |
 | `MCP_REGISTRY_PATH` | — | 自动配置 | MCP 能力注册表文件路径 |
@@ -1968,8 +1968,8 @@ Claude Fable 5.2 使用已有 OpenRouter Key，默认请求 `reasoning.effort=ma
 |------|:---:|--------|------|
 | `FEATURE_BACKGROUND_AGENT_WAIT` | — | true | 等待并汇总当前父 Run 的后台 Agent 结果；设为 false 关闭 |
 | `AGENT_TIMEOUT_MAX_WAIT_MINUTES` | — | 31 | 每批后台 Agent 结果的等待预算，单位分钟；不修改子 Agent 执行超时 |
-| `ZHIKUN_COORDINATOR_MODE` | — | 0 | Feature flag，启用协调器模式（0=关闭，1=开启） |
-| `ZHIKUN_DELETE_CONFIRM_CODE` | — | 空 | 删除会话二次确认验证码；配置后 Web 删除会话须输入该验证码，未配置保持原确认流程 |
+| `SKYCODE_COORDINATOR_MODE` | — | 0 | Feature flag，启用协调器模式（0=关闭，1=开启） |
+| `SKYCODE_DELETE_CONFIRM_CODE` | — | 空 | 删除会话二次确认验证码；配置后 Web 删除会话须输入该验证码，未配置保持原确认流程 |
 | `LLM_PROVIDER_DASHSCOPE_MODELS` | — | qwen3.8-max-0902 | 按量计费 DashScope 可用模型列表（逗号分隔；实际目录可动态扩展） |
 | `LLM_PROVIDER_DASHSCOPE_TOKEN_PLAN_MODELS` | — | deepseek-v4.1-flash,bailian/glm-5.3,qwen4-max-preview | 百炼 Token Plan Provider 可用模型列表；与普通 DashScope、DeepSeek 直连配置相互独立 |
 | `LLM_PROVIDER_DEEPSEEK_MODELS` | — | deepseek-flash | DeepSeek 可用模型列表；默认使用 V4.1 Flash（逗号分隔） |
@@ -2015,14 +2015,14 @@ Claude Fable 5.2 使用已有 OpenRouter Key，默认请求 `reasoning.effort=ma
 
 | 现象 | 先检查什么 |
 |---|---|
-| 构建／启动失败 | JDK 21、Node 版本（见[本地安装](#local-setup)）、依赖下载；Docker 看 `docker compose logs --tail=100 zhikuncode`，手动启动看各终端 |
+| 构建／启动失败 | JDK 21、Node 版本（见[本地安装](#local-setup)）、依赖下载；Docker 看 `docker compose logs --tail=100 skycode`，手动启动看各终端 |
 | Key 无效／没有工具调用 | 选择的 Provider 与模型、实际服务商错误、Docker 入口支持范围和模型工具调用能力 |
 | 端口占用 | 先识别 8080／8000／5173 的监听进程；不要终止不属于本次启动的服务 |
 | 找不到项目／挂载不可写 | 本地使用真实路径；Docker 选择容器路径，检查宿主卷权限和 Docker Desktop 文件共享 |
 | Python 活着但能力不可用 | `/api/health/capabilities` 中的 available／reason、实际解释器、依赖和 Chromium |
 | 页面断线／审批未出现 | WebSocket 代理与服务日志；重连恢复过程，默认完全访问可能不弹审批，后端重启则旧运行中断 |
 
-使用 `start.sh` 时日志位于 `log/backend-console.log`、`log/python-console.log`、`log/frontend-console.log`。Compose 的 `zhikun-data` 卷保存 `/app/data` 下的会话和全局配置，`zhikun-memory` 卷保存 `/app/.ai-code-assistant` 下的个人记忆及受信任设备文件，项目来自独立挂载；停服一致备份应同时覆盖这两个卷和项目挂载，保留数据时不要执行 `docker compose down -v`。错误信息中先移除凭证再分享。
+使用 `start.sh` 时日志位于 `log/backend-console.log`、`log/python-console.log`、`log/frontend-console.log`。Compose 的 `skycode-data` 卷保存 `/app/data` 下的会话和全局配置，`skycode-memory` 卷保存 `/app/.ai-code-assistant` 下的个人记忆及受信任设备文件，项目来自独立挂载；停服一致备份应同时覆盖这两个卷和项目挂载，保留数据时不要执行 `docker compose down -v`。错误信息中先移除凭证再分享。
 
 
 <details>
@@ -2054,7 +2054,7 @@ Claude Fable 5.2 使用已有 OpenRouter Key，默认请求 `reasoning.effort=ma
 
 **部署只需 3 步：**
 ```bash
-git clone https://github.com/zhikunqingtao/zhikuncode.git && cd zhikuncode
+git clone https://github.com/zhikunqingtao/zhikuncode.git && cd skycode
 cp .env.example .env  # 编辑填入 API Key
 docker compose up -d --build  # 构建并启动
 ```
@@ -2068,8 +2068,8 @@ docker compose up -d --build  # 构建并启动
 
 **应用状态和数据库保存在本地**；提示词、相关代码上下文和其他模型输入会发送给你配置的 LLM 服务商：
 
-- **会话数据** — SQLite 数据库，存储在 Docker Volume `zhikun-data` 中
-- **个人记忆与设备信任** — `MEMORY.md`、其 `.bak` 备份及 `trusted-devices.json` 位于 Docker Volume `zhikun-memory` 的 `/app/.ai-code-assistant`；备份按应用私有数据保管，不将设备信任文件分享给其他部署
+- **会话数据** — SQLite 数据库，存储在 Docker Volume `skycode-data` 中
+- **个人记忆与设备信任** — `MEMORY.md`、其 `.bak` 备份及 `trusted-devices.json` 位于 Docker Volume `skycode-memory` 的 `/app/.ai-code-assistant`；备份按应用私有数据保管，不将设备信任文件分享给其他部署
 - **项目代码** — 通过 Volume 挂载你本地的项目目录
 - **API Key** — 由部署环境和配置管理；排查日志或分享资料前应移除凭证
 
@@ -2079,35 +2079,35 @@ docker compose up -d --build  # 构建并启动
 
 | 旧数据／备份中的文件 | 当前恢复目标 | 持久化位置 |
 |---|---|---|
-| 旧 `/app/.ai-code-assistant/data.db` 及同次备份的 SQLite 伴随文件 | `/app/data/.ai-code-assistant/data.db` 及对应伴随文件 | `zhikun-data` |
-| 旧 `/app/.config/ai-code-assistant/global.db` 及同次备份的 SQLite 伴随文件 | `/app/data/global.db` 及对应伴随文件 | `zhikun-data` |
-| `/app/.ai-code-assistant/MEMORY.md`、`MEMORY.md.bak` | 同名文件，仍在 `/app/.ai-code-assistant/` | `zhikun-memory` |
-| `/app/.ai-code-assistant/trusted-devices.json` | 同名文件，仍在 `/app/.ai-code-assistant/` | `zhikun-memory` |
+| 旧 `/app/.ai-code-assistant/data.db` 及同次备份的 SQLite 伴随文件 | `/app/data/.ai-code-assistant/data.db` 及对应伴随文件 | `skycode-data` |
+| 旧 `/app/.config/ai-code-assistant/global.db` 及同次备份的 SQLite 伴随文件 | `/app/data/global.db` 及对应伴随文件 | `skycode-data` |
+| `/app/.ai-code-assistant/MEMORY.md`、`MEMORY.md.bak` | 同名文件，仍在 `/app/.ai-code-assistant/` | `skycode-memory` |
+| `/app/.ai-code-assistant/trusted-devices.json` | 同名文件，仍在 `/app/.ai-code-assistant/` | `skycode-memory` |
 
 已使用 `/app/data` 的部署应保留该卷现有数据库，不用旧主目录中的数据库覆盖它。项目挂载中的数据也应另行备份。以下命令从仓库根目录的同一个 Bash 会话执行，只选择实际存在的源路径；复制失败时停止排查，不能将权限或 I/O 错误当作“文件不存在”跳过。全程不要执行 `docker compose down -v`。
 
 ```bash
 set -e
 umask 077
-mkdir -p "$HOME/zhikuncode-backups"
-migration_backup=$(mktemp -d "$HOME/zhikuncode-backups/backup.XXXXXX")
-docker compose stop zhikuncode
-docker cp zhikuncode:/app/data "$migration_backup/data"
-docker cp zhikuncode:/app/.ai-code-assistant "$migration_backup/home"
+mkdir -p "$HOME/skycode-backups"
+migration_backup=$(mktemp -d "$HOME/skycode-backups/backup.XXXXXX")
+docker compose stop skycode
+docker cp skycode:/app/data "$migration_backup/data"
+docker cp skycode:/app/.ai-code-assistant "$migration_backup/home"
 # 仅旧版全局数据库仍在此路径时执行；备份整个目录以保留伴随文件：
-# docker cp zhikuncode:/app/.config/ai-code-assistant "$migration_backup/legacy-config"
+# docker cp skycode:/app/.config/ai-code-assistant "$migration_backup/legacy-config"
 ```
 
 确认备份完整且可恢复后，构建目标镜像。下面是**逐文件恢复模板**，示例恢复个人记忆；数据库文件应按上表选择路径，并在应用仍停止时恢复同次备份中的 `-wal`、`-shm`、`-journal`（若存在），不可混用不同时间的数据库与伴随文件。已有新卷内容不会被自动覆盖：目标存在时模板退出，须保留双方副本、人工核对，不要删除目标来绕过检查。
 
 ```bash
-docker compose build zhikuncode
+docker compose build skycode
 restore_source=home/MEMORY.md
 restore_target=/app/.ai-code-assistant/MEMORY.md
 docker compose run --rm --no-deps -T --user root --entrypoint sh \
   --volume "$migration_backup:/migration-backup:ro" \
   --env RESTORE_SOURCE="$restore_source" --env RESTORE_TARGET="$restore_target" \
-  zhikuncode -ec '
+  skycode -ec '
     src="/migration-backup/$RESTORE_SOURCE"
     dst="$RESTORE_TARGET"
     test -f "$src"
@@ -2120,14 +2120,14 @@ docker compose run --rm --no-deps -T --user root --entrypoint sh \
     mkdir -p "$dir"
     set -C
     cat "$src" > "$dst"
-    chown zhikun:zhikun "$dir" "$dst"
+    chown skycode:skycode "$dir" "$dst"
   '
 # 全部所需文件恢复成功并核对后，才重建和启动应用容器：
-docker compose create --force-recreate zhikuncode
-docker compose start zhikuncode
+docker compose create --force-recreate skycode
+docker compose start skycode
 ```
 
-恢复容器仅运行上述 shell，不启动应用，备份挂载为只读；文件属主按目标镜像中的 `zhikun` 用户设置，不假定固定数字 UID。任一步失败时保持应用停止并保留备份。确认 Session、配置、个人记忆和设备信任状态均符合预期后，再按自己的备份保留策略处置备份。
+恢复容器仅运行上述 shell，不启动应用，备份挂载为只读；文件属主按目标镜像中的 `skycode` 用户设置，不假定固定数字 UID。任一步失败时保持应用停止并保留备份。确认 Session、配置、个人记忆和设备信任状态均符合预期后，再按自己的备份保留策略处置备份。
 
 实际请求发往你配置的模型／MCP／云服务端点；如果选择聚合 Provider 或代理，请求也会经过该渠道。自托管不代表所有输入只留在本地。
 
@@ -2221,10 +2221,10 @@ docker compose start zhikuncode
 docker ps -a
 
 # 查看启动日志（Java 启动通常需要 30-60 秒）
-docker logs zhikuncode
+docker logs skycode
 
 # 查看健康检查详情
-docker inspect --format='{{json .State.Health}}' zhikuncode | python3 -m json.tool
+docker inspect --format='{{json .State.Health}}' skycode | python3 -m json.tool
 ```
 
 **常见启动失败原因：**
@@ -2235,11 +2235,11 @@ docker inspect --format='{{json .State.Health}}' zhikuncode | python3 -m json.to
 **查看运行时日志：**
 ```bash
 # 实时跟踪日志
-docker logs -f zhikuncode
+docker logs -f skycode
 
 # 进入容器查看日志文件
-docker exec -it zhikuncode ls -la /app/log/
-docker exec -it zhikuncode tail -100 /app/log/app.log
+docker exec -it skycode ls -la /app/log/
+docker exec -it skycode tail -100 /app/log/app.log
 ```
 
 **关于 `ALLOW_PRIVATE_NETWORK`：**
@@ -2261,7 +2261,7 @@ JAVA_OPTS="-Xms512m -Xmx2048m --enable-preview"
 修改 `.env` 文件中的端口配置：
 
 ```bash
-ZHIKUN_PORT=9090  # 改为任意未被占用的端口
+SKYCODE_PORT=9090  # 改为任意未被占用的端口
 ```
 
 然后重新启动：
@@ -2295,7 +2295,7 @@ docker compose up -d
 
 ## 📬 联系
 
-- **邮箱：** alizhikun@gmail.com
+- **邮箱：** aliskycode@gmail.com
 - **GitHub Issues：** [提交问题](https://github.com/zhikunqingtao/zhikuncode/issues)
 
 ---

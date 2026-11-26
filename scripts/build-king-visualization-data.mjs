@@ -317,7 +317,7 @@ for (const bucket of hourlyBill) {
 
 const output = {
   schemaVersion: 2,
-  caseId: 'zhikuncode-king-20260809',
+  caseId: 'skycode-king-20260809',
   generatedAt: provenance.generatedAt,
   evidenceWindow: provenance.developmentWindow,
   timeBoundaries: {

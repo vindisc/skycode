@@ -84,7 +84,7 @@ class MobileProxyTest(unittest.TestCase):
             raise RuntimeError("Caddy is required; on macOS: brew install caddy")
         # A checkout may live under a directory such as "My Projects".
         # Exercise Caddy's environment expansion with spaces in the root path.
-        cls.temp = tempfile.TemporaryDirectory(prefix="zhikun mobile verify ")
+        cls.temp = tempfile.TemporaryDirectory(prefix="skycode mobile verify ")
         cls.addClassCleanup(cls.temp.cleanup)
         root = Path(cls.temp.name)
         static = root / "dist"

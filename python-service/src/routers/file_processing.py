@@ -97,7 +97,7 @@ async def get_file_tree(request: FileTreeRequest):
         'node_modules', '.git', '__pycache__', 'target', 'dist',
         '.venv', 'venv', '.idea', '.vscode', '.next', 'build',
         '.qoder', '.claude', '.ai-code-assistant', '.scratchpad',
-        '.zhikun', '.zhikun-scratchpad', 'egg-info',
+        '.skycode', '.skycode-scratchpad', 'egg-info',
     }
 
     excludes = set(request.exclude_patterns or []) | DEFAULT_EXCLUDES

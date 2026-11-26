@@ -148,7 +148,7 @@ export async function copyImageToClipboard(image: CopyableImage): Promise<void> 
 /**
  * 将消息的全部内容（全部文本 + 全部图片链接）复制为纯文本。
  *
- * 主要场景：复制后粘贴回 zhikuncode 输入框继续对话——
+ * 主要场景：复制后粘贴回 skycode 输入框继续对话——
  * 图片以 URL 文字形式随行（agent 收到后自行下载查看），
  * 剪贴板不含图片文件，不触发输入框的图片附件粘贴逻辑，文字完整保留。
  *

@@ -9,18 +9,18 @@
 # =============================================================================
 
 services:
-  zhikuncode:
+  skycode:
     build:
       context: .
       dockerfile: Dockerfile
       target: runtime
-    image: zhikuncode:latest
-    container_name: zhikuncode
+    image: skycode:latest
+    container_name: skycode
     # 默认只绑定本机回环地址。镜像里 ALLOW_PRIVATE_NETWORK=true 时，经端口映射进来的请求一律免鉴权，
     # 绑到 0.0.0.0 等于把一个拥有"完全访问"权限、挂着工作区的 Agent 向整个局域网敞开。
-    # 确实需要手机等局域网设备访问时，在 .env 里设 ZHIKUN_BIND_ADDRESS=0.0.0.0（并确认所在网络可信）。
+    # 确实需要手机等局域网设备访问时，在 .env 里设 SKYCODE_BIND_ADDRESS=0.0.0.0（并确认所在网络可信）。
     ports:
-      - "${ZHIKUN_BIND_ADDRESS:-127.0.0.1}:${ZHIKUN_PORT:-8080}:8080"
+      - "${SKYCODE_BIND_ADDRESS:-127.0.0.1}:${SKYCODE_PORT:-8080}:8080"
     environment:
       # ---- Required ----
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-production}
@@ -35,7 +35,7 @@ services:
       - LLM_PROVIDER_DEEPSEEK_API_KEY=${LLM_PROVIDER_DEEPSEEK_API_KEY:-}
       # 走 DeepSeek 中转站时这两个必须一起改：只改 BASE_URL 不配前缀白名单，摘要链路会返回 unsupported_summary
       - LLM_PROVIDER_DEEPSEEK_BASE_URL=${LLM_PROVIDER_DEEPSEEK_BASE_URL:-https://api.deepseek.com/v1}
-      - ZHIKUN_SUMMARY_DEEPSEEK_RELAY_PREFIXES=${ZHIKUN_SUMMARY_DEEPSEEK_RELAY_PREFIXES:-}
+      - SKYCODE_SUMMARY_DEEPSEEK_RELAY_PREFIXES=${SKYCODE_SUMMARY_DEEPSEEK_RELAY_PREFIXES:-}
       - LLM_PROVIDER_DEEPSEEK_MODELS=${LLM_PROVIDER_DEEPSEEK_MODELS:-deepseek-flash}
       - LLM_PROVIDER_MOONSHOT_API_KEY=${LLM_PROVIDER_MOONSHOT_API_KEY:-}
       - LLM_PROVIDER_MOONSHOT_MODELS=${LLM_PROVIDER_MOONSHOT_MODELS:-kimi-k3.1-pro-highspeed}
@@ -65,7 +65,7 @@ services:
       - PROMPT_OPTIMIZE_API_KEY=${PROMPT_OPTIMIZE_API_KEY:-}
       - PROMPT_OPTIMIZE_MODEL=${PROMPT_OPTIMIZE_MODEL:-}
       - PROMPT_OPTIMIZE_BASE_URL=${PROMPT_OPTIMIZE_BASE_URL:-}
-      - ASR_CORRECTIONS=${ASR_CORRECTIONS:-zhikuncode:zhi kun code,zkun code,智坤code,志鲲Code,智kuncode,zhi坤code}
+      - ASR_CORRECTIONS=${ASR_CORRECTIONS:-skycode:sky code,skykode,sky kod,skyco}
       # ---- Legacy Single-Provider (Backward Compatible) ----
       - LLM_API_KEY=${LLM_API_KEY:-}
       - LLM_BASE_URL=${LLM_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
@@ -76,9 +76,9 @@ services:
       - WEB_SEARCH_DEEPSEEK_API_KEY=${WEB_SEARCH_DEEPSEEK_API_KEY:-}
       - WEB_SEARCH_DEEPSEEK_BASE_URL=${WEB_SEARCH_DEEPSEEK_BASE_URL:-https://api.deepseek.com}
       # ---- External MCP servers ----
-      - ZHIKUN_MCP_SERVERS=${ZHIKUN_MCP_SERVERS:-}
+      - SKYCODE_MCP_SERVERS=${SKYCODE_MCP_SERVERS:-}
       # Delete-session confirmation code (empty = no code required)
-      - ZHIKUN_DELETE_CONFIRM_CODE=${ZHIKUN_DELETE_CONFIRM_CODE:-}
+      - SKYCODE_DELETE_CONFIRM_CODE=${SKYCODE_DELETE_CONFIRM_CODE:-}
       - CONTEXT7_API_KEY=${CONTEXT7_API_KEY:-}
       - GITHUB_TOOLS=${GITHUB_TOOLS:-get_me,get_file_contents,search_code,list_branches,list_commits,list_pull_requests,pull_request_read}
       - GITHUB_READ_ONLY=${GITHUB_READ_ONLY:-1}
@@ -100,10 +100,10 @@ services:
       - SKILL_STATE_PATH=/app/data/skill-states.json
       # ---- Internal ----
       - SPRING_WEB_RESOURCES_STATIC_LOCATIONS=classpath:/static/,file:/app/static/
-      - ZHIKUN_DEFAULT_WORKSPACE=/app/workspace
-      - ZHIKUN_WORKSPACE_ALLOWED_ROOTS=/app/workspace
-      - ZHIKUN_GLOBAL_DB_PATH=/app/data/global.db
-      - ZHIKUNCODE_DATABASE_PROJECT_ROOT=/app/data
+      - SKYCODE_DEFAULT_WORKSPACE=/app/workspace
+      - SKYCODE_WORKSPACE_ALLOWED_ROOTS=/app/workspace
+      - SKYCODE_GLOBAL_DB_PATH=/app/data/global.db
+      - SKYCODE_DATABASE_PROJECT_ROOT=/app/data
       # Python 服务（代码洞察、增强 Git、浏览器自动化、代码质量、变更影响、文件树）由后端拉起并守护。
       # 镜像里装全了，但开关默认是关的，不透传就永远不会启动。
       # WORKSPACE_ROOT：Python 侧解析相对路径的根；不传的话会落到 /app/python-service，路径会锚错。
@@ -112,35 +112,35 @@ services:
       # 注意：.env 里的 PLAYWRIGHT_BROWSERS_PATH 是宿主机路径，不要透传——镜像里浏览器装在 /opt/playwright-browsers（Dockerfile 已设）。
       # 设置页保存的 API Key 用这个密钥加密（Base64 编码的 32 字节随机值）。后端取不到时会临时生成一把，
       # 而临时密钥不在数据卷里，容器重建后就变了，已保存的 Key 全部解不开——所以要显式透传
-      - ZHIKU_ENCRYPTION_KEY=${ZHIKU_ENCRYPTION_KEY:-}
+      - SKYCODE_ENCRYPTION_KEY=${SKYCODE_ENCRYPTION_KEY:-}
       # 协调者模式开关（默认 0，行为不变）
-      - ZHIKUN_COORDINATOR_MODE=${ZHIKUN_COORDINATOR_MODE:-0}
+      - SKYCODE_COORDINATOR_MODE=${SKYCODE_COORDINATOR_MODE:-0}
       # ---- Optional Meoo publishing (credentials file is read by the backend only) ----
-      - ZHIKUN_MEOO_ENABLED=${ZHIKUN_MEOO_ENABLED:-false}
-      - ZHIKUN_MEOO_CREDENTIALS_FILE=${ZHIKUN_MEOO_CREDENTIALS_FILE:-/run/secrets/meoo-credentials.json}
-      - ZHIKUN_MEOO_TIMEOUT_SECONDS=${ZHIKUN_MEOO_TIMEOUT_SECONDS:-1200}
+      - SKYCODE_MEOO_ENABLED=${SKYCODE_MEOO_ENABLED:-false}
+      - SKYCODE_MEOO_CREDENTIALS_FILE=${SKYCODE_MEOO_CREDENTIALS_FILE:-/run/secrets/meoo-credentials.json}
+      - SKYCODE_MEOO_TIMEOUT_SECONDS=${SKYCODE_MEOO_TIMEOUT_SECONDS:-1200}
       # ---- Optional OSS publishing + clipboard image paste (disabled by default) ----
       # auto prefers local ALIBABA_CLOUD_* credentials, then a named ECS RAM Role.
-      - ZHIKUN_OSS_ENABLED=${ZHIKUN_OSS_ENABLED:-false}
-      - ZHIKUN_OSS_ENDPOINT=${ZHIKUN_OSS_ENDPOINT:-}
-      - ZHIKUN_OSS_REGION=${ZHIKUN_OSS_REGION:-}
-      - ZHIKUN_OSS_BUCKET=${ZHIKUN_OSS_BUCKET:-}
-      - ZHIKUN_OSS_PUBLIC_BASE_URL=${ZHIKUN_OSS_PUBLIC_BASE_URL:-}
-      - ZHIKUN_OSS_PREVIEW_ENABLED=${ZHIKUN_OSS_PREVIEW_ENABLED:-false}
-      - ZHIKUN_OSS_PREFIX=${ZHIKUN_OSS_PREFIX:-zhikuncode-artifacts}
-      - ZHIKUN_OSS_ECS_ROLE_NAME=${ZHIKUN_OSS_ECS_ROLE_NAME:-}
-      - ZHIKUN_OSS_CREDENTIAL_MODE=${ZHIKUN_OSS_CREDENTIAL_MODE:-auto}
-      - ZHIKUN_OSS_MAX_FILE_BYTES=${ZHIKUN_OSS_MAX_FILE_BYTES:-1073741824}
-      - ZHIKUN_OSS_CONNECT_TIMEOUT_MS=${ZHIKUN_OSS_CONNECT_TIMEOUT_MS:-10000}
-      - ZHIKUN_OSS_REQUEST_TIMEOUT_MS=${ZHIKUN_OSS_REQUEST_TIMEOUT_MS:-120000}
+      - SKYCODE_OSS_ENABLED=${SKYCODE_OSS_ENABLED:-false}
+      - SKYCODE_OSS_ENDPOINT=${SKYCODE_OSS_ENDPOINT:-}
+      - SKYCODE_OSS_REGION=${SKYCODE_OSS_REGION:-}
+      - SKYCODE_OSS_BUCKET=${SKYCODE_OSS_BUCKET:-}
+      - SKYCODE_OSS_PUBLIC_BASE_URL=${SKYCODE_OSS_PUBLIC_BASE_URL:-}
+      - SKYCODE_OSS_PREVIEW_ENABLED=${SKYCODE_OSS_PREVIEW_ENABLED:-false}
+      - SKYCODE_OSS_PREFIX=${SKYCODE_OSS_PREFIX:-skycode-artifacts}
+      - SKYCODE_OSS_ECS_ROLE_NAME=${SKYCODE_OSS_ECS_ROLE_NAME:-}
+      - SKYCODE_OSS_CREDENTIAL_MODE=${SKYCODE_OSS_CREDENTIAL_MODE:-auto}
+      - SKYCODE_OSS_MAX_FILE_BYTES=${SKYCODE_OSS_MAX_FILE_BYTES:-1073741824}
+      - SKYCODE_OSS_CONNECT_TIMEOUT_MS=${SKYCODE_OSS_CONNECT_TIMEOUT_MS:-10000}
+      - SKYCODE_OSS_REQUEST_TIMEOUT_MS=${SKYCODE_OSS_REQUEST_TIMEOUT_MS:-120000}
       - ALIBABA_CLOUD_ACCESS_KEY_ID=${ALIBABA_CLOUD_ACCESS_KEY_ID:-}
       - ALIBABA_CLOUD_ACCESS_KEY_SECRET=${ALIBABA_CLOUD_ACCESS_KEY_SECRET:-}
       - ALIBABA_CLOUD_SECURITY_TOKEN=${ALIBABA_CLOUD_SECURITY_TOKEN:-}
     volumes:
       # Persistent data (SQLite DB, session data, memories)
-      - zhikun-data:/app/data
+      - skycode-data:/app/data
       # Personal memory (MEMORY.md); container HOME is /app, so it lives outside /app/data
-      - zhikun-memory:/app/.ai-code-assistant
+      - skycode-memory:/app/.ai-code-assistant
       # User workspace mount (the code project to work on)
       - ${WORKSPACE_PATH:-./workspace}:/app/workspace
       # When enabling Meoo, add a read-only secret mount in a compose override:
@@ -163,7 +163,9 @@ services:
           memory: 1g
 
 volumes:
-  zhikun-data:
+  skycode-data:
+    name: skycode-data
     driver: local
-  zhikun-memory:
+  skycode-memory:
+    name: skycode-memory
     driver: local

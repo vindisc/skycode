@@ -16,7 +16,7 @@ import java.io.*;
 @Service
 public class MeooPublicationPolicy {
     private static final Set<String> STATIC_EXT = Set.of("html","htm","css","js","mjs","json","geojson","png","jpg","jpeg","gif","svg","webp","ico","avif","woff","woff2","ttf","otf","eot","wasm","glb","gltf","bin","hdr","ktx2","mp3","mp4","ogg","wav","webm","pdf","txt","xml","webmanifest","vert","frag");
-    private static final Set<String> EXCLUDED = Set.of(".npmrc",".pypirc",".netrc",".git-credentials",".htpasswd",".docker",".azure",".gcloud",".git",".svn",".hg",".ssh",".aws",".meoo",".codex",".zhikun",".ai-code-assistant","node_modules","__pycache__",".venv","venv",".cache","coverage","test-results","playwright-report","preview","screenshots","credentials","secrets",".DS_Store");
+    private static final Set<String> EXCLUDED = Set.of(".npmrc",".pypirc",".netrc",".git-credentials",".htpasswd",".docker",".azure",".gcloud",".git",".svn",".hg",".ssh",".aws",".meoo",".codex",".skycode",".ai-code-assistant","node_modules","__pycache__",".venv","venv",".cache","coverage","test-results","playwright-report","preview","screenshots","credentials","secrets",".DS_Store");
     private static final Pattern SECRET = Pattern.compile("(?:meoo_ak_|ats_|sk-ant-|sk-|ghp_|LTAI)[A-Za-z0-9_-]{16,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|(?i:(?:api[_-]?key|access[_-]?key|secret|password|token|credential)\\s*[=:]\\s*['\"]?[A-Za-z0-9_./+\\-=]{16,})|(?:postgres(?:ql)?|mysql|mongodb|redis)://[^\\s:@]+:[^\\s@]+@");
     private final MeooPublishProperties properties;
     private final EvidenceStore evidence;

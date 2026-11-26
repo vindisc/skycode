@@ -68,7 +68,7 @@ public final class OwnedProcess extends Process {
         }
         argv.addAll(List.of(linux ? "/bin/bash" : "/bin/sh", "-c",
                 "IFS= read -r admission; [ \"$admission\" = start ] || exit 125; exec \"$@\"",
-                "zhikun-owned"));
+                "skycode-owned"));
         argv.addAll(original);
         Process process;
         try {

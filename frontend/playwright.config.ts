@@ -35,7 +35,7 @@ export default defineConfig({
       origins: [{
         origin: E2E_BASE_URL,
         localStorage: [{
-          name: 'zhikun.workbench.default-view',
+          name: 'skycode.workbench.default-view',
           value: 'development',
         }],
       }],

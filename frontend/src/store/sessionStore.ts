@@ -14,7 +14,7 @@ import { useTurnViewStore } from './turnViewStore';
 // Apply new-chat presentation defaults only after binding succeeds.
 const newSessionCandidates = new Set<string>();
 
-const ACTIVE_SESSION_KEY = 'zhikuncode.activeSessionId';
+const ACTIVE_SESSION_KEY = 'skycode.activeSessionId';
 
 function readActiveSessionId(): string | null {
     if (typeof window === 'undefined') return null;

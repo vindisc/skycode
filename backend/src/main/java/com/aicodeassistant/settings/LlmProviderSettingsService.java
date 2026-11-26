@@ -203,7 +203,7 @@ public class LlmProviderSettingsService {
         } else {
             if (!encryption.keyIsPersistent()) {
                 throw new RequestValidationException("ENCRYPTION_KEY_REQUIRED",
-                        "当前运行环境没有稳定的加密密钥，不能保存 API Key。请通过环境变量 ZHIKU_ENCRYPTION_KEY "
+                        "当前运行环境没有稳定的加密密钥，不能保存 API Key。请通过环境变量 SKYCODE_ENCRYPTION_KEY "
                                 + "（Base64 编码的 32 字节随机值）提供密钥后重启服务；密钥丢失会导致已保存的 Key 无法解密。");
             }
             apiKey = submitted;

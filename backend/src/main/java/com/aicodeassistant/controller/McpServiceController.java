@@ -142,7 +142,7 @@ public class McpServiceController {
         view.put("serverKey", serverKey);
         view.put("displayName", displayName(serverKey, first));
         view.put("description", first != null ? valueOrEmpty(first.briefDescription())
-                : "来自 ZHIKUN_MCP_SERVERS 或配置文件的 MCP 服务");
+                : "来自 SKYCODE_MCP_SERVERS 或配置文件的 MCP 服务");
         view.put("domain", first != null ? valueOrEmpty(first.domain()) : "configured");
         view.put("source", definitions.isEmpty() ? "configured" : "registry");
         view.put("transportType", first != null ? first.resolvedTransportType().name()

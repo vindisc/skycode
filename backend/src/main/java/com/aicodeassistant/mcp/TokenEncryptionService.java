@@ -29,7 +29,7 @@ import java.util.Set;
  * 密钥解析优先级:
  * <ol>
  *   <li>Spring 配置 {@code zhiku.encryption.key}（Base64 编码）</li>
- *   <li>环境变量 {@code ZHIKU_ENCRYPTION_KEY}（Base64 编码）</li>
+ *   <li>环境变量 {@code SKYCODE_ENCRYPTION_KEY}（Base64 编码）</li>
  *   <li>文件 {@code ~/.zhiku/.master-key}（已存在则读取）</li>
  *   <li>自动生成新密钥并写入 {@code ~/.zhiku/.master-key}</li>
  * </ol>
@@ -42,7 +42,7 @@ public class TokenEncryptionService {
     private static final String ALGORITHM = "AES/GCM/NoPadding";
     private static final int GCM_IV_LENGTH = 12;   // 96 bits
     private static final int GCM_TAG_LENGTH = 128;  // bits
-    private static final String KEY_ENV_VAR = "ZHIKU_ENCRYPTION_KEY";
+    private static final String KEY_ENV_VAR = "SKYCODE_ENCRYPTION_KEY";
     private static final String ENCRYPTED_PREFIX = "ENC:";
 
     private static final Path KEY_DIR = Path.of(System.getProperty("user.home"), ".zhiku");

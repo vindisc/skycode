@@ -139,11 +139,11 @@ describe('TurnViewStore', () => {
         expect(overrides['s-0']).toEqual({ 0: true, '0:1': false });
     });
 
-    it('persist：仅持久化 density 与 expandOverrides（key=zhikun.turn-view.v1）', () => {
+    it('persist：仅持久化 density 与 expandOverrides（key=skycode.turn-view.v1）', () => {
         useTurnViewStore.getState().setDensity('detailed');
         useTurnViewStore.getState().setSectionExpanded('s-1', sectionExpandKey(1, 2), false);
 
-        const raw = localStorage.getItem('zhikun.turn-view.v1');
+        const raw = localStorage.getItem('skycode.turn-view.v1');
         expect(raw).toBeTruthy();
         const persisted = JSON.parse(raw as string);
         expect(Object.keys(persisted.state).sort()).toEqual(['density', 'expandOverrides']);

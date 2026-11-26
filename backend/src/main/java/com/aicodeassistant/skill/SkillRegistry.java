@@ -27,8 +27,8 @@ import java.util.stream.Stream;
  * 加载来源优先级 (高→低):
  * <ol>
  *     <li>managed — 策略管理目录</li>
- *     <li>user    — 用户全局目录 (~/.zhikun/skills/)</li>
- *     <li>project — 项目目录 (.zhikun/skills/)</li>
+ *     <li>user    — 用户全局目录 (~/.skycode/skills/)</li>
+ *     <li>project — 项目目录 (.skycode/skills/)</li>
  *     <li>plugin  — 插件提供的技能</li>
  *     <li>bundled — 内置技能</li>
  *     <li>mcp     — MCP 构建的技能</li>
@@ -59,10 +59,10 @@ public class SkillRegistry {
     private final Map<String, SkillDefinition> builtinSkills = new ConcurrentHashMap<>();
 
     /** 用户全局技能目录 */
-    private static final String USER_SKILLS_DIR = ".zhikun/skills";
+    private static final String USER_SKILLS_DIR = ".skycode/skills";
 
     /** 项目技能目录 */
-    private static final String PROJECT_SKILLS_DIR = ".zhikun/skills";
+    private static final String PROJECT_SKILLS_DIR = ".skycode/skills";
 
     /** 内置技能列表 */
     private static final List<String> BUILTIN_SKILL_NAMES = List.of(
@@ -168,7 +168,7 @@ public class SkillRegistry {
     }
 
     /**
-     * 获取项目技能 — 扫描项目 .zhikun/skills/ 目录。
+     * 获取项目技能 — 扫描项目 .skycode/skills/ 目录。
      */
     public List<SkillDefinition> getProjectSkills(String workingDirectory) {
         if (workingDirectory == null) return List.of();
@@ -177,7 +177,7 @@ public class SkillRegistry {
     }
 
     /**
-     * 获取用户全局技能 — 扫描 ~/.zhikun/skills/ 目录。
+     * 获取用户全局技能 — 扫描 ~/.skycode/skills/ 目录。
      */
     public List<SkillDefinition> getUserSkills() {
         String home = System.getProperty("user.home");
@@ -239,7 +239,7 @@ public class SkillRegistry {
     }
 
     /**
-     * 加载并注册指定目录下的所有 .zhikun/skills/ 技能。
+     * 加载并注册指定目录下的所有 .skycode/skills/ 技能。
      *
      * @param workingDirectory 项目工作目录
      */
@@ -295,13 +295,13 @@ public class SkillRegistry {
     }
 
     /**
-     * 解析项目工作目录 — 用于定位 .zhikun/skills/ 目录。
+     * 解析项目工作目录 — 用于定位 .skycode/skills/ 目录。
      * <p>
      * start.sh 从项目根目录执行 {@code java -jar backend/target/xxx.jar}，
      * 因此 {@code user.dir} 指向项目根目录。
      * 如果 user.dir 是 backend/ 子目录（IDE 内运行），则尝试上级目录。
      *
-     * @return 包含 .zhikun/skills/ 目录的工作目录路径，或 user.dir 本身
+     * @return 包含 .skycode/skills/ 目录的工作目录路径，或 user.dir 本身
      */
     private String resolveWorkingDirectory() {
         String userDir = System.getProperty("user.dir");
@@ -309,7 +309,7 @@ public class SkillRegistry {
             return null;
         }
 
-        // 优先检查当前目录下是否有 .zhikun/skills/
+        // 优先检查当前目录下是否有 .skycode/skills/
         if (Files.isDirectory(Path.of(userDir, PROJECT_SKILLS_DIR))) {
             log.info("Resolved working directory: {} (has {})", userDir, PROJECT_SKILLS_DIR);
             return userDir;
@@ -331,7 +331,7 @@ public class SkillRegistry {
     // ============ 动态技能发现 WatchService (§11.3.3) ============
 
     /**
-     * 启动文件监听 — 监听 .zhikun/skills/ 目录变化，自动注册/反注册技能。
+     * 启动文件监听 — 监听 .skycode/skills/ 目录变化，自动注册/反注册技能。
      *
      * @param workingDirectory 项目工作目录
      */

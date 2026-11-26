@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
  * <p>
  * 激活条件：
  * 1. FeatureFlag COORDINATOR_MODE = true
- * 2. 环境变量 ZHIKUN_COORDINATOR_MODE = '1' (可选，用于运行时切换)
+ * 2. 环境变量 SKYCODE_COORDINATOR_MODE = '1' (可选，用于运行时切换)
  */
 @Service
 public class CoordinatorService {
@@ -94,8 +94,8 @@ public class CoordinatorService {
     public boolean isCoordinatorMode() {
         return featureFlags.isEnabled("COORDINATOR_MODE")
                 && isEnvTruthy(runtimeEnv.getOrDefault(
-                        "ZHIKUN_COORDINATOR_MODE",
-                        System.getenv("ZHIKUN_COORDINATOR_MODE")));
+                        "SKYCODE_COORDINATOR_MODE",
+                        System.getenv("SKYCODE_COORDINATOR_MODE")));
     }
 
     /**
@@ -140,9 +140,9 @@ public class CoordinatorService {
         if (current == target) return null;
 
         if (target) {
-            runtimeEnv.put("ZHIKUN_COORDINATOR_MODE", "1");
+            runtimeEnv.put("SKYCODE_COORDINATOR_MODE", "1");
         } else {
-            runtimeEnv.remove("ZHIKUN_COORDINATOR_MODE");
+            runtimeEnv.remove("SKYCODE_COORDINATOR_MODE");
         }
 
         return target
@@ -248,7 +248,7 @@ public class CoordinatorService {
 
     /**
      * 获取会话的 scratchpad 目录（Worker 间共享文件交换区）。
-     * 自动创建，位于 .zhikun/scratchpad/{sessionId}/
+     * 自动创建，位于 .skycode/scratchpad/{sessionId}/
      * <p><b>安全（CWE-22）</b>：{@code sessionId} 必须匹配
      * {@link #SAFE_SESSION_ID_PATTERN}，否则回退到 {@code "default"}，
      * 防止 {@code ../} 等路径穿越将目录创建到 workspace 以外。

@@ -21,7 +21,7 @@ public class MeooPublicationService {
         String id=claim.publication().id(); Path stage=null; boolean remoteStarted=false;
         String version=null,url=null;
         try {
-            stage=Files.createTempDirectory("zhikun-meoo-");
+            stage=Files.createTempDirectory("skycode-meoo-");
             Path control=Files.createDirectory(stage.resolve("control"));
             Path home=Files.createDirectory(stage.resolve("home"));
             Path payload=Files.createDirectory(stage.resolve("payload"));

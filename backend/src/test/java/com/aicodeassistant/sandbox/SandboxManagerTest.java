@@ -119,7 +119,7 @@ class SandboxManagerTest {
     void prepareInvocation_ownedContainer() {
         var invocation = manager.prepareInvocation("echo ok", Path.of("/tmp"), Map.of(), "run", "tool");
         assertTrue(invocation.command().contains("--name"));
-        assertTrue(invocation.containerName().startsWith("zhikun-run-tool-"));
+        assertTrue(invocation.containerName().startsWith("skycode-run-tool-"));
         assertNotNull(invocation.cleanup());
     }
 

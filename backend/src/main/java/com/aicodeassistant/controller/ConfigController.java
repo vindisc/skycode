@@ -29,13 +29,13 @@ public class ConfigController {
     private final ConfigService configService;
 
     /**
-     * 删除会话二次确认验证码（环境变量 ZHIKUN_DELETE_CONFIRM_CODE）。
+     * 删除会话二次确认验证码（环境变量 SKYCODE_DELETE_CONFIRM_CODE）。
      * 仅用于判断是否要求验证码——任何接口都不得返回验证码值本身。
      */
     private final String deleteConfirmCode;
 
     public ConfigController(ConfigService configService,
-                            @Value("${zhikun.delete-confirm-code:}") String deleteConfirmCode) {
+                            @Value("${skycode.delete-confirm-code:}") String deleteConfirmCode) {
         this.configService = configService;
         this.deleteConfirmCode = deleteConfirmCode;
     }

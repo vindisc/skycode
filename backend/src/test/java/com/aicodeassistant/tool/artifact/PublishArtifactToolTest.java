@@ -87,7 +87,7 @@ class PublishArtifactToolTest {
         assertThat(structured.get("url")).asString()
                 .startsWith("https://test-artifacts.oss-cn-beijing.aliyuncs.com/");
         assertThat(structured.get("objectKey")).asString()
-                .startsWith("zhikuncode-artifacts/manifest-1/artifact-1/");
+                .startsWith("skycode-artifacts/manifest-1/artifact-1/");
     }
 
     @Test
@@ -166,7 +166,7 @@ class PublishArtifactToolTest {
         properties.setEndpoint("https://oss-cn-beijing.aliyuncs.com");
         properties.setRegion("cn-beijing");
         properties.setBucket("test-artifacts");
-        properties.setPrefix("zhikuncode-artifacts");
+        properties.setPrefix("skycode-artifacts");
         properties.setEcsRoleName("TestEcsRole");
         return properties;
     }

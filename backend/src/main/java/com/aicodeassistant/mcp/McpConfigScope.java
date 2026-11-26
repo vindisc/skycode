@@ -16,7 +16,7 @@ public enum McpConfigScope {
     /** 企业配置 (MDM 推送) — 优先级 4 */
     ENTERPRISE,
     /** AI 平台托管 — 优先级 5 */
-    ZHIKUN_AI,
+    SKYCODE_AI,
     /** 受管理配置 (Marketplace) — 优先级 6 */
     MANAGED
 }

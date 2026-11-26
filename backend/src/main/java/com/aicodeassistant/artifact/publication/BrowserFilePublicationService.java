@@ -52,7 +52,7 @@ public class BrowserFilePublicationService {
 
         Path temporary = null;
         try {
-            temporary = Files.createTempFile("zhikuncode-browser-file-", ".upload");
+            temporary = Files.createTempFile("skycode-browser-file-", ".upload");
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             long size = copyWithLimit(input, temporary, digest, maxBytes);
             if (size == 0) {

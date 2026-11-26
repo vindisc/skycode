@@ -17,7 +17,7 @@ import java.util.*;
  * <p>
  * 当前实现 4 级优先级（从低到高，后加载的覆盖先加载的同名服务器）:
  * <ol>
- *   <li>ENV — 环境变量 {@code ZHIKUN_MCP_SERVERS}（JSON 格式）</li>
+ *   <li>ENV — 环境变量 {@code SKYCODE_MCP_SERVERS}（JSON 格式）</li>
  *   <li>ENTERPRISE — 企业级 {@code /etc/ai-code-assistant/mcp.json}</li>
  *   <li>USER — 用户级 {@code ~/.config/ai-code-assistant/mcp.json}</li>
  *   <li>LOCAL — 项目本地 {@code .ai-code-assistant/mcp.json}（最高优先级）</li>
@@ -25,7 +25,7 @@ import java.util.*;
  * <p>
  * 后续 Roadmap（当前不在 ZhikunCode 实现范围）:
  * <ul>
- *   <li>ZHIKUN_AI — AI 平台托管配置</li>
+ *   <li>SKYCODE_AI — AI 平台托管配置</li>
  *   <li>MANAGED — Marketplace 管理配置</li>
  * </ul>
  * <p>
@@ -43,7 +43,7 @@ public class McpConfigurationResolver {
     private static final String USER_MCP_FILE = ".config/ai-code-assistant/mcp.json";
     private static final String ENTERPRISE_MCP_FILE = "/etc/ai-code-assistant/mcp.json";
     // MCP_SERVERS collides with Spring Boot's relaxed binding for mcp.servers.
-    private static final String ENV_VAR_MCP_SERVERS = "ZHIKUN_MCP_SERVERS";
+    private static final String ENV_VAR_MCP_SERVERS = "SKYCODE_MCP_SERVERS";
 
     private final ObjectMapper objectMapper;
     private final Environment environment;
@@ -122,7 +122,7 @@ public class McpConfigurationResolver {
     }
 
     /**
-     * 从环境变量 {@code ZHIKUN_MCP_SERVERS} 加载。
+     * 从环境变量 {@code SKYCODE_MCP_SERVERS} 加载。
      * <p>
      * 格式: JSON 字符串，结构与 mcp.json 相同。
      */
@@ -243,7 +243,7 @@ public class McpConfigurationResolver {
      */
     @SuppressWarnings("unused")
     private List<McpServerConfig> loadFromZhikunAI() {
-        // Reserved for future ZHIKUN_AI scope — platform-managed configuration
+        // Reserved for future SKYCODE_AI scope — platform-managed configuration
         return List.of();
     }
 

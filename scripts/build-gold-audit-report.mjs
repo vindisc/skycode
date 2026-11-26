@@ -18,10 +18,10 @@ import {
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
 const caseDir = path.join(repoRoot, "docs", "case-studies");
-const evidencePath = path.join(caseDir, "zhikuncode-codex-gold-monitor-evidence.json");
-const outputPath = path.join(caseDir, "zhikuncode-codex-gold-monitor-audit.html");
-const privateLogPath = path.join(caseDir, "zhikuncode黄金监控运行日志.log");
-const publicLogExcerptRelativePath = "zhikuncode-gold-monitor-log-excerpts.txt";
+const evidencePath = path.join(caseDir, "skycode-codex-gold-monitor-evidence.json");
+const outputPath = path.join(caseDir, "skycode-codex-gold-monitor-audit.html");
+const privateLogPath = path.join(caseDir, "skycode黄金监控运行日志.log");
+const publicLogExcerptRelativePath = "skycode-gold-monitor-log-excerpts.txt";
 const publicLogExcerptPath = path.join(caseDir, publicLogExcerptRelativePath);
 const data = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
 data.reportVersion = "1.5.2";
@@ -31,7 +31,7 @@ const runtimeVersionFinding = data.findings.find((finding) => finding.id === "F1
 if (runtimeVersionFinding) {
   runtimeVersionFinding.body = "审计参考提交 aa1b3173… 的源码能解释日志中的类、方法与结构化事件，但日志没有记录运行构建 Git SHA，不能证明运行二进制与该参考提交逐字节一致。";
 }
-const auditCommit = data.sourceCommits.zhikuncodeAuditReference;
+const auditCommit = data.sourceCommits.skycodeAuditReference;
 const frozenFactsSha256 = "16a2650b21380b94838ad8a05251b1f8e77c84b927b4c0e6d02e458adacc48e9";
 const cliArgs = process.argv.slice(2);
 const readOption = (name) => {
@@ -39,7 +39,7 @@ const readOption = (name) => {
   return index >= 0 ? cliArgs[index + 1] : null;
 };
 const verifyPrivateSources = cliArgs.includes("--verify-private-sources");
-const zhikunSourceReportPath = readOption("--zhikun-report");
+const skycodeSourceReportPath = readOption("--skycode-report");
 const comparisonSourceReportPath = readOption("--comparison-report");
 
 const sha256 = (value) => crypto.createHash("sha256").update(value).digest("hex");
@@ -62,7 +62,7 @@ const publicLogSelections = [
 ];
 
 const redactLogLine = (line) => line
-  .replaceAll(/\/Users\/[^/\s]+\/Desktop\/code\/zhikun\/zhikuncode/g, "<WORKSPACE>")
+  .replaceAll(/\/Users\/[^/\s]+\/Desktop\/code\/skycode\/skycode/g, "<WORKSPACE>")
   .replaceAll(/\/Users\/[^/\s]+\/[^\s,)\]}]+/g, "<LOCAL_PATH>")
   .replaceAll(/\/var\/folders\/[^\s,)\]}]+/g, "<TEMP_PATH>")
   .replaceAll(/\/tmp\/[^\s,)\]}]+/g, "<TEMP_PATH>")
@@ -279,7 +279,7 @@ const calculateScore = (dimensions, key = "value") =>
   dimensions.reduce((total, dimension) => total + dimension.weight * dimension[key] / 10, 0);
 
 const scoreById = Object.fromEntries(data.scores.map((score) => [score.systemId, score]));
-const zhikunScore = scoreById.zhikun;
+const skycodeScore = scoreById.skycode;
 const codexScore = scoreById.codex;
 
 const computed = Object.fromEntries(data.scores.map((score) => [
@@ -308,8 +308,8 @@ const validateData = () => {
     assert(computed[score.systemId].min === score.declaredMin, `${score.systemId} minimum drift`);
     assert(computed[score.systemId].max === score.declaredMax, `${score.systemId} maximum drift`);
   }
-  assert(computed.zhikun.score === 68.3 && computed.codex.score === 68.4, "declared case totals changed");
-  assert(computed.zhikun.min === 62.6 && computed.zhikun.max === 73.7, "ZhikunCode interval changed");
+  assert(computed.skycode.score === 68.3 && computed.codex.score === 68.4, "declared case totals changed");
+  assert(computed.skycode.min === 62.6 && computed.skycode.max === 73.7, "ZhikunCode interval changed");
   assert(computed.codex.min === 63.2 && computed.codex.max === 73.6, "Codex interval changed");
   assert(data.clarificationQuestions.length === 4, "expected four first-batch clarification questions");
   assert(
@@ -455,11 +455,11 @@ const validateData = () => {
   assert(data.dataSourceMatrix.length === 6, "expected six data source matrix rows");
   const validDataStatuses = new Set(["dynamic-public", "derived-estimate", "static-snapshot", "verification-only", "missing", "different-instrument"]);
   for (const row of data.dataSourceMatrix) {
-    assert(validDataStatuses.has(row.zhikun.status), `${row.domain} has invalid ZhikunCode data status`);
+    assert(validDataStatuses.has(row.skycode.status), `${row.domain} has invalid ZhikunCode data status`);
     assert(validDataStatuses.has(row.codex.status), `${row.domain} has invalid Codex data status`);
   }
   assert(
-    JSON.stringify(data.dataSourceMatrix.map((row) => [row.domain, row.zhikun.status, row.codex.status])) ===
+    JSON.stringify(data.dataSourceMatrix.map((row) => [row.domain, row.skycode.status, row.codex.status])) ===
       JSON.stringify([
         ["国际黄金", "dynamic-public", "dynamic-public"],
         ["国内黄金", "different-instrument", "dynamic-public"],
@@ -624,35 +624,35 @@ const validateData = () => {
 
 const verifyPrivateSourceReports = () => {
   if (!verifyPrivateSources) return;
-  assert(zhikunSourceReportPath && comparisonSourceReportPath, "--verify-private-sources requires --zhikun-report and --comparison-report");
-  assert(fs.existsSync(zhikunSourceReportPath), "ZhikunCode source report does not exist");
+  assert(skycodeSourceReportPath && comparisonSourceReportPath, "--verify-private-sources requires --skycode-report and --comparison-report");
+  assert(fs.existsSync(skycodeSourceReportPath), "ZhikunCode source report does not exist");
   assert(fs.existsSync(comparisonSourceReportPath), "comparison source report does not exist");
-  const zhikunBytes = fs.readFileSync(zhikunSourceReportPath);
+  const skycodeBytes = fs.readFileSync(skycodeSourceReportPath);
   const comparisonBytes = fs.readFileSync(comparisonSourceReportPath);
-  const zhikunArtifact = data.artifacts.find((artifact) => artifact.label === "ZhikunCode 单系统报告");
+  const skycodeArtifact = data.artifacts.find((artifact) => artifact.label === "ZhikunCode 单系统报告");
   const comparisonArtifact = data.artifacts.find((artifact) => artifact.label === "双系统冻结比较报告");
-  assert(sha256(zhikunBytes) === zhikunArtifact.sha256, "ZhikunCode source report SHA-256 mismatch");
+  assert(sha256(skycodeBytes) === skycodeArtifact.sha256, "ZhikunCode source report SHA-256 mismatch");
   assert(sha256(comparisonBytes) === comparisonArtifact.sha256, "comparison source report SHA-256 mismatch");
 
-  const zhikunHtml = zhikunBytes.toString("utf8");
+  const skycodeHtml = skycodeBytes.toString("utf8");
   const comparisonHtml = comparisonBytes.toString("utf8");
-  assert(sourceDocumentAudit.zhikun.sha256 === sha256(zhikunBytes), "embedded ZhikunCode source visual baseline hash drifted");
+  assert(sourceDocumentAudit.skycode.sha256 === sha256(skycodeBytes), "embedded ZhikunCode source visual baseline hash drifted");
   assert(sourceDocumentAudit.comparison.sha256 === sha256(comparisonBytes), "embedded comparison source visual baseline hash drifted");
   const inventoryStatuses = new Set(["included", "merged", "omitted"]);
   assert(sourceVisualInventory.length === 46, "private visual inventory must register all forty-six top-level source SVGs");
   const inventoryKeys = sourceVisualInventory.map((item) => `${item.source}:${item.title}`);
   assert(new Set(inventoryKeys).size === inventoryKeys.length, "private visual inventory contains duplicate source/title entries");
   for (const item of sourceVisualInventory) {
-    assert(["zhikun", "comparison"].includes(item.source), `invalid private visual source: ${item.source}`);
+    assert(["skycode", "comparison"].includes(item.source), `invalid private visual source: ${item.source}`);
     assert(inventoryStatuses.has(item.status), `invalid private visual status: ${item.status}`);
     assert(item.reason.trim().length > 0, `private visual inventory reason missing: ${item.title}`);
-    const sourceHtml = item.source === "zhikun" ? zhikunHtml : comparisonHtml;
+    const sourceHtml = item.source === "skycode" ? skycodeHtml : comparisonHtml;
     assert(sourceHtml.includes(`>${item.title}</title>`), `registered private visual reference is missing: ${item.title}`);
   }
   const extractTopLevelSvgTitles = (sourceHtml) =>
     [...sourceHtml.matchAll(/<svg\b[^>]*>[\s\S]*?<title[^>]*>([^<]+)<\/title>/g)].map((match) => match[1].trim());
   for (const [source, sourceHtml, expectedCount] of [
-    ["zhikun", zhikunHtml, 28],
+    ["skycode", skycodeHtml, 28],
     ["comparison", comparisonHtml, 18],
   ]) {
     const sourceTitles = extractTopLevelSvgTitles(sourceHtml);
@@ -675,7 +675,7 @@ const verifyPrivateSourceReports = () => {
       assert(sourceItem.status !== "omitted", `visual manifest references an omitted source visual: ${title}`);
     }
   }
-  const sourceToolFingerprint = [...zhikunHtml.matchAll(/<title>第\s*(\d+)\s*次：([^，]+)，([^<]+)<\/title>/g)]
+  const sourceToolFingerprint = [...skycodeHtml.matchAll(/<title>第\s*(\d+)\s*次：([^，]+)，([^<]+)<\/title>/g)]
     .map((match) => ({
       index: Number(match[1]),
       tool: match[2].trim(),
@@ -731,9 +731,9 @@ const refreshPublicScreenshotArtifacts = () => {
     artifact.sha256 = sha256(bytes);
     artifact.bytes = bytes.length;
   }
-  const zhikunProcess = data.artifacts.find((artifact) => artifact.label === "ZhikunCode 开发过程截图");
-  assert(zhikunProcess.sha256 !== unsafeZhikunProcessSha256, "unredacted ZhikunCode process screenshot must not be published");
-  zhikunProcess.note = "从冻结比较报告内嵌图像解码后，对一处本机绝对路径做确定性遮蔽；哈希对应公开派生 JPEG，不等同于源图哈希。";
+  const skycodeProcess = data.artifacts.find((artifact) => artifact.label === "ZhikunCode 开发过程截图");
+  assert(skycodeProcess.sha256 !== unsafeZhikunProcessSha256, "unredacted ZhikunCode process screenshot must not be published");
+  skycodeProcess.note = "从冻结比较报告内嵌图像解码后，对一处本机绝对路径做确定性遮蔽；哈希对应公开派生 JPEG，不等同于源图哈希。";
   fs.writeFileSync(evidencePath, `${JSON.stringify(data, null, 2)}\n`);
 };
 
@@ -752,37 +752,37 @@ const inlineImage = (relativePath) => {
 const imageData = {
   codexProcess: inlineImage("assets/gold-audit/codex-process.jpg"),
   codexProduct: inlineImage("assets/gold-audit/codex-product.jpg"),
-  zhikunProcess: inlineImage("assets/gold-audit/zhikuncode-process.jpg"),
-  zhikunProduct: inlineImage("assets/gold-audit/zhikuncode-product.jpg"),
-  zhikunClarification: inlineImage("assets/gold-audit/zhikuncode-clarification.jpg"),
+  skycodeProcess: inlineImage("assets/gold-audit/skycode-process.jpg"),
+  skycodeProduct: inlineImage("assets/gold-audit/skycode-product.jpg"),
+  skycodeClarification: inlineImage("assets/gold-audit/skycode-clarification.jpg"),
   codexClarification: inlineImage("assets/gold-audit/codex-clarification.jpg"),
 };
 
 const scoreRows = data.dimensions.map((dimension) => {
-  const zhikun = zhikunScore.dimensions.find((item) => item.id === dimension.id);
+  const skycode = skycodeScore.dimensions.find((item) => item.id === dimension.id);
   const codex = codexScore.dimensions.find((item) => item.id === dimension.id);
-  const delta = zhikun.value - codex.value;
+  const delta = skycode.value - codex.value;
   const deltaText = delta === 0 ? "相同" : `${delta > 0 ? "+" : ""}${delta.toFixed(1)}`;
   return `
     <tr>
       <th scope="row">${escapeHtml(dimension.label)}<small>权重 ${dimension.weight}%</small></th>
       <td>
-        <div class="score-cell"><b>${zhikun.value.toFixed(1)}</b><span class="meter"><i style="width:${zhikun.value * 10}%"></i></span></div>
-        <p>${escapeHtml(publicNarrativeText(zhikun.reason))}</p>
-        <div>${evidenceLinks(zhikun.evidence)}</div>
+        <div class="score-cell"><b>${skycode.value.toFixed(1)}</b><span class="meter"><i style="width:${skycode.value * 10}%"></i></span></div>
+        <p>${escapeHtml(publicNarrativeText(skycode.reason))}</p>
+        <div>${evidenceLinks(skycode.evidence)}</div>
       </td>
       <td>
         <div class="score-cell codex"><b>${codex.value.toFixed(1)}</b><span class="meter"><i style="width:${codex.value * 10}%"></i></span></div>
         <p>${escapeHtml(publicNarrativeText(codex.reason))}</p>
         <div>${evidenceLinks(codex.evidence)}</div>
       </td>
-      <td class="delta ${delta > 0 ? "zhikun" : delta < 0 ? "codex" : ""}">${deltaText}</td>
+      <td class="delta ${delta > 0 ? "skycode" : delta < 0 ? "codex" : ""}">${deltaText}</td>
     </tr>`;
 }).join("");
 
 const findingRows = data.findings.map((finding) => `
   <tr>
-    <td><span class="system-tag ${finding.system}">${finding.system === "zhikun" ? "ZhikunCode" : "Codex"}</span></td>
+    <td><span class="system-tag ${finding.system}">${finding.system === "skycode" ? "ZhikunCode" : "Codex"}</span></td>
     <td><strong>${escapeHtml(finding.title)}</strong><p>${escapeHtml(finding.body)}</p></td>
     <td>${evidenceLinks(finding.evidence)}</td>
   </tr>`).join("");
@@ -855,7 +855,7 @@ const pressureLevels = { "配置级": 25, "单层实现": 50, "跨层实现": 75
 const surfaceOwnershipRows = data.surfaceOwnership.map((row) => `
   <tr>
     <th>${escapeHtml(row.module)}</th>
-    <td>${escapeHtml(row.zhikun)}</td>
+    <td>${escapeHtml(row.skycode)}</td>
     <td>${escapeHtml(row.codex)}</td>
     <td><div class="pressure-label"><span>${escapeHtml(row.pressure)}</span></div><div class="pressure-scale" aria-label="${escapeHtml(row.pressure)}"><i style="width:${pressureLevels[row.pressure]}%"></i></div><p>${escapeHtml(row.meaning)}</p>${evidenceLinks(row.evidence)}</td>
   </tr>`).join("");
@@ -881,7 +881,7 @@ const dataSourceCell = (system) => `
 const dataSourceRows = data.dataSourceMatrix.map((row) => `
   <tr>
     <th>${escapeHtml(row.domain)}<small>${evidenceLinks(row.evidence)}</small></th>
-    <td>${dataSourceCell(row.zhikun)}</td>
+    <td>${dataSourceCell(row.skycode)}</td>
     <td>${dataSourceCell(row.codex)}</td>
   </tr>`).join("");
 
@@ -963,13 +963,13 @@ const html = canonicalizeGeneratedHtml(`<!doctype html>
   <meta name="color-scheme" content="dark light">
   <meta name="description" content="ZhikunCode 与 Codex 在同一黄金监控任务中的需求澄清、Agent 调度、权限控制与工程交付公开审计。">
   <meta name="robots" content="index,follow">
-  <link rel="canonical" href="https://zhikunqingtao.github.io/zhikuncode/case-studies/zhikuncode-codex-gold-monitor-audit.html">
+  <link rel="canonical" href="https://zhikunqingtao.github.io/zhikuncode/case-studies/skycode-codex-gold-monitor-audit.html">
   <meta property="og:type" content="article">
   <meta property="og:locale" content="zh_CN">
   <meta property="og:site_name" content="ZhikunCode">
   <meta property="og:title" content="同一黄金监控任务的双工具执行审计">
   <meta property="og:description" content="一份证据优先、可复算、有明确边界的 ZhikunCode 与 Codex 工程执行案例。">
-  <meta property="og:url" content="https://zhikunqingtao.github.io/zhikuncode/case-studies/zhikuncode-codex-gold-monitor-audit.html">
+  <meta property="og:url" content="https://zhikunqingtao.github.io/zhikuncode/case-studies/skycode-codex-gold-monitor-audit.html">
   <title>同一黄金监控任务的双工具执行审计 · ZhikunCode × Codex</title>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"TechArticle","headline":"同一黄金监控任务的双工具执行审计","datePublished":"2026-07-25","dateModified":"${escapeHtml(data.auditDate)}","inLanguage":"zh-CN","author":{"@type":"Organization","name":"ZhikunCode"},"about":["AI coding agent","ZhikunCode","Codex","工程审计"]}
@@ -1134,9 +1134,9 @@ ${auditVisualCss}
     <section id="product-audit">
       <header class="section-head"><div class="kicker">08 / Product audit</div><div><h2>页面背后的代码和数据</h2><p>这一节把页面模块对应到代码与数据来源。修改压力只表示改动会跨过哪些层，不估算工时。</p></div></header>
       ${visuals.dataLineage}
-      ${visuals.zhikunArchitecture}
-      ${visuals.zhikunLifecycle}
-      ${visuals.zhikunScreen}
+      ${visuals.skycodeArchitecture}
+      ${visuals.skycodeLifecycle}
+      ${visuals.skycodeScreen}
       ${visuals.codexArchitecture}
       ${visuals.codexLifecycle}
       ${visuals.codexScreen}
@@ -1160,11 +1160,11 @@ ${auditVisualCss}
     <section id="gallery">
       <header class="section-head"><div class="kicker">09 / Primary evidence</div><div><h2>开发过程与最终页面</h2><p>截图来自冻结比较报告，只对一处本机路径做了遮蔽。长图可以直接纵向滚动查看。</p></div></header>
       <div class="gallery">
-        <figure class="shot"><div class="shot-frame"><img src="${imageData.zhikunProcess}" alt="ZhikunCode 开发过程长截图，本机路径已遮蔽" loading="lazy"></div><figcaption><strong>ZhikunCode · 开发过程</strong><span>公开派生图仅遮蔽一处本机绝对路径；其余流程像素保持不变，不从截图推断墙钟时间 · ${evidenceLink("E004")}</span></figcaption></figure>
+        <figure class="shot"><div class="shot-frame"><img src="${imageData.skycodeProcess}" alt="ZhikunCode 开发过程长截图，本机路径已遮蔽" loading="lazy"></div><figcaption><strong>ZhikunCode · 开发过程</strong><span>公开派生图仅遮蔽一处本机绝对路径；其余流程像素保持不变，不从截图推断墙钟时间 · ${evidenceLink("E004")}</span></figcaption></figure>
         <figure class="shot"><div class="shot-frame"><img src="${imageData.codexProcess}" alt="Codex 开发过程长截图" loading="lazy"></div><figcaption><strong>Codex · 开发过程</strong><span>包含澄清、实现与交付记录 · ${evidenceLink("E002")}</span></figcaption></figure>
-        <figure class="shot"><div class="shot-frame short"><img src="${imageData.zhikunProduct}" alt="ZhikunCode 黄金监控仪表盘最终截图" loading="lazy"></div><figcaption><strong>ZhikunCode · 最终产物</strong><span>本地动态 Flask 仪表盘 · ${evidenceLink("E005")} ${evidenceLink("E006")}</span></figcaption></figure>
+        <figure class="shot"><div class="shot-frame short"><img src="${imageData.skycodeProduct}" alt="ZhikunCode 黄金监控仪表盘最终截图" loading="lazy"></div><figcaption><strong>ZhikunCode · 最终产物</strong><span>本地动态 Flask 仪表盘 · ${evidenceLink("E005")} ${evidenceLink("E006")}</span></figcaption></figure>
         <figure class="shot"><div class="shot-frame"><img src="${imageData.codexProduct}" alt="Codex 黄金监控仪表盘最终截图" loading="lazy"></div><figcaption><strong>Codex · 最终产物</strong><span>React 仪表盘与来源披露 · ${evidenceLink("E003")}</span></figcaption></figure>
-        <figure class="shot"><div class="shot-frame short"><img src="${imageData.zhikunClarification}" alt="ZhikunCode AI 需要更多信息结构化选择窗口" loading="lazy"></div><figcaption><strong>ZhikunCode · 结构化澄清</strong><span>可点击选项、说明、确认/取消 · ${evidenceLink("E026")}</span></figcaption></figure>
+        <figure class="shot"><div class="shot-frame short"><img src="${imageData.skycodeClarification}" alt="ZhikunCode AI 需要更多信息结构化选择窗口" loading="lazy"></div><figcaption><strong>ZhikunCode · 结构化澄清</strong><span>可点击选项、说明、确认/取消 · ${evidenceLink("E026")}</span></figcaption></figure>
         <figure class="shot"><div class="shot-frame short"><img src="${imageData.codexClarification}" alt="Codex 以普通文本提问并由用户整理答案的界面" loading="lazy"></div><figcaption><strong>Codex · 文本澄清</strong><span>用户在输入框手动整理三项回复 · ${evidenceLink("E029")}</span></figcaption></figure>
       <p class="shot-note">公开 JPEG 是从冻结报告的内嵌图像解码得到；ZhikunCode 开发过程图另对一处本机绝对路径做了确定性遮蔽。公开文件哈希记录在“复现与限制”章节，它们不冒充源图的字节级副本。</p>
       </div>
@@ -1173,8 +1173,8 @@ ${auditVisualCss}
     <section id="issues">
       <header class="section-head"><div class="kicker">10 / Retrospective</div><div><h2>问题复盘</h2><p>这里同时记录执行过程和最终产物的问题。任务结束后的修复不改变本次评分。</p></div></header>
       <div class="table-wrap"><table class="issues"><thead><tr><th>范围</th><th>问题、现象与具体影响</th><th>证据</th></tr></thead><tbody>
-        <tr><td><span class="system-tag zhikun">控制面</span></td><td><strong>实现与修复 Agent 达到轮次上限</strong><p>三个不同研究方向在时间窗内重叠执行并成功；后续 2 个实现/修复 Agent 达到 <code>SUBAGENT_MAX_TURNS</code>。日志能证明终态与主链接管，不能据此推断重复任务或调度器内部选择原因。</p><p>两次子任务未自行完成，主协调器继续 Bash、Read、Edit、测试和修复。</p></td><td>${evidenceLink("E027")} ${evidenceLink("E037")}</td></tr>
-        <tr><td><span class="system-tag zhikun">交互</span></td><td><strong>确认一个问题后，下一问没有立即弹出</strong><p>选择卡减少了用户手动整理答案的步骤，但操作者记录显示，首次确认后后续问题没有自动出现，刷新页面后才恢复。公开截图只能证明弹窗样式，不能单独还原完整的刷新过程。</p></td><td>${evidenceLink("E025")} ${evidenceLink("E026")}</td></tr>
+        <tr><td><span class="system-tag skycode">控制面</span></td><td><strong>实现与修复 Agent 达到轮次上限</strong><p>三个不同研究方向在时间窗内重叠执行并成功；后续 2 个实现/修复 Agent 达到 <code>SUBAGENT_MAX_TURNS</code>。日志能证明终态与主链接管，不能据此推断重复任务或调度器内部选择原因。</p><p>两次子任务未自行完成，主协调器继续 Bash、Read、Edit、测试和修复。</p></td><td>${evidenceLink("E027")} ${evidenceLink("E037")}</td></tr>
+        <tr><td><span class="system-tag skycode">交互</span></td><td><strong>确认一个问题后，下一问没有立即弹出</strong><p>选择卡减少了用户手动整理答案的步骤，但操作者记录显示，首次确认后后续问题没有自动出现，刷新页面后才恢复。公开截图只能证明弹窗样式，不能单独还原完整的刷新过程。</p></td><td>${evidenceLink("E025")} ${evidenceLink("E026")}</td></tr>
         ${findingRows}
       </tbody></table></div>
     </section>
@@ -1182,7 +1182,7 @@ ${auditVisualCss}
     <section id="score">
       <header class="section-head"><div class="kicker">11 / Scoring method</div><div><h2>十四维评分方法</h2><p>评分只汇总本次案例。每个维度的理由、证据、权重和区间都可以复算。</p></div></header>
       <div class="score-summary">
-        <article class="panel score-panel zhikun"><span class="system-tag zhikun">ZhikunCode</span><div class="score">${computed.zhikun.score}</div><small>计算区间 ${computed.zhikun.min}–${computed.zhikun.max} · 权重 ${computed.zhikun.weight}%</small></article>
+        <article class="panel score-panel skycode"><span class="system-tag skycode">ZhikunCode</span><div class="score">${computed.skycode.score}</div><small>计算区间 ${computed.skycode.min}–${computed.skycode.max} · 权重 ${computed.skycode.weight}%</small></article>
         <article class="panel score-panel codex"><span class="system-tag codex">Codex</span><div class="score">${computed.codex.score}</div><small>计算区间 ${computed.codex.min}–${computed.codex.max} · 权重 ${computed.codex.weight}%</small></article>
         <div class="formula"><code>Σ(维度分 ÷ 10 × 权重)</code><span>中心分保留 1 位小数；上下界使用相同公式。0.1 分差异远小于评分区间，不解释为实质领先。</span></div>
       </div>
@@ -1194,17 +1194,17 @@ ${auditVisualCss}
     <section id="evidence">
       <header class="section-head"><div class="kicker">12 / Evidence ledger</div><div><h2>证据账本</h2><p>38 条证据重新连续编号为 E001–E038，并保留旧编号。证据等级、作者核验和第三方公开复核是三个独立维度。</p></div></header>
       <div class="notice" style="margin:0 0 18px"><strong>等级定义</strong><p><b>A：</b>${escapeHtml(data.evidenceGradeDefinition.A)}<br><b>B：</b>${escapeHtml(data.evidenceGradeDefinition.B)}<br><b>C：</b>${escapeHtml(data.evidenceGradeDefinition.C)}</p></div>
-      <div class="evidence-tools"><p>“作者已验证”表示报告作者掌握直接材料；“公开材料可访问”只表示第三方能打开所列材料。完整日志原件已核验但未公开，第三方可直接检查脱敏摘录中的原始行号和事件，仍不能据此推断未公开的全部日志内容。</p><a class="button" href="zhikuncode-codex-gold-monitor-evidence.json" download>下载结构化证据 JSON</a></div>
+      <div class="evidence-tools"><p>“作者已验证”表示报告作者掌握直接材料；“公开材料可访问”只表示第三方能打开所列材料。完整日志原件已核验但未公开，第三方可直接检查脱敏摘录中的原始行号和事件，仍不能据此推断未公开的全部日志内容。</p><a class="button" href="skycode-codex-gold-monitor-evidence.json" download>下载结构化证据 JSON</a></div>
       <div class="evidence-grid">${evidenceCards}</div>
     </section>
 
     <section id="reproduce">
       <header class="section-head"><div class="kicker">13 / Reproducibility</div><div><h2>复现、哈希与已知限制</h2><p>哈希只能帮助确认文件连续性，不能独立证明内容真实、完整或来源可信。</p></div></header>
       <div class="table-wrap hashes"><table><thead><tr><th>产物</th><th>SHA-256</th><th>公开状态</th><th>说明</th></tr></thead><tbody>${artifactRows}</tbody></table></div>
-      <p><a class="button" href="zhikuncode-codex-gold-monitor-SHA256SUMS.txt">查看公开 HTML、证据 JSON、脱敏日志摘录、截图与复核说明的完整 SHA-256 清单</a></p>
-      <div class="runtime-check"><strong>从仓库根目录校验公开文件</strong><code>cd docs/case-studies &amp;&amp; shasum -a 256 -c zhikuncode-codex-gold-monitor-SHA256SUMS.txt</code></div>
+      <p><a class="button" href="skycode-codex-gold-monitor-SHA256SUMS.txt">查看公开 HTML、证据 JSON、脱敏日志摘录、截图与复核说明的完整 SHA-256 清单</a></p>
+      <div class="runtime-check"><strong>从仓库根目录校验公开文件</strong><code>cd docs/case-studies &amp;&amp; shasum -a 256 -c skycode-codex-gold-monitor-SHA256SUMS.txt</code></div>
       <div class="summary-grid" style="margin-top:18px">
-        <article class="panel prompt"><h3>源码与运行版本</h3><p>控制面审计参考提交：<a href="https://github.com/zhikunqingtao/zhikuncode/tree/${escapeHtml(data.sourceCommits.zhikuncodeAuditReference)}"><code>${escapeHtml(data.sourceCommits.zhikuncodeAuditReference)}</code></a></p><p>${escapeHtml(data.sourceCommits.zhikuncodeAuditReferenceNote)}</p><p>${escapeHtml(data.sourceCommits.runBuildNote)}</p></article>
+        <article class="panel prompt"><h3>源码与运行版本</h3><p>控制面审计参考提交：<a href="https://github.com/zhikunqingtao/zhikuncode/tree/${escapeHtml(data.sourceCommits.skycodeAuditReference)}"><code>${escapeHtml(data.sourceCommits.skycodeAuditReference)}</code></a></p><p>${escapeHtml(data.sourceCommits.skycodeAuditReferenceNote)}</p><p>${escapeHtml(data.sourceCommits.runBuildNote)}</p></article>
         <article class="panel prompt"><h3>第三方最低复核路径</h3><ol><li>阅读<a href="README.md">生成与复核说明</a>并下载证据 JSON，检查证据编号、评分权重和引用闭包。</li><li>打开<a href="${publicLogExcerptRelativePath}">脱敏关键日志摘录</a>，按原始行号核对 Run、Agent、权限、恢复、验证与终止事件。</li><li>用页面内公式复算 14 个维度。</li><li>核对公开截图哈希与页面内嵌图像。</li><li>按固定提交阅读控制面源码。</li><li>将无法访问的完整原件视为证据限制，而不是默认相信。</li></ol></article>
       </div>
       <div class="subsection">
@@ -1216,7 +1216,7 @@ ${auditVisualCss}
     </section>
   </main>
 
-  <footer><div class="shell footer-grid"><p><strong>ZhikunCode × Codex · 黄金监控任务公开审计</strong><br>报告版本 ${escapeHtml(data.reportVersion)} · ${escapeHtml(data.auditDate)} · Asia/Shanghai</p><p>单文件正文离线可读 · 无 CDN / 无远程字体 / 无运行时数据请求<br><a href="../index.html">返回 ZhikunCode 首页</a> · <a href="zhikuncode-codex-gold-monitor-evidence.json">证据 JSON</a></p></div></footer>
+  <footer><div class="shell footer-grid"><p><strong>ZhikunCode × Codex · 黄金监控任务公开审计</strong><br>报告版本 ${escapeHtml(data.reportVersion)} · ${escapeHtml(data.auditDate)} · Asia/Shanghai</p><p>单文件正文离线可读 · 无 CDN / 无远程字体 / 无运行时数据请求<br><a href="../index.html">返回 ZhikunCode 首页</a> · <a href="skycode-codex-gold-monitor-evidence.json">证据 JSON</a></p></div></footer>
 
   <script id="audit-data" type="application/json">${embeddedJson}</script>
   <script>
@@ -1394,7 +1394,7 @@ const validateGenerated = (documentHtml) => {
   assert(documentHtml.includes('class="source-panel-stack phase-story-layout"'), "five-phase source layout lost its companion story");
   assert((documentHtml.match(/class="phase-story-card"/g) || []).length === 5, "five-phase companion cards drifted");
   assert(
-    /data-source-visual="zhikun-06"[\s\S]*?--source-native-width:300px/.test(documentHtml),
+    /data-source-visual="skycode-06"[\s\S]*?--source-native-width:300px/.test(documentHtml),
     "portrait execution pulse lost its native-width constraint",
   );
   assert(
@@ -1402,19 +1402,19 @@ const validateGenerated = (documentHtml) => {
     "static source SVG visibility override is missing",
   );
   assert(
-    documentHtml.includes('[data-source-visual="zhikun-06"] .run-stage-map .stage-node{opacity:1!important'),
+    documentHtml.includes('[data-source-visual="skycode-06"] .run-stage-map .stage-node{opacity:1!important'),
     "static execution stages are not all legible",
   );
   assert(
-    documentHtml.includes('[data-source-visual="zhikun-22"] .source-only-node{opacity:.92;stroke-dasharray:7 6}'),
+    documentHtml.includes('[data-source-visual="skycode-22"] .source-only-node{opacity:.92;stroke-dasharray:7 6}'),
     "capability map source-only evidence styling was lost during embedding",
   );
   assert(
-    documentHtml.includes('[data-source-visual="zhikun-12"] .cut-docs{opacity:.34;stroke-dasharray:7 7}'),
+    documentHtml.includes('[data-source-visual="skycode-12"] .cut-docs{opacity:.34;stroke-dasharray:7 7}'),
     "control cutaway documentation-only boundary styling was lost during embedding",
   );
   assert(
-    documentHtml.includes('[data-source-visual="zhikun-20"],[data-source-visual="zhikun-21"]\n  ) text[font-size="11"]{font-size:12px}'),
+    documentHtml.includes('[data-source-visual="skycode-20"],[data-source-visual="skycode-21"]\n  ) text[font-size="11"]{font-size:12px}'),
     "architecture atlas text-size correction was lost during embedding",
   );
   assert(
@@ -1517,7 +1517,7 @@ const checksumLines = checksumFiles.map((relativePath) => {
   return `${digest}  ${relativePath}`;
 });
 fs.writeFileSync(
-  path.join(caseDir, "zhikuncode-codex-gold-monitor-SHA256SUMS.txt"),
+  path.join(caseDir, "skycode-codex-gold-monitor-SHA256SUMS.txt"),
   `${checksumLines.join("\n")}\n`,
 );
 console.log(`Generated ${path.relative(repoRoot, outputPath)} (${Buffer.byteLength(html)} bytes)`);

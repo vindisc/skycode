@@ -78,7 +78,7 @@ public class AsrService {
      * ASR 热词纠正规则配置（环境变量 ASR_CORRECTIONS 可覆盖），格式与默认值见类 javadoc。
      * 统一驱动 system 词表偏置（canonical）与识别结果后处理替换（variants）两层。
      */
-    @Value("${asr.corrections:zhikuncode:zhi kun code,zkun code,智坤code,志鲲Code,智kuncode,zhi坤code}")
+    @Value("${asr.corrections:skycode:sky code,skykode,sky kod,skyco}")
     private String correctionsConfig;
 
     /**
@@ -299,7 +299,7 @@ public class AsrService {
      *       （编译不出有意义的模式）。</li>
      * </ul>
      *
-     * @param config 配置串，如 {@code zhikuncode:zhi kun code,zkuncode}，可为 null/空白
+     * @param config 配置串，如 {@code skycode:zhi kun code,zkuncode}，可为 null/空白
      * @return 解析后的规则列表（不可变，按配置顺序）
      */
     static List<CorrectionRule> parseCorrections(String config) {
@@ -354,7 +354,7 @@ public class AsrService {
      *       （如 {@code 智坤code} → {@code 智坤} + {@code code}，{@code zhi坤code} → {@code zhi} +
      *       {@code 坤} + {@code code}）；</li>
      *   <li>所有切出的 token 之间以 {@code [\s\-]*} 连接 —— 变体各部分之间允许空格、连字符或零分隔，
-     *       因此 "zhi kun code" 可匹配 "zhi-kun-code"、"zhiKunCode"、"zhikuncode"（对已纠正文本幂等）；</li>
+     *       因此 "zhi kun code" 可匹配 "zhi-kun-code"、"zhiKunCode"、"skycode"（对已纠正文本幂等）；</li>
      *   <li>不加词边界 {@code \b}，接受子串匹配 —— ASR 转录中品牌词常与中文紧邻无空格（如
      *       "智坤code这个项目"），加 \b 会漏判；代价是更长包含串中的命中也会被整体替换，对品牌
      *       纠正场景可接受。</li>
@@ -384,7 +384,7 @@ public class AsrService {
      * 逐规则将各变体的宽容正则匹配到的文本统一替换为该规则的 canonical。规则按配置顺序依次应用
      * （后一条规则作用于前一条替换后的结果）；替换值经 {@link Matcher#quoteReplacement} 转义，
      * canonical 含 {@code $}/{@code \} 时亦按字面量处理。替换幂等 —— 已是 canonical 写法的文本再
-     * 应用规则不变（如 zhikuncode 会被 "zhi kun code" 模式以零分隔匹配后替换回自身）。
+     * 应用规则不变（如 skycode 会被 "zhi kun code" 模式以零分隔匹配后替换回自身）。
      *
      * @param text  识别原始文本，可为 null
      * @param rules {@link #parseCorrections} 解析出的规则列表，可为 null/空

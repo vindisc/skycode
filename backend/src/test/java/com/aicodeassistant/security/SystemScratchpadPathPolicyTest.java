@@ -19,7 +19,7 @@ class SystemScratchpadPathPolicyTest {
 
     @Test
     void resolvesOnlyTheExactRootAndItsDescendants() throws IOException {
-        Path root = tempDir.resolve(".zhikun").resolve("scratchpad");
+        Path root = tempDir.resolve(".skycode").resolve("scratchpad");
         SystemScratchpadPathPolicy policy = new SystemScratchpadPathPolicy(root);
 
         Path child = policy.resolveChild("session-1");
@@ -28,7 +28,7 @@ class SystemScratchpadPathPolicyTest {
         assertEquals(root.toRealPath(), policy.systemRoot());
         assertTrue(policy.contains(root));
         assertTrue(policy.contains(child.resolve("result.txt")));
-        assertFalse(policy.contains(tempDir.resolve(".zhikun").resolve("scratchpad-evil")));
+        assertFalse(policy.contains(tempDir.resolve(".skycode").resolve("scratchpad-evil")));
         assertFalse(policy.contains(tempDir.resolve("other").resolve("scratchpad")));
     }
 
@@ -91,17 +91,17 @@ class SystemScratchpadPathPolicyTest {
         Files.createDirectories(second);
         Files.createSymbolicLink(link, first);
         SystemScratchpadPathPolicy policy = new SystemScratchpadPathPolicy(
-                link.resolve(".zhikun").resolve("scratchpad"));
+                link.resolve(".skycode").resolve("scratchpad"));
 
         assertTrue(policy.contains(
-                first.resolve(".zhikun").resolve("scratchpad").resolve("before.txt")));
+                first.resolve(".skycode").resolve("scratchpad").resolve("before.txt")));
         Files.delete(link);
         Files.createSymbolicLink(link, second);
 
         assertFalse(policy.contains(
-                first.resolve(".zhikun").resolve("scratchpad").resolve("after.txt")));
+                first.resolve(".skycode").resolve("scratchpad").resolve("after.txt")));
         assertFalse(policy.contains(
-                second.resolve(".zhikun").resolve("scratchpad").resolve("after.txt")));
+                second.resolve(".skycode").resolve("scratchpad").resolve("after.txt")));
         assertThrows(SecurityException.class, policy::systemRoot);
     }
 }

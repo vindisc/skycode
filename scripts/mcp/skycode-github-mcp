@@ -11,7 +11,7 @@ fi
 # Prefer a project-local verified binary when available. The two PWD variants
 # cover start.sh launching Java from either the repository root or backend/.
 for candidate in \
-    "${ZHIKUN_GITHUB_MCP_BIN:-}" \
+    "${SKYCODE_GITHUB_MCP_BIN:-}" \
     "${PWD}/.ai-code-assistant/bin/github-mcp-server" \
     "${PWD}/backend/.ai-code-assistant/bin/github-mcp-server"
 do

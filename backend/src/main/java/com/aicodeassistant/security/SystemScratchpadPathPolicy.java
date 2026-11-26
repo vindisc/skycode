@@ -26,7 +26,7 @@ public class SystemScratchpadPathPolicy {
 
     @Autowired
     public SystemScratchpadPathPolicy(
-            @Value("${zhikuncode.scratchpad.system-root:${app.working-dir:${user.dir}}/.zhikun/scratchpad}")
+            @Value("${skycode.scratchpad.system-root:${app.working-dir:${user.dir}}/.skycode/scratchpad}")
             String configuredRoot) {
         this(pathFromConfig(configuredRoot));
     }
@@ -57,7 +57,7 @@ public class SystemScratchpadPathPolicy {
             workingDirectory = ".";
         }
         return new SystemScratchpadPathPolicy(
-                Path.of(workingDirectory, ".zhikun", "scratchpad"));
+                Path.of(workingDirectory, ".skycode", "scratchpad"));
     }
 
     /** Returns the fixed canonical root, provided its configured identity is stable. */

@@ -47,7 +47,7 @@ public class ClipboardImagePublicationService {
                 throw invalid("CLIPBOARD_IMAGE_TYPE_MISMATCH");
             }
 
-            temporary = Files.createTempFile("zhikuncode-clipboard-", "." + format.extension());
+            temporary = Files.createTempFile("skycode-clipboard-", "." + format.extension());
             try (InputStream input = file.getInputStream()) {
                 Files.copy(input, temporary, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
             }

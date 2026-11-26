@@ -47,7 +47,7 @@ public class McpConfiguration {
 
     /** 用户显式启用的 MCP 服务状态。能力目录与连接配置本身不再代表自动启用。 */
     private String serviceStatePath = System.getProperty("user.home")
-            + "/.zhikun/mcp-service-states.json";
+            + "/.skycode/mcp-service-states.json";
 
     public Map<String, ServerConfig> getServers() {
         return servers;

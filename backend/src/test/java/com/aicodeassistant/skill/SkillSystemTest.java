@@ -148,7 +148,7 @@ class SkillSystemTest {
         @Test
         @DisplayName("修改文件后技能重新加载")
         void skillReloadedAfterFileModification() throws Exception {
-            Path skillsDir = tempDir.resolve(".zhikun/skills");
+            Path skillsDir = tempDir.resolve(".skycode/skills");
             Files.createDirectories(skillsDir);
             Path skillFile = skillsDir.resolve("hot-test.md");
             Files.writeString(skillFile,
@@ -178,7 +178,7 @@ class SkillSystemTest {
         @Test
         @DisplayName("连续快速修改后重新加载获取最新版本")
         void debounceMultipleRapidModifications() throws Exception {
-            Path skillsDir = tempDir.resolve(".zhikun/skills");
+            Path skillsDir = tempDir.resolve(".skycode/skills");
             Files.createDirectories(skillsDir);
             Path skillFile = skillsDir.resolve("debounce-test.md");
             Files.writeString(skillFile,

@@ -25,7 +25,7 @@ class NativeDirectoryPickerTest {
                 .contains("on run argv")
                 .contains("POSIX file (item 1 of argv) as alias")
                 .contains("default location startFolder")
-                .contains("__ZHIKUN_CANCELLED__");
+                .contains("__SKYCODE_CANCELLED__");
         assertThat(command.getLast()).doesNotContain("\n");
     }
 
@@ -46,7 +46,7 @@ class NativeDirectoryPickerTest {
                 .contains("System.Windows.Forms.FolderBrowserDialog")
                 .contains("DesktopDirectory")
                 .contains("$dialog.Dispose()")
-                .contains("__ZHIKUN_CANCELLED__");
+                .contains("__SKYCODE_CANCELLED__");
     }
 
     @Test

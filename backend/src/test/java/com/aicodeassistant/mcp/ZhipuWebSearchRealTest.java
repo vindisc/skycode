@@ -137,7 +137,7 @@ class ZhipuWebSearchRealTest {
                         "protocolVersion": "2024-11-05",
                         "capabilities": {},
                         "clientInfo": {
-                          "name": "zhikuncode-test",
+                          "name": "skycode-test",
                           "version": "1.0.0"
                         }
                       }

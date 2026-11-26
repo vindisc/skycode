@@ -42,8 +42,8 @@ async def fp_client():
 def workspace_policy(monkeypatch, tmp_path):
     """File endpoints may only inspect the current test workspace."""
     monkeypatch.setenv("WORKSPACE_ROOT", str(tmp_path))
-    monkeypatch.delenv("ZHIKUN_WORKSPACE_ALLOWED_ROOTS", raising=False)
-    monkeypatch.delenv("ZHIKUN_LOCAL_PICKER_ENABLED", raising=False)
+    monkeypatch.delenv("SKYCODE_WORKSPACE_ALLOWED_ROOTS", raising=False)
+    monkeypatch.delenv("SKYCODE_LOCAL_PICKER_ENABLED", raising=False)
 
 
 @pytest.mark.asyncio

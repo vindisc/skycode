@@ -291,7 +291,7 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
     // 新窗口打开
     const handleOpenInNewWindow = useCallback(() => {
         const url = `${window.location.origin}${window.location.pathname}?sidebar=detached&tab=${activeTab}`;
-        window.open(url, 'zhikun-sidebar', 'width=600,height=800,menubar=no,toolbar=no');
+        window.open(url, 'skycode-sidebar', 'width=600,height=800,menubar=no,toolbar=no');
     }, [activeTab]);
 
     const aposEnabled = useFeatureFlagStore((s) => s.flags.APOS_ACTIVITY_STREAM);
@@ -545,7 +545,7 @@ function ApiDocsTab() {
     );
 }
 
-// ═══ 删除会话二次确认验证码（ZHIKUN_DELETE_CONFIRM_CODE） ═══
+// ═══ 删除会话二次确认验证码（SKYCODE_DELETE_CONFIRM_CODE） ═══
 // 模块级缓存：是否要求删除验证码只需询问一次后端（GET /api/config/delete-confirm），
 // fetch 失败时按"不需要"处理（保持原有删除行为），但失败结果不缓存——
 // 下次组件挂载会重新请求，避免瞬时网络失败被永久缓存为"不需要验证码"。
@@ -1004,9 +1004,9 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                                         transition={reducedMotion ? { duration: 0 } : { type: 'spring', stiffness: 480, damping: 32, mass: 0.6 }}
                                                     />
                                                 )}
-                                                <div className="relative flex items-center gap-1">
+                                                <div className="relative flex items-start gap-1">
                                                     <div className="flex-1 min-w-0">
-                                                        <div className={`truncate text-sm ${isActive ? 'font-semibold' : 'font-medium'} text-t1`}>
+                                                        <div className={`line-clamp-2 break-words text-sm ${isActive ? 'font-semibold' : 'font-medium'} text-t1`}>
                                                             {displayTitle}
                                                         </div>
                                                         {simpleMode && (
@@ -1020,9 +1020,9 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                                             </div>
                                                         )}
                                                     </div>
-                                                    {/* 尾部槽位：状态胶囊与操作区占同一位置。触屏并排常驻；
-                                                        鼠标设备 hover/聚焦时胶囊让位给操作按钮（切换规则见 globals.css） */}
-                                                    <div className="relative flex shrink-0 items-center gap-1.5">
+                                                    {/* 尾部槽位：状态胶囊与操作区占同一位置，顶部对齐标题首行（-mt-px 抵消图标与行高差）。
+                                                        触屏并排常驻；鼠标设备 hover/聚焦时胶囊让位给操作按钮（切换规则见 globals.css） */}
+                                                    <div className="relative flex shrink-0 items-center gap-1.5 -mt-px">
                                                         {(generating || merging) && (
                                                             <div className="card-status flex items-center gap-1.5 transition-interactive duration-fast">
                                                                 {generating && (

@@ -84,7 +84,7 @@ describe('PromptInput asynchronous submit', () => {
     it('fills the current draft from a hero template and focuses without submitting', () => {
         const submit = vi.fn().mockResolvedValue(true);
         renderInput(submit);
-        fireEvent(window, new CustomEvent('zhikun:prompt-template-fill', { detail: { text: '生成 API 文档' } }));
+        fireEvent(window, new CustomEvent('skycode:prompt-template-fill', { detail: { text: '生成 API 文档' } }));
         const input = screen.getByRole('textbox', { name: '输入消息' });
         expect(input).toHaveValue('生成 API 文档');
         expect(input).toHaveFocus();

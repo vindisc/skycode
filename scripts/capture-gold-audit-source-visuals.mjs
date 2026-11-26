@@ -11,7 +11,7 @@ import { sourceVisualInventory, visualManifest } from "./gold-audit-visuals.mjs"
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const outputPath = path.join(scriptDir, "gold-audit-source-visuals.mjs");
-const evidencePath = path.join(scriptDir, "..", "docs", "case-studies", "zhikuncode-codex-gold-monitor-evidence.json");
+const evidencePath = path.join(scriptDir, "..", "docs", "case-studies", "skycode-codex-gold-monitor-evidence.json");
 const evidenceData = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
 const args = process.argv.slice(2);
 const option = (name) => {
@@ -19,7 +19,7 @@ const option = (name) => {
   return index >= 0 ? args[index + 1] : null;
 };
 const sourcePaths = {
-  zhikun: option("--zhikun-report"),
+  skycode: option("--skycode-report"),
   comparison: option("--comparison-report"),
 };
 
@@ -33,7 +33,7 @@ const escapeTemplate = (value) => value.replaceAll("\\", "\\\\").replaceAll("`",
 for (const [source, sourcePath] of Object.entries(sourcePaths)) {
   assert(sourcePath, `missing --${source}-report`);
   assert(fs.existsSync(sourcePath), `${source} source report does not exist`);
-  const artifactLabel = source === "zhikun" ? "ZhikunCode 单系统报告" : "双系统冻结比较报告";
+  const artifactLabel = source === "skycode" ? "ZhikunCode 单系统报告" : "双系统冻结比较报告";
   const registeredArtifact = evidenceData.artifacts.find((artifact) => artifact.label === artifactLabel);
   assert(registeredArtifact, `${artifactLabel} is missing from the evidence manifest`);
   assert(sha256(fs.readFileSync(sourcePath)) === registeredArtifact.sha256, `${artifactLabel} SHA-256 does not match the registered source`);
@@ -211,8 +211,8 @@ const mergedVisualTargets = new Map([
   ["ZhikunCode 完整工程控制面与本次命中模块", "capability-coverage"],
   ["故障隔离与完成闭环", "completion-gate"],
   ["类型化失败、文件溯源和控制状态证据", "recovery-matrix"],
-  ["黄金行情监控系统的代码架构与数据流", "zhikun-architecture"],
-  ["Codex 与 ZhikunCode 最终产物的页面结构和状态语义", "zhikun-screen"],
+  ["黄金行情监控系统的代码架构与数据流", "skycode-architecture"],
+  ["Codex 与 ZhikunCode 最终产物的页面结构和状态语义", "skycode-screen"],
   ["中心分与证据区间重叠关系", "score-overview"],
   ["请求、缓存、刷新、故障和测量边界", "dual-runtime"],
   ["ZhikunCode 三个主 Run 多泳道时间线与需求编译链", "trace-map"],
@@ -257,7 +257,7 @@ const applyCorrections = (value, sourceKey) => {
     "数据范围 · 交付形式 · 估算口径 · 不确定项处理",
     "回购口径 · 金价品种 · 银行范围 · 交付形式",
   ));
-  if (sourceKey === "zhikun-06") {
+  if (sourceKey === "skycode-06") {
     mark("VC014", output
       .replaceAll(
         "从任务编译、资产探索、工程执行、失败收敛到验证交付。滚动阅读时仅高亮当前阶段与已经经过的主链。",
@@ -273,7 +273,7 @@ const applyCorrections = (value, sourceKey) => {
       .replaceAll("429 / max_turns / exit 1", "44 轮 · 60 次主工具")
       .replaceAll("验证交付", "验证终止"));
   }
-  if (sourceKey === "zhikun-14") {
+  if (sourceKey === "skycode-14") {
     mark("VC015", output
       .replaceAll(
         "本次任务从React和WebSocket进入Java QueryEngine，经模型与工具控制面生成产物。Python Capability Service、完整MCP服务和浏览器自动化属于源码或产品资料确认，但本次日志没有直接命中。",
@@ -288,7 +288,7 @@ const applyCorrections = (value, sourceKey) => {
         "MCP 恢复已命中；其余能力未在主链触发",
       ));
   }
-  if (sourceKey === "zhikun-02") {
+  if (sourceKey === "skycode-02") {
     output = output
       .replaceAll(
         /从底部的开源交付、控制面源码，到[^。]+仓库级评测产物，再到黄金监控端到端案例。每层分别标注证据和边界。/g,
@@ -306,7 +306,7 @@ const applyCorrections = (value, sourceKey) => {
     "GLM-5.2是ZhikunCode核心执行模型",
     "GLM-5.2是本任务人工换模后的主链执行模型",
   ));
-  if (sourceKey === "zhikun-23") {
+  if (sourceKey === "skycode-23") {
     mark("VC019", output
       .replaceAll(
         "日志直接记录 API 熔断器从 OPEN 进入 HALF_OPEN 并在探测成功后 CLOSED；MCP 健康检查失败后自动退避重连、初始化、重新发现四个工具并恢复注册表。",
@@ -393,7 +393,7 @@ const inspectSvg = (svg) => {
 
 const sourceDocuments = {};
 const snapshots = [];
-const cssIdMaps = { zhikun: new Map(), comparison: new Map() };
+const cssIdMaps = { skycode: new Map(), comparison: new Map() };
 for (const [family, sourcePath] of Object.entries(sourcePaths)) {
   const bytes = fs.readFileSync(sourcePath);
   const html = bytes.toString("utf8");

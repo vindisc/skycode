@@ -1,5 +1,5 @@
 /**
- * zhikuncode v2 基元组件库（指南 §6.1 统一出口）。
+ * skycode v2 基元组件库（指南 §6.1 统一出口）。
  * 全部 forwardRef + 原生属性透传 + VariantProps 导出；样式只消费 v2 令牌类。
  */
 export { cn } from './cn';

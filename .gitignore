@@ -74,10 +74,10 @@ access-token
 /scripts/mobile-access/log/
 
 # ZhikuCode 本地记忆文件
-zhikun.local.md
+skycode.local.md
 
 # ZhikuCode 本地配置目录
-.zhikun/
+.skycode/
 
 # 运行时 PID 文件
 .service-pids*
@@ -86,7 +86,7 @@ zhikun.local.md
 docs/local/
 docs/.DS_Store
 docs/assets/e2e-tests/node_modules
-docs/zhikun
+docs/skycode
 
 # === 测试产物：自动生成，可复跑，不入库 ===
 # JaCoCo / lcov / coverage HTML 报告（每次 mvn test / vitest 都会重建，体积大）

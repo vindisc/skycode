@@ -71,7 +71,7 @@ public class PluginController {
         // 3. 保存到插件目录
         try {
             String home = System.getProperty("user.home", ".");
-            Path pluginDir = Path.of(home, ".zhikun", "plugins");
+            Path pluginDir = Path.of(home, ".skycode", "plugins");
             Files.createDirectories(pluginDir);
             Path target = pluginDir.resolve(safeName);
             file.transferTo(target);

@@ -48,7 +48,7 @@ public class AttachmentController {
     private final ObjectMapper objectMapper;
 
     public AttachmentController(
-            @Value("${app.upload-dir:${user.home}/.zhikun/uploads}") String dir,
+            @Value("${app.upload-dir:${user.home}/.skycode/uploads}") String dir,
             ObjectMapper objectMapper) {
         this.uploadDir = Path.of(dir);
         this.metadataDir = uploadDir.resolve(METADATA_DIR_NAME);

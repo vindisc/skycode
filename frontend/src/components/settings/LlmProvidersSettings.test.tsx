@@ -230,7 +230,7 @@ describe('LlmProvidersSettings', () => {
         fireEvent.click(screen.getByRole('button', { name: '添加服务商' }));
 
         expect(await screen.findByLabelText('API Key')).toBeDisabled();
-        expect(screen.getAllByText(/ZHIKU_ENCRYPTION_KEY/).length).toBeGreaterThan(0);
+        expect(screen.getAllByText(/SKYCODE_ENCRYPTION_KEY/).length).toBeGreaterThan(0);
     });
 
     it('edits without re-entering the key and with a new default model', async () => {

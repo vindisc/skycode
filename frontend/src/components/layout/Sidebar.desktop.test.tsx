@@ -227,6 +227,7 @@ it('会话卡只保留标题：不显示模型、消息数与时间；运行中�
     render(<Sidebar />);
     const title = await screen.findByText('目标会话');
     const card = title.closest('.session-card')!;
+    expect(title).toHaveClass('line-clamp-2');
     expect(screen.queryByText('test-model-x')).not.toBeInTheDocument();
     expect(screen.queryByText(/8 条/)).not.toBeInTheDocument();
     expect(screen.queryByText(/刚刚/)).not.toBeInTheDocument();
@@ -345,11 +346,11 @@ it('配置验证码后 DELETE 携带请求头，403 时气泡内提示错误且�
     expect(deleteCallsOf(fetchMock)).toHaveLength(1);
     expect((deleteCallsOf(fetchMock)[0][1] as RequestInit).headers).toEqual({ 'X-Delete-Confirm-Code': 'wrong' });
     // 重新输入正确验证码后删除成功，气泡关闭
-    fireEvent.change(screen.getByLabelText('删除验证码'), { target: { value: 'zhikun' } });
+    fireEvent.change(screen.getByLabelText('删除验证码'), { target: { value: 'skycode' } });
     fireEvent.click(screen.getByRole('button', { name: '确认删除' }));
     await waitFor(() => expect(screen.queryByText('目标会话')).not.toBeInTheDocument());
     expect(deleteCallsOf(fetchMock)).toHaveLength(2);
-    expect((deleteCallsOf(fetchMock)[1][1] as RequestInit).headers).toEqual({ 'X-Delete-Confirm-Code': 'zhikun' });
+    expect((deleteCallsOf(fetchMock)[1][1] as RequestInit).headers).toEqual({ 'X-Delete-Confirm-Code': 'skycode' });
     expect(screen.queryByText('确定删除该会话？')).not.toBeInTheDocument();
 });
 

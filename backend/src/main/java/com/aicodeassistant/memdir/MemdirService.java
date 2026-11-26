@@ -66,7 +66,7 @@ public class MemdirService {
     private static final double COMPACT_KEEP_RATIO = 0.7;
 
     /** 团队记忆目录名 */
-    private static final String TEAM_MEM_DIR = ".zhikun/team-memories";
+    private static final String TEAM_MEM_DIR = ".skycode/team-memories";
     /** 记忆最大存活时间（天） */
     private static final int MAX_MEMORY_AGE_DAYS = 90;
 
@@ -782,7 +782,7 @@ public class MemdirService {
     // ==================== 团队记忆 ====================
 
     /**
-     * 加载团队记忆 — 扫描项目根目录的 .zhikun/team-memories/。
+     * 加载团队记忆 — 扫描项目根目录的 .skycode/team-memories/。
      */
     public List<Memory> loadTeamMemories(Path projectRoot) {
         if (projectRoot == null) return List.of();

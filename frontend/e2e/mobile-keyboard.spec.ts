@@ -76,7 +76,7 @@ for (const width of [393, 820]) {
     await page.setViewportSize({ width, height: 852 });
     await expectSeparatedLayout(page, 852);
     await expect.poll(() => page.evaluate(() => document.documentElement.style.getPropertyValue('--keyboard-height'))).toBe('0px');
-    await page.screenshot({ path: `/tmp/zhikun-viewport-${width}.png` });
+    await page.screenshot({ path: `/tmp/skycode-viewport-${width}.png` });
     // Returning to desktop must restore real measured spacing, not the old detached node.
     await page.setViewportSize({ width: 1440, height: 900 });
     await expect.poll(() => page.locator('.glass-chat-spacer').evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThan(100);
@@ -185,6 +185,6 @@ for (const width of [393, 820]) {
       await expect.poll(() => panel.evaluate(el => el.scrollHeight - el.scrollTop - el.clientHeight)).toBeLessThanOrEqual(1);
       await expect(input).toBeEditable();
     }
-    await page.screenshot({ path: `/tmp/zhikun-verify-panel-${width}.png` });
+    await page.screenshot({ path: `/tmp/skycode-verify-panel-${width}.png` });
   });
 }

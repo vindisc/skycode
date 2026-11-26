@@ -1,7 +1,7 @@
 """Opt-in real Chromium regression in an isolated Linux container, with --init.
 
 Mount python-service/src and this file read-only into a browser-capable image;
-set PYTHONPATH to the mounted src and ZHIKUN_BROWSER_CONTAINER_TEST=1. No network,
+set PYTHONPATH to the mounted src and SKYCODE_BROWSER_CONTAINER_TEST=1. No network,
 production workspace, credentials, or application database is needed.
 """
 import asyncio
@@ -26,7 +26,7 @@ def resources():
     return {"tasks": tasks, "zombies": zombies, "limit_events": int(events.get("max", "0"))}
 
 
-@unittest.skipUnless(os.getenv("ZHIKUN_BROWSER_CONTAINER_TEST") == "1", "isolated Linux container only")
+@unittest.skipUnless(os.getenv("SKYCODE_BROWSER_CONTAINER_TEST") == "1", "isolated Linux container only")
 class BrowserContainerLifecycleTest(unittest.IsolatedAsyncioTestCase):
     async def test_repeated_success_failure_timeout_cancel_and_restart_converge(self):
         from fastapi import HTTPException

@@ -16,7 +16,7 @@ class SkillHotReloadAvailabilityTest {
 
     @Test
     void realFileWatcherRefreshesDefinitionsWithoutResettingDisabledState() throws Exception {
-        Path directory = Files.createDirectories(project.resolve(".zhikun/skills"));
+        Path directory = Files.createDirectories(project.resolve(".skycode/skills"));
         Path existing = directory.resolve("watched.md");
         Files.writeString(existing, markdown("old-alias", "original body"));
         Files.writeString(directory.resolve(" .md"), markdown("invalid", "invalid body"));

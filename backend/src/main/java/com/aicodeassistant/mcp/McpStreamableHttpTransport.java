@@ -94,7 +94,7 @@ public class McpStreamableHttpTransport implements McpTransport {
                 Map<String, Object> initParams = Map.of(
                         "protocolVersion", "2025-03-26",
                         "capabilities", clientCapabilities != null ? clientCapabilities : Map.of(),
-                        "clientInfo", Map.of("name", "zhikun-mcp-client", "version", "1.0.0")
+                        "clientInfo", Map.of("name", "skycode-mcp-client", "version", "1.0.0")
                 );
 
                 JsonNode result = sendRequestInternal("initialize", initParams, DEFAULT_TIMEOUT_MS);

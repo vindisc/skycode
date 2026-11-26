@@ -1,6 +1,6 @@
-export const WORKBENCH_ENABLED_KEY = 'zhikun.workbench.enabled';
-export const WORKBENCH_DEFAULT_VIEW_KEY = 'zhikun.workbench.default-view';
-export const WORKBENCH_SESSION_VIEW_PREFIX = 'zhikun.workbench.session-view.';
+export const WORKBENCH_ENABLED_KEY = 'skycode.workbench.enabled';
+export const WORKBENCH_DEFAULT_VIEW_KEY = 'skycode.workbench.default-view';
+export const WORKBENCH_SESSION_VIEW_PREFIX = 'skycode.workbench.session-view.';
 
 export type WorkbenchViewMode = 'simple' | 'development';
 

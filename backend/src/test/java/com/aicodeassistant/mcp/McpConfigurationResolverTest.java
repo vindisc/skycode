@@ -16,10 +16,10 @@ class McpConfigurationResolverTest {
                 .withProperty("CONTEXT7_API_KEY", "test-context7-key")
                 .withProperty("ALIBABA_CLOUD_ACCESS_KEY_ID", "test-access-key-id")
                 .withProperty("GITHUB_TOOLS", "get_me,get_file_contents")
-                .withProperty("ZHIKUN_MCP_SERVERS", """
+                .withProperty("SKYCODE_MCP_SERVERS", """
                         {
                           "github": {
-                            "command": "zhikun-github-mcp",
+                            "command": "skycode-github-mcp",
                             "env": {"GITHUB_TOOLS": "${GITHUB_TOOLS}"}
                           },
                           "context7": {
@@ -28,7 +28,7 @@ class McpConfigurationResolverTest {
                             "headers": {"Authorization": "Bearer ${CONTEXT7_API_KEY}"}
                           },
                           "alibaba-cloud-ops": {
-                            "command": "zhikun-alibaba-cloud-ops-mcp",
+                            "command": "skycode-alibaba-cloud-ops-mcp",
                             "args": ["--visible-tools", "${VISIBLE_TOOLS:DescribeInstances}"],
                             "env": {"ALIBABA_CLOUD_ACCESS_KEY_ID": "${ALIBABA_CLOUD_ACCESS_KEY_ID}"}
                           }

@@ -44,10 +44,10 @@ class ClipboardImagePublicationServiceTest {
 
         verify(oss).publish(snapshot.getValue());
         assertThat(snapshot.getValue().objectKey())
-                .startsWith("zhikuncode-artifacts/clipboard/");
+                .startsWith("skycode-artifacts/clipboard/");
         assertThat(snapshot.getValue().mimeType()).isEqualTo("image/png");
         assertThat(result.url()).startsWith(
-                "https://test-artifacts.oss-cn-beijing.aliyuncs.com/zhikuncode-artifacts/clipboard/");
+                "https://test-artifacts.oss-cn-beijing.aliyuncs.com/skycode-artifacts/clipboard/");
         assertThat(result.size()).isEqualTo(png.length);
         assertThat(result.mediaType()).isEqualTo("image/png");
     }
@@ -83,7 +83,7 @@ class ClipboardImagePublicationServiceTest {
         var result = new ClipboardImagePublicationService(properties, oss).publish("session",
                 new MockMultipartFile("file", "image.png", "image/png", png));
 
-        assertThat(result.url()).startsWith("https://files.example.com/zhikuncode-artifacts/clipboard/");
+        assertThat(result.url()).startsWith("https://files.example.com/skycode-artifacts/clipboard/");
         assertThat(properties.isTrustedClipboardImageUrl(result.url())).isTrue();
     }
 
@@ -141,7 +141,7 @@ class ClipboardImagePublicationServiceTest {
         properties.setEndpoint("https://oss-cn-beijing.aliyuncs.com");
         properties.setRegion("cn-beijing");
         properties.setBucket("test-artifacts");
-        properties.setPrefix("zhikuncode-artifacts");
+        properties.setPrefix("skycode-artifacts");
         properties.setCredentialMode("default-chain");
         return properties;
     }

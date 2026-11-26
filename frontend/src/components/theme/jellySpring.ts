@@ -7,7 +7,7 @@
  *   静止判定 |v|<0.001 且 |x-t|<0.001 → 从活动集摘除；
  *   强劲水感形变上限（v2 级 duang）：sy∈[0.78,1.22] · sx∈[0.82,1.18]。
  *
- * 门控（沿用 demo richOn 语义，改读 zhikuncode 配置）：
+ * 门控（沿用 demo richOn 语义，改读 skycode 配置）：
  *   isJellyRich()       —— jelly 模式 + jellyFx.cinematic + 系统未要求减弱动态
  *   isJellyMotionFull() —— 浓郁档且动效档位 full（装饰循环/视差等永续动画）
  *   springsActive()     —— 浓郁档且动效非 off（按压/悬停等事件瞬态反馈；wake 总闸）

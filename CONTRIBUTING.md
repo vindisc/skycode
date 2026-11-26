@@ -15,7 +15,7 @@ Thank you for your interest in contributing to ZhikunCode! Every contribution ma
 
 ```bash
 git clone https://github.com/zhikunqingtao/zhikuncode.git
-cd zhikuncode
+cd skycode
 ```
 
 ### Configure Environment

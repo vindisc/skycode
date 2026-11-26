@@ -54,7 +54,7 @@ sourceCss += await fs.readFile(path.join(styleDir, 'interface-refinements.css'),
 const tailwindConfig = loadConfig(path.join(frontend, 'tailwind.config.ts'));
 tailwindConfig.content = [path.join(frontend, 'src/**/*.{ts,tsx}'), path.join(frontend, 'tests/browser/jelly-fixture.tsx')];
 const css = (await postcss([tailwindcss(tailwindConfig)]).process(sourceCss, { from: undefined })).css;
-const artifacts = await fs.mkdtemp(path.join(os.tmpdir(), 'zhikuncode-jelly-regression-'));
+const artifacts = await fs.mkdtemp(path.join(os.tmpdir(), 'skycode-jelly-regression-'));
 const browser = await chromium.launch({ headless: true });
 let scenarios = 0;
 

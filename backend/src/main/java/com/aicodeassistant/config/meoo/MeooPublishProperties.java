@@ -9,7 +9,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.Set;
 
 @Component
-@ConfigurationProperties(prefix = "zhikuncode.meoo")
+@ConfigurationProperties(prefix = "skycode.meoo")
 public class MeooPublishProperties {
     public static final String CLI_VERSION = "0.5.8";
     /** 秒悟平台硬性限制：全栈（image）deploy 上传的源码 zip 不超过 100MiB（CLI MAX_IMAGE_SOURCE_ZIP_BYTES）。

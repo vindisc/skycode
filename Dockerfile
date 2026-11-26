@@ -98,7 +98,7 @@ LABEL maintainer="ZhikunCode Team"
 LABEL org.opencontainers.image.title="ZhikunCode"
 LABEL org.opencontainers.image.description="AI-powered code assistant with multi-agent collaboration"
 LABEL org.opencontainers.image.vendor="ZhikunCode"
-LABEL org.opencontainers.image.source="https://github.com/zhikuncode/zhikuncode"
+LABEL org.opencontainers.image.source="https://github.com/vindisc/skycode"
 
 # Install runtime dependencies:
 #   - python3 + venv + libmagic: Python subprocess for analysis/file inspection
@@ -151,7 +151,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
-RUN groupadd -r zhikun && useradd -r -g zhikun -d /app -s /bin/sh zhikun
+RUN groupadd -r skycode && useradd -r -g skycode -d /app -s /bin/sh skycode
 
 WORKDIR /app
 
@@ -202,10 +202,10 @@ RUN ln -sf /app/python-service/.venv/bin/python /usr/local/bin/python
 
 # External MCP runtimes and stable project launchers.
 COPY --from=github-mcp /server/github-mcp-server /usr/local/bin/github-mcp-server
-COPY scripts/mcp/zhikun-github-mcp scripts/mcp/zhikun-alibaba-cloud-ops-mcp /usr/local/bin/
+COPY scripts/mcp/skycode-github-mcp scripts/mcp/skycode-alibaba-cloud-ops-mcp /usr/local/bin/
 RUN chmod +x /usr/local/bin/github-mcp-server \
-    /usr/local/bin/zhikun-github-mcp \
-    /usr/local/bin/zhikun-alibaba-cloud-ops-mcp
+    /usr/local/bin/skycode-github-mcp \
+    /usr/local/bin/skycode-alibaba-cloud-ops-mcp
 
 # Copy MCP capability registry
 COPY configuration/ ./configuration/
@@ -221,15 +221,15 @@ COPY --from=frontend-build /build/frontend/dist ./static/
 # PythonProcessManager starts this service as a subprocess.
 COPY python-service/src ./python-service/src/
 
-# Create data and log directories; pre-create the HOME-side .zhikun mountpoint
-# tree (owned by zhikun) so deploying a bind mount over /app/.zhikun/skills
-# never leaves /app/.zhikun root-owned — the app creates its uploads directory
-# under /app/.zhikun at startup and must keep write access there.
+# Create data and log directories; pre-create the HOME-side .skycode mountpoint
+# tree (owned by skycode) so deploying a bind mount over /app/.skycode/skills
+# never leaves /app/.skycode root-owned — the app creates its uploads directory
+# under /app/.skycode at startup and must keep write access there.
 RUN mkdir -p /app/data /app/workspace /app/log /app/log/debug /app/log/mcp \
-    /app/.zhikun/skills /app/.ai-code-assistant && \
-    chown -R zhikun:zhikun /app
+    /app/.skycode/skills /app/.ai-code-assistant && \
+    chown -R skycode:skycode /app
 
-USER zhikun
+USER skycode
 
 # ---- Environment defaults (overridable via docker-compose / .env) ----
 ENV JAVA_OPTS="-Xms256m -Xmx1024m --enable-preview" \

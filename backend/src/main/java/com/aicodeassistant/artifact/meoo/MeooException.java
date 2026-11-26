@@ -10,7 +10,7 @@ public final class MeooException extends RuntimeException {
     public static String guidance(String code) {
         if(code==null) return "请检查秒悟项目状态，不要自动重发。";
         return switch(code) {
-            case "MEOO_DISABLED" -> "请部署管理员启用 ZHIKUN_MEOO_ENABLED 并重启服务。";
+            case "MEOO_DISABLED" -> "请部署管理员启用 SKYCODE_MEOO_ENABLED 并重启服务。";
             case "MEOO_CREDENTIALS_UNAVAILABLE", "MEOO_CREDENTIAL_PERMISSIONS", "MEOO_ACCOUNT_CREDENTIAL_REQUIRED", "MEOO_ACCOUNT_ID_REQUIRED", "MEOO_CREDENTIALS_INVALID", "MEOO_AUTH_FAILED" -> "请管理员检查官方账号 credentials.json、文件权限及登录状态；不要把密钥发进聊天。";
             case "MEOO_IMAGE_SCRIPTS_REQUIRED" -> "先在普通开发流程中补齐 scripts/setup.sh 与 scripts/start.sh，验证后重新请求发布。";
             case "MEOO_PORT_CONFIGURATION_REQUIRED" -> "启动服务必须监听 0.0.0.0:${PORT:-9000}，请先适配并验证。";

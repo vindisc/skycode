@@ -108,7 +108,7 @@ public class WorktreeManager {
             if (safeId.isBlank()) safeId = "agent";
             String branchName = "agent-" + safeId + "-" + suffix;
             Path path = realPath(Path.of(System.getProperty("java.io.tmpdir")))
-                    .resolve(".zhikun-agent-" + suffix);
+                    .resolve(".skycode-agent-" + suffix);
             Path execution = path.resolve(root.relativize(cwd));
             entry = new Entry(root, path, execution, targetRef, baseline,
                     "refs/heads/" + branchName, context, manual);

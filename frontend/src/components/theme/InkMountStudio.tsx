@@ -7,7 +7,7 @@
  *   落款：formatMountDate 干支日期 + 朱印「知」自动盖于左下/右下
  * 预览与导出共用同一 drawMountedCard（纯 Canvas 2D，零第三方库）：
  *   预览 1x 即绘即所得；导出 2x 清晰度 toBlob 触发下载，
- *   文件名 zhikuncode-装裱-YYYYMMDD.png。
+ *   文件名 skycode-装裱-YYYYMMDD.png。
  * BrushKaiti 经主题 @font-face 加载，绘制前 document.fonts.load 确保就绪。
  */
 

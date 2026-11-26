@@ -15,34 +15,34 @@ const x = (value) => String(value ?? "")
 const refs = (ids = []) => ids.map((id) => `<a href="#evidence-${x(id)}">${x(id)}</a>`).join(" ");
 
 export const sourceVisualInventory = [
-  { source: "zhikun", title: "ZhikunCode 国产模型工程控制面", status: "merged", reason: "由控制面剖视图、三端系统和能力覆盖图共同承接。" },
-  { source: "zhikun", title: "ZhikunCode 四层证据金字塔", status: "included", reason: "解释证据等级与公开复核状态的区别。" },
-  { source: "zhikun", title: "Codex用户能力心智到ZhikunCode控制面的映射", status: "included", reason: "保留熟悉能力到实际机制的映射，同时标记未验证能力。" },
-  { source: "zhikun", title: "Codex 与 ZhikunCode 的本次配置、工程路径和任务级结果", status: "included", reason: "提供同题运行边界总览。" },
-  { source: "zhikun", title: "十四维加权贡献差值图", status: "included", reason: "解释总分相近背后的结构差异。" },
-  { source: "zhikun", title: "黄金监控任务五阶段执行脉冲", status: "included", reason: "提供执行阶段与时间窗。" },
-  { source: "zhikun", title: "ZhikunCode 黄金监控任务多泳道执行 Trace Map", status: "included", reason: "展示多角色事件顺序。" },
-  { source: "zhikun", title: "从模糊需求到可执行约束集", status: "included", reason: "展示需求编译与证据边界。" },
-  { source: "zhikun", title: "研究证据到交付资产的来源链", status: "included", reason: "展示研究资产与交付文件的控制流血缘。" },
-  { source: "zhikun", title: "验证返工、失败隔离与完成门禁闭环", status: "included", reason: "解释 Verify 不是最终终止。" },
-  { source: "zhikun", title: "主协调器六十次工具调用指纹", status: "included", reason: "保留完整有序工具调用指纹。" },
-  { source: "zhikun", title: "ZhikunCode 控制面剖视图与本次日志命中路径", status: "included", reason: "区分日志命中、源码解释和未触发能力。" },
-  { source: "zhikun", title: "ZhikunCode 完整工程控制面与本次命中模块", status: "merged", reason: "并入完整能力覆盖图和控制面剖视图，避免重复总览。" },
-  { source: "zhikun", title: "三端系统与本次日志实际路径", status: "included", reason: "展示前端、控制面、模型与工具端边界。" },
-  { source: "zhikun", title: "黄金监控任务端到端执行时序", status: "included", reason: "展示请求至消息持久化的时序。" },
-  { source: "zhikun", title: "QueryEngine 八步 Agent Loop", status: "included", reason: "解释主循环的控制步骤。" },
-  { source: "zhikun", title: "ContextCascade 六层上下文治理与本次触发层", status: "included", reason: "展示上下文诊断与压缩边界。" },
-  { source: "zhikun", title: "主 Agent 与五个子 Agent 的执行 DAG", status: "included", reason: "展示五个子 Agent 的终态与主链接管。" },
-  { source: "zhikun", title: "统一工具授权与唯一执行入口", status: "included", reason: "展示工具安全执行门禁。" },
-  { source: "zhikun", title: "持久交互与会话恢复状态机", status: "included", reason: "展示澄清交互的恢复语义。" },
-  { source: "zhikun", title: "故障隔离与完成闭环", status: "merged", reason: "并入完成门禁、恢复状态机和失败矩阵。" },
-  { source: "zhikun", title: "ZhikunCode Capability Overview 完整能力地图与本次运行证据覆盖", status: "included", reason: "完整展示能力层级和本案例覆盖。" },
-  { source: "zhikun", title: "API Circuit Breaker 与 MCP 自动恢复状态机", status: "included", reason: "区分协议自动恢复与人工换模。" },
-  { source: "zhikun", title: "分阶段子 Agent 调度与轮内工具并发模型", status: "included", reason: "展示时间重叠、最大轮次与工具队列。" },
-  { source: "zhikun", title: "类型化失败、文件溯源和控制状态证据", status: "merged", reason: "并入恢复方式与运行版本边界矩阵。" },
-  { source: "zhikun", title: "黄金行情监控系统的代码架构与数据流", status: "merged", reason: "由 ZhikunCode 分层架构、生命周期和数据血缘分别承接。" },
-  { source: "zhikun", title: "Codex 与 ZhikunCode 最终产物的页面结构和状态语义", status: "merged", reason: "拆为两侧独立屏幕所有权图，减少拥挤。" },
-  { source: "zhikun", title: "模型候选与控制面机制共同形成可观察交付链", status: "omitted", reason: "带有难以由单任务隔离验证的模型与控制面因果暗示。" },
+  { source: "skycode", title: "ZhikunCode 国产模型工程控制面", status: "merged", reason: "由控制面剖视图、三端系统和能力覆盖图共同承接。" },
+  { source: "skycode", title: "ZhikunCode 四层证据金字塔", status: "included", reason: "解释证据等级与公开复核状态的区别。" },
+  { source: "skycode", title: "Codex用户能力心智到ZhikunCode控制面的映射", status: "included", reason: "保留熟悉能力到实际机制的映射，同时标记未验证能力。" },
+  { source: "skycode", title: "Codex 与 ZhikunCode 的本次配置、工程路径和任务级结果", status: "included", reason: "提供同题运行边界总览。" },
+  { source: "skycode", title: "十四维加权贡献差值图", status: "included", reason: "解释总分相近背后的结构差异。" },
+  { source: "skycode", title: "黄金监控任务五阶段执行脉冲", status: "included", reason: "提供执行阶段与时间窗。" },
+  { source: "skycode", title: "ZhikunCode 黄金监控任务多泳道执行 Trace Map", status: "included", reason: "展示多角色事件顺序。" },
+  { source: "skycode", title: "从模糊需求到可执行约束集", status: "included", reason: "展示需求编译与证据边界。" },
+  { source: "skycode", title: "研究证据到交付资产的来源链", status: "included", reason: "展示研究资产与交付文件的控制流血缘。" },
+  { source: "skycode", title: "验证返工、失败隔离与完成门禁闭环", status: "included", reason: "解释 Verify 不是最终终止。" },
+  { source: "skycode", title: "主协调器六十次工具调用指纹", status: "included", reason: "保留完整有序工具调用指纹。" },
+  { source: "skycode", title: "ZhikunCode 控制面剖视图与本次日志命中路径", status: "included", reason: "区分日志命中、源码解释和未触发能力。" },
+  { source: "skycode", title: "ZhikunCode 完整工程控制面与本次命中模块", status: "merged", reason: "并入完整能力覆盖图和控制面剖视图，避免重复总览。" },
+  { source: "skycode", title: "三端系统与本次日志实际路径", status: "included", reason: "展示前端、控制面、模型与工具端边界。" },
+  { source: "skycode", title: "黄金监控任务端到端执行时序", status: "included", reason: "展示请求至消息持久化的时序。" },
+  { source: "skycode", title: "QueryEngine 八步 Agent Loop", status: "included", reason: "解释主循环的控制步骤。" },
+  { source: "skycode", title: "ContextCascade 六层上下文治理与本次触发层", status: "included", reason: "展示上下文诊断与压缩边界。" },
+  { source: "skycode", title: "主 Agent 与五个子 Agent 的执行 DAG", status: "included", reason: "展示五个子 Agent 的终态与主链接管。" },
+  { source: "skycode", title: "统一工具授权与唯一执行入口", status: "included", reason: "展示工具安全执行门禁。" },
+  { source: "skycode", title: "持久交互与会话恢复状态机", status: "included", reason: "展示澄清交互的恢复语义。" },
+  { source: "skycode", title: "故障隔离与完成闭环", status: "merged", reason: "并入完成门禁、恢复状态机和失败矩阵。" },
+  { source: "skycode", title: "ZhikunCode Capability Overview 完整能力地图与本次运行证据覆盖", status: "included", reason: "完整展示能力层级和本案例覆盖。" },
+  { source: "skycode", title: "API Circuit Breaker 与 MCP 自动恢复状态机", status: "included", reason: "区分协议自动恢复与人工换模。" },
+  { source: "skycode", title: "分阶段子 Agent 调度与轮内工具并发模型", status: "included", reason: "展示时间重叠、最大轮次与工具队列。" },
+  { source: "skycode", title: "类型化失败、文件溯源和控制状态证据", status: "merged", reason: "并入恢复方式与运行版本边界矩阵。" },
+  { source: "skycode", title: "黄金行情监控系统的代码架构与数据流", status: "merged", reason: "由 ZhikunCode 分层架构、生命周期和数据血缘分别承接。" },
+  { source: "skycode", title: "Codex 与 ZhikunCode 最终产物的页面结构和状态语义", status: "merged", reason: "拆为两侧独立屏幕所有权图，减少拥挤。" },
+  { source: "skycode", title: "模型候选与控制面机制共同形成可观察交付链", status: "omitted", reason: "带有难以由单任务隔离验证的模型与控制面因果暗示。" },
   { source: "comparison", title: "审计决策星图", status: "omitted", reason: "与十四维共享标尺和加权贡献图重复，且极坐标会放大形状印象。" },
   { source: "comparison", title: "两套系统综合评分与证据不确定区间", status: "included", reason: "展示中心分与不确定区间。" },
   { source: "comparison", title: "中心分与证据区间重叠关系", status: "merged", reason: "已并入综合评分与证据区间图。" },
@@ -89,9 +89,9 @@ export const visualManifest = [
   { key: "resilienceState", id: "resilience-state", section: "control-plane", title: "API 熔断、MCP 重连与人工换模", takeaway: "前两者有自动恢复状态机；本次模型切换由用户手动完成。", sourceReferences: ["API Circuit Breaker 与 MCP 自动恢复状态机"], evidence: ["E027", "E038"] },
   { key: "recoveryMatrix", id: "recovery-matrix", section: "control-plane", title: "失败处理与文件记录", takeaway: "不同故障使用不同恢复路径，文件活动则通过哈希和编辑者信息追踪。", sourceReferences: ["类型化失败、文件溯源和控制状态证据", "失败隔离、恢复方式、文件溯源和运行版本边界矩阵"], evidence: ["E027", "E037", "E038"] },
   { key: "dataLineage", id: "data-lineage", section: "product-audit", title: "数据来源与页面展示", takeaway: "页面数字分为动态报价、估算、静态快照和官方入口核验四类。", sourceReferences: ["黄金数据从权威来源到页面标签的血缘链"], evidence: ["E009", "E010", "E011", "E019", "E020", "E028", "E030", "E036"] },
-  { key: "zhikunArchitecture", id: "zhikun-architecture", section: "product-audit", title: "ZhikunCode 产物的 Flask 架构", takeaway: "启动脚本、页面、六个路由、抓取器和月度缓存组成完整运行路径。", sourceReferences: ["ZhikunCode 冻结代码的 Flask 分层架构", "黄金行情监控系统的代码架构与数据流"], evidence: ["E006", "E007", "E019", "E028", "E032", "E034", "E036"] },
-  { key: "zhikunLifecycle", id: "zhikun-lifecycle", section: "product-audit", title: "ZhikunCode 怎样刷新数据", takeaway: "行情和银行数据每 30 秒刷新，央行数据按月缓存并支持预热。", sourceReferences: ["ZhikunCode 运行与数据生命周期"], evidence: ["E006", "E007", "E019", "E028", "E034", "E036"] },
-  { key: "zhikunScreen", id: "zhikun-screen", section: "product-audit", title: "ZhikunCode 页面模块与对应代码", takeaway: "每个可见模块都可以追到页面、路由、抓取器或配置文件。", sourceReferences: ["ZhikunCode 屏幕解剖、代码归属与状态", "Codex 与 ZhikunCode 最终产物的页面结构和状态语义"], evidence: ["E005", "E006", "E019", "E028", "E035", "E036"] },
+  { key: "skycodeArchitecture", id: "skycode-architecture", section: "product-audit", title: "ZhikunCode 产物的 Flask 架构", takeaway: "启动脚本、页面、六个路由、抓取器和月度缓存组成完整运行路径。", sourceReferences: ["ZhikunCode 冻结代码的 Flask 分层架构", "黄金行情监控系统的代码架构与数据流"], evidence: ["E006", "E007", "E019", "E028", "E032", "E034", "E036"] },
+  { key: "skycodeLifecycle", id: "skycode-lifecycle", section: "product-audit", title: "ZhikunCode 怎样刷新数据", takeaway: "行情和银行数据每 30 秒刷新，央行数据按月缓存并支持预热。", sourceReferences: ["ZhikunCode 运行与数据生命周期"], evidence: ["E006", "E007", "E019", "E028", "E034", "E036"] },
+  { key: "skycodeScreen", id: "skycode-screen", section: "product-audit", title: "ZhikunCode 页面模块与对应代码", takeaway: "每个可见模块都可以追到页面、路由、抓取器或配置文件。", sourceReferences: ["ZhikunCode 屏幕解剖、代码归属与状态", "Codex 与 ZhikunCode 最终产物的页面结构和状态语义"], evidence: ["E005", "E006", "E019", "E028", "E035", "E036"] },
   { key: "codexArchitecture", id: "codex-architecture", section: "product-audit", title: "Codex 产物的 Next.js 架构", takeaway: "页面通过单一 API 聚合五个并发任务，并组合动态报价和静态央行数据。", sourceReferences: ["Codex 冻结代码的 Next.js 客户端与服务端聚合架构"], evidence: ["E003", "E008", "E018", "E020", "E030", "E034", "E036"] },
   { key: "codexLifecycle", id: "codex-lifecycle", section: "product-audit", title: "Codex 怎样刷新数据", takeaway: "页面每 60 秒轮询，服务端并发聚合并设置缓存；央行数组不随请求更新。", sourceReferences: ["Codex 运行与数据生命周期"], evidence: ["E003", "E018", "E020", "E030", "E034", "E036"] },
   { key: "codexScreen", id: "codex-screen", section: "product-audit", title: "Codex 页面模块与对应代码", takeaway: "屏幕状态主要分布在页面组件、市场 API 和样式文件中。", sourceReferences: ["Codex 屏幕解剖、代码归属与状态"], evidence: ["E003", "E008", "E018", "E020", "E030", "E035", "E036"] },
@@ -109,7 +109,7 @@ const renderSourcePanel = (snapshot, index, panelCount) => {
   const [, , nativeWidth = 1180, nativeHeight = 680] = viewBox.split(/\s+/).map(Number);
   const compactClass = nativeWidth < 800 ? " compact-source" : "";
   const portraitClass = nativeHeight > nativeWidth ? " portrait-source" : "";
-  const sourceLabel = snapshot.source === "zhikun" ? "单系统报告" : "双系统报告";
+  const sourceLabel = snapshot.source === "skycode" ? "单系统报告" : "双系统报告";
   const heading = panelCount > 1
     ? `<header class="source-panel-heading"><div><span class="source-panel-index">${String(index + 1).padStart(2, "0")}</span>
           <span class="source-panel-copy"><strong>${x(snapshot.title)}</strong></span></div>
@@ -212,90 +212,90 @@ export const auditVisualCss = `
      The public audit embeds the static SVG itself, so it must remain visible and legible
      without the source page's companion DOM or runtime controller. */
   .source-panel-stage>svg.desktop-diagram{display:block!important}
-  .source-visual-panel[data-source-visual="zhikun-06"] .run-stage-map{display:block!important;max-height:none!important}
-  .source-visual-panel[data-source-visual="zhikun-06"] .run-stage-map .stage-node{opacity:1!important;filter:none!important}
-  .source-visual-panel[data-source-visual="zhikun-06"] .run-stage-map .stage-path{opacity:.68!important;stroke-width:2!important}
+  .source-visual-panel[data-source-visual="skycode-06"] .run-stage-map{display:block!important;max-height:none!important}
+  .source-visual-panel[data-source-visual="skycode-06"] .run-stage-map .stage-node{opacity:1!important;filter:none!important}
+  .source-visual-panel[data-source-visual="skycode-06"] .run-stage-map .stage-path{opacity:.68!important;stroke-width:2!important}
   .source-visual-panel:is(
-    [data-source-visual="zhikun-14"],[data-source-visual="zhikun-15"],
-    [data-source-visual="zhikun-16"],[data-source-visual="zhikun-17"],
-    [data-source-visual="zhikun-18"],[data-source-visual="zhikun-19"],
-    [data-source-visual="zhikun-20"],[data-source-visual="zhikun-21"]
+    [data-source-visual="skycode-14"],[data-source-visual="skycode-15"],
+    [data-source-visual="skycode-16"],[data-source-visual="skycode-17"],
+    [data-source-visual="skycode-18"],[data-source-visual="skycode-19"],
+    [data-source-visual="skycode-20"],[data-source-visual="skycode-21"]
   ) .log-node{filter:drop-shadow(0 0 9px rgba(67,216,235,.18))}
   .source-visual-panel:is(
-    [data-source-visual="zhikun-14"],[data-source-visual="zhikun-15"],
-    [data-source-visual="zhikun-16"],[data-source-visual="zhikun-17"],
-    [data-source-visual="zhikun-18"],[data-source-visual="zhikun-19"],
-    [data-source-visual="zhikun-20"],[data-source-visual="zhikun-21"]
+    [data-source-visual="skycode-14"],[data-source-visual="skycode-15"],
+    [data-source-visual="skycode-16"],[data-source-visual="skycode-17"],
+    [data-source-visual="skycode-18"],[data-source-visual="skycode-19"],
+    [data-source-visual="skycode-20"],[data-source-visual="skycode-21"]
   ) .source-node{opacity:.9}
   .source-visual-panel:is(
-    [data-source-visual="zhikun-14"],[data-source-visual="zhikun-15"],
-    [data-source-visual="zhikun-16"],[data-source-visual="zhikun-17"],
-    [data-source-visual="zhikun-18"],[data-source-visual="zhikun-19"],
-    [data-source-visual="zhikun-20"],[data-source-visual="zhikun-21"]
+    [data-source-visual="skycode-14"],[data-source-visual="skycode-15"],
+    [data-source-visual="skycode-16"],[data-source-visual="skycode-17"],
+    [data-source-visual="skycode-18"],[data-source-visual="skycode-19"],
+    [data-source-visual="skycode-20"],[data-source-visual="skycode-21"]
   ) .docs-node{opacity:.58;stroke-dasharray:7 6}
   .source-visual-panel:is(
-    [data-source-visual="zhikun-14"],[data-source-visual="zhikun-15"],
-    [data-source-visual="zhikun-16"],[data-source-visual="zhikun-17"],
-    [data-source-visual="zhikun-18"],[data-source-visual="zhikun-19"],
-    [data-source-visual="zhikun-20"],[data-source-visual="zhikun-21"]
+    [data-source-visual="skycode-14"],[data-source-visual="skycode-15"],
+    [data-source-visual="skycode-16"],[data-source-visual="skycode-17"],
+    [data-source-visual="skycode-18"],[data-source-visual="skycode-19"],
+    [data-source-visual="skycode-20"],[data-source-visual="skycode-21"]
   ) .manual-node{stroke-dasharray:5 5}
   .source-visual-panel:is(
-    [data-source-visual="zhikun-14"],[data-source-visual="zhikun-15"],
-    [data-source-visual="zhikun-16"],[data-source-visual="zhikun-17"],
-    [data-source-visual="zhikun-18"],[data-source-visual="zhikun-19"],
-    [data-source-visual="zhikun-20"],[data-source-visual="zhikun-21"]
+    [data-source-visual="skycode-14"],[data-source-visual="skycode-15"],
+    [data-source-visual="skycode-16"],[data-source-visual="skycode-17"],
+    [data-source-visual="skycode-18"],[data-source-visual="skycode-19"],
+    [data-source-visual="skycode-20"],[data-source-visual="skycode-21"]
   ) .error-node{filter:drop-shadow(0 0 8px rgba(250,115,136,.16))}
   .source-visual-panel:is(
-    [data-source-visual="zhikun-14"],[data-source-visual="zhikun-15"],
-    [data-source-visual="zhikun-16"],[data-source-visual="zhikun-17"],
-    [data-source-visual="zhikun-18"],[data-source-visual="zhikun-19"],
-    [data-source-visual="zhikun-20"],[data-source-visual="zhikun-21"]
+    [data-source-visual="skycode-14"],[data-source-visual="skycode-15"],
+    [data-source-visual="skycode-16"],[data-source-visual="skycode-17"],
+    [data-source-visual="skycode-18"],[data-source-visual="skycode-19"],
+    [data-source-visual="skycode-20"],[data-source-visual="skycode-21"]
   ) text[font-size="9"],.source-visual-panel:is(
-    [data-source-visual="zhikun-14"],[data-source-visual="zhikun-15"],
-    [data-source-visual="zhikun-16"],[data-source-visual="zhikun-17"],
-    [data-source-visual="zhikun-18"],[data-source-visual="zhikun-19"],
-    [data-source-visual="zhikun-20"],[data-source-visual="zhikun-21"]
+    [data-source-visual="skycode-14"],[data-source-visual="skycode-15"],
+    [data-source-visual="skycode-16"],[data-source-visual="skycode-17"],
+    [data-source-visual="skycode-18"],[data-source-visual="skycode-19"],
+    [data-source-visual="skycode-20"],[data-source-visual="skycode-21"]
   ) text[font-size="10"]{font-size:11px}
   .source-visual-panel:is(
-    [data-source-visual="zhikun-14"],[data-source-visual="zhikun-15"],
-    [data-source-visual="zhikun-16"],[data-source-visual="zhikun-17"],
-    [data-source-visual="zhikun-18"],[data-source-visual="zhikun-19"],
-    [data-source-visual="zhikun-20"],[data-source-visual="zhikun-21"]
+    [data-source-visual="skycode-14"],[data-source-visual="skycode-15"],
+    [data-source-visual="skycode-16"],[data-source-visual="skycode-17"],
+    [data-source-visual="skycode-18"],[data-source-visual="skycode-19"],
+    [data-source-visual="skycode-20"],[data-source-visual="skycode-21"]
   ) text[font-size="11"]{font-size:12px}
-  .source-visual-panel[data-source-visual="zhikun-22"] .observed-node{filter:drop-shadow(0 0 10px rgba(67,216,235,.2))}
-  .source-visual-panel[data-source-visual="zhikun-22"] .source-only-node{opacity:.92;stroke-dasharray:7 6}
-  .source-visual-panel[data-source-visual="zhikun-22"] .docs-only-node{opacity:.82;stroke:#65708e;stroke-dasharray:4 7}
-  .source-visual-panel[data-source-visual="zhikun-22"] g[data-evidence="source"] text{fill:#aeb8d0}
-  .source-visual-panel[data-source-visual="zhikun-22"] g[data-evidence="docs"] text{fill:#929db9}
-  .source-visual-panel:is([data-source-visual="zhikun-23"],[data-source-visual="zhikun-24"]) .observed-node{filter:drop-shadow(0 0 8px rgba(67,216,235,.15))}
-  .source-visual-panel:is([data-source-visual="zhikun-23"],[data-source-visual="zhikun-24"]) .source-node{opacity:.88;stroke-dasharray:7 6}
-  .source-visual-panel:is([data-source-visual="zhikun-23"],[data-source-visual="zhikun-24"]) .manual-node{stroke-dasharray:5 5}
-  .source-visual-panel[data-source-visual="zhikun-12"] .cut-observed{filter:drop-shadow(0 0 8px rgba(67,216,235,.17))}
-  .source-visual-panel[data-source-visual="zhikun-12"] .cut-source{opacity:.72}
-  .source-visual-panel[data-source-visual="zhikun-12"] .cut-docs{opacity:.34;stroke-dasharray:7 7}
+  .source-visual-panel[data-source-visual="skycode-22"] .observed-node{filter:drop-shadow(0 0 10px rgba(67,216,235,.2))}
+  .source-visual-panel[data-source-visual="skycode-22"] .source-only-node{opacity:.92;stroke-dasharray:7 6}
+  .source-visual-panel[data-source-visual="skycode-22"] .docs-only-node{opacity:.82;stroke:#65708e;stroke-dasharray:4 7}
+  .source-visual-panel[data-source-visual="skycode-22"] g[data-evidence="source"] text{fill:#aeb8d0}
+  .source-visual-panel[data-source-visual="skycode-22"] g[data-evidence="docs"] text{fill:#929db9}
+  .source-visual-panel:is([data-source-visual="skycode-23"],[data-source-visual="skycode-24"]) .observed-node{filter:drop-shadow(0 0 8px rgba(67,216,235,.15))}
+  .source-visual-panel:is([data-source-visual="skycode-23"],[data-source-visual="skycode-24"]) .source-node{opacity:.88;stroke-dasharray:7 6}
+  .source-visual-panel:is([data-source-visual="skycode-23"],[data-source-visual="skycode-24"]) .manual-node{stroke-dasharray:5 5}
+  .source-visual-panel[data-source-visual="skycode-12"] .cut-observed{filter:drop-shadow(0 0 8px rgba(67,216,235,.17))}
+  .source-visual-panel[data-source-visual="skycode-12"] .cut-source{opacity:.72}
+  .source-visual-panel[data-source-visual="skycode-12"] .cut-docs{opacity:.34;stroke-dasharray:7 7}
   .source-visual-panel:is(
-    [data-source-visual="zhikun-07"],[data-source-visual="zhikun-10"],
-    [data-source-visual="zhikun-11"]
+    [data-source-visual="skycode-07"],[data-source-visual="skycode-10"],
+    [data-source-visual="skycode-11"]
   ) text[font-size="8"],.source-visual-panel:is(
-    [data-source-visual="zhikun-07"],[data-source-visual="zhikun-10"],
-    [data-source-visual="zhikun-11"]
+    [data-source-visual="skycode-07"],[data-source-visual="skycode-10"],
+    [data-source-visual="skycode-11"]
   ) text[font-size="9"]{font-size:10px}
   .source-visual-panel:is(
-    [data-source-visual="zhikun-07"],[data-source-visual="zhikun-10"],
-    [data-source-visual="zhikun-11"]
+    [data-source-visual="skycode-07"],[data-source-visual="skycode-10"],
+    [data-source-visual="skycode-11"]
   ) text[font-size="10"]{font-size:11px}
-  .source-visual-panel:is([data-source-visual="zhikun-08"],[data-source-visual="zhikun-09"]) text[font-size="8"],
-  .source-visual-panel:is([data-source-visual="zhikun-08"],[data-source-visual="zhikun-09"]) text[font-size="9"]{font-size:10.5px}
-  .source-visual-panel:is([data-source-visual="zhikun-08"],[data-source-visual="zhikun-09"]) text[font-size="10"],
-  .source-visual-panel:is([data-source-visual="zhikun-08"],[data-source-visual="zhikun-09"]) text[font-size="11"]{font-size:11.5px}
-  .source-visual-panel[data-source-visual="zhikun-22"] text[font-size="8"]{font-size:9px}
-  .source-visual-panel[data-source-visual="zhikun-22"] text[font-size="9"]{font-size:10px}
-  .source-visual-panel[data-source-visual="zhikun-22"] text[font-size="10"]{font-size:11px}
+  .source-visual-panel:is([data-source-visual="skycode-08"],[data-source-visual="skycode-09"]) text[font-size="8"],
+  .source-visual-panel:is([data-source-visual="skycode-08"],[data-source-visual="skycode-09"]) text[font-size="9"]{font-size:10.5px}
+  .source-visual-panel:is([data-source-visual="skycode-08"],[data-source-visual="skycode-09"]) text[font-size="10"],
+  .source-visual-panel:is([data-source-visual="skycode-08"],[data-source-visual="skycode-09"]) text[font-size="11"]{font-size:11.5px}
+  .source-visual-panel[data-source-visual="skycode-22"] text[font-size="8"]{font-size:9px}
+  .source-visual-panel[data-source-visual="skycode-22"] text[font-size="9"]{font-size:10px}
+  .source-visual-panel[data-source-visual="skycode-22"] text[font-size="10"]{font-size:11px}
   /* The comparison source's last visual-QA layer was scoped to body.technical-audit.
      Only its SVG semantics are reattached here; page-shell and navigation rules must
      not leak into the independently embedded source panels. */
-  .source-visual-panel[data-source-family="comparison"] .audit-svg .node-zhikun{
-    fill:#e4eef2;stroke:var(--system-paper-zhikun)
+  .source-visual-panel[data-source-family="comparison"] .audit-svg .node-skycode{
+    fill:#e4eef2;stroke:var(--system-paper-skycode)
   }
   .source-visual-panel[data-source-family="comparison"] .audit-svg .node-codex{
     fill:#f5ead1;stroke:var(--system-paper-codex)
@@ -325,7 +325,7 @@ export const auditReportCss = `
     --bg:#060811;--panel:#0e1424;--panel-2:#111a2d;--panel-3:#151f34;
     --text:#f5f7ff;--muted:#abb4cf;--soft:#77829f;--line:#26324a;--line-strong:#354560;
     --cyan:#43d8eb;--blue:#5a95ff;--purple:#a77bff;--amber:#f6b94b;--green:#2dd4a8;--red:#fa7388;
-    --zhikun:#43d8eb;--codex:#f6b94b;
+    --skycode:#43d8eb;--codex:#f6b94b;
     --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
     --mono:"SFMono-Regular","Cascadia Code","Liberation Mono",Menlo,monospace;
   }
@@ -365,7 +365,7 @@ export const auditReportCss = `
   .section-head h2{margin:0;font-size:clamp(31px,3.7vw,48px);line-height:1.12;letter-spacing:-.04em}.section-head p{max-width:900px;margin:10px 0 0;color:var(--muted)}
   .panel,.question-card,.evidence-card,.shot,.disclosure{border:1px solid var(--line);background:linear-gradient(180deg,rgba(17,25,43,.96),rgba(11,16,30,.96));border-radius:15px;box-shadow:0 18px 50px rgba(0,0,0,.18)}
   .summary-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}.prompt{padding:27px}.prompt blockquote{margin:18px 0 0;padding:21px 23px;border:0;border-left:4px solid var(--cyan);border-radius:0 10px 10px 0;background:rgba(67,216,235,.055);font-size:17px}
-  .summary-side{display:grid;gap:14px}.fact-box{padding:22px;border-left:3px solid var(--line-strong)}.fact-box:first-child{border-left-color:var(--zhikun)}.fact-box:nth-child(2){border-left-color:var(--codex)}.fact-box:last-child{border-left-color:var(--green)}.fact-box h3{margin:0 0 7px}.fact-box p{margin:0;color:var(--muted)}
+  .summary-side{display:grid;gap:14px}.fact-box{padding:22px;border-left:3px solid var(--line-strong)}.fact-box:first-child{border-left-color:var(--skycode)}.fact-box:nth-child(2){border-left-color:var(--codex)}.fact-box:last-child{border-left-color:var(--green)}.fact-box h3{margin:0 0 7px}.fact-box p{margin:0;color:var(--muted)}
   .finding-grid,.boundary-grid{display:grid;gap:13px;margin-top:18px}.finding-grid{grid-template-columns:repeat(3,1fr)}.boundary-grid{grid-template-columns:repeat(4,1fr)}
   .finding,.boundary{padding:20px}.finding{border-left:3px solid}.finding.verified{border-left-color:var(--green)}.finding.limit{border-left-color:var(--amber)}.finding b{display:block;margin-bottom:6px}.finding p,.boundary p{margin:0;color:var(--muted);font-size:13px}.boundary .num{color:var(--cyan);font:700 11px var(--mono)}.boundary h3{margin:9px 0 7px;font-size:16px}
   .notice{margin-top:18px;padding:20px 22px;border-left:3px solid var(--amber);border-radius:0 12px 12px 0;background:linear-gradient(90deg,rgba(246,185,75,.1),rgba(246,185,75,.025));box-shadow:inset 0 0 0 1px rgba(246,185,75,.1)}.notice strong{color:#ffd47c}.notice p{margin:6px 0 0;color:#c2cae0}
@@ -375,13 +375,13 @@ export const auditReportCss = `
   .question-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0;padding:0;list-style:none}.question-card{position:relative;padding:20px;overflow:hidden}.question-card::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--cyan)}.boundary-card::before{background:var(--amber)}.question-card header{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:start}.question-card ul{display:grid;gap:8px;margin:15px 0 0;padding:0;list-style:none}.question-card ul>li{padding:10px 12px;border-left:2px solid #384965;background:rgba(255,255,255,.025)}.question-card ul>li b,.question-card ul>li span{display:block}.question-card ul>li span{color:var(--muted);font-size:12px}.boundary-card p{color:var(--muted);font-size:12px}
   .mechanism-legend,.legend-row{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 15px}
   .capability header{display:flex;justify-content:space-between;gap:12px}.capability h3{margin:0}.capability dl{display:grid;gap:9px}.capability dl div{display:grid;grid-template-columns:72px 1fr;gap:10px;padding-top:9px;border-top:1px solid var(--line)}dt{font-weight:700;color:#bdc6d9}dd{margin:0}.capability dd{color:var(--muted);font-size:13px}
-  .status,.system-tag,.data-status{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font:700 10px/1 var(--mono);white-space:nowrap}.status.verified{color:var(--green);background:rgba(45,212,168,.08)}.status.limited{color:var(--amber);background:rgba(246,185,75,.08)}.status.failed{color:var(--red);background:rgba(250,115,136,.08)}.status.grade{color:#b9c4dc;background:rgba(167,123,255,.09)}.system-tag.zhikun{color:var(--zhikun);background:rgba(67,216,235,.08);border:1px solid rgba(67,216,235,.24)}.system-tag.codex{color:var(--codex);background:rgba(246,185,75,.08);border:1px solid rgba(246,185,75,.24)}
+  .status,.system-tag,.data-status{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font:700 10px/1 var(--mono);white-space:nowrap}.status.verified{color:var(--green);background:rgba(45,212,168,.08)}.status.limited{color:var(--amber);background:rgba(246,185,75,.08)}.status.failed{color:var(--red);background:rgba(250,115,136,.08)}.status.grade{color:#b9c4dc;background:rgba(167,123,255,.09)}.system-tag.skycode{color:var(--skycode);background:rgba(67,216,235,.08);border:1px solid rgba(67,216,235,.24)}.system-tag.codex{color:var(--codex);background:rgba(246,185,75,.08);border:1px solid rgba(246,185,75,.24)}
   .data-status{margin-bottom:9px;border:1px solid currentColor}.status-dynamic-public{color:var(--green)}.status-derived-estimate,.status-different-instrument{color:var(--amber)}.status-static-snapshot,.status-verification-only{color:var(--purple)}.status-missing{color:var(--red)}.matrix-details{display:grid;gap:5px;margin:0}.matrix-details div{display:grid;grid-template-columns:46px 1fr;gap:7px;padding-bottom:4px;border-bottom:1px dashed var(--line);font-size:11px}.matrix-details dt{color:#7f8ba5}.data-matrix td{min-width:350px}
   .pressure-label{display:flex;justify-content:space-between;margin-bottom:6px;color:#cad2e2;font:700 10px var(--mono)}.pressure-scale{height:6px;margin-bottom:9px;overflow:hidden;border-radius:99px;background:#202a3d}.pressure-scale i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--amber))}
   .evidence-ref{display:inline-block;margin:2px;padding:2px 5px;border:1px solid rgba(90,149,255,.34);border-radius:5px;background:rgba(90,149,255,.07);color:#8bbcff;font:700 9px var(--mono);text-decoration:none}.evidence-ref:hover{background:rgba(90,149,255,.15)}
   .gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.shot{margin:0;overflow:hidden}.shot-frame{height:620px;overflow:auto;background:#05070d}.shot-frame.short{height:auto}.shot img{display:block;width:100%;height:auto}.shot figcaption{padding:16px 18px;border-top:1px solid var(--line)}.shot figcaption strong,.shot figcaption span{display:block}.shot figcaption span,.shot-note{color:var(--muted);font-size:12px}.shot-note{grid-column:1/-1}
-  .score-summary{display:grid;grid-template-columns:1fr 1fr .8fr;gap:14px;margin-bottom:18px}.score-panel{padding:22px}.score-panel .score{font:750 42px/1 var(--mono)}.score-panel small{display:block;margin-top:8px;color:var(--muted)}.score-panel.zhikun{border-top:4px solid var(--zhikun)}.score-panel.codex{border-top:4px solid var(--codex)}.formula{padding:22px;border:1px solid var(--line);border-radius:15px;background:#111a2d}.formula code{display:block;margin-bottom:8px;color:var(--cyan)}.formula span{color:var(--muted);font-size:12px}
-  .score-table td{min-width:310px}.score-cell{display:flex;align-items:center;gap:12px}.score-cell b{width:34px;color:var(--zhikun);font:700 14px var(--mono)}.score-cell.codex b{color:var(--codex)}.meter{display:block;height:7px;flex:1;overflow:hidden;border-radius:99px;background:#202a3d}.meter i{display:block;height:100%;background:var(--zhikun)}.score-cell.codex .meter i{background:var(--codex)}.delta{font:700 12px var(--mono)}.delta.zhikun{color:var(--zhikun)}.delta.codex{color:var(--codex)}
+  .score-summary{display:grid;grid-template-columns:1fr 1fr .8fr;gap:14px;margin-bottom:18px}.score-panel{padding:22px}.score-panel .score{font:750 42px/1 var(--mono)}.score-panel small{display:block;margin-top:8px;color:var(--muted)}.score-panel.skycode{border-top:4px solid var(--skycode)}.score-panel.codex{border-top:4px solid var(--codex)}.formula{padding:22px;border:1px solid var(--line);border-radius:15px;background:#111a2d}.formula code{display:block;margin-bottom:8px;color:var(--cyan)}.formula span{color:var(--muted);font-size:12px}
+  .score-table td{min-width:310px}.score-cell{display:flex;align-items:center;gap:12px}.score-cell b{width:34px;color:var(--skycode);font:700 14px var(--mono)}.score-cell.codex b{color:var(--codex)}.meter{display:block;height:7px;flex:1;overflow:hidden;border-radius:99px;background:#202a3d}.meter i{display:block;height:100%;background:var(--skycode)}.score-cell.codex .meter i{background:var(--codex)}.delta{font:700 12px var(--mono)}.delta.skycode{color:var(--skycode)}.delta.codex{color:var(--codex)}
   .runtime-check{margin-top:16px;padding:18px 20px;border:1px dashed #40506d;border-radius:12px;background:rgba(90,149,255,.035)}.runtime-check strong{display:block}.runtime-check span{color:var(--muted)}
   .evidence-tools{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:18px}.evidence-tools p{margin:0;color:var(--muted)}.button{display:inline-flex;padding:9px 12px;border:1px solid #42516c;border-radius:8px;background:#131c30;color:#dbe2f2;text-decoration:none;font-weight:700;font-size:12px}.button:hover{border-color:var(--cyan)}
   .evidence-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.evidence-card{position:relative;padding:20px;scroll-margin-top:90px;overflow:hidden}.evidence-card::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:#50678a}.evidence-card:target{outline:3px solid var(--cyan)}.evidence-card header{display:flex;justify-content:space-between;gap:12px}.evidence-badges{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px}.evidence-id{color:var(--cyan);font:750 12px var(--mono)}.legacy-id{margin-left:7px;color:#6f7b96;font:10px var(--mono)}.evidence-card h3{margin:12px 0 7px;font-size:16px}.evidence-card>p{margin:0 0 13px;color:var(--muted);font-size:13px}.evidence-card dl{display:grid;gap:4px;margin:0}.evidence-card dl div{display:grid;grid-template-columns:90px 1fr;gap:8px;padding:3px 0;border-bottom:1px dashed var(--line);font-size:11px}.evidence-card dt{color:#7d89a3}.evidence-card dd{overflow-wrap:anywhere}.private-source{color:var(--amber)}.redaction{padding-top:9px;border-top:1px dashed var(--line);color:var(--amber)!important}

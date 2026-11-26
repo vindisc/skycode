@@ -337,7 +337,7 @@ public class VerifyJourneyTool implements Tool {
             String browserResourceId = "rv-" + UUID.randomUUID();
             try {
                 if (staticPublication) {
-                    staticStage = Files.createTempDirectory("zhikun-meoo-verify-");
+                    staticStage = Files.createTempDirectory("skycode-meoo-verify-");
                     meooPolicy.stage(publicationSnapshot, staticStage);
                     handle = devServerLauncher.startStatic(staticStage, DEV_SERVER_TIMEOUT);
                     baseUrl = "http://127.0.0.1:" + handle.port();

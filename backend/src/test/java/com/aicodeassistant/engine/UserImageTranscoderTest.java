@@ -19,7 +19,7 @@ import java.util.concurrent.*;
 import static org.assertj.core.api.Assertions.*;
 
 class UserImageTranscoderTest {
-    static final String URL = "https://bucket.oss-cn-beijing.aliyuncs.com/zhikuncode-artifacts/clipboard/";
+    static final String URL = "https://bucket.oss-cn-beijing.aliyuncs.com/skycode-artifacts/clipboard/";
     static OssPublishProperties properties() {
         var props = new OssPublishProperties(); props.setBucket("bucket"); props.setEndpoint("https://oss-cn-beijing.aliyuncs.com"); return props;
     }

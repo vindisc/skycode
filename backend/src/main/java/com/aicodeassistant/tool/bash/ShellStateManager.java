@@ -79,32 +79,32 @@ public class ShellStateManager {
         String quotedCwdFile = "'" + cwdFile.replace("'", "'\"'\"'") + "'";
 
         // 动态选择 heredoc 终止符 (防御极端边缘情况)
-        String heredocDelimiter = "__ZHIKUN_EOF__";
+        String heredocDelimiter = "__SKYCODE_EOF__";
         if (userCommand.contains(heredocDelimiter)) {
-            heredocDelimiter = "__ZHIKUN_EOF_" + System.nanoTime() + "__";
+            heredocDelimiter = "__SKYCODE_EOF_" + System.nanoTime() + "__";
         }
 
         return "umask 077\n"
                 + "shopt -u extglob 2>/dev/null || true\n"
-                + "__zhikun_cmd=''\n"
-                + "__zhikun_cwd=''\n"
-                + "trap 'rm -f \"$__zhikun_cmd\" \"$__zhikun_cwd\"' EXIT\n"
+                + "__skycode_cmd=''\n"
+                + "__skycode_cwd=''\n"
+                + "trap 'rm -f \"$__skycode_cmd\" \"$__skycode_cwd\"' EXIT\n"
                 // Both files use the private state directory, independent of the shell's TMPDIR.
-                + "__zhikun_cmd=$(mktemp " + quotedCwdFile + ".cmd.XXXXXX)"
+                + "__skycode_cmd=$(mktemp " + quotedCwdFile + ".cmd.XXXXXX)"
                 + " || { echo 'Shell initialization failed: cannot create command file' >&2; exit 1; }\n"
-                + "__zhikun_cwd=$(mktemp " + quotedCwdFile + ".XXXXXX)"
+                + "__skycode_cwd=$(mktemp " + quotedCwdFile + ".XXXXXX)"
                 + " || { echo 'Shell initialization failed: cannot create CWD file' >&2; exit 1; }\n"
-                + "cat > \"$__zhikun_cmd\" <<'" + heredocDelimiter + "'"
+                + "cat > \"$__skycode_cmd\" <<'" + heredocDelimiter + "'"
                 + " || { echo 'Shell initialization failed: cannot write command file' >&2; exit 1; }\n"
                 + userCommand + "\n"
                 + heredocDelimiter + "\n"
-                + "source \"$__zhikun_cmd\"\n"
-                + "__zhikun_exit=$?\n"
-                + "rm -f \"$__zhikun_cmd\"\n"
-                + "pwd > \"$__zhikun_cwd\"\n"
-                + "chmod 600 \"$__zhikun_cwd\"\n"
-                + "mv -f \"$__zhikun_cwd\" " + quotedCwdFile + "\n"
-                + "exit $__zhikun_exit";
+                + "source \"$__skycode_cmd\"\n"
+                + "__skycode_exit=$?\n"
+                + "rm -f \"$__skycode_cmd\"\n"
+                + "pwd > \"$__skycode_cwd\"\n"
+                + "chmod 600 \"$__skycode_cwd\"\n"
+                + "mv -f \"$__skycode_cwd\" " + quotedCwdFile + "\n"
+                + "exit $__skycode_exit";
     }
 
     /** 确认包装脚本已经完成本次 CWD 状态更新。 */

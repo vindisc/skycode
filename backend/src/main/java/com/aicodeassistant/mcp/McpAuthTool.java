@@ -58,7 +58,7 @@ public class McpAuthTool implements Tool {
 
     /** 令牌存储目录 */
     private static final Path TOKEN_DIR = Path.of(
-            System.getProperty("user.home"), ".zhikun", "mcp-tokens");
+            System.getProperty("user.home"), ".skycode", "mcp-tokens");
 
     public McpAuthTool(String serverName, String serverUrl,
                        McpClientManager mcpClientManager, ObjectMapper objectMapper,

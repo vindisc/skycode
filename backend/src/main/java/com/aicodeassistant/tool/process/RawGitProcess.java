@@ -76,7 +76,7 @@ abstract class RawGitProcess extends Process {
                 set -m
                 script=$1
                 shift
-                /bin/bash -p -c "$script" zhikun-git-scope "$@" <&0 &
+                /bin/bash -p -c "$script" skycode-git-scope "$@" <&0 &
                 child=$!
                 exec </dev/null >/dev/null 2>&1
                 wait "$child"
@@ -87,7 +87,7 @@ abstract class RawGitProcess extends Process {
                 shift
                 printf '%s\\n' "$$" > "$control/anchor"
                 IFS= read -r admission && [ "$admission" = prepare ] || exit 125
-                /bin/bash -p -c 'IFS= read -r admission && [ "$admission" = run ] || exit 125; exec "$@" </dev/null' zhikun-git-command "$@" <&0 &
+                /bin/bash -p -c 'IFS= read -r admission && [ "$admission" = run ] || exit 125; exec "$@" </dev/null' skycode-git-command "$@" <&0 &
                 child=$!
                 printf '%s\\n' "$child" > "$control/foreground"
                 wait "$child"
@@ -123,10 +123,10 @@ abstract class RawGitProcess extends Process {
                 throw new IOException("RAW_GIT_PROCESS_SCOPE_UNAVAILABLE: bash and ps are required");
             if (builder.redirectInput() != ProcessBuilder.Redirect.PIPE)
                 throw new IOException("Raw Git requires piped admission");
-            Path control = Files.createTempDirectory("zhikun-raw-git-");
+            Path control = Files.createTempDirectory("skycode-raw-git-");
             List<String> original = List.copyOf(builder.command());
             var command = new ArrayList<>(List.of("/bin/bash", "-p", "-c", LAUNCH,
-                    "zhikun-git-launch", SUPERVISE, control.toString()));
+                    "skycode-git-launch", SUPERVISE, control.toString()));
             command.addAll(original);
             Mac process = null;
             try {

@@ -90,13 +90,13 @@ jobs:
 
       # 构建 Docker 镜像用于扫描
       - name: Build Docker image
-        run: docker build -t zhikuncode:scan .
+        run: docker build -t skycode:scan .
 
       # 使用 Trivy 扫描容器镜像
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: 'zhikuncode:scan'
+          image-ref: 'skycode:scan'
           format: 'table'
           exit-code: '0'
           severity: 'CRITICAL,HIGH'

@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 await import('./build-king-report-v14.mjs');
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const reportPath = join(repoRoot, 'docs/case-studies/zhikuncode开发王者荣耀.html');
+const reportPath = join(repoRoot, 'docs/case-studies/skycode开发王者荣耀.html');
 const assetRoot = join(repoRoot, 'docs/case-studies/assets/king');
 const manifestPath = join(assetRoot, 'visualization-manifest.json');
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');

@@ -19,7 +19,7 @@ public class MemoryCommand implements Command {
     }
 
     @Override public String getName() { return "memory"; }
-    @Override public String getDescription() { return "Manage project memory (zhikun.md)"; }
+    @Override public String getDescription() { return "Manage project memory (skycode.md)"; }
     @Override public CommandType getType() { return CommandType.LOCAL_JSX; }
 
     @Override
@@ -37,7 +37,7 @@ public class MemoryCommand implements Command {
                 "workingDir", context.workingDir(),
                 "hasMemory", hasMemory,
                 "content", hasMemory ? memory : "",
-                "files", List.of("zhikun.md", "zhikun.local.md")
+                "files", List.of("skycode.md", "skycode.local.md")
             ));
         }
 
@@ -55,15 +55,15 @@ public class MemoryCommand implements Command {
                     ## 注意事项
                     <!-- 在此填写项目注意事项 -->
                     """;
-                // 仅在不存在时创建，绝不覆盖已有 zhikun.md
+                // 仅在不存在时创建，绝不覆盖已有 skycode.md
                 memoryService.createMemoryIfAbsent(workingDir, template, false);
                 return CommandResult.jsx(Map.of(
                     "action", "memoryCreated",
-                    "fileName", "zhikun.md",
+                    "fileName", "skycode.md",
                     "workingDir", context.workingDir()
                 ));
             } catch (java.nio.file.FileAlreadyExistsException e) {
-                return CommandResult.text("zhikun.md 已存在，未做修改。");
+                return CommandResult.text("skycode.md 已存在，未做修改。");
             } catch (IOException e) {
                 return CommandResult.error("创建失败: " + e.getMessage());
             }

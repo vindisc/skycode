@@ -34,7 +34,7 @@ import java.util.List;
  * <p>
  * 另外（除非使用 Override）:
  * <ul>
- *     <li>记忆段（MEMORY.md / zhikun.md / zhikun.local.md）由 {@link MemoryPromptService}
+ *     <li>记忆段（MEMORY.md / skycode.md / skycode.local.md）由 {@link MemoryPromptService}
  *         每次构建时重新读取并追加；实际选中 Custom 时不自动注入记忆</li>
  *     <li>appendSystemPrompt 追加到最终提示末尾</li>
  * </ul>
@@ -136,7 +136,7 @@ public class EffectiveSystemPromptBuilder {
         }
 
         // 优先级 1: Coordinator 模式
-        // 必须同时满足 feature flag + 环境变量 ZHIKUN_COORDINATOR_MODE
+        // 必须同时满足 feature flag + 环境变量 SKYCODE_COORDINATOR_MODE
         // 且当前无 Agent 定义时才激活 Coordinator 模式
         // ERR-2 fix: 使用语义化方法，消除内联条件组合
         if (coordinatorService.isCoordinatorTopLevel(config.getAgentDefinition())) {

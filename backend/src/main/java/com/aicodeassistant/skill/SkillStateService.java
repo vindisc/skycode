@@ -35,7 +35,7 @@ public class SkillStateService {
 
     @Autowired
     public SkillStateService(ObjectMapper objectMapper,
-            @Value("${skill.state-path:${user.home}/.zhikun/skill-states.json}") String statePath) {
+            @Value("${skill.state-path:${user.home}/.skycode/skill-states.json}") String statePath) {
         this.objectMapper = objectMapper;
         this.statePath = Path.of(statePath).toAbsolutePath().normalize();
         load();

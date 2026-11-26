@@ -323,7 +323,7 @@ def _detect_language(ext: str) -> Optional[str]:
 _IGNORE_DIRS = {
     "node_modules", ".git", "__pycache__", ".venv", "venv",
     "dist", "build", "target", ".idea", ".vscode", ".next",
-    ".claude", ".zhikun", ".scratchpad", ".ai-code-assistant",
+    ".claude", ".skycode", ".scratchpad", ".ai-code-assistant",
     "egg-info", ".pytest_cache", ".mypy_cache",
 }
 

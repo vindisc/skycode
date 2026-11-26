@@ -143,7 +143,7 @@ const databaseLocalUserReplacements = databaseExportPaths.reduce((sum, relativeP
 const derivedVisualizationReplacements = placeholderCount('db/activities-20260809-0130-0701.json');
 const report = {
   schemaVersion: 1,
-  caseId: 'zhikuncode-king-20260809',
+  caseId: 'skycode-king-20260809',
   policy: 'MINIMAL_REDACTION_PRESERVE_TECHNICAL_TRACE_IDS',
   developmentWindow: { startInclusiveLocal: start, endExclusiveLocal: end, timeZone: 'Asia/Shanghai' },
   mergeOrder: sources.map((source) => source.id),

@@ -19,8 +19,8 @@ public class DatabaseResolver {
     private final String configuredProjectRoot;
 
     public DatabaseResolver(
-            @Value("${zhikuncode.database.global-path:}") String configuredGlobalPath,
-            @Value("${zhikuncode.database.project-root:}") String configuredProjectRoot) {
+            @Value("${skycode.database.global-path:}") String configuredGlobalPath,
+            @Value("${skycode.database.project-root:}") String configuredProjectRoot) {
         this.configuredGlobalPath = configuredGlobalPath;
         this.configuredProjectRoot = configuredProjectRoot;
     }

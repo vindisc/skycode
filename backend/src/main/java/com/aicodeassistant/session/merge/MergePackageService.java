@@ -45,9 +45,9 @@ public class MergePackageService {
     }
     // Per operation, shared by A/B, descendants and embedded images. Failed partial writes
     // still consume the allowance so repeatedly changing files cannot cause unbounded writes.
-    @org.springframework.beans.factory.annotation.Value("${zhikuncode.session-merge.max-copy-bytes:1073741824}")
+    @org.springframework.beans.factory.annotation.Value("${skycode.session-merge.max-copy-bytes:1073741824}")
     private long maxCopyBytes = 1024L * 1024 * 1024;
-    @org.springframework.beans.factory.annotation.Value("${zhikuncode.session-merge.min-free-bytes:1073741824}")
+    @org.springframework.beans.factory.annotation.Value("${skycode.session-merge.min-free-bytes:1073741824}")
     private long minFreeBytes = 1024L * 1024 * 1024;
 
     long availableBytes(Path directory) throws IOException {
@@ -116,7 +116,7 @@ public class MergePackageService {
 
     public record Snapshot(String hash, int version, long records, long files, long copiedCount,
                            long warningCount, String blockedReason) { }
-    @org.springframework.beans.factory.annotation.Value("${zhikuncode.session-merge.max-record-materialize-bytes:67108864}")
+    @org.springframework.beans.factory.annotation.Value("${skycode.session-merge.max-record-materialize-bytes:67108864}")
     private int maxRecordMaterializeBytes = 64 * 1024 * 1024;
 
     /** A bounded reader of a SQLite TEXT column. No JDBC allocation grows with the whole record. */

@@ -45,8 +45,8 @@ from workspace_paths import WorkspacePathError, resolve_workspace_path  # noqa: 
 @pytest.fixture(autouse=True)
 def _isolated_workspace_policy(monkeypatch):
     """Keep path-policy tests independent of the developer's shell config."""
-    monkeypatch.delenv("ZHIKUN_LOCAL_PICKER_ENABLED", raising=False)
-    monkeypatch.delenv("ZHIKUN_WORKSPACE_ALLOWED_ROOTS", raising=False)
+    monkeypatch.delenv("SKYCODE_LOCAL_PICKER_ENABLED", raising=False)
+    monkeypatch.delenv("SKYCODE_WORKSPACE_ALLOWED_ROOTS", raising=False)
 
 
 def _create_git_repo(path):
@@ -104,7 +104,7 @@ def test_local_picker_accepts_external_absolute_project_but_keeps_default_anchor
     relative_project.mkdir(parents=True)
     external_project.mkdir()
     monkeypatch.setenv("WORKSPACE_ROOT", str(workspace))
-    monkeypatch.setenv("ZHIKUN_LOCAL_PICKER_ENABLED", "true")
+    monkeypatch.setenv("SKYCODE_LOCAL_PICKER_ENABLED", "true")
 
     assert resolve_workspace_path(
         str(external_project), require_directory=True) == external_project.resolve()
@@ -120,8 +120,8 @@ def test_allowed_roots_override_local_picker_mode(monkeypatch, tmp_path):
     allowed.mkdir()
     outside.mkdir()
     monkeypatch.setenv("WORKSPACE_ROOT", str(workspace))
-    monkeypatch.setenv("ZHIKUN_LOCAL_PICKER_ENABLED", "true")
-    monkeypatch.setenv("ZHIKUN_WORKSPACE_ALLOWED_ROOTS", str(allowed))
+    monkeypatch.setenv("SKYCODE_LOCAL_PICKER_ENABLED", "true")
+    monkeypatch.setenv("SKYCODE_WORKSPACE_ALLOWED_ROOTS", str(allowed))
 
     assert resolve_workspace_path(
         str(allowed), require_directory=True) == allowed.resolve()
@@ -135,7 +135,7 @@ def test_explicitly_disabled_local_picker_fails_closed(monkeypatch, tmp_path):
     workspace.mkdir()
     outside.mkdir()
     monkeypatch.setenv("WORKSPACE_ROOT", str(workspace))
-    monkeypatch.setenv("ZHIKUN_LOCAL_PICKER_ENABLED", "false")
+    monkeypatch.setenv("SKYCODE_LOCAL_PICKER_ENABLED", "false")
 
     with pytest.raises(WorkspacePathError):
         resolve_workspace_path(str(outside), require_directory=True)

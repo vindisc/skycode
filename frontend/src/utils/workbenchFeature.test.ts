@@ -44,10 +44,10 @@ describe('workbenchFeature', () => {
 
     it('ignores per-session views and always falls back to the machine default', () => {
         const storage = memoryStorage({
-            'zhikun.workbench.session-view.session-1': 'simple',
+            'skycode.workbench.session-view.session-1': 'simple',
         });
         expect(readSessionWorkbenchView('session-1', 'development', storage)).toBe('development');
-        expect(storage.getItem('zhikun.workbench.session-view.session-1')).toBeNull();
+        expect(storage.getItem('skycode.workbench.session-view.session-1')).toBeNull();
         expect(readSessionWorkbenchView('session-2', 'development', storage)).toBe('development');
     });
 

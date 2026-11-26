@@ -96,7 +96,7 @@ class SkillRegistrySkillLoadTest {
     }
 
     private Path writeProjectSkill(String name, String description, String body) throws Exception {
-        Path directory = Files.createDirectories(project.resolve(".zhikun/skills"));
+        Path directory = Files.createDirectories(project.resolve(".skycode/skills"));
         return Files.writeString(directory.resolve(name + ".md"), """
                 ---
                 name: %s

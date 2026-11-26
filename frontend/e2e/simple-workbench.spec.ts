@@ -2,8 +2,8 @@ import { expect, test } from '@playwright/test';
 
 async function bootWithLegacySimplePreference(page: import('@playwright/test').Page) {
   await page.addInitScript(() => {
-    localStorage.setItem('zhikun.workbench.enabled', 'true');
-    localStorage.setItem('zhikun.workbench.default-view', 'simple');
+    localStorage.setItem('skycode.workbench.enabled', 'true');
+    localStorage.setItem('skycode.workbench.default-view', 'simple');
   });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 }
@@ -54,8 +54,8 @@ test.describe('Developer workbench with legacy preferences', () => {
 
   test('keeps session creation in the sidebar when the feature flag is disabled', async ({ page }) => {
     await page.addInitScript(() => {
-      localStorage.setItem('zhikun.workbench.enabled', 'false');
-      localStorage.setItem('zhikun.workbench.default-view', 'simple');
+      localStorage.setItem('skycode.workbench.enabled', 'false');
+      localStorage.setItem('skycode.workbench.default-view', 'simple');
     });
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 

@@ -175,7 +175,7 @@ public class SandboxManager {
                                                String runId, String toolUseId) {
         String safeRun = sanitize(runId);
         String safeTool = sanitize(toolUseId);
-        String containerName = "zhikun-" + safeRun + "-" + safeTool + "-"
+        String containerName = "skycode-" + safeRun + "-" + safeTool + "-"
                 + UUID.randomUUID().toString().substring(0, 8);
         List<String> dockerCommand = buildDockerCommand(command, workingDir, envVars, containerName);
         return new SandboxInvocation(dockerCommand, containerName,

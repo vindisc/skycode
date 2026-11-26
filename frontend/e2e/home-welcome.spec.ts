@@ -9,8 +9,8 @@ const examples = [
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    localStorage.setItem('zhikun.workbench.enabled', 'true');
-    localStorage.setItem('zhikun.workbench.default-view', 'simple');
+    localStorage.setItem('skycode.workbench.enabled', 'true');
+    localStorage.setItem('skycode.workbench.default-view', 'simple');
   });
   // No live backend or model calls: startup reads only, with a newer session in the list.
   await page.route('**/api/**', route => {
@@ -42,7 +42,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     await expect(hero.getByText('下达指令，剩下的一切交给 SkyCode')).toBeVisible();
     await expect(hero.getByText(/APOS/)).toHaveCount(0);
     await page.evaluate(() => window.dispatchEvent(new Event('session-list-updated')));
-    expect(await page.evaluate(() => sessionStorage.getItem('zhikuncode.activeSessionId'))).toBeNull();
+    expect(await page.evaluate(() => sessionStorage.getItem('skycode.activeSessionId'))).toBeNull();
     await expect(heading).toBeVisible();
     const input = page.getByRole('textbox', { name: '输入消息' });
     for (const [label, prompt] of examples) {
@@ -72,7 +72,7 @@ test('a committed selection survives reload; clearing it returns home', async ({
   expect(await page.evaluate(() => window.__e2eStores!.sessionStore.getState().sessionId)).toBe('chosen-session');
   await page.evaluate(() => window.__e2eStores!.sessionStore.getState().resumeSession(''));
   await expect(page.getByRole('heading', { name: '今天想创造什么？' })).toBeVisible();
-  expect(await page.evaluate(() => sessionStorage.getItem('zhikuncode.activeSessionId'))).toBeNull();
+  expect(await page.evaluate(() => sessionStorage.getItem('skycode.activeSessionId'))).toBeNull();
 });
 
 for (const width of [390, 900]) {
@@ -104,7 +104,7 @@ for (const width of [390, 900, 1440]) {
     });
     await page.getByRole('button', { name: '返回首页' }).click();
     await expect(page.getByRole('heading', { name: '今天想创造什么？' })).toBeVisible();
-    expect(await page.evaluate(() => sessionStorage.getItem('zhikuncode.activeSessionId'))).toBeNull();
+    expect(await page.evaluate(() => sessionStorage.getItem('skycode.activeSessionId'))).toBeNull();
     await page.reload();
     await expect(page.getByRole('heading', { name: '今天想创造什么？' })).toBeVisible();
     expect(writes).toEqual([]);

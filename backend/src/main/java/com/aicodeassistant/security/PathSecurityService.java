@@ -55,7 +55,7 @@ public class PathSecurityService {
         ".zshrc", ".zprofile", ".zshenv", ".zlogin",
         ".profile", ".login", ".ripgreprc",
         ".env", ".env.local", ".env.production",
-        ".mcp.json", ".zhikun.json",
+        ".mcp.json", ".skycode.json",
         ".npmrc", ".yarnrc",
         "id_rsa", "id_ed25519", "id_ecdsa",
         "known_hosts", "authorized_keys",
@@ -66,7 +66,7 @@ public class PathSecurityService {
 
     // ===== Layer 2: 危险目录黑名单 =====
     private static final Set<String> DANGEROUS_DIRECTORIES = Set.of(
-        ".git", ".vscode", ".idea", ".zhikun", ".ai-code-assistant",
+        ".git", ".vscode", ".idea", ".skycode", ".ai-code-assistant",
         ".ssh", ".gnupg", ".aws",
         ".config", ".local",
         ".kube", ".docker",
@@ -86,7 +86,7 @@ public class PathSecurityService {
 
     /** Direct writes to control/credential directories always require approval. */
     private static final Set<String> SENSITIVE_WRITE_DIRECTORIES = Set.of(
-        ".git", ".vscode", ".idea", ".zhikun",
+        ".git", ".vscode", ".idea", ".skycode",
         ".ai-code-assistant", ".ssh", ".gnupg", ".aws",
         ".config", ".kube", ".docker"
     );
@@ -652,7 +652,7 @@ public class PathSecurityService {
                 if (!rootName.equalsIgnoreCase(directory)) {
                     continue;
                 }
-                if (directory.equalsIgnoreCase(".zhikun")
+                if (directory.equalsIgnoreCase(".skycode")
                         && isRelaxedScratchpadMarker(
                                 resolved, projectRoot, false)) {
                     continue;
@@ -682,7 +682,7 @@ public class PathSecurityService {
                     sensitiveDirectory)) {
                 continue;
             }
-            if (sensitiveDirectory.equalsIgnoreCase(".zhikun")
+            if (sensitiveDirectory.equalsIgnoreCase(".skycode")
                     && isRelaxedScratchpadMarker(
                             resolved, current, outsideProject)) {
                 continue;
@@ -693,7 +693,7 @@ public class PathSecurityService {
     }
 
     /**
-     * Only the exact {@code .zhikun/scratchpad} marker is relaxed. Other
+     * Only the exact {@code .skycode/scratchpad} marker is relaxed. Other
      * protected descendants (for example {@code .ssh}) are still inspected.
      */
     private boolean isRelaxedScratchpadMarker(

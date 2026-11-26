@@ -457,7 +457,7 @@ class ManagedProcessRunnerTest {
                 .thenAnswer(call -> gate.acquireBackground(ds, "failed"));
         org.springframework.test.util.ReflectionTestUtils.setField(runner, "sessions", sessions);
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> runner.startBackground(new ManagedProcessRunner.BackgroundRequest(
-                List.of("bash", "-c", "true"), Path.of("/nonexistent-zhikun-test-directory"), "run", "tool", "failed")))
+                List.of("bash", "-c", "true"), Path.of("/nonexistent-skycode-test-directory"), "run", "tool", "failed")))
                 .isInstanceOf(java.io.IOException.class);
         try (var merge = gate.tryAcquireMerge(ds, "failed", "merge")) { assertThat(merge).isNotNull(); }
     }

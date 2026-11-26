@@ -63,6 +63,6 @@ public class DockerRuntimeService {
     }
 
     private static boolean safeContainerName(String name) {
-        return name != null && name.matches("zhikun-[a-z0-9_.-]{1,120}");
+        return name != null && name.matches("skycode-[a-z0-9_.-]{1,120}");
     }
 }

@@ -41,7 +41,7 @@ class CoordinatorServiceScratchpadTest {
                 toolRegistry,
                 null,
                 new SystemScratchpadPathPolicy(
-                        tempWorkspace.resolve(".zhikun").resolve("scratchpad")));
+                        tempWorkspace.resolve(".skycode").resolve("scratchpad")));
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -53,7 +53,7 @@ class CoordinatorServiceScratchpadTest {
     void rejectPathTraversalDotDot() {
         Path dir = coordinatorService.getScratchpadDir("../../../tmp/pwned");
 
-        assertTrue(dir.endsWith(Path.of(".zhikun", "scratchpad", "default")),
+        assertTrue(dir.endsWith(Path.of(".skycode", "scratchpad", "default")),
                 "必须回退到 default 目录，而非路径穿越");
         assertTrue(Files.exists(dir), "default 目录应被实际创建");
         // 负向：tempWorkspace 外层父目录下不应出现 pwned 目录
@@ -65,35 +65,35 @@ class CoordinatorServiceScratchpadTest {
     @DisplayName("绝对路径 /etc/passwd 风格 → 回退 default")
     void rejectAbsolutePathStyle() {
         Path dir = coordinatorService.getScratchpadDir("/etc/passwd");
-        assertTrue(dir.endsWith(Path.of(".zhikun", "scratchpad", "default")));
+        assertTrue(dir.endsWith(Path.of(".skycode", "scratchpad", "default")));
     }
 
     @Test
     @DisplayName("包含正斜杠的 sessionId → 回退 default")
     void rejectForwardSlash() {
         Path dir = coordinatorService.getScratchpadDir("abc/def");
-        assertTrue(dir.endsWith(Path.of(".zhikun", "scratchpad", "default")));
+        assertTrue(dir.endsWith(Path.of(".skycode", "scratchpad", "default")));
     }
 
     @Test
     @DisplayName("包含反斜杠的 sessionId → 回退 default")
     void rejectBackslash() {
         Path dir = coordinatorService.getScratchpadDir("abc\\def");
-        assertTrue(dir.endsWith(Path.of(".zhikun", "scratchpad", "default")));
+        assertTrue(dir.endsWith(Path.of(".skycode", "scratchpad", "default")));
     }
 
     @Test
     @DisplayName("空白字符的 sessionId → 回退 default")
     void rejectWhitespace() {
         Path dir = coordinatorService.getScratchpadDir("abc def");
-        assertTrue(dir.endsWith(Path.of(".zhikun", "scratchpad", "default")));
+        assertTrue(dir.endsWith(Path.of(".skycode", "scratchpad", "default")));
     }
 
     @Test
     @DisplayName("空字符串 → 回退 default（不匹配 {1,128}）")
     void rejectEmptyString() {
         Path dir = coordinatorService.getScratchpadDir("");
-        assertTrue(dir.endsWith(Path.of(".zhikun", "scratchpad", "default")));
+        assertTrue(dir.endsWith(Path.of(".skycode", "scratchpad", "default")));
     }
 
     @Test
@@ -101,7 +101,7 @@ class CoordinatorServiceScratchpadTest {
     void rejectTooLong() {
         String tooLong = "a".repeat(129);
         Path dir = coordinatorService.getScratchpadDir(tooLong);
-        assertTrue(dir.endsWith(Path.of(".zhikun", "scratchpad", "default")));
+        assertTrue(dir.endsWith(Path.of(".skycode", "scratchpad", "default")));
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -112,7 +112,7 @@ class CoordinatorServiceScratchpadTest {
     @DisplayName("null sessionId → 回退 default（向后兼容原行为）")
     void nullSessionId_returns_default() {
         Path dir = coordinatorService.getScratchpadDir(null);
-        assertTrue(dir.endsWith(Path.of(".zhikun", "scratchpad", "default")));
+        assertTrue(dir.endsWith(Path.of(".skycode", "scratchpad", "default")));
     }
 
     @Test
@@ -120,7 +120,7 @@ class CoordinatorServiceScratchpadTest {
     void acceptValidUuidStyle() {
         String sid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890";
         Path dir = coordinatorService.getScratchpadDir(sid);
-        assertTrue(dir.endsWith(Path.of(".zhikun", "scratchpad", sid)));
+        assertTrue(dir.endsWith(Path.of(".skycode", "scratchpad", sid)));
         assertTrue(Files.exists(dir));
     }
 
@@ -129,7 +129,7 @@ class CoordinatorServiceScratchpadTest {
     void acceptValidUnderscoreDash() {
         String sid = "sess_01-A9";
         Path dir = coordinatorService.getScratchpadDir(sid);
-        assertTrue(dir.endsWith(Path.of(".zhikun", "scratchpad", sid)));
+        assertTrue(dir.endsWith(Path.of(".skycode", "scratchpad", sid)));
     }
 
     @Test
@@ -137,7 +137,7 @@ class CoordinatorServiceScratchpadTest {
     void acceptBoundaryLength128() {
         String sid = "a".repeat(128);
         Path dir = coordinatorService.getScratchpadDir(sid);
-        assertTrue(dir.endsWith(Path.of(".zhikun", "scratchpad", sid)));
+        assertTrue(dir.endsWith(Path.of(".skycode", "scratchpad", sid)));
     }
 
     @Test
@@ -146,7 +146,7 @@ class CoordinatorServiceScratchpadTest {
         Path dir = coordinatorService.getScratchpadDir("session-1");
 
         assertEquals(
-                tempWorkspace.resolve(".zhikun").resolve("scratchpad")
+                tempWorkspace.resolve(".skycode").resolve("scratchpad")
                         .resolve("session-1").toRealPath(),
                 dir);
     }

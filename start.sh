@@ -158,7 +158,7 @@ java_major_version() {
 }
 resolve_jdk21() {
     local candidate bundled
-    for bundled in "$PROJECT_ROOT"/.zhikun/toolchains/jdk21/*/Contents/Home; do
+    for bundled in "$PROJECT_ROOT"/.skycode/toolchains/jdk21/*/Contents/Home; do
         if [ -x "$bundled/bin/java" ]; then JAVA_HOME="$bundled"; return 0; fi
     done
     if [ -x /usr/libexec/java_home ]; then
@@ -193,17 +193,17 @@ case "$JAVA_MAJOR" in
 esac
 PYTHON_WORKSPACE_ROOT="${WORKSPACE_ROOT:-$PROJECT_ROOT}"
 
-# Project-pinned MCP launchers. Keeping them on PATH makes the same ZHIKUN_MCP_SERVERS
+# Project-pinned MCP launchers. Keeping them on PATH makes the same SKYCODE_MCP_SERVERS
 # JSON work for local development and the production container.
 export PATH="$PROJECT_ROOT/scripts/mcp:$PATH"
 
 # 本地一键启动需要能完成首次 Project 授权，同时保留显式的安全策略配置。
-if [ -z "${ZHIKUN_DEFAULT_WORKSPACE:-}" ]; then
-    export ZHIKUN_DEFAULT_WORKSPACE="$PROJECT_ROOT"
+if [ -z "${SKYCODE_DEFAULT_WORKSPACE:-}" ]; then
+    export SKYCODE_DEFAULT_WORKSPACE="$PROJECT_ROOT"
 fi
-if [ -z "${ZHIKUN_WORKSPACE_ALLOWED_ROOTS:-}" ] \
-        && [ -z "${ZHIKUN_LOCAL_PICKER_ENABLED:-}" ]; then
-    export ZHIKUN_LOCAL_PICKER_ENABLED=true
+if [ -z "${SKYCODE_WORKSPACE_ALLOWED_ROOTS:-}" ] \
+        && [ -z "${SKYCODE_LOCAL_PICKER_ENABLED:-}" ]; then
+    export SKYCODE_LOCAL_PICKER_ENABLED=true
 fi
 
 # ======================== 同步 Frontend 依赖 ========================

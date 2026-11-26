@@ -9,7 +9,7 @@ import { gunzipSync } from 'node:zlib';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(scriptDir, '..');
-const caseHtmlPath = join(repoRoot, 'docs/case-studies/zhikuncode开发王者荣耀.html');
+const caseHtmlPath = join(repoRoot, 'docs/case-studies/skycode开发王者荣耀.html');
 const assetRoot = join(repoRoot, 'docs/case-studies/assets/king');
 const sourceProject = resolve(repoRoot, '../../project/king');
 const sourceDatabase = join(repoRoot, 'backend/.ai-code-assistant/data.db');
@@ -929,8 +929,8 @@ const provenance = json(join(assetRoot, 'provenance.json'));
 const outsideWindowRecovery = null;
 assert(!provenance.logs?.outsideWindowSupplements?.length, 'Public provenance must not register unrelated outside-window recovery material');
 const onlineDeployment = provenance.onlineDeployment;
-const standardOnlineUrl = 'https://king.zhikun.xin/';
-const demoOnlineUrl = 'https://king.zhikun.xin/?demo=1';
+const standardOnlineUrl = 'https://king.skycode.xin/';
+const demoOnlineUrl = 'https://king.skycode.xin/?demo=1';
 assert(onlineDeployment?.classification === 'OUTSIDE_DEVELOPMENT_WINDOW_ALIYUN_HTTPS_DEPLOYMENT', 'Online deployment classification differs');
 assert(onlineDeployment?.deploymentRelationship === 'SAME_STATIC_BUILD_WITH_RUNTIME_QUERY_PARAMETER', 'Online deployment relationship differs');
 assert(onlineDeployment?.standard?.url === standardOnlineUrl && onlineDeployment?.demo?.url === demoOnlineUrl, 'Online deployment URLs differ');
@@ -1233,8 +1233,8 @@ const visualizationManifest = json(join(assetRoot, 'visualization-manifest.json'
 const visualizationData = json(join(assetRoot, 'visualization-data.json'));
 const svgLayoutAudit = json(join(assetRoot, 'svg-layout-audit.json'));
 assert(visualizationManifest.schemaVersion === 5 && visualizationManifest.reportVersion === 'v15', 'Visualization manifest version differs');
-assert(visualizationData.schemaVersion === 2 && visualizationData.caseId === 'zhikuncode-king-20260809', 'Visualization data schema/case differs');
-assert(svgLayoutAudit.schemaVersion === 3 && svgLayoutAudit.reportVersion === 'v15' && svgLayoutAudit.caseId === 'zhikuncode-king-20260809', 'SVG layout audit schema/report differs');
+assert(visualizationData.schemaVersion === 2 && visualizationData.caseId === 'skycode-king-20260809', 'Visualization data schema/case differs');
+assert(svgLayoutAudit.schemaVersion === 3 && svgLayoutAudit.reportVersion === 'v15' && svgLayoutAudit.caseId === 'skycode-king-20260809', 'SVG layout audit schema/report differs');
 assert(svgLayoutAudit.report?.sha256 === sha256(caseHtmlPath) && svgLayoutAudit.report?.bytes === statSync(caseHtmlPath).size, 'SVG layout audit is not bound to the current HTML');
 assert(svgLayoutAudit.summary.figures === 91 && svgLayoutAudit.figures.length === 91 && new Set(svgLayoutAudit.figures.map((entry) => entry.id)).size === 91, 'SVG layout audit does not cover 91 unique figures');
 assert(svgLayoutAudit.summary.foregroundOverflowFigures === 0 && svgLayoutAudit.summary.textCollisionFigures === 0 && svgLayoutAudit.summary.excessiveBottomBlankFigures === 0 && svgLayoutAudit.summary.allMeasured === true, 'SVG layout audit contains an unresolved issue');
@@ -1487,9 +1487,9 @@ assert(messages.every((message) => !String(message.content_json ?? '').includes(
 for (const [label, value] of [['HTML', html], ['root README', rootReadme], ['case README', caseReadme]]) {
   assert(value.includes(standardOnlineUrl), `${label} is missing the exact standard online URL`);
   assert(value.includes(demoOnlineUrl), `${label} is missing the exact Demo online URL`);
-  assert(!/https:\/\/king\.zhikun\.xin\/(?:\?demo=1)?(?:，|%EF%BC%8C)/i.test(value), `${label} contains a trailing Chinese comma in an online URL`);
+  assert(!/https:\/\/king\.skycode\.xin\/(?:\?demo=1)?(?:，|%EF%BC%8C)/i.test(value), `${label} contains a trailing Chinese comma in an online URL`);
 }
-const onlineAnchors = [...html.matchAll(/<a\b([^>]*?)href="(https:\/\/king\.zhikun\.xin\/(?:\?demo=1)?)"([^>]*)>([\s\S]*?)<\/a>/g)];
+const onlineAnchors = [...html.matchAll(/<a\b([^>]*?)href="(https:\/\/king\.skycode\.xin\/(?:\?demo=1)?)"([^>]*)>([\s\S]*?)<\/a>/g)];
 assert(onlineAnchors.filter((match) => match[2] === standardOnlineUrl).length === 4, 'HTML must expose the standard online URL in hero, rail, QA and conclusion');
 assert(onlineAnchors.filter((match) => match[2] === demoOnlineUrl).length === 4, 'HTML must expose the Demo online URL in hero, rail, QA and conclusion');
 for (const match of onlineAnchors) {
@@ -1501,7 +1501,7 @@ assert(html.includes('QA-V10') && html.includes('OUTSIDE WINDOW · SAME BUILD + 
 
 const verification = {
   schemaVersion: 10,
-  caseId: 'zhikuncode-king-20260809',
+  caseId: 'skycode-king-20260809',
   status: errors.length ? 'FAILED' : 'VERIFIED',
   evidenceWindow: { startInclusive: '2026-08-09T01:30:00+08:00', endExclusive: '2026-08-09T07:01:00+08:00' },
   platformSnapshot,
@@ -1602,7 +1602,7 @@ if (writeMode) {
     process.exit(1);
   }
   writeFileSync(join(assetRoot, 'verification.json'), `${JSON.stringify(verification, null, 2)}\n`);
-  writeFileSync(join(assetRoot, 'zhikuncode开发王者荣耀.html.sha256'), `${sha256(caseHtmlPath)}  ../../zhikuncode开发王者荣耀.html\n`);
+  writeFileSync(join(assetRoot, 'skycode开发王者荣耀.html.sha256'), `${sha256(caseHtmlPath)}  ../../skycode开发王者荣耀.html\n`);
   writeFileSync(join(assetRoot, 'SHA256SUMS.txt'), generateManifest());
 }
 

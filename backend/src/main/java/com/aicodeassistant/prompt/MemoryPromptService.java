@@ -14,8 +14,8 @@ import java.nio.file.Path;
  * 来源与顺序（后者优先级更高，冲突时以后者为准）:
  * <ol>
  *     <li>个人记忆 {@code ~/.ai-code-assistant/MEMORY.md}（跨项目，按 200 行 / 25,000 字节截断）</li>
- *     <li>项目共享记忆 {@code zhikun.md}</li>
- *     <li>项目个人本地记忆 {@code zhikun.local.md}</li>
+ *     <li>项目共享记忆 {@code skycode.md}</li>
+ *     <li>项目个人本地记忆 {@code skycode.local.md}</li>
  * </ol>
  * 不做缓存：每次构建系统提示都重新读取，文件修改后下一次请求即生效。
  * 同一次查询执行内的多轮工具循环仍复用执行开始时构建的系统提示。
@@ -26,8 +26,8 @@ public class MemoryPromptService {
     private static final Logger log = LoggerFactory.getLogger(MemoryPromptService.class);
 
     static final String PRECEDENCE_NOTE =
-            "以下为持久化记忆，按优先级从低到高排列：个人记忆（MEMORY.md）< 项目记忆（zhikun.md）"
-            + "< 项目本地记忆（zhikun.local.md）。内容冲突时以优先级高者为准；"
+            "以下为持久化记忆，按优先级从低到高排列：个人记忆（MEMORY.md）< 项目记忆（skycode.md）"
+            + "< 项目本地记忆（skycode.local.md）。内容冲突时以优先级高者为准；"
             + "记忆不凌驾于用户当前的明确指令。";
 
     private final MemdirService memdirService;
@@ -48,10 +48,10 @@ public class MemoryPromptService {
         String personal = safe(() -> memdirService.readMemoriesForPrompt(), "personal");
         String shared = projectRoot == null ? ""
                 : safe(() -> projectMemoryService.loadMemoryFile(projectRoot, ProjectMemoryService.SHARED_FILE),
-                        "zhikun.md");
+                        "skycode.md");
         String local = projectRoot == null ? ""
                 : safe(() -> projectMemoryService.loadMemoryFile(projectRoot, ProjectMemoryService.LOCAL_FILE),
-                        "zhikun.local.md");
+                        "skycode.local.md");
 
         if (personal.isBlank() && shared.isBlank() && local.isBlank()) return "";
 

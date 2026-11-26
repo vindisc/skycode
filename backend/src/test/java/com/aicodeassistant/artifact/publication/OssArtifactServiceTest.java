@@ -318,7 +318,7 @@ class OssArtifactServiceTest {
         Path file = Files.writeString(workspace.resolve(fileName), content);
         String hash = HexFormat.of().formatHex(
                 MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file)));
-        String objectKey = "zhikuncode-artifacts/manifest-1/artifact-1/" + hash + "-" + fileName;
+        String objectKey = "skycode-artifacts/manifest-1/artifact-1/" + hash + "-" + fileName;
         return new ArtifactPublicationPolicy.Snapshot("artifact-1", "manifest-1", "run-1",
                 fileName, file, fileName, Files.size(file), hash, mime,
                 objectKey, properties.publicUrl(objectKey),
@@ -347,7 +347,7 @@ class OssArtifactServiceTest {
         properties.setEndpoint("https://oss-cn-beijing.aliyuncs.com");
         properties.setRegion("cn-beijing");
         properties.setBucket("test-artifacts");
-        properties.setPrefix("zhikuncode-artifacts");
+        properties.setPrefix("skycode-artifacts");
         properties.setEcsRoleName("TestEcsRole");
         return properties;
     }

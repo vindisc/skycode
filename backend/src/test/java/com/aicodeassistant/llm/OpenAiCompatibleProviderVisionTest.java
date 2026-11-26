@@ -68,7 +68,7 @@ class OpenAiCompatibleProviderVisionTest {
     @Test
     void visionRequestKeepsServerValidatedRemoteImageUrl() throws Exception {
         String remoteUrl = "https://bucket.oss-cn-beijing.aliyuncs.com/"
-                + "zhikuncode-artifacts/clipboard/session/image.png";
+                + "skycode-artifacts/clipboard/session/image.png";
         Map<String, Object> image = Map.of(
                 "type", "image",
                 "source", Map.of("type", "url", "url", remoteUrl));

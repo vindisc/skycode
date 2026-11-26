@@ -1,7 +1,7 @@
 /**
  * TurnViewStore — 轮次视图偏好（密度 + 手动展开/折叠覆盖）
  * SPEC: 消息流轮次分组聚合方案 P0 状态层
- * 持久化: localStorage (persist middleware, key 'zhikun.turn-view.v1')
+ * 持久化: localStorage (persist middleware, key 'skycode.turn-view.v1')
  *
  * 三层轮模型（用户 query ｜ 过程区 ｜ 回复）下，compact 默认折叠三层；
  * balanced / detailed 保持问题与回复完整。过程区：compact = 轮级聚合条；balanced = 任务分节条；
@@ -140,7 +140,7 @@ export const useTurnViewStore = create<TurnViewStoreState>()(
             }),
         })),
         {
-            name: 'zhikun.turn-view.v1',
+            name: 'skycode.turn-view.v1',
             storage: createJSONStorage(() => localStorage),
             partialize: (s) => ({
                 density: s.density,

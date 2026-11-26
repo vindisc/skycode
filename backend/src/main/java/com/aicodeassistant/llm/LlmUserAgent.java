@@ -13,7 +13,7 @@ import okhttp3.Interceptor;
  */
 public final class LlmUserAgent {
 
-    public static final String VALUE = "zhikuncode/1.0";
+    public static final String VALUE = "skycode/1.0";
 
     private LlmUserAgent() {}
 

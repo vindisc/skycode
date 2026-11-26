@@ -95,7 +95,7 @@ describe('Session activation transaction', () => {
         clearSessionSelection();
         expect(getPendingSessionActivation()).toBeNull();
         expect(useSessionStore.getState().sessionId).toBe('');
-        expect(sessionStorage.getItem('zhikuncode.activeSessionId')).toBeNull();
+        expect(sessionStorage.getItem('skycode.activeSessionId')).toBeNull();
         expect(useMessageStore.getState().messages).toEqual([]);
         restore(payload, [oldMessage]);
         dispatch({ type: 'model_changed', model: 'old-model', _sessionId: 'old-session', _bindingEpoch: 1 } as never);
@@ -158,7 +158,7 @@ describe('Session activation transaction', () => {
 
         expect(useSessionStore.getState().sessionId).toBe('session-old');
         expect(useMessageStore.getState().messages).toEqual([oldMessage]);
-        expect(window.sessionStorage.getItem('zhikuncode.activeSessionId'))
+        expect(window.sessionStorage.getItem('skycode.activeSessionId'))
             .toBe('session-old');
 
         await vi.advanceTimersByTimeAsync(50);

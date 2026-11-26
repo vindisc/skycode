@@ -6,11 +6,11 @@
   "author": "ZhikunCode Team",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zhikuncode/zhikuncode.git"
+    "url": "https://github.com/skycode/skycode.git"
   },
-  "homepage": "https://github.com/zhikuncode/zhikuncode",
+  "homepage": "https://github.com/skycode/skycode",
   "bugs": {
-    "url": "https://github.com/zhikuncode/zhikuncode/issues"
+    "url": "https://github.com/skycode/skycode/issues"
   },
   "type": "module",
   "scripts": {

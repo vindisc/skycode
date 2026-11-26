@@ -19,9 +19,9 @@ class PathSecurityServiceScratchpadTest {
         Path project = Files.createDirectory(
                 temp.resolve("project")).toRealPath();
         Path scratchpad = Files.createDirectories(
-                project.resolve(".zhikun/scratchpad"));
+                project.resolve(".skycode/scratchpad"));
         PathSecurityService security = securityWithSystemRoot(
-                temp.resolve("system/.zhikun/scratchpad"));
+                temp.resolve("system/.skycode/scratchpad"));
 
         Path ordinary = Files.writeString(
                 scratchpad.resolve("notes.txt"), "notes");
@@ -50,7 +50,7 @@ class PathSecurityServiceScratchpadTest {
 
         Path nestedControl = Files.writeString(
                 Files.createDirectories(
-                        scratchpad.resolve("nested/.zhikun"))
+                        scratchpad.resolve("nested/.skycode"))
                         .resolve("control.txt"),
                 "control");
         assertThat(security.checkWritePermission(
@@ -64,11 +64,11 @@ class PathSecurityServiceScratchpadTest {
         Path project = Files.createDirectory(
                 temp.resolve("project-lookalike")).toRealPath();
         PathSecurityService security = securityWithSystemRoot(
-                temp.resolve("system/.zhikun/scratchpad"));
+                temp.resolve("system/.skycode/scratchpad"));
 
         for (String lookalike : java.util.List.of(
-                ".zhikun/scratchpad-evil/file.txt",
-                ".zhikun/not-scratchpad/file.txt")) {
+                ".skycode/scratchpad-evil/file.txt",
+                ".skycode/not-scratchpad/file.txt")) {
             Path target = project.resolve(lookalike);
             Files.createDirectories(target.getParent());
             Files.writeString(target, "data");
@@ -82,9 +82,9 @@ class PathSecurityServiceScratchpadTest {
     void projectRootNamedZhikunUsesTheSameExactScratchpadRule()
             throws Exception {
         Path project = Files.createDirectory(
-                temp.resolve(".zhikun")).toRealPath();
+                temp.resolve(".skycode")).toRealPath();
         PathSecurityService security = securityWithSystemRoot(
-                temp.resolve("system/.zhikun/scratchpad"));
+                temp.resolve("system/.skycode/scratchpad"));
 
         Path ordinary = project.resolve("scratchpad/notes.txt");
         Files.createDirectories(ordinary.getParent());
@@ -113,7 +113,7 @@ class PathSecurityServiceScratchpadTest {
         Path project = Files.createDirectory(
                 temp.resolve("system-project")).toRealPath();
         Path systemScratchpad = Files.createDirectories(
-                temp.resolve("state/.zhikun/scratchpad")).toRealPath();
+                temp.resolve("state/.skycode/scratchpad")).toRealPath();
         PathSecurityService security = securityWithSystemRoot(
                 systemScratchpad);
 
@@ -149,7 +149,7 @@ class PathSecurityServiceScratchpadTest {
                 .needsConfirmation()).isTrue();
 
         Path lookalike = temp.resolve(
-                "state/.zhikun/scratchpad-evil/file.txt");
+                "state/.skycode/scratchpad-evil/file.txt");
         Files.createDirectories(lookalike.getParent());
         Files.writeString(lookalike, "data");
         assertThat(security.checkAuthorizedWritePermission(
@@ -163,9 +163,9 @@ class PathSecurityServiceScratchpadTest {
         Path project = Files.createDirectory(
                 temp.resolve("symlink-project")).toRealPath();
         Path projectScratchpad = Files.createDirectories(
-                project.resolve(".zhikun/scratchpad"));
+                project.resolve(".skycode/scratchpad"));
         Path systemScratchpad = Files.createDirectories(
-                temp.resolve("symlink-state/.zhikun/scratchpad"));
+                temp.resolve("symlink-state/.skycode/scratchpad"));
         Path external = Files.writeString(
                 temp.resolve("external.txt"), "external").toRealPath();
         Path projectLink = Files.createSymbolicLink(

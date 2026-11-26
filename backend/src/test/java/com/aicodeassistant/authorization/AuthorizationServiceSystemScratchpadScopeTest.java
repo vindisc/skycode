@@ -43,7 +43,7 @@ class AuthorizationServiceSystemScratchpadScopeTest {
         workspace = Files.createDirectories(
                 tempDir.resolve("project"));
         scratchpad = Files.createDirectories(
-                tempDir.resolve("state/.zhikun/scratchpad"));
+                tempDir.resolve("state/.skycode/scratchpad"));
     }
 
     @Test
@@ -177,7 +177,7 @@ class AuthorizationServiceSystemScratchpadScopeTest {
 
     @Test
     void relativeProjectResourceCanStillMatchConfiguredSystemRoot() {
-        scratchpad = workspace.resolve(".zhikun/scratchpad");
+        scratchpad = workspace.resolve(".skycode/scratchpad");
         Fixture fixture = fixture(PermissionMode.DEFAULT, true);
 
         AuthorizedOperation authorized = fixture.authorize(descriptor(
@@ -215,7 +215,7 @@ class AuthorizationServiceSystemScratchpadScopeTest {
     @Test
     void ordinaryFileOperationsUsePrivateTmpPolicy() {
         Path privateTmp = Path.of(
-                "/private/tmp/zhikuncode-authorization-test");
+                "/private/tmp/skycode-authorization-test");
         for (ToolAction tool : List.of(
                 new ToolAction("Read", TypedFileOperation.READ_FILE,
                         EffectClass.READ_RESOURCE),
@@ -243,7 +243,7 @@ class AuthorizationServiceSystemScratchpadScopeTest {
     @Test
     void privateTmpPolicyPreservesPlanAndHighRiskGates() {
         Path target = Path.of(
-                "/private/tmp/zhikuncode-authorization-test/note.md");
+                "/private/tmp/skycode-authorization-test/note.md");
         Fixture planReadFixture = fixture(PermissionMode.PLAN, true);
         AuthorizedOperation read = planReadFixture.authorize(descriptor(
                 "Read", TypedFileOperation.READ_FILE,
@@ -288,7 +288,7 @@ class AuthorizationServiceSystemScratchpadScopeTest {
         AuthorizedOperation authorized = fixture.authorize(descriptor(
                 "Write", TypedFileOperation.REPLACE_FILE,
                 EffectClass.WRITE_RESOURCE, RiskClass.GUARDED,
-                Path.of("/private/tmp/zhikuncode-authorization-test/note.md")));
+                Path.of("/private/tmp/skycode-authorization-test/note.md")));
 
         assertThatThrownBy(() -> fixture.service()
                 .finalGrantRecheckInCurrentTransaction(

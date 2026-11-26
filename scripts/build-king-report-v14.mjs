@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import './build-king-visualization-data.mjs';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const reportPath = join(repoRoot, 'docs/case-studies/zhikuncode开发王者荣耀.html');
+const reportPath = join(repoRoot, 'docs/case-studies/skycode开发王者荣耀.html');
 const assetRoot = join(repoRoot, 'docs/case-studies/assets/king');
 const manifestPath = join(assetRoot, 'visualization-manifest.json');
 const dataPath = join(assetRoot, 'visualization-data.json');
@@ -31,7 +31,7 @@ const sourceRel = (path) => path.replace(/^assets\/king\//, '');
 const groupOrder = ['CASE', 'SRC', 'PLAT', 'RUN', 'DBG', 'QA', 'AUDIT', 'META'];
 const onlineDeployment = provenance.onlineDeployment;
 if (!onlineDeployment?.standard?.url || !onlineDeployment?.demo?.url) throw new Error('provenance.onlineDeployment must define standard and demo URLs');
-if (onlineDeployment.standard.url !== 'https://king.zhikun.xin/' || onlineDeployment.demo.url !== 'https://king.zhikun.xin/?demo=1') throw new Error('Unexpected online deployment URLs');
+if (onlineDeployment.standard.url !== 'https://king.skycode.xin/' || onlineDeployment.demo.url !== 'https://king.skycode.xin/?demo=1') throw new Error('Unexpected online deployment URLs');
 
 const reportVersion = 'v14';
 const groupEditorial = {
@@ -1959,7 +1959,7 @@ const screenshotFrames = data.media.screenshots.map((record, index) => ({ ordina
 const storyboardFrames = storyboard.videos.flatMap((video, videoIndex) => video.frames.map((frame, frameIndex) => ({ videoIndex: videoIndex + 1, frameIndex: frameIndex + 1, preview: video.preview, original: video.original, classification: video.classification, speed: video.speed, ...frame, path: `assets/king/${frame.path}` })));
 const manifest = {
   schemaVersion: 4,
-  caseId: 'zhikuncode-king-20260809', reportVersion: 'v14', totalVisualizations: 91,
+  caseId: 'skycode-king-20260809', reportVersion: 'v14', totalVisualizations: 91,
   retainedVisualizations: [...Array.from({ length: 26 }, (_, index) => `KING-V${String(index + 1).padStart(2, '0')}`), ...Array.from({ length: 3 }, (_, index) => `LOG-V${String(index + 1).padStart(2, '0')}`)],
   newVisualizations,
   renderingPolicy: { pcFirst: true, desktopWidths: [1280, 1440, 1920], mobileWidth: 390, desktopFigureOverflow: 'none', mobileFigureOverflow: 'internal-only', editorialShell: 'restrained-moba-broadcast', visualSystem: 'v14-layout-contract-1', semanticColorOnly: true, chapterLegendOnly: true, repeatedKpiRail: false, repeatedEvidenceCards: false, genericFallbackRenderer: false, arbitraryGeometry: false, categoricalEqualSizeAllowedWhenNotEncodingQuantity: true, maximumForegroundOverflowSvgUnits: 1, maximumTextOverlapRatio: 0.08, standardMaximumBottomBlankRatio: 0.12, wideMaximumBottomBlankRatio: 0.15 },

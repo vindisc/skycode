@@ -164,8 +164,8 @@ describe('MessageStore', () => {
     });
 
     it('atomically replaces the transient run with the committed generic message tail', () => {
-        const objectKey = 'zhikuncode-artifacts/session/artifact/live.html';
-        const url = `https://zhikunshare.oss-cn-beijing.aliyuncs.com/${objectKey}`;
+        const objectKey = 'skycode-artifacts/session/artifact/live.html';
+        const url = `https://skycodeshare.oss-cn-beijing.aliyuncs.com/${objectKey}`;
         useMessageStore.setState({
             messages: [
                 { uuid: 'history-anchor', type: 'assistant', content: [{ type: 'text', text: 'before' }], timestamp: 1 },
@@ -289,8 +289,8 @@ describe('MessageStore', () => {
     });
 
     it('restores new structured results onto their tool call without creating active calls', () => {
-        const objectKey = 'zhikuncode-artifacts/session/artifact/file.html';
-        const url = `https://zhikunshare.oss-cn-beijing.aliyuncs.com/${objectKey}`;
+        const objectKey = 'skycode-artifacts/session/artifact/file.html';
+        const url = `https://skycodeshare.oss-cn-beijing.aliyuncs.com/${objectKey}`;
         const messages: Message[] = [
             {
                 uuid: 'assistant-1',

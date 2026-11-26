@@ -15,7 +15,7 @@
     <artifactId>ai-code-assistant-backend</artifactId>
     <version>1.0.0</version>
     <name>AI Code Assistant Backend</name>
-    <url>https://github.com/zhikuncode/zhikuncode</url>
+    <url>https://github.com/skycode/skycode</url>
     <description>AI-powered code assistant with multi-agent collaboration</description>
 
     <licenses>
@@ -27,14 +27,14 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/zhikuncode/zhikuncode</url>
-        <connection>scm:git:https://github.com/zhikuncode/zhikuncode.git</connection>
+        <url>https://github.com/skycode/skycode</url>
+        <connection>scm:git:https://github.com/skycode/skycode.git</connection>
     </scm>
 
     <developers>
         <developer>
             <name>ZhikunCode Team</name>
-            <url>https://github.com/zhikuncode</url>
+            <url>https://github.com/skycode</url>
         </developer>
     </developers>
 

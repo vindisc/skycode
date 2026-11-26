@@ -26,15 +26,15 @@ class MemoryPromptServiceTest {
         Path personal = Files.createDirectories(temp.resolve("personal"));
         Path project = Files.createDirectories(temp.resolve("project")).toRealPath();
         Files.writeString(personal.resolve("MEMORY.md"), "PERSONAL_MARK");
-        Files.writeString(project.resolve("zhikun.md"), "SHARED_MARK");
-        Files.writeString(project.resolve("zhikun.local.md"), "LOCAL_MARK");
+        Files.writeString(project.resolve("skycode.md"), "SHARED_MARK");
+        Files.writeString(project.resolve("skycode.local.md"), "LOCAL_MARK");
 
         String prompt = service(personal).buildMemoryPrompt(project);
 
         int p = prompt.indexOf("PERSONAL_MARK");
         int s = prompt.indexOf("SHARED_MARK");
         int l = prompt.indexOf("LOCAL_MARK");
-        assertTrue(p >= 0 && s > p && l > s, "顺序应为 MEMORY → zhikun.md → zhikun.local.md");
+        assertTrue(p >= 0 && s > p && l > s, "顺序应为 MEMORY → skycode.md → skycode.local.md");
         assertTrue(prompt.contains("<personal_memory>"));
         assertTrue(prompt.contains("<project_memory>"));
         assertTrue(prompt.contains("<project_local_memory>"));
@@ -54,10 +54,10 @@ class MemoryPromptServiceTest {
         Path project = Files.createDirectories(temp.resolve("project-v")).toRealPath();
         MemoryPromptService svc = service(personal);
 
-        Files.writeString(project.resolve("zhikun.md"), "PROJECT_V1");
+        Files.writeString(project.resolve("skycode.md"), "PROJECT_V1");
         assertTrue(svc.buildMemoryPrompt(project).contains("PROJECT_V1"));
 
-        Files.writeString(project.resolve("zhikun.md"), "PROJECT_V2");
+        Files.writeString(project.resolve("skycode.md"), "PROJECT_V2");
         String second = svc.buildMemoryPrompt(project);
         assertTrue(second.contains("PROJECT_V2"));
         assertFalse(second.contains("PROJECT_V1"));

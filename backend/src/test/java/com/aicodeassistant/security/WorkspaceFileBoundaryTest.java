@@ -600,16 +600,16 @@ class WorkspaceFileBoundaryTest {
         PathSecurityService security = new PathSecurityService();
 
         assertThat(security.checkAuthorizedWritePermission(
-                "/etc/zhikun-test.conf", workspace.toString())
+                "/etc/skycode-test.conf", workspace.toString())
                 .needsConfirmation()).isTrue();
         assertThat(security.checkAuthorizedWritePermission(
-                "/var/zhikun-test/data", workspace.toString())
+                "/var/skycode-test/data", workspace.toString())
                 .needsConfirmation()).isTrue();
         assertThat(security.checkAuthorizedWritePermission(
-                "/private/etc/zhikun-test.conf", workspace.toString())
+                "/private/etc/skycode-test.conf", workspace.toString())
                 .needsConfirmation()).isTrue();
         assertThat(security.checkAuthorizedWritePermission(
-                "/private/var/zhikun-test/data", workspace.toString())
+                "/private/var/skycode-test/data", workspace.toString())
                 .needsConfirmation()).isTrue();
         assertThat(security.checkAuthorizedRecursiveReadRootPermission(
                 "/private/etc", workspace.toString())

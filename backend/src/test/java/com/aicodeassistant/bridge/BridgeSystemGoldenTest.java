@@ -52,10 +52,10 @@ class BridgeSystemGoldenTest {
         @Test
         @DisplayName("1.2 auth 消息 — JWT 认证")
         void authMessage() {
-            BridgeMessage msg = BridgeMessage.auth("jwt-token", "zhikun-ide-extension");
+            BridgeMessage msg = BridgeMessage.auth("jwt-token", "skycode-ide-extension");
             assertEquals("bridge_auth", msg.type());
             assertEquals("jwt-token", msg.payload().get("token"));
-            assertEquals("zhikun-ide-extension", msg.payload().get("issuer"));
+            assertEquals("skycode-ide-extension", msg.payload().get("issuer"));
         }
 
         @Test

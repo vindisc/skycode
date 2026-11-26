@@ -5,7 +5,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const reportPath = resolve(repoRoot, 'docs/case-studies/zhikuncode开发王者荣耀.html');
+const reportPath = resolve(repoRoot, 'docs/case-studies/skycode开发王者荣耀.html');
 let html = readFileSync(reportPath, 'utf8');
 
 function markerBlock(id, content) {

@@ -15,13 +15,13 @@ public class ProjectMemoryService {
 
     private static final Logger log = LoggerFactory.getLogger(ProjectMemoryService.class);
     /** 项目共享记忆（随代码库提交） */
-    public static final String SHARED_FILE = "zhikun.md";
-    /** 项目个人本地记忆（不提交，优先级高于 zhikun.md） */
-    public static final String LOCAL_FILE = "zhikun.local.md";
+    public static final String SHARED_FILE = "skycode.md";
+    /** 项目个人本地记忆（不提交，优先级高于 skycode.md） */
+    public static final String LOCAL_FILE = "skycode.local.md";
     private static final String[] MEMORY_FILES = { SHARED_FILE, LOCAL_FILE };
     private static final long MAX_MEMORY_SIZE = 100 * 1024;
 
-    /** 读取两个项目记忆文件并拼接（zhikun.md 在前，zhikun.local.md 在后）。 */
+    /** 读取两个项目记忆文件并拼接（skycode.md 在前，skycode.local.md 在后）。 */
     public String loadMemory(Path workingDir) {
         List<String> memories = new ArrayList<>();
         for (String fileName : MEMORY_FILES) {
@@ -111,7 +111,7 @@ public class ProjectMemoryService {
 
     /**
      * 仅在文件不存在时创建项目记忆（原子 CREATE_NEW，已存在则抛 FileAlreadyExistsException，原文件不变）。
-     * 供 /memory init 使用，避免覆盖已有 zhikun.md。
+     * 供 /memory init 使用，避免覆盖已有 skycode.md。
      */
     public void createMemoryIfAbsent(Path workingDir, String content, boolean isLocal) throws IOException {
         Path memFile = resolveWritableMemoryFile(workingDir, isLocal);

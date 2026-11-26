@@ -70,7 +70,7 @@ describe('SessionStore', () => {
         const state = useSessionStore.getState();
         expect(state.sessionId).toBe('session-123');
         expect(state.status).toBe('idle');
-        expect(window.sessionStorage.getItem('zhikuncode.activeSessionId')).toBe('session-123');
+        expect(window.sessionStorage.getItem('skycode.activeSessionId')).toBe('session-123');
     });
 
     it('createSession requests the AUTO_APPROVE permission mode by default', async () => {
@@ -96,7 +96,7 @@ describe('SessionStore', () => {
         expect(candidate).toBe('session-created');
         expect(useSessionStore.getState().sessionId).toBeNull();
         expect(window.sessionStorage.getItem(
-            'zhikuncode.activeSessionId'))
+            'skycode.activeSessionId'))
             .toBeNull();
     });
 
@@ -114,7 +114,7 @@ describe('SessionStore', () => {
 
     it('createSession failure preserves the previous Session state', async () => {
         window.sessionStorage.setItem(
-            'zhikuncode.activeSessionId',
+            'skycode.activeSessionId',
             'session-existing',
         );
         useSessionStore.setState({
@@ -141,20 +141,20 @@ describe('SessionStore', () => {
             isAborted: true,
         });
         expect(window.sessionStorage.getItem(
-            'zhikuncode.activeSessionId')).toBe('session-existing');
+            'skycode.activeSessionId')).toBe('session-existing');
     });
 
     it('resumeSession with an empty id clears the persisted session', async () => {
-        window.sessionStorage.setItem('zhikuncode.activeSessionId', 'session-old');
+        window.sessionStorage.setItem('skycode.activeSessionId', 'session-old');
 
         await useSessionStore.getState().resumeSession('');
 
         expect(useSessionStore.getState().sessionId).toBe('');
-        expect(window.sessionStorage.getItem('zhikuncode.activeSessionId')).toBeNull();
+        expect(window.sessionStorage.getItem('skycode.activeSessionId')).toBeNull();
     });
 
     it('restores the active session when the store module is reloaded', async () => {
-        window.sessionStorage.setItem('zhikuncode.activeSessionId', 'session-restored');
+        window.sessionStorage.setItem('skycode.activeSessionId', 'session-restored');
         vi.resetModules();
 
         const { useSessionStore: restoredStore } = await import('../sessionStore');

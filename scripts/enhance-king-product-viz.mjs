@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const repo = resolve(import.meta.dirname, '..');
-const reportPath = resolve(repo, 'docs/case-studies/zhikuncode开发王者荣耀.html');
+const reportPath = resolve(repo, 'docs/case-studies/skycode开发王者荣耀.html');
 
 const esc = (value) => String(value)
   .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');

@@ -68,7 +68,7 @@ public class SessionController {
     private final SessionExecutionGate executionGate;
 
     /**
-     * 删除会话二次确认验证码（环境变量 ZHIKUN_DELETE_CONFIRM_CODE）。
+     * 删除会话二次确认验证码（环境变量 SKYCODE_DELETE_CONFIRM_CODE）。
      * 配置后删除会话必须携带匹配的 X-Delete-Confirm-Code 请求头；不配置则无需校验。
      */
     private final String deleteConfirmCode;
@@ -84,7 +84,7 @@ public class SessionController {
                              PublicMessageProjection publicMessages,
                              RunEnvelopeRepository runEnvelopes,
                              SessionExecutionGate executionGate,
-                             @Value("${zhikun.delete-confirm-code:}") String deleteConfirmCode) {
+                             @Value("${skycode.delete-confirm-code:}") String deleteConfirmCode) {
         this.sessionManager = sessionManager;
         this.compactService = compactService;
         this.providerRegistry = providerRegistry;
@@ -218,7 +218,7 @@ public class SessionController {
     /**
      * 删除会话。
      * <p>
-     * 配置了 zhikun.delete-confirm-code 时，必须携带匹配的
+     * 配置了 skycode.delete-confirm-code 时，必须携带匹配的
      * X-Delete-Confirm-Code 请求头，否则返回 403。
      * <p>
      * 403 时返回 {@code {success:false}} 而非 GlobalExceptionHandler 的统一

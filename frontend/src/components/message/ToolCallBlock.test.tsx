@@ -186,13 +186,13 @@ describe('ToolCallBlock 结果区折叠与截断', () => {
 
 describe('ToolCallBlock structured result renderer', () => {
     it.each([
-        { host: 'zhikunshare.oss-cn-beijing.aliyuncs.com', downloadExpected: true, mimeType: 'text/html', htmlHint: true },
+        { host: 'skycodeshare.oss-cn-beijing.aliyuncs.com', downloadExpected: true, mimeType: 'text/html', htmlHint: true },
         { host: 'files.example.com', downloadExpected: true, mimeType: 'text/html', htmlHint: true },
         { host: 'files.example.com', downloadExpected: false, mimeType: 'text/html', htmlHint: false },
         { host: 'files.example.com', downloadExpected: true, mimeType: 'Text/HTML; charset=UTF-8', htmlHint: true },
         { host: 'files.example.com', downloadExpected: true, mimeType: 'text/html-invalid', htmlHint: false },
     ])('preserves the exact URL and response behavior for $host / $downloadExpected / $mimeType', ({ host, downloadExpected, mimeType, htmlHint }) => {
-        const objectKey = 'zhikuncode-artifacts/session/artifact/report.html';
+        const objectKey = 'skycode-artifacts/session/artifact/report.html';
         const url = `https://${host}/${objectKey}?version=1`;
 
         render(<ToolCallBlock

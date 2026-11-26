@@ -30,7 +30,7 @@ final class BackgroundProcessGroup {
     final CompletableFuture<Void> exited = new CompletableFuture<>();
 
     static BackgroundProcessGroup launch(List<String> command, Path directory) throws IOException {
-        var argv = new ArrayList<>(List.of("bash", "-c", LAUNCH, "zhikun-background"));
+        var argv = new ArrayList<>(List.of("bash", "-c", LAUNCH, "skycode-background"));
         argv.addAll(command);
         Process process = new ProcessBuilder(argv).directory(directory.toFile())
                 .redirectError(ProcessBuilder.Redirect.DISCARD).start();
@@ -111,7 +111,7 @@ final class BackgroundProcessGroup {
     private static String command(String script, long deadline, String... arguments) throws IOException {
         long remaining = deadline - System.nanoTime();
         if (remaining <= 0) throw new IOException("PROCESS_GROUP_DEADLINE");
-        var argv = new ArrayList<>(List.of("bash", "-c", script, "zhikun-process-group"));
+        var argv = new ArrayList<>(List.of("bash", "-c", script, "skycode-process-group"));
         argv.addAll(List.of(arguments));
         Process process = new ProcessBuilder(argv).redirectError(ProcessBuilder.Redirect.DISCARD).start();
         try {

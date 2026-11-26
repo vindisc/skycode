@@ -304,7 +304,7 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
             {data && !data.apiKeyStorageReady && (
                 <p role="status" className="rounded-[10px] border border-warn bg-warnsoft px-3 py-2 text-[13px] text-warnstrong">
                     当前运行环境没有稳定的加密密钥，暂时不能保存 API Key。
-                    请通过环境变量 ZHIKU_ENCRYPTION_KEY 提供密钥后重启服务；无密钥的服务商（例如本地模型）不受影响。
+                    请通过环境变量 SKYCODE_ENCRYPTION_KEY 提供密钥后重启服务；无密钥的服务商（例如本地模型）不受影响。
                 </p>
             )}
 

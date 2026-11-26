@@ -131,7 +131,7 @@ public class McpCapabilityController {
                         var initParams = Map.of(
                                 "protocolVersion", "2024-11-05",
                                 "capabilities", Map.of(),
-                                "clientInfo", Map.of("name", "zhikuncode", "version", "1.0.0"));
+                                "clientInfo", Map.of("name", "skycode", "version", "1.0.0"));
                         conn.get().request("initialize", initParams, 15000);
                         conn.get().sendNotification("notifications/initialized");
                     } catch (Exception ignored) { /* 已初始化则忽略 */ }
@@ -202,7 +202,7 @@ public class McpCapabilityController {
                         conn.request("initialize", Map.of(
                                 "protocolVersion", "2024-11-05",
                                 "capabilities", Map.of(),
-                                "clientInfo", Map.of("name", "zhikuncode", "version", "1.0.0")), 15000);
+                                "clientInfo", Map.of("name", "skycode", "version", "1.0.0")), 15000);
                         conn.sendNotification("notifications/initialized");
                     } catch (Exception ignored) { }
                     JsonNode result = conn.callTool(def.toolName(), arguments, timeout);

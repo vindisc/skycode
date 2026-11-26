@@ -45,7 +45,7 @@ class BrowserFilePublicationServiceTest {
         verify(oss, times(3)).publish(any());
         assertThat(snapshots.getAllValues().get(0).objectKey())
                 .isEqualTo(snapshots.getAllValues().get(1).objectKey())
-                .startsWith("zhikuncode-artifacts/local-files/")
+                .startsWith("skycode-artifacts/local-files/")
                 .endsWith("-note.txt");
         assertThat(snapshots.getAllValues().get(2).objectKey())
                 .isNotEqualTo(snapshots.getAllValues().get(0).objectKey());
@@ -92,7 +92,7 @@ class BrowserFilePublicationServiceTest {
                 "session", "report.txt", "text/plain", 4,
                 new ByteArrayInputStream(new byte[] { 's', 'a', 'f', 'e' }));
 
-        assertThat(result.url()).startsWith("https://files.example.com/zhikuncode-artifacts/local-files/");
+        assertThat(result.url()).startsWith("https://files.example.com/skycode-artifacts/local-files/");
         assertThat(properties.isTrustedLocalFileUrl(result.url())).isTrue();
     }
 
@@ -183,7 +183,7 @@ class BrowserFilePublicationServiceTest {
         properties.setEndpoint("https://oss-cn-beijing.aliyuncs.com");
         properties.setRegion("cn-beijing");
         properties.setBucket("test-artifacts");
-        properties.setPrefix("zhikuncode-artifacts");
+        properties.setPrefix("skycode-artifacts");
         properties.setCredentialMode("default-chain");
         properties.setMaxFileBytes(maxBytes);
         return properties;

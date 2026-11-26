@@ -130,7 +130,7 @@ public class McpServerConnection {
             Map<String, Object> initParams = new LinkedHashMap<>();
             initParams.put("protocolVersion", "2024-11-05");
             Map<String, Object> clientInfo = new LinkedHashMap<>();
-            clientInfo.put("name", "zhikuncode");
+            clientInfo.put("name", "skycode");
             clientInfo.put("version", "1.0.0");
             initParams.put("clientInfo", clientInfo);
             Map<String, Object> capabilities = new LinkedHashMap<>();
@@ -213,7 +213,7 @@ public class McpServerConnection {
             case WS, WS_IDE  -> new McpWebSocketTransport(
                     config.url().replace("http://", "ws://").replace("https://", "wss://"));
             default -> {
-                // SDK, ZHIKUN_AI_PROXY 等尚未实现的传输类型 — 容错处理
+                // SDK, SKYCODE_AI_PROXY 等尚未实现的传输类型 — 容错处理
                 log.warn("Unsupported transport type '{}' for MCP server '{}', no transport created",
                         config.type(), config.name());
                 yield null;

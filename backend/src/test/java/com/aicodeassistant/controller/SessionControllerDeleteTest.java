@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * 删除会话二次确认验证码 — 后端强制校验。
- * 配置 zhikun.delete-confirm-code 后，删除必须携带匹配的
+ * 配置 skycode.delete-confirm-code 后，删除必须携带匹配的
  * X-Delete-Confirm-Code 请求头，否则 403 且不删除会话。
  */
 class SessionControllerDeleteTest {

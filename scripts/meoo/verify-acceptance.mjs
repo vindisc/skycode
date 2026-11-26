@@ -87,7 +87,7 @@ try {
   } else {
     await page.waitForFunction(()=>document.querySelector('#health').textContent==='API 连接正常');
     const response=await context.request.get(new URL('/api/health',url).href);
-    assert.equal(response.status(),200);assert.deepEqual(await response.json(),{ok:true,app:'zhikuncode-meoo-acceptance'});checks.push('homepage and live Node API');
+    assert.equal(response.status(),200);assert.deepEqual(await response.json(),{ok:true,app:'skycode-meoo-acceptance'});checks.push('homepage and live Node API');
   }
   assert.deepEqual(errors,[]);checks.push('no JavaScript page errors');
   await page.screenshot({path:path.join(out,'page.png'),fullPage:true});

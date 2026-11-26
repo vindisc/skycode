@@ -6,7 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const reportPath = join(repoRoot, 'docs/case-studies/zhikuncode开发王者荣耀.html');
+const reportPath = join(repoRoot, 'docs/case-studies/skycode开发王者荣耀.html');
 const assetRoot = join(repoRoot, 'docs/case-studies/assets/king');
 const browserPath = join(assetRoot, 'browser-verification.json');
 const layoutPath = join(assetRoot, 'svg-layout-audit.json');
@@ -70,12 +70,12 @@ requireCondition(
 );
 const onlineDeployment = measurement.onlineDeployment;
 requireCondition(onlineDeployment?.classification === 'OUTSIDE_DEVELOPMENT_WINDOW_ALIYUN_HTTPS_DEPLOYMENT', 'Online deployment classification differs');
-requireCondition(onlineDeployment.standard?.url === 'https://king.zhikun.xin/', 'Standard online URL differs');
+requireCondition(onlineDeployment.standard?.url === 'https://king.skycode.xin/', 'Standard online URL differs');
 requireCondition(onlineDeployment.standard?.title === 'KING_OK', 'Standard online title differs');
 requireCondition(onlineDeployment.standard?.heroSelectContainer === true && onlineDeployment.standard?.heroCards === 5, 'Standard online hero selection check failed');
 requireCondition(onlineDeployment.standard?.selectionTest?.lockSelectionSucceeded === true, 'Standard online hero lock selection failed');
 requireCondition(onlineDeployment.standard?.consoleErrors === 0 && onlineDeployment.standard?.resourceErrors === 0, 'Standard online page has console/resource errors');
-requireCondition(onlineDeployment.demo?.url === 'https://king.zhikun.xin/?demo=1', 'Demo online URL differs');
+requireCondition(onlineDeployment.demo?.url === 'https://king.skycode.xin/?demo=1', 'Demo online URL differs');
 requireCondition(onlineDeployment.demo?.title === 'KING_OK', 'Demo online title differs');
 requireCondition(onlineDeployment.demo?.heroSelectContainer === false && onlineDeployment.demo?.timerAdvanced === true, 'Demo auto-start check failed');
 requireCondition(onlineDeployment.demo?.canvasCount >= 2, 'Demo canvas rendering check failed');
@@ -102,12 +102,12 @@ const layoutSummary = {
 };
 const layoutAudit = {
   schemaVersion: 3,
-  caseId: 'zhikuncode-king-20260809',
+  caseId: 'skycode-king-20260809',
   reportVersion: 'v15',
   classification: 'OUTSIDE_DEVELOPMENT_WINDOW_DIRECT_BROWSER_LAYOUT_AUDIT',
   observedAt,
   browser: measurement.browser,
-  report: { path: 'zhikuncode开发王者荣耀.html', sha256: reportSha256, bytes: reportBytes.length },
+  report: { path: 'skycode开发王者荣耀.html', sha256: reportSha256, bytes: reportBytes.length },
   viewport: { width: primary.width, height: primary.height },
   thresholds,
   summary: layoutSummary,
@@ -119,12 +119,12 @@ const layoutSha256 = createHash('sha256').update(readFileSync(layoutPath)).diges
 
 const browserVerification = {
   schemaVersion: 10,
-  caseId: 'zhikuncode-king-20260809',
+  caseId: 'skycode-king-20260809',
   reportVersion: 'v15',
   classification: 'OUTSIDE_DEVELOPMENT_WINDOW_CURRENT_REPORT_BROWSER_VERIFICATION',
   observedAt,
   browser: measurement.browser,
-  report: { path: 'zhikuncode开发王者荣耀.html', sha256: reportSha256, bytes: statSync(reportPath).size },
+  report: { path: 'skycode开发王者荣耀.html', sha256: reportSha256, bytes: statSync(reportPath).size },
   content: measurement.content,
   viewports: measurement.viewports,
   layoutAudit: { path: 'svg-layout-audit.json', sha256: layoutSha256, summary: layoutSummary },
