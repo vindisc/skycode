@@ -119,8 +119,9 @@ test.describe('三主题视觉基线', () => {
 
         test(`②设置面板打开态 - ${theme}`, async ({ page }) => {
             await openApp(page, theme);
-            // Header 设置钮：title="设置"（桌面视口可见）；弹窗标题是「设置」，默认落在外观页
+            // Header 设置钮：title="设置"（桌面视口可见）；弹窗标题是「设置」。基线截的是外观页
             await page.locator('button[title="设置"]').click();
+            await page.getByRole('dialog', { name: '设置', exact: true }).getByRole('tab', { name: '外观' }).click();
             await expect(page.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
             await page.waitForTimeout(300);
             await expect(page).toHaveScreenshot(`settings-open-${theme}.png`, {

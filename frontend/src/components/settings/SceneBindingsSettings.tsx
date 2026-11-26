@@ -20,8 +20,6 @@ type ProviderSource = NonNullable<SceneBinding['source']>;
 /** 图片理解兜底场景只能选收图的模型 */
 const VISION_SCENE = 'vision_fallback';
 
-const LABEL = 'block text-sm font-medium text-t2 mb-1.5';
-
 interface Choice {
     source: ProviderSource;
     providerKey: string;
@@ -112,8 +110,8 @@ export function SceneBindingsSettings({ onGoToProviders }: SceneBindingsSettings
         <div className="space-y-4" data-testid="scene-bindings-settings">
             <div>
                 <h3 className="text-base font-semibold text-t1">场景分派</h3>
-                <p className="mt-1 text-[13px] leading-relaxed text-t3">
-                    给每个场景指定用「模型服务商」里的哪个模型。没有分派、或分派失效时，使用默认模型。
+                <p className="mt-1 text-[13px] text-t3">
+                    给每个场景指定用「模型服务商」里的哪个模型；没分派的用默认模型。
                 </p>
             </div>
 
@@ -124,124 +122,119 @@ export function SceneBindingsSettings({ onGoToProviders }: SceneBindingsSettings
                 </div>
             )}
 
-            <ul className="space-y-3">
-                {data.scenes.map(scene => {
-                    // saved：已保存且此刻仍有效的绑定；choice：界面上正显示的选择（用户改过但没保存的优先）
-                    const saved = choiceFor(scene, providers);
-                    const choice = drafts[scene.key] ?? saved;
-                    const dirty = choice != null && (saved == null
-                        || saved.source !== choice.source
-                        || saved.providerKey !== choice.providerKey
-                        || saved.modelId !== choice.modelId);
-                    const saving = savingScene === scene.key;
-                    return (
-                        <li key={scene.key} data-testid={`scene-card-${scene.key}`}>
-                            <Card className="p-4">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <h4 className="text-sm font-semibold text-t1">{scene.label}</h4>
-                                    <BindingStatus scene={scene} />
+            <Card className="overflow-hidden">
+                <ul className="divide-y divide-hairline">
+                    {data.scenes.map(scene => {
+                        // saved：已保存且此刻仍有效的绑定；choice：界面上正显示的选择（用户改过但没保存的优先）
+                        const saved = choiceFor(scene, providers);
+                        const choice = drafts[scene.key] ?? saved;
+                        const dirty = choice != null && (saved == null
+                            || saved.source !== choice.source
+                            || saved.providerKey !== choice.providerKey
+                            || saved.modelId !== choice.modelId);
+                        const saving = savingScene === scene.key;
+                        return (
+                            <li key={scene.key} data-testid={`scene-card-${scene.key}`} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+                                <div className="w-full shrink-0 sm:w-48">
+                                    {/* 场景干什么用的放在悬停提示里，正文保持一行 */}
+                                    <div className="flex items-center gap-2" title={scene.description}>
+                                        <h4 className="text-sm font-medium text-t1">{scene.label}</h4>
+                                        <BindingStatus scene={scene} />
+                                    </div>
+                                    <p className="mt-0.5 truncate text-[13px] text-t3">
+                                        {scene.binding
+                                            ? `当前：${scene.providerName ?? '（服务商已不存在）'} / ${scene.binding.modelId}`
+                                            : '用默认模型'}
+                                    </p>
+                                    {scene.binding && !scene.active && (
+                                        <p role="status" className="mt-0.5 text-[13px] text-warnstrong">
+                                            这条分派已失效，目前使用默认值。
+                                        </p>
+                                    )}
                                 </div>
-                                <p className="mt-1 text-[13px] leading-relaxed text-t3">{scene.description}</p>
-                                {scene.binding && (
-                                    <p className="mt-2 text-[13px] text-t2">
-                                        当前：{scene.providerName ?? '（服务商已不存在）'} / {scene.binding.modelId}
-                                    </p>
-                                )}
-                                {scene.binding && !scene.active && (
-                                    <p role="status" className="mt-1 text-[13px] text-warnstrong">
-                                        这条分派已失效：服务商被停用或删除，或者模型不在它的清单里。目前使用默认值。
-                                    </p>
-                                )}
 
                                 {providers.length > 0 && (
-                                    <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
-                                        <div className="min-w-0">
-                                            <label htmlFor={`${scene.key}-provider`} className={LABEL}>服务商</label>
-                                            <select
-                                                id={`${scene.key}-provider`}
-                                                value={choice ? `${choice.source}\u0000${choice.providerKey}` : ''}
-                                                disabled={saving}
-                                                onChange={e => {
-                                                    const found = providers.find(p => `${p.source}\u0000${p.key}` === e.target.value);
-                                                    setDrafts(previous => {
-                                                        // 选回「未分派」：撤掉这一张卡片上没保存的选择
-                                                        if (!found) return without(previous, scene.key);
-                                                        return {
-                                                            ...previous,
-                                                            [scene.key]: {
-                                                                source: found.source,
-                                                                providerKey: found.key,
-                                                                modelId: modelsFor(found, scene.key)[0]?.id ?? '',
-                                                            },
-                                                        };
-                                                    });
-                                                }}
-                                                className={cn(inputVariants(), 'pr-8')}
-                                            >
-                                                {/* 没分派的场景停在第一项，不替用户预选任何服务商 */}
-                                                <option value="">未分派（使用默认模型）</option>
-                                                {providers.map(provider => (
-                                                    <option key={`${provider.source}\u0000${provider.key}`} value={`${provider.source}\u0000${provider.key}`}>
-                                                        {provider.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div className="min-w-0">
-                                            <label htmlFor={`${scene.key}-model`} className={LABEL}>模型</label>
-                                            <ModelSelect
-                                                id={`${scene.key}-model`}
-                                                sceneKey={scene.key}
-                                                provider={choice ? providers.find(p => p.source === choice.source && p.key === choice.providerKey) : undefined}
-                                                value={choice?.modelId ?? ''}
-                                                disabled={saving || !choice}
-                                                onChange={modelId => {
-                                                    if (!choice) return;
-                                                    setDrafts(previous => ({
+                                    /* 桌面宽度下挤成一行；窄屏（弹窗手机形态）才允许换行 */
+                                    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2 sm:flex-nowrap">
+                                        <select
+                                            id={`${scene.key}-provider`}
+                                            aria-label={`${scene.label}的服务商`}
+                                            value={choice ? `${choice.source}\u0000${choice.providerKey}` : ''}
+                                            disabled={saving}
+                                            onChange={e => {
+                                                const found = providers.find(p => `${p.source}\u0000${p.key}` === e.target.value);
+                                                setDrafts(previous => {
+                                                    // 选回「未分派」：撤掉这一行上没保存的选择
+                                                    if (!found) return without(previous, scene.key);
+                                                    return {
                                                         ...previous,
-                                                        [scene.key]: { source: choice.source, providerKey: choice.providerKey, modelId },
-                                                    }));
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="primary"
-                                                loading={saving}
-                                                disabled={!dirty || !choice?.modelId}
-                                                onClick={() => { if (choice) void handleSave(scene, choice); }}
-                                            >
-                                                保存
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                disabled={!scene.binding || saving}
-                                                onClick={() => { void handleClear(scene); }}
-                                            >
-                                                清除
-                                            </Button>
-                                        </div>
+                                                        [scene.key]: {
+                                                            source: found.source,
+                                                            providerKey: found.key,
+                                                            modelId: modelsFor(found, scene.key)[0]?.id ?? '',
+                                                        },
+                                                    };
+                                                });
+                                            }}
+                                            className={cn(inputVariants(), 'min-w-0 flex-1 basis-36 py-1.5 pr-8')}
+                                        >
+                                            {/* 没分派的场景停在第一项，不替用户预选任何服务商 */}
+                                            <option value="">未分派</option>
+                                            {providers.map(provider => (
+                                                <option key={`${provider.source}\u0000${provider.key}`} value={`${provider.source}\u0000${provider.key}`}>
+                                                    {provider.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <ModelSelect
+                                            id={`${scene.key}-model`}
+                                            sceneKey={scene.key}
+                                            provider={choice ? providers.find(p => p.source === choice.source && p.key === choice.providerKey) : undefined}
+                                            value={choice?.modelId ?? ''}
+                                            disabled={saving || !choice}
+                                            onChange={modelId => {
+                                                if (!choice) return;
+                                                setDrafts(previous => ({
+                                                    ...previous,
+                                                    [scene.key]: { source: choice.source, providerKey: choice.providerKey, modelId },
+                                                }));
+                                            }}
+                                        />
+                                        <Button
+                                            size="sm"
+                                            variant="primary"
+                                            loading={saving}
+                                            disabled={!dirty || !choice?.modelId}
+                                            onClick={() => { if (choice) void handleSave(scene, choice); }}
+                                        >
+                                            保存
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            disabled={!scene.binding || saving}
+                                            onClick={() => { void handleClear(scene); }}
+                                        >
+                                            清除
+                                        </Button>
                                     </div>
                                 )}
                                 {/* 没有可选服务商时上面的操作区不渲染，但失效的绑定仍要能清掉 */}
                                 {providers.length === 0 && scene.binding && (
-                                    <div className="mt-3">
-                                        <Button size="sm" disabled={saving} onClick={() => { void handleClear(scene); }}>
-                                            清除这条分派
-                                        </Button>
-                                    </div>
+                                    <Button size="sm" disabled={saving} onClick={() => { void handleClear(scene); }}>
+                                        清除这条分派
+                                    </Button>
                                 )}
                                 {saveErrors[scene.key] && (
-                                    <p role="alert" className="mt-3 rounded-[10px] border border-err bg-errsoft px-3 py-2 text-[13px] text-errstrong">
+                                    <p role="alert" className="w-full rounded-[10px] border border-err bg-errsoft px-3 py-2 text-[13px] text-errstrong">
                                         {saveErrors[scene.key]}
                                     </p>
                                 )}
-                            </Card>
-                        </li>
-                    );
-                })}
-            </ul>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </Card>
         </div>
     );
 }
@@ -260,10 +253,11 @@ function ModelSelect({ id, sceneKey, provider, value, disabled, onChange }: {
     return (
         <select
             id={id}
+            aria-label="模型"
             value={current}
             disabled={disabled}
             onChange={e => onChange(e.target.value)}
-            className={cn(inputVariants(), 'pr-8')}
+            className={cn(inputVariants(), 'min-w-0 flex-1 basis-32 py-1.5 pr-8')}
         >
             {models.length === 0 && (
                 <option value="">

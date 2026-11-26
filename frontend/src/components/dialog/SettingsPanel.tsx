@@ -19,16 +19,17 @@ import { LlmProvidersSettings } from '@/components/settings/LlmProvidersSettings
 import { SceneBindingsSettings } from '@/components/settings/SceneBindingsSettings';
 import type { ThemeConfig } from '@/types';
 
-export type SettingsTab = 'appearance' | 'providers' | 'scenes';
+export type SettingsTab = 'providers' | 'scenes' | 'appearance';
 
+// 模型相关的两页放前面、默认落在「模型服务商」——这是用户最常来的地方；外观放最后
 const TABS: { value: SettingsTab; label: string }[] = [
-    { value: 'appearance', label: '外观' },
     { value: 'providers', label: '模型服务商' },
     { value: 'scenes', label: '场景分派' },
+    { value: 'appearance', label: '外观' },
 ];
 
 function toSettingsTab(value: string): SettingsTab {
-    return TABS.some(tab => tab.value === value) ? (value as SettingsTab) : 'appearance';
+    return TABS.some(tab => tab.value === value) ? (value as SettingsTab) : 'providers';
 }
 
 const THEMES: { mode: ThemeConfig['mode']; label: string; icon: typeof Sun }[] = [
@@ -46,7 +47,7 @@ const THEMES: { mode: ThemeConfig['mode']; label: string; icon: typeof Sun }[] =
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
     // 打开弹窗时可以通过 dialogData.tab 指定落在哪一页（例如从「优化提示词」跳到场景分派）
     const requestedTab = useDialogStore(s => s.dialogData.tab);
-    const [tab, setTab] = useState<SettingsTab>(() => toSettingsTab(String(requestedTab ?? 'appearance')));
+    const [tab, setTab] = useState<SettingsTab>(() => toSettingsTab(String(requestedTab ?? 'providers')));
     // 当前页有没有没保存的改动。用 ref：关闭、切换的瞬间要读到最新值，不必等重渲染
     const unsavedRef = useRef(false);
     const onUnsavedChange = useCallback((unsaved: boolean) => { unsavedRef.current = unsaved; }, []);

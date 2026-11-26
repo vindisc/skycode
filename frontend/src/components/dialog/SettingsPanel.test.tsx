@@ -28,6 +28,10 @@ describe('Appearance settings and shortcut help', () => {
     it('applies theme changes and persists them without session controls', () => {
         render(<SettingsPanel onClose={vi.fn()} />);
         expect(screen.getByRole('dialog', { name: '设置' })).toBeInTheDocument();
+        // 模型设置在前、外观在最后；默认落在「模型服务商」
+        expect(screen.getAllByRole('tab').map(tab => tab.textContent?.trim()))
+            .toEqual(['模型服务商', '场景分派', '外观']);
+        fireEvent.click(screen.getByRole('tab', { name: '外观' }));
         expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
         expect(screen.queryByRole('button', { name: '跟随系统' })).not.toBeInTheDocument();
         fireEvent.click(screen.getByRole('button', { name: '液态玻璃' }));
@@ -43,26 +47,25 @@ describe('Appearance settings and shortcut help', () => {
         expect(onClose).toHaveBeenCalledOnce();
     });
 
-    it('only mounts the tab that is selected, starting with appearance', async () => {
+    it('only mounts the tab that is selected, starting with providers', async () => {
+        // 前面的用例渲染弹窗时也会拉一次服务商列表（现在这是默认页），先清掉计数
+        vi.mocked(settingsApi.listProviders).mockClear();
+        vi.mocked(settingsApi.listScenes).mockClear();
         render(<SettingsPanel onClose={vi.fn()} />);
 
-        // 就三页：外观、模型服务商、场景分派
-        expect(screen.getAllByRole('tab').map(tab => tab.textContent?.trim()))
-            .toEqual(['外观', '模型服务商', '场景分派']);
-        // 外观页不发请求，也不挂载另外两页
-        expect(screen.getByRole('tab', { name: '外观' })).toHaveAttribute('aria-selected', 'true');
-        expect(screen.queryByTestId('llm-providers-settings')).not.toBeInTheDocument();
-        expect(screen.queryByTestId('scene-bindings-settings')).not.toBeInTheDocument();
-        expect(settingsApi.listProviders).not.toHaveBeenCalled();
-
-        fireEvent.click(screen.getByRole('tab', { name: '模型服务商' }));
+        // 默认落在「模型服务商」：拉服务商列表，不挂载另外两页
         expect(await screen.findByTestId('llm-providers-settings')).toBeInTheDocument();
+        expect(screen.getByRole('tab', { name: '模型服务商' })).toHaveAttribute('aria-selected', 'true');
         expect(screen.queryByRole('group', { name: '主题' })).not.toBeInTheDocument();
         expect(screen.queryByTestId('scene-bindings-settings')).not.toBeInTheDocument();
 
         fireEvent.click(screen.getByRole('tab', { name: '场景分派' }));
         expect(await screen.findByTestId('scene-bindings-settings')).toBeInTheDocument();
         await waitFor(() => expect(screen.queryByTestId('llm-providers-settings')).not.toBeInTheDocument());
+
+        fireEvent.click(screen.getByRole('tab', { name: '外观' }));
+        expect(screen.getByRole('group', { name: '主题' })).toBeInTheDocument();
+        await waitFor(() => expect(screen.queryByTestId('scene-bindings-settings')).not.toBeInTheDocument());
         expect(settingsApi.listProviders).toHaveBeenCalledTimes(1);
         expect(settingsApi.listScenes).toHaveBeenCalledTimes(1);
     });

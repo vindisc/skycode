@@ -76,6 +76,8 @@ describe('银河皮肤入口', () => {
     it.each(['dialog', 'picker'] as const)('%s 支持 9 项主题，固定配色不改写已选颜色', entry => {
         useConfigStore.getState().setTheme({ accentColor: '#C9578A' });
         render(entry === 'dialog' ? <SettingsPanel onClose={() => undefined} /> : <ThemePicker />);
+        // 设置弹窗默认落在「模型服务商」，主题在外观页
+        if (entry === 'dialog') fireEvent.click(screen.getByRole('tab', { name: '外观' }));
         const modes = screen.getByRole('group', { name: '主题' });
         expect(within(modes).getAllByRole('button')).toHaveLength(9);
         fireEvent.click(within(modes).getByRole('button', { name: '璀璨银河' }));

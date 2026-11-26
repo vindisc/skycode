@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { Button, Card, Chip, EmptyState, Spinner, Toggle } from '@/components/ui';
 import {
     configuredProvidersApi,
@@ -287,10 +287,7 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                     <h3 className="text-base font-semibold text-t1">模型服务商</h3>
-                    <p className="mt-1 text-[13px] leading-relaxed text-t3">
-                        这里列出的就是当前可用的服务商。要加新的点「添加服务商」，保存后立即可用；
-                        模型清单可以点「从接口获取」，不用手敲模型名。
-                    </p>
+                    <p className="mt-1 text-[13px] text-t3">列出的就是当前可用的服务商，保存后立即生效。</p>
                 </div>
                 <div className="flex shrink-0 gap-2">
                     <Button size="sm" loading={isBusy('reload')} onClick={() => { void handleReload(); }}>
@@ -334,8 +331,9 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
                             />
                         ))
                         : (
-                            /* 一张清单：.env 里配了密钥的在前，设置页里添加的在后 */
-                            <ul className="space-y-3">
+                            /* 一张清单：带注册名的在前，设置页里添加的在后 */
+                            <Card className="overflow-hidden">
+                                <ul className="divide-y divide-hairline">
                                 {configured.map(view => (
                                     <ConfiguredProviderRow
                                         key={view.name}
@@ -363,7 +361,8 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
                                         onDelete={() => { void handleDelete(provider); }}
                                     />
                                 ))}
-                            </ul>
+                                </ul>
+                            </Card>
                         )}
                 </section>
             )}
@@ -426,62 +425,53 @@ interface ConfiguredProviderRowProps {
 
 function ConfiguredProviderRow({ view, operation, anyBusy, testResult, onTest, onToggle, onEdit, onDelete }: ConfiguredProviderRowProps) {
     return (
-        <li data-testid={`configured-provider-row-${view.name}`}>
-            <Card className="p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1 basis-64">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-sm font-semibold text-t1">{view.displayName}</span>
-                            <span className="text-[13px] text-t4" title={`注册名 ${view.name}`}>{view.name}</span>
-                            <ConfiguredStatus view={view} />
-                        </div>
-                        <div className="mt-1 truncate text-[13px] text-t3" title={view.baseUrl}>{view.baseUrl}</div>
-                        <div className="mt-0.5 text-[13px] text-t3">
-                            {view.hasApiKey ? <>密钥 {view.apiKeyMasked}</> : '还没有填写密钥'}
-                        </div>
-                        <div className="mt-3 flex flex-wrap gap-1.5" aria-label={`${view.displayName} 的模型`}>
-                            {view.models.map(model => (
-                                <Chip key={model} variant={view.active ? 'accent' : 'neutral'}>{model}</Chip>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                        {/* 没有密钥的条目谈不上启停，给了开关只会让人以为打开就能用 */}
-                        {view.hasApiKey && (
-                            <label className="flex items-center gap-2 text-[13px] text-t2">
-                                <Toggle
-                                    checked={view.enabled}
-                                    onCheckedChange={onToggle}
-                                    disabled={anyBusy}
-                                    aria-label={`启用 ${view.displayName}`}
-                                />
-                                启用
-                            </label>
-                        )}
-                        <Button size="sm" onClick={onTest} loading={operation === 'test'} disabled={anyBusy}>测试</Button>
-                        <Button size="sm" variant="ghost" onClick={onEdit} disabled={anyBusy}>编辑</Button>
-                        <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={onDelete}
-                            loading={operation === 'delete'}
-                            disabled={anyBusy}
-                        >
-                            删除
-                        </Button>
-                    </div>
+        <li data-testid={`configured-provider-row-${view.name}`} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+            <div className="min-w-0 flex-1 basis-64">
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-t1">{view.displayName}</span>
+                    <span className="text-[13px] text-t4" title={`注册名 ${view.name}`}>{view.name}</span>
+                    <ConfiguredStatus view={view} />
+                </div>
+                <div className="mt-0.5 truncate text-[13px] text-t3" title={view.baseUrl}>
+                    {view.baseUrl} · {view.hasApiKey ? `密钥 ${view.apiKeyMasked}` : '还没有填写密钥'}
+                </div>
+                <div className="mt-1.5 flex flex-wrap gap-1" aria-label={`${view.displayName} 的模型`}>
+                    {view.models.map(model => (
+                        <Chip key={model} variant={view.active ? 'accent' : 'neutral'} className="h-5 px-2 text-[12px]">{model}</Chip>
+                    ))}
                 </div>
                 <TestOutcome testResult={testResult} />
-            </Card>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+                {/* 没有密钥的条目谈不上启停，给了开关只会让人以为打开就能用 */}
+                {view.hasApiKey && (
+                    <label className="mr-1 flex items-center gap-1.5 text-[13px] text-t2">
+                        <Toggle
+                            checked={view.enabled}
+                            onCheckedChange={onToggle}
+                            disabled={anyBusy}
+                            aria-label={`启用 ${view.displayName}`}
+                        />
+                        启用
+                    </label>
+                )}
+                <Button size="sm" variant="ghost" onClick={onTest} loading={operation === 'test'} disabled={anyBusy}>测试</Button>
+                <Button size="sm" variant="ghost" onClick={onEdit} disabled={anyBusy} aria-label="编辑" title="编辑">
+                    <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={onDelete} loading={operation === 'delete'} disabled={anyBusy} aria-label="删除" title="删除">
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                </Button>
+            </div>
         </li>
     );
 }
 
-/** 已启用 / 已停用 / 未配置密钥 / 未注册。 */
+/** 行内已有启用开关，启用/停用不再重复标；只标开关表达不了的：没密钥、或注册没成功。 */
 function ConfiguredStatus({ view }: { view: ConfiguredProviderView }) {
-    if (!view.enabled) return <Chip variant="neutral">已停用</Chip>;
     if (!view.hasApiKey) return <Chip variant="neutral">未配置密钥</Chip>;
-    return view.active ? <Chip variant="ok">已启用</Chip> : <Chip variant="warn">未注册</Chip>;
+    if (view.enabled && !view.active) return <Chip variant="warn">未注册</Chip>;
+    return null;
 }
 
 interface ProviderRowProps {
@@ -501,38 +491,17 @@ interface ProviderRowProps {
 function ProviderRow({ provider, routing, operation, anyBusy, testResult, onToggle, onTest, onEdit, onDelete }: ProviderRowProps) {
     const registered = routing?.registeredAs != null;
     return (
-        <li data-testid={`llm-provider-row-${provider.key}`}>
-            <Card className="p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1 basis-64">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-sm font-semibold text-t1">{provider.name}</span>
-                            <RoutingStatus routing={routing} enabled={provider.enabled} />
-                        </div>
-                        <div className="mt-1 truncate text-[13px] text-t3" title={provider.baseUrl}>{provider.baseUrl}</div>
-                        <div className="mt-0.5 text-[13px] text-t3">
-                            密钥 {provider.hasApiKey ? provider.apiKeyMasked : '未设置'}
-                        </div>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2">
-                        <label className="flex items-center gap-2 text-[13px] text-t2">
-                            <Toggle
-                                checked={provider.enabled}
-                                onCheckedChange={onToggle}
-                                disabled={anyBusy}
-                                aria-label={`启用 ${provider.name}`}
-                            />
-                            启用
-                        </label>
-                        <Button size="sm" onClick={onTest} loading={operation === 'test'} disabled={anyBusy}>测试</Button>
-                        <Button size="sm" variant="ghost" onClick={onEdit} disabled={anyBusy}>编辑</Button>
-                        <Button size="sm" variant="ghost" onClick={onDelete} loading={operation === 'delete'} disabled={anyBusy}>
-                            删除
-                        </Button>
-                    </div>
+        <li data-testid={`llm-provider-row-${provider.key}`} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
+            <div className="min-w-0 flex-1 basis-64">
+                <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-t1">{provider.name}</span>
+                    <RoutingStatus routing={routing} enabled={provider.enabled} />
+                </div>
+                <div className="mt-0.5 truncate text-[13px] text-t3" title={provider.baseUrl}>
+                    {provider.baseUrl} · 密钥 {provider.hasApiKey ? provider.apiKeyMasked : '未设置'}
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-1.5" aria-label={`${provider.name} 的模型`}>
+                <div className="mt-1.5 flex flex-wrap gap-1" aria-label={`${provider.name} 的模型`}>
                     {provider.models.map(model => {
                         const skip = routing?.skippedModels.find(s => s.model === model);
                         const inferred = routing?.inferredModels?.find(item => item.model === model);
@@ -540,6 +509,7 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
                             <Chip
                                 key={model}
                                 variant={!provider.enabled || !registered ? 'neutral' : skip ? 'warn' : 'accent'}
+                                className="h-5 px-2 text-[12px]"
                                 title={!provider.enabled
                                     ? '服务商已停用'
                                     : skip?.reason ?? inferred?.basis}
@@ -551,12 +521,12 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
                 </div>
 
                 {registered && (
-                    <p className="mt-3 text-[13px] text-t3">
+                    <p className="mt-1.5 text-[13px] text-t3">
                         已注册为 {routing?.registeredAs}，默认模型 {routing?.defaultModel}
                     </p>
                 )}
                 {registered && (routing?.inferredModels?.length ?? 0) > 0 && (
-                    <div className="mt-2 text-[13px] text-t3" data-testid="inferred-models">
+                    <div className="mt-1.5 text-[13px] text-t3" data-testid="inferred-models">
                         <p>以下模型不在内置能力表里，按推算的参数登记：</p>
                         <ul className="mt-1 space-y-1">
                             {routing?.inferredModels?.map((inferred: InferredModel) => (
@@ -568,10 +538,10 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
                     </div>
                 )}
                 {!registered && routing?.skipReason && (
-                    <p role="status" className="mt-3 text-[13px] text-t3">未注册：{routing.skipReason}</p>
+                    <p role="status" className="mt-1.5 text-[13px] text-t3">未注册：{routing.skipReason}</p>
                 )}
                 {routing && routing.skippedModels.length > 0 && (
-                    <ul className="mt-2 space-y-1" aria-label="未注册的模型">
+                    <ul className="mt-1.5 space-y-1" aria-label="未注册的模型">
                         {routing.skippedModels.map(skip => (
                             <li key={skip.model} className="text-[13px] text-t3">
                                 <span className="text-t2">{skip.model}</span> — {skip.reason}
@@ -580,7 +550,25 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
                     </ul>
                 )}
                 <TestOutcome testResult={testResult} />
-            </Card>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+                <label className="mr-1 flex items-center gap-1.5 text-[13px] text-t2">
+                    <Toggle
+                        checked={provider.enabled}
+                        onCheckedChange={onToggle}
+                        disabled={anyBusy}
+                        aria-label={`启用 ${provider.name}`}
+                    />
+                    启用
+                </label>
+                <Button size="sm" variant="ghost" onClick={onTest} loading={operation === 'test'} disabled={anyBusy}>测试</Button>
+                <Button size="sm" variant="ghost" onClick={onEdit} disabled={anyBusy} aria-label="编辑" title="编辑">
+                    <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={onDelete} loading={operation === 'delete'} disabled={anyBusy} aria-label="删除" title="删除">
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                </Button>
+            </div>
         </li>
     );
 }

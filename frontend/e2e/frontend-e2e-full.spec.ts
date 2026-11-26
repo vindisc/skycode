@@ -341,6 +341,8 @@ test.describe('前端 E2E 与 UI 功能测试 (Task 13)', () => {
     await page.getByRole('button', { name: '设置', exact: true }).click();
     const dialog = page.getByRole('dialog', { name: '设置', exact: true });
     await expect(dialog).toBeVisible();
+    // 默认落在「模型服务商」，主题在外观页
+    await dialog.getByRole('tab', { name: '外观' }).click();
     for (const [mode, label] of [['dark', '深色'], ['glass', '液态玻璃'], ['light', '浅色']]) {
       const option = dialog.getByRole('button', { name: label, exact: true });
       await option.click();

@@ -117,7 +117,7 @@ describe('LlmProvidersSettings', () => {
         render(<LlmProvidersSettings />);
 
         expect(await screen.findByText('智谱')).toBeInTheDocument();
-        expect(screen.getByText('密钥 ••••cdef')).toBeInTheDocument();
+        expect(screen.getByText(/密钥 ••••cdef/)).toBeInTheDocument();
         expect(screen.getByText('已注册')).toBeInTheDocument();
         expect(screen.getByText('已注册为 db:智谱，默认模型 glm-5.4')).toBeInTheDocument();
         expect(screen.getByText(/— 已由配置里的服务商「huoshen」提供/)).toBeInTheDocument();
@@ -464,7 +464,8 @@ describe('LlmProvidersSettings', () => {
         const section = await screen.findByTestId('providers-list');
 
         const active = within(section).getByTestId('configured-provider-row-huoshenai');
-        expect(within(active).getByText('已启用')).toBeInTheDocument();
+        // 启用状态由行内开关表达，不再重复标「已启用」
+        expect(within(active).queryByText('已启用')).not.toBeInTheDocument();
         expect(within(active).getByText('HuoshenAI 中转站')).toBeInTheDocument();
         expect(active).toHaveTextContent('密钥 ••••vEEm');
         expect(within(active).getByRole('button', { name: '删除' })).toBeEnabled();
@@ -481,8 +482,9 @@ describe('LlmProvidersSettings', () => {
         render(<LlmProvidersSettings />);
 
         const section = await screen.findByTestId('providers-list');
-        // 同一张清单（行里嵌着的小列表不算），不分来源分组
-        expect(Array.from(section.querySelectorAll<HTMLLIElement>(':scope > ul > li')).map(row => row.dataset.testid))
+        // 同一张清单，不分来源分组
+        expect(Array.from(section.querySelectorAll('[data-testid^="configured-provider-row-"], [data-testid^="llm-provider-row-"]'))
+            .map(row => row.getAttribute('data-testid')))
             .toEqual(['configured-provider-row-huoshenai', 'llm-provider-row-智谱']);
         expect(screen.queryByText('配置里的服务商')).not.toBeInTheDocument();
         expect(screen.queryByText('设置页里添加的服务商')).not.toBeInTheDocument();
@@ -555,7 +557,8 @@ describe('LlmProvidersSettings', () => {
         fireEvent.click(within(row).getByRole('switch', { name: '启用 HuoshenAI 中转站' }));
 
         await waitFor(() => expect(api.saveConfiguredProvider).toHaveBeenCalledWith('huoshenai', { enabled: false }));
-        expect(await within(row).findByText('已停用')).toBeInTheDocument();
+        // 停用状态体现在开关上
+        await waitFor(() => expect(within(row).getByRole('switch', { name: '启用 HuoshenAI 中转站' })).toHaveAttribute('aria-checked', 'false'));
         // 没有密钥的条目不给开关：打开了也用不了
         expect(within(within(section).getByTestId('configured-provider-row-zhipu')).queryByRole('switch')).not.toBeInTheDocument();
     });

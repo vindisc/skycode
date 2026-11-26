@@ -89,7 +89,7 @@ describe('SceneBindingsSettings', () => {
         // 没分派的场景不预选服务商：服务商停在「未分派」，模型框空着，保存不可点
         const promptProvider = promptCard.querySelectorAll('select')[0] as HTMLSelectElement;
         expect(promptProvider.value).toBe('');
-        expect(promptProvider.selectedOptions[0].textContent).toBe('未分派（使用默认模型）');
+        expect(promptProvider.selectedOptions[0].textContent).toBe('未分派');
         expect(Array.from(promptCard.querySelectorAll('select')[1].options).map(o => o.value)).toEqual(['']);
         expect(within(promptCard).getByRole('button', { name: '保存' })).toBeDisabled();
         // 选了服务商才出模型清单
@@ -228,7 +228,7 @@ describe('SceneBindingsSettings', () => {
         // 不分「配置里的」「添加的」两组：用户看到的就是一串可选的服务商
         expect(card.querySelectorAll('optgroup')).toHaveLength(0);
         expect(Array.from(provider.options).map(option => option.textContent))
-            .toEqual(['未分派（使用默认模型）', 'HuoshenAI 中转站', '火神']);
+            .toEqual(['未分派', 'HuoshenAI 中转站', '火神']);
 
         fireEvent.change(provider, { target: { value: 'configured\u0000huoshenai' } });
         fireEvent.click(within(card).getByRole('button', { name: '保存' }));
