@@ -78,7 +78,7 @@ public class AsrService {
      * ASR 热词纠正规则配置（环境变量 ASR_CORRECTIONS 可覆盖），格式与默认值见类 javadoc。
      * 统一驱动 system 词表偏置（canonical）与识别结果后处理替换（variants）两层。
      */
-    @Value("${asr.corrections:skycode:sky code,skykode,sky kod,skyco}")
+    @Value("${asr.corrections:skycode:sky code,skykode,sky kod}")
     private String correctionsConfig;
 
     /**

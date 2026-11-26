@@ -65,7 +65,7 @@ services:
       - PROMPT_OPTIMIZE_API_KEY=${PROMPT_OPTIMIZE_API_KEY:-}
       - PROMPT_OPTIMIZE_MODEL=${PROMPT_OPTIMIZE_MODEL:-}
       - PROMPT_OPTIMIZE_BASE_URL=${PROMPT_OPTIMIZE_BASE_URL:-}
-      - ASR_CORRECTIONS=${ASR_CORRECTIONS:-skycode:sky code,skykode,sky kod,skyco}
+      - ASR_CORRECTIONS=${ASR_CORRECTIONS:-skycode:sky code,skykode,sky kod}
       # ---- Legacy Single-Provider (Backward Compatible) ----
       - LLM_API_KEY=${LLM_API_KEY:-}
       - LLM_BASE_URL=${LLM_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}

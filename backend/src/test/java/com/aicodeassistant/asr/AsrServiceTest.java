@@ -21,7 +21,7 @@ class AsrServiceTest {
 
     /** 与 {@code @Value("${asr.corrections:…}")} 默认值一致的默认纠正配置串 */
     private static final String DEFAULT_CORRECTIONS =
-            "skycode:zhi kun code,zkun code,智坤code,志鲲Code,智kuncode,zhi坤code";
+            "skycode:sky code,skykode,sky kod";
 
     private static final String DEFAULT_PREFIX = "实体词表：skycode";
 
@@ -33,12 +33,12 @@ class AsrServiceTest {
     // ═══════════════ parseCorrections：配置解析 ═══════════════
 
     @Test
-    @DisplayName("默认配置串（与 @Value 默认值一致）→ 1 条规则、canonical=skycode、6 个变体模式")
-    void parseCorrections_defaultConfig_shouldYieldOneRuleWithSixVariants() {
+    @DisplayName("默认配置串（与 @Value 默认值一致）→ 1 条规则、canonical=skycode、3 个变体模式")
+    void parseCorrections_defaultConfig_shouldYieldOneRuleWithThreeVariants() {
         List<AsrService.CorrectionRule> rules = defaultRules();
         assertEquals(1, rules.size());
         assertEquals("skycode", rules.get(0).canonical());
-        assertEquals(6, rules.get(0).patterns().size());
+        assertEquals(3, rules.get(0).patterns().size());
     }
 
     @Test
@@ -120,21 +120,21 @@ class AsrServiceTest {
     // ═══════════════ variantToPattern：变体宽容正则 ═══════════════
 
     @Test
-    @DisplayName("变体 'zhi kun code' 的模式匹配空格/连字符/驼峰/连写四种形态")
+    @DisplayName("变体 'sky code' 的模式匹配空格/连字符/驼峰/连写四种形态")
     void variantToPattern_spacesAndHyphens_shouldMatchAllSeparatorForms() {
-        java.util.regex.Pattern pattern = AsrService.variantToPattern("zhi kun code");
-        assertTrue(pattern.matcher("zhi kun code").find());
-        assertTrue(pattern.matcher("zhi-kun-code").find());
-        assertTrue(pattern.matcher("zhiKunCode").find());
+        java.util.regex.Pattern pattern = AsrService.variantToPattern("sky code");
+        assertTrue(pattern.matcher("sky code").find());
+        assertTrue(pattern.matcher("sky-code").find());
+        assertTrue(pattern.matcher("skyCode").find());
         assertTrue(pattern.matcher("skycode").find());
     }
 
     @Test
-    @DisplayName("变体大小写不敏感：'ZHI KUN CODE' / 'ZhiKunCode' 均匹配")
+    @DisplayName("变体大小写不敏感：'SKY CODE' / 'SkyCode' 均匹配")
     void variantToPattern_shouldBeCaseInsensitive() {
-        java.util.regex.Pattern pattern = AsrService.variantToPattern("zhi kun code");
-        assertTrue(pattern.matcher("ZHI KUN CODE").find());
-        assertTrue(pattern.matcher("ZhiKunCode").find());
+        java.util.regex.Pattern pattern = AsrService.variantToPattern("sky code");
+        assertTrue(pattern.matcher("SKY CODE").find());
+        assertTrue(pattern.matcher("SkyCode").find());
     }
 
     @Test
@@ -177,46 +177,48 @@ class AsrServiceTest {
     // ═══════════════ applyCorrections：确定性后处理 ═══════════════
 
     @Test
-    @DisplayName("实测变体：zkuncode（英文发音识别结果）→ skycode")
-    void corrections_zkuncodeVariant_shouldNormalize() {
+    @DisplayName("实测变体：skykode（英文发音识别结果）→ skycode")
+    void corrections_skykodeVariant_shouldNormalize() {
         assertEquals("介绍一下skycode这个项目。",
-                AsrService.applyCorrections("介绍一下zkuncode这个项目。", defaultRules()));
+                AsrService.applyCorrections("介绍一下skykode这个项目。", defaultRules()));
     }
 
     @Test
-    @DisplayName("默认变体 zkun code 分词模式 → 连写、空格、连字符形态均纠正")
-    void corrections_zkunCodeFamily_shouldNormalizeAllForms() {
-        assertEquals("skycode", AsrService.applyCorrections("zkun code", defaultRules()));
-        assertEquals("skycode", AsrService.applyCorrections("zkun-code", defaultRules()));
-        assertEquals("skycode", AsrService.applyCorrections("ZKUN CODE", defaultRules()));
+    @DisplayName("默认变体 sky code 分词模式 → 连写、空格、连字符形态均纠正")
+    void corrections_skyCodeFamily_shouldNormalizeAllForms() {
+        assertEquals("skycode", AsrService.applyCorrections("sky code", defaultRules()));
+        assertEquals("skycode", AsrService.applyCorrections("sky-code", defaultRules()));
+        assertEquals("skycode", AsrService.applyCorrections("SKY KOD", defaultRules()));
     }
 
     @Test
-    @DisplayName("实测变体：智坤code（中文发音识别结果）→ skycode")
+    @DisplayName("自定义变体：智坤code（中文发音识别结果）→ skycode")
     void corrections_chineseVariant_shouldNormalize() {
+        List<AsrService.CorrectionRule> rules = AsrService.parseCorrections("skycode:智坤code");
         assertEquals("请介绍一下skycode这个项目。",
-                AsrService.applyCorrections("请介绍一下智坤code这个项目。", defaultRules()));
+                AsrService.applyCorrections("请介绍一下智坤code这个项目。", rules));
     }
 
     @Test
-    @DisplayName("实测输入：zhi kun code 与 智坤 code 并存 → 全部纠正")
+    @DisplayName("实测输入：sky code 与 skykode 并存 → 全部纠正")
     void corrections_mixedVariants_shouldNormalizeAll() {
         assertEquals("是 skycode skycode。",
-                AsrService.applyCorrections("是 zhi kun code 智坤 code。", defaultRules()));
+                AsrService.applyCorrections("是 sky code skykode。", defaultRules()));
     }
 
     @Test
     @DisplayName("大小写/驼峰变体 → 统一纠正")
     void corrections_caseVariants_shouldNormalize() {
-        assertEquals("skycode", AsrService.applyCorrections("ZhiKunCode", defaultRules()));
+        assertEquals("skycode", AsrService.applyCorrections("SkyCode", defaultRules()));
     }
 
     @Test
-    @DisplayName("谐音字与混合形态变体 → 统一纠正")
+    @DisplayName("谐音字与混合形态变体 → 统一纠正（用自定义规则串覆盖 CJK 边界拆分逻辑）")
     void corrections_homophoneAndMixedVariants_shouldNormalize() {
-        assertEquals("skycode", AsrService.applyCorrections("志鲲Code", defaultRules()));
-        assertEquals("skycode", AsrService.applyCorrections("智kuncode", defaultRules()));
-        assertEquals("skycode", AsrService.applyCorrections("zhi坤code", defaultRules()));
+        List<AsrService.CorrectionRule> rules = AsrService.parseCorrections("skycode:志鲲Code,智kuncode,zhi坤code");
+        assertEquals("skycode", AsrService.applyCorrections("志鲲Code", rules));
+        assertEquals("skycode", AsrService.applyCorrections("智kuncode", rules));
+        assertEquals("skycode", AsrService.applyCorrections("zhi坤code", rules));
     }
 
     @Test
@@ -246,16 +248,16 @@ class AsrServiceTest {
     @Test
     @DisplayName("空规则列表 → 原样返回")
     void corrections_emptyRules_shouldReturnAsIs() {
-        assertEquals("介绍一下zkuncode这个项目。",
-                AsrService.applyCorrections("介绍一下zkuncode这个项目。", List.of()));
+        assertEquals("介绍一下skykode这个项目。",
+                AsrService.applyCorrections("介绍一下skykode这个项目。", List.of()));
     }
 
     @Test
-    @DisplayName("多条目规则各自独立生效：zkuncode→skycode、千问→qwen")
+    @DisplayName("多条目规则各自独立生效：skykode→skycode、千问→qwen")
     void corrections_multipleRules_shouldApplyEachCanonical() {
-        List<AsrService.CorrectionRule> rules = AsrService.parseCorrections("skycode:zkuncode;qwen:千问");
+        List<AsrService.CorrectionRule> rules = AsrService.parseCorrections("skycode:skykode;qwen:千问");
         assertEquals("用skycode和qwen写代码",
-                AsrService.applyCorrections("用zkuncode和千问写代码", rules));
+                AsrService.applyCorrections("用skykode和千问写代码", rules));
     }
 
     // ═══════════════ buildSystemText：词表偏置 system 消息 ═══════════════
@@ -322,6 +324,6 @@ class AsrServiceTest {
         assertEquals(List.of("skycode"), canonicals);
         assertEquals(DEFAULT_PREFIX, AsrService.buildSystemText(canonicals, null));
         assertEquals("介绍一下skycode这个项目。",
-                AsrService.applyCorrections("介绍一下zkuncode这个项目。", rules));
+                AsrService.applyCorrections("介绍一下skykode这个项目。", rules));
     }
 }
