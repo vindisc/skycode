@@ -61,6 +61,18 @@ describe('MessageStore', () => {
         expect(state.messages[0].type).toBe('assistant');
     });
 
+    it('restoreSessionSnapshot normalizes recovered tool timestamps from seconds to milliseconds', () => {
+        useMessageStore.getState().restoreSessionSnapshot([], [{
+            toolUseId: 'recovered-tool',
+            toolName: 'Bash',
+            input: {},
+            startedAt: 1_700_000_000,
+        }]);
+
+        expect(useMessageStore.getState().activeToolCalls.get('recovered-tool')?.startTime)
+            .toBe(1_700_000_000_000);
+    });
+
     it('startToolCall/completeToolCall tracks tool execution', () => {
         useMessageStore.getState().startToolCall('tc-1', 'FileReadTool', { path: '/test.txt' });
         

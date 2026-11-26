@@ -25,6 +25,11 @@ export interface RecoveredToolCall {
     startedAt?: number;
 }
 
+function normalizeEpochMillis(timestamp: number | undefined): number {
+    if (timestamp == null || !Number.isFinite(timestamp)) return Date.now();
+    return timestamp < 100_000_000_000 ? timestamp * 1000 : timestamp;
+}
+
 function attachCompletedToolResults(messages: Message[]): Message[] {
     const results = new Map<string, ToolResult>();
     for (const message of messages) {
@@ -281,7 +286,7 @@ export const useMessageStore = create<MessageStoreState>()(
                 toolName: call.toolName || 'Tool',
                 input: call.input ?? {},
                 status: 'running',
-                startTime: call.startedAt ?? Date.now(),
+                startTime: normalizeEpochMillis(call.startedAt),
             }));
         }),
         restoreSessionSnapshot: (messages, calls) => {
@@ -298,7 +303,7 @@ export const useMessageStore = create<MessageStoreState>()(
                     toolName: call.toolName || 'Tool',
                     input: call.input ?? {},
                     status: 'running',
-                    startTime: call.startedAt ?? Date.now(),
+                    startTime: normalizeEpochMillis(call.startedAt),
                 }));
                 d.tokenBudgetState = null;
                 d.tokenWarning = null;

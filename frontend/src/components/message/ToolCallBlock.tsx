@@ -56,6 +56,7 @@ const EDIT_TOOL_NAMES = new Set(['FileEditTool', 'FileEdit', 'Edit', 'MultiEdit'
 
 /** 工具耗时格式化（ms → 342ms / 12s / 3m 5s / 1h 2m）；导出供 ToolRunBlock 复用 */
 export function formatToolDuration(ms: number): string {
+    if (!Number.isFinite(ms) || ms < 0) return '<1s';
     if (ms < 1000) return `${ms}ms`;
     const totalSeconds = Math.floor(ms / 1000);
     if (totalSeconds < 60) return `${totalSeconds}s`;
