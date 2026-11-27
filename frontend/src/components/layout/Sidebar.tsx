@@ -45,6 +45,7 @@ import {
 import { Chip, Kbd } from '@/components/ui';
 import { APISequenceDiagram } from '@/components/visualization/backend/APISequenceDiagram';
 import { FileTreePanel } from '@/components/layout/FileTreePanel';
+import { DEFAULT_SIDEBAR_WIDTH } from './shellMetrics';
 import { AgentDAGChart } from '@/components/visualization/shared/AgentDAGChart';
 import { GitTimeline } from '@/components/visualization/shared/GitTimeline';
 import { CodeComplexityTreemap } from '@/components/visualization/backend/CodeComplexityTreemap';
@@ -93,7 +94,7 @@ export const SIDEBAR_TAB_LABELS: Record<TabType, string> = {
 // ═══ Sidebar 宽度配置 ═══
 const MIN_WIDTH = 256;
 const MAX_WIDTH = 800;
-const DEFAULT_WIDTH = 300;
+const DEFAULT_WIDTH = DEFAULT_SIDEBAR_WIDTH;
 const STORAGE_KEY = 'sidebar-width';
 /** 桌面端收起后侧栏保留的固定展开条宽度（图标 + 竖排文字，整条可点击恢复） */
 const COLLAPSED_STRIP_WIDTH = 36;
@@ -248,6 +249,11 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
     const [isDragging, setIsDragging] = useState(false);
     const widthRef = useRef(width);
     widthRef.current = width;
+    // 顶栏的状态行要对准工作区中线（AppLayout 用它算 --sidebar-track），需要侧栏的真实宽度：拖拽、收起都会变
+    useEffect(() => {
+        const outer = isDrawerMode ? 0 : panelCollapsed ? COLLAPSED_STRIP_WIDTH : width;
+        document.documentElement.style.setProperty('--sidebar-w', `${outer}px`);
+    }, [width, panelCollapsed, isDrawerMode]);
 
     // 拖拽手柄 — mousedown
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -919,7 +925,7 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                         onClick={clearSessionSelection}
                         aria-label="返回首页"
                         title="返回首页"
-                        className="flex min-w-0 items-center gap-2 rounded-sm px-1 py-1 hover:bg-hover2
+                        className="sidebar-brand-home flex min-w-0 items-center gap-2 rounded-sm px-1 py-1 hover:bg-hover2
                             focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
                     >
                         <BrandLogo className="h-[18px] w-[18px]" />

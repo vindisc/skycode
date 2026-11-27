@@ -1,8 +1,6 @@
-/* ===== 输入区悬浮布局（light / dark 共用）=====
-   --glass-composer-height 与 .glass-chat-spacer 名称沿用自早期玻璃主题，
-   但承担的是两个保留主题下的输入区布局：输入区绝对定位悬浮在消息列底部，
-   内容区/Virtuoso Footer 用同一变量留出等高空间。App 的 ResizeObserver 写入该变量。
-   勿当作主题残留删除。 */
+/* ===== 输入区停靠布局（light / dark 共用）=====
+   输入区是工作区底部的一条独立行：消息在上、输入条带在下，不叠在消息上（各宽度一致）。
+   .glass-chat-spacer 是消息列末尾的 12px 留白，名字沿用自早期玻璃主题。 */
 .chat-workspace { position: relative; }
 /* 输入区停靠在工作区底部（各宽度一致）：消息在上、输入条带在下，各占自己的行，不叠在消息上 */
 .chat-composer-dock {
@@ -19,17 +17,24 @@
 .glass-chat-spacer { display: block; height: 12px; }
 .message-list { scroll-padding-bottom: 12px; }
 .message-list > .back-to-latest-position { bottom: 12px; }
-/* 桌面：输入区是工作区面板底部的一条横向圆角条带，底色比面板更深一档（对应 Skymap 的底部图片条） */
-@media (min-width: 1024px) {
+/* ≥768px（平板与桌面）：输入区是工作区底部的一条横向圆角条带。桌面上它嵌在面板里，底色比面板深一档
+   （对应 Skymap 的底部图片条）；平板没有面板外壳，条带用面板色，比窗口底色浅一档 */
+@media (min-width: 768px) {
   .chat-composer-inset { padding: 0 10px 10px; }
   .chat-composer-surface {
     border-radius: var(--v2-r-md);
     padding: 8px 10px;
-    background: var(--v2-bg-app);
+    background: var(--v2-bg-surface);
     border: 1px solid var(--v2-border-hairline);
     transition: border-color var(--v2-dur-fast) var(--v2-ease);
   }
   .chat-composer-surface:focus-within { border-color: color-mix(in srgb, var(--v2-accent) 55%, var(--v2-border-hairline)); }
+}
+@media (min-width: 1024px) {
+  .chat-composer-surface { background: var(--v2-bg-app); }
+}
+@media (min-width: 768px) and (prefers-contrast: more) {
+  .chat-composer-surface { border-color: var(--v2-border-strong); }
 }
 /* Compact screens keep messages and the composer in separate layout rows. */
 @media (max-width: 1023px) {
@@ -56,12 +61,18 @@
   .message-list { scroll-padding-bottom: 12px; }
   .message-list > .back-to-latest-position { bottom: 12px; }
 }
+/* 手机（<768px）：悬浮胶囊 */
 @media (max-width: 767px) {
-  .chat-composer-surface { border-radius: 22px; padding: 0; }
+  :root .chat-composer-surface {
+    border-radius: 22px;
+    padding: 0;
+    background: var(--v2-bg-surface);
+    border: 1px solid var(--v2-border-strong);
+    box-shadow: var(--v2-shadow-md);
+  }
   .chat-composer-inset { padding-top: 8px; }
 }
-:root .chat-composer-surface { background: var(--v2-bg-surface); border: 1px solid var(--v2-border-strong); box-shadow: var(--v2-shadow-md); }
-@media (prefers-contrast: no-preference) {
+@media (max-width: 767px) and (prefers-contrast: no-preference) {
   :root .chat-composer-surface { border-color: var(--v2-border-hairline); }
 }
 @tailwind base;
@@ -383,7 +394,7 @@ body {
 
 /* ===== 外壳（Skymap 式工作站）=====
    窗口最外层是最深一档；侧栏与工作区是嵌在窗口里的圆角面板，四周留边、之间留缝。
-   顶栏三段式：左段与侧栏等宽、中段一行等宽字体的状态、右段成组的工具按钮。 */
+   顶栏：左右控件各靠一边，中间一行等宽字体的状态居中在工作区上（见下方 .app-header-grid）。 */
 @media (min-width: 1024px) {
   .app-body { gap: 10px; padding: 8px; }
   .app-panel {
@@ -402,6 +413,32 @@ body {
   border-radius: var(--v2-r-sm);
 }
 .app-tool-divider { width: 1px; height: 16px; margin: 0 3px; flex-shrink: 0; background: var(--v2-border-hairline); }
+
+/* ===== 顶栏（≥768px）=====
+   左右控件各靠一边，中间一行等宽字体的状态。状态行横向居中在工作区（主面板）上，而不是整个窗口：
+   两侧面板不等宽、侧栏拖宽或收起时，它仍然对着会话列的中线。
+   --sidebar-track / --inspector-track 由 AppLayout 写在 .app-root 上（px），分别是工作区左缘、
+   右侧需要让出的宽度。左右两轨等宽（1fr）状态行才居中；右侧按钮组靠右，检查器展开时它悬在检查器上方，
+   用负外边距把按钮组拉出工作区范围，两轨就不必为它让位。 */
+@media (min-width: 768px) {
+  .app-header-grid {
+    position: absolute;
+    inset: 0 calc(var(--inspector-track, 0px) + 8px) 0 var(--sidebar-track, 10px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(max-content, 1fr);
+    column-gap: 12px;
+    align-items: center;
+  }
+  .app-header-grid > .app-tool-group {
+    justify-self: end;
+    margin-right: calc(2px - var(--inspector-track, 0px));
+  }
+}
+/* ≥1024px：品牌在左栏顶部，顶栏不重复放；左栏收起（或切到别的页签、品牌行不在）时，顶栏自己的回首页按钮顶上 */
+@media (min-width: 1024px) {
+  .app-root .header-home { display: none; }
+  .app-root:not(:has(.sidebar-brand-home)) .header-home { display: flex; }
+}
 
 /* ===== 会话条目选中态：选中底 + 左侧 3px 蓝色竖条（同 Skymap 模板卡）。
    它是 framer-motion layoutId 的滑动载体（切换会话时做 FLIP 平移），所以独立成层并 will-change: transform。 */

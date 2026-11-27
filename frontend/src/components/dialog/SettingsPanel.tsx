@@ -83,8 +83,8 @@ function AppearanceSettings() {
 
     return (
         <>
-        {/* 主题：桌面 4 列、窄屏 2 列 */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" role="group" aria-label="主题">
+        {/* 主题只剩浅色、深色两个：各占一半 */}
+        <div className="grid grid-cols-2 gap-3" role="group" aria-label="主题">
                 {THEMES.map(({ mode, label, icon: Icon }) => (
                     <button
                         key={mode}

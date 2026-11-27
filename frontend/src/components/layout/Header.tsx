@@ -4,9 +4,9 @@ import { BrandLogo } from '@/components/ui/BrandLogo';
  * Header — 顶部导航栏组件
  * SPEC: §8.6.1
  *
- * 包含: Logo, SessionStatus, Metrics(Tokens/Cost), ThemeSwitch, NewSession, Settings
- * （会话状态与用量指标自底部状态栏右簇上移；会话标题由左侧列表承载，桌面端不再重复，
- *   仅移动端抽屉不常驻时在本栏显示标题）
+ * 桌面（≥768px）：左侧是菜单 / 回首页，中间一行等宽字体的「模型 | 权限 | 会话状态」，居中在工作区上；
+ * 右侧是 MCP / 记忆 / Skill / 设置 / 检查器的按钮组。手机（<768px）换成「菜单 + 会话标题和模型 + 状态」。
+ * 品牌在左栏顶部的品牌行里，顶栏只在左栏收起（或没有桌面侧栏）时露出回首页按钮。
  */
 
 import { useEffect } from 'react';
@@ -125,10 +125,10 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     <BrandLogo className="h-8 w-8" />
                 </button>
             </div>
-            {/* 桌面三段式：左段（平板放菜单键和回首页，桌面与侧栏等宽留空）、中段一行等宽字体的状态、
-                右段成组的工具按钮——对应 Skymap 顶栏的「左空 | 中间等宽标题 | 右侧按钮组」 */}
-            <div className="hidden md:grid flex-1 min-w-0 grid-cols-[auto_1fr_auto] lg:grid-cols-[var(--sidebar-track,310px)_1fr_auto] items-center gap-3">
-                <div className="flex min-w-0 items-center gap-1">
+            {/* 桌面：左右控件各靠一边，中间一行等宽字体的状态居中在工作区上（居中与等宽轨的写法见
+                globals.css 的 .app-header-grid；--sidebar-track / --inspector-track 由 AppLayout 写在根节点） */}
+            <div className="app-header-grid hidden min-w-0">
+                <div className="flex min-w-0 items-center gap-1 justify-self-start">
                     {showMenuButton && (
                         <button
                             onClick={onMenuClick}
@@ -138,9 +138,10 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                             <Menu className="w-5 h-5" />
                         </button>
                     )}
-                    {/* 桌面上品牌与回首页在左栏顶部的品牌行；这里只给没有常驻侧栏的平板留一个入口 */}
+                    {/* ≥1024px 时品牌与回首页在左栏顶部的品牌行，这里的按钮由样式隐藏，只在左栏收起时露出；
+                        没有常驻侧栏的平板一直显示 */}
                     <button type="button" onClick={clearSessionSelection} aria-label="返回首页" title="返回首页"
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm hover:bg-hover2 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring lg:hidden">
+                        className="header-home flex h-8 w-8 shrink-0 items-center justify-center rounded-sm hover:bg-hover2 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring">
                         <BrandLogo className="h-5 w-5" />
                     </button>
                 </div>

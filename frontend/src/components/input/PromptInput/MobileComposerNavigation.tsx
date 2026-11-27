@@ -63,7 +63,7 @@ export function MobileComposerNavigation({ optimize }: MobileComposerNavigationP
                 {panel === 'more' && <>
                     <section>
                         <h3 className="mb-2 text-13 font-medium text-t2">外观</h3>
-                        <div className="grid grid-cols-2 min-[380px]:grid-cols-4 gap-2">{(['light', 'dark'] as const).map((mode, i) => {
+                        <div className="grid grid-cols-2 gap-2">{(['light', 'dark'] as const).map((mode, i) => {
                             const Icon = [Sun, Moon][i];
                             const selected = theme.mode === mode;
                             return <button key={mode} className={`flex min-h-[72px] flex-col items-center justify-center gap-2 rounded-md border text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink ${selected ? 'border-accent2-ink bg-accent2-soft text-accent2-ink' : 'border-hairline bg-surface2 text-t2 hover:bg-hover2'}`} aria-pressed={selected} onClick={() => setTheme({ mode })}><Icon size={20} aria-hidden="true" /><span>{['浅色', '深色'][i]}</span></button>;

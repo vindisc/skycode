@@ -60,7 +60,10 @@ test.describe('Developer workbench with legacy preferences', () => {
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
     await expect(page.getByRole('tablist', { name: '工作台视图' })).toHaveCount(0);
-    await expect(page.getByRole('banner').getByText('SkyCode', { exact: true })).toBeVisible();
+    // 品牌在左侧栏顶部的品牌行里（桌面上顶栏不再放品牌）：点它回首页
+    const brand = page.getByRole('complementary').getByRole('button', { name: '返回首页', exact: true });
+    await expect(brand).toBeVisible();
+    await expect(brand).toHaveText(/SKYCODE/);
     await expect(page.getByRole('banner').getByRole('button', { name: '新建会话', exact: true })).toHaveCount(0);
     await expect(page.getByRole('button', { name: '新建会话', exact: true })).toBeVisible();
     // §7.1 空态 Hero（P3 起替换「开始对话」占位）

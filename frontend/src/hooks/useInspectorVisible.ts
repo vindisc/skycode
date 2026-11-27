@@ -10,8 +10,9 @@
 
 import { useEffect, useState } from 'react';
 import { useAppUiStore } from '@/store/appUiStore';
+import { INSPECTOR_MIN_WIDTH } from '@/components/layout/shellMetrics';
 
-export const INSPECTOR_MIN_WIDTH = 1280;
+export { INSPECTOR_MIN_WIDTH };
 
 const QUERY = `(min-width: ${INSPECTOR_MIN_WIDTH}px)`;
 

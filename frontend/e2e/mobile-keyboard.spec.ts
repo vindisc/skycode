@@ -77,14 +77,12 @@ for (const width of [393, 820]) {
     await expectSeparatedLayout(page, 852);
     await expect.poll(() => page.evaluate(() => document.documentElement.style.getPropertyValue('--keyboard-height'))).toBe('0px');
     await page.screenshot({ path: `/tmp/skycode-viewport-${width}.png` });
-    // Returning to desktop must restore real measured spacing, not the old detached node.
+    // Returning to desktop keeps the docked layout: the composer is its own row under the message
+    // list instead of floating over it, and the spacer at the end of the list is a fixed 12px strip.
     await page.setViewportSize({ width: 1440, height: 900 });
-    await expect.poll(() => page.locator('.glass-chat-spacer').evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThan(100);
-    await expect.poll(() => page.evaluate(() => {
-      const spacer = document.querySelector('.glass-chat-spacer')!.getBoundingClientRect().height;
-      const composer = document.querySelector('.chat-composer-dock')!.getBoundingClientRect().height;
-      return Math.abs(spacer - composer - 12);
-    })).toBeLessThan(1);
+    await expectSeparatedLayout(page, 900);
+    await expect(page.locator('.chat-composer-dock')).toBeVisible();
+    await expect.poll(() => page.locator('.glass-chat-spacer').evaluate(el => el.getBoundingClientRect().height)).toBe(12);
   });
 }
 
