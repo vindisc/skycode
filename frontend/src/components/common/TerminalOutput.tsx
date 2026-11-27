@@ -21,12 +21,12 @@ interface TerminalOutputProps {
   className?: string;
 }
 
-import { ANSI_CODE_TO_KEY, getXtermPalette, resolveTheme, type ThemeMode } from '@/styles/design-tokens';
+import { ANSI_CODE_TO_KEY, getXtermPalette, resolveTheme } from '@/styles/design-tokens';
 import { useConfigStore } from '@/store/configStore';
 
 /** 当前主题+强调色下的 ANSI 颜色表（§4.3 xterm zk 色板，accent 动态派生） */
-function ansiColors(mode: 'light' | 'dark', accentHex?: string, skinMode?: ThemeMode): Record<string, string> {
-    const palette = getXtermPalette(mode, accentHex, skinMode);
+function ansiColors(mode: 'light' | 'dark', accentHex?: string): Record<string, string> {
+    const palette = getXtermPalette(mode, accentHex);
     const map: Record<string, string> = {};
     for (const [code, key] of Object.entries(ANSI_CODE_TO_KEY)) {
         map[code] = palette[key];
@@ -37,8 +37,8 @@ function ansiColors(mode: 'light' | 'dark', accentHex?: string, skinMode?: Theme
 /**
  * 将 ANSI 转义序列转换为 HTML span。
  */
-function ansiToHtml(text: string, mode: 'light' | 'dark', accentHex?: string, skinMode?: ThemeMode): string {
-  const colors = ansiColors(mode, accentHex, skinMode);
+function ansiToHtml(text: string, mode: 'light' | 'dark', accentHex?: string): string {
+  const colors = ansiColors(mode, accentHex);
   return text
     // 替换 ANSI 颜色代码
     .replace(/\x1b\[(\d+)m/g, (_, code) => {
@@ -60,7 +60,7 @@ export function TerminalOutput({
 }: TerminalOutputProps) {
   const containerRef = useRef<HTMLPreElement>(null);
 
-  // 主题模式 + 强调色订阅：变化时按新色板重渲染（glass 归一为 light）
+  // 主题模式 + 强调色订阅：变化时按新色板重渲染（归一为 light / dark）
   const themeMode = useConfigStore(s => s.theme.mode);
   const accentColor = useConfigStore(s => s.theme.accentColor);
   const mode = resolveTheme(themeMode);
@@ -74,8 +74,8 @@ export function TerminalOutput({
 
   // ANSI → HTML 随内容/主题/强调色记忆重算
   const html = useMemo(
-    () => ansiToHtml(displayContent, mode, accentColor, themeMode),
-    [displayContent, mode, accentColor, themeMode]
+    () => ansiToHtml(displayContent, mode, accentColor),
+    [displayContent, mode, accentColor]
   );
 
   // 自动滚动到底部

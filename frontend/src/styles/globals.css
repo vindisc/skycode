@@ -1,9 +1,60 @@
-@import './liquid-glass.css';
-@import './spaceship.css';
-@import './ink-havoc.css';
-@import './jelly.css';
-@import './spider.css';
-@import './galaxy.css';
+/* ===== 输入区悬浮布局（light / dark 共用）=====
+   --glass-composer-height 与 .glass-chat-spacer 名称沿用自早期玻璃主题，
+   但承担的是两个保留主题下的输入区布局：输入区绝对定位悬浮在消息列底部，
+   内容区/Virtuoso Footer 用同一变量留出等高空间。App 的 ResizeObserver 写入该变量。
+   勿当作主题残留删除。 */
+.chat-workspace { position: relative; }
+.chat-composer-dock {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 15;
+  border: 0;
+  background: transparent;
+  pointer-events: none;
+}
+.chat-composer-dock > * { pointer-events: auto; }
+.chat-composer-inset { border: 0; background: transparent; }
+.chat-composer-surface { border-radius: 22px; padding: 12px 16px; }
+.chat-content { padding-bottom: var(--glass-composer-height, 132px); }
+/* Virtualized development chat extends behind the composer. Footer reserves its real height. */
+.chat-content:has(.message-list) { padding-bottom: 0; }
+.glass-chat-spacer { display: block; height: var(--glass-composer-height, 132px); }
+.message-list { scroll-padding-bottom: var(--glass-composer-height, 132px); }
+.message-list > .back-to-latest-position { bottom: calc(var(--glass-composer-height, 132px) + 12px); }
+/* Compact screens keep messages and the composer in separate layout rows. */
+@media (max-width: 1023px) {
+  .chat-workspace, .chat-content { min-height: 0; }
+  .chat-composer-dock {
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    /* Leave room for turn navigation and a message row; shrink verification details first. */
+    max-height: calc(100% - 80px);
+  }
+  .chat-composer-inset { flex-shrink: 0; }
+  .chat-composer-dock > .journey-verify-panel {
+    min-height: 0;
+    max-height: calc(var(--viewport-height, 100vh) * 0.25);
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .chat-content { padding-bottom: 0; }
+  .chat-content:has(.message-list) { padding-bottom: 0; }
+  .glass-chat-spacer { height: 12px; }
+  .message-list { scroll-padding-bottom: 12px; }
+  .message-list > .back-to-latest-position { bottom: 12px; }
+}
+@media (max-width: 767px) {
+  .chat-composer-surface { border-radius: 22px; padding: 0; }
+  .chat-composer-inset { padding-top: 8px; }
+}
+:root .chat-composer-surface { background: var(--v2-bg-surface); border: 1px solid var(--v2-border-strong); box-shadow: var(--v2-shadow-md); }
+@media (prefers-contrast: no-preference) {
+  :root .chat-composer-surface { border-color: var(--v2-border-hairline); }
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

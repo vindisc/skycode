@@ -5,12 +5,12 @@ import { test, expect } from '@playwright/test';
  * 归档目录：docs/test-results/memory-points/
  * 用途：设计亮点资产 + 后续回归参照。
  *
- * ① 空态 Hero ② milestone 胶囊 ③ 移动胶囊输入条 ④ 状态物理化 ⑤ 玻璃主题 ⑥ ⌘K 命令面板
+ * ① 空态 Hero ② milestone 胶囊 ③ 移动胶囊输入条 ④ 状态物理化 ⑤ ⌘K 命令面板
  */
 
 const OUT = '../docs/test-results/memory-points';
 
-async function seedTheme(page: any, mode: 'light' | 'dark' | 'glass') {
+async function seedTheme(page: any, mode: 'light' | 'dark') {
     const theme = { mode, accentColor: '#6366F1', fontSize: 'medium', fontFamily: 'monospace', borderRadius: 'md' };
     await page.addInitScript((t: any) => {
         try {
@@ -75,14 +75,6 @@ test.describe('六记忆点截图归档', () => {
         const toggleSection = page.locator('section', { hasText: '06 · Toggle' }).first();
         await expect(toggleSection).toBeVisible();
         await toggleSection.screenshot({ path: `${OUT}/memory-04b-状态物理化-Toggle.png` });
-    });
-
-    test('⑤ 玻璃主题主界面', async ({ page }) => {
-        await seedTheme(page, 'glass');
-        await page.goto('/');
-        await page.locator('html.glass').waitFor({ state: 'attached', timeout: 15000 });
-        await page.waitForTimeout(500);
-        await page.screenshot({ path: `${OUT}/memory-05-玻璃主题.png` });
     });
 
     test('⑥ ⌘K 命令面板', async ({ page }) => {

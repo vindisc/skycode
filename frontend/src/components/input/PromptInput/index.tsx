@@ -1,4 +1,3 @@
-import { GlassMaterial } from '@/components/theme/GlassMaterial';
 /**
  * PromptInput — 用户输入组件（容器：对外接口 + 形态分发）
  *
@@ -61,12 +60,10 @@ const PromptInput: React.FC<PromptInputProps> = (props) => {
 
     return (
         <div
-            className="chat-composer-surface glass-surface relative"
-            data-spider-exclude="composer"
+            className="chat-composer-surface relative"
             onDrop={a.handleDrop}
             onDragOver={e => e.preventDefault()}
         >
-            <GlassMaterial kind="control" interactive />
             {/* File auto-complete (@trigger) */}
             {s.showFileComplete && (
                 <FileAutoComplete

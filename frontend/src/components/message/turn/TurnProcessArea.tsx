@@ -239,9 +239,6 @@ const ProcessAggregateBar: React.FC<TurnProcessAreaProps> = ({
     }, [sessionId, expandKey, expanded, turn.index, onAfterToggle]);
 
     const steps = useMemo(() => countToolUses(process), [process]);
-    const galaxyToolIds = useMemo(() => JSON.stringify(process.flatMap(message =>
-        message.type === 'assistant' ? message.content.flatMap(block =>
-            block.type === 'tool_use' ? [block.toolUseId] : []) : [])), [process]);
     const now = useNow(running);
     const duration = formatTurnDuration(turn.startedAt, running ? now : turn.endedAt)
         .replace(/(\d+)h/g, (_, n) => `${Number(n)}时`)
@@ -275,7 +272,6 @@ const ProcessAggregateBar: React.FC<TurnProcessAreaProps> = ({
                 aria-expanded={expanded}
                 aria-label={`详细过程区，${expanded ? '点击收起' : '点击展开'}${running ? `，当前任务：${currentTitle}` : ''}`}
                 data-turn-header={turn.index}
-                data-galaxy-tool-ids={galaxyToolIds}
                 className={cn(
                     'process-aggregate-toggle flex min-h-11 w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-sm px-3 py-2 text-left',
                     'transition-colors duration-fast hover:bg-hover2',

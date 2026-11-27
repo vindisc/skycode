@@ -6,7 +6,6 @@
 
 import { useEffect, useRef } from 'react';
 import { useNotificationStore } from '@/store/notificationStore';
-import { InkSealStamp } from '@/components/theme/InkSealStamp';
 import type { NotificationItem } from '@/types';
 
 /** 同时可见的通知上限（审查#5修复：防积压遮挡；超出裁掉最旧） */
@@ -80,8 +79,6 @@ export function ToastContainer() {
                     {/* 语义色左条 3px */}
                     <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-[3px] ${barClass[n.level] ?? 'bg-accent2'}`} />
                     <div className="flex items-start justify-between gap-2 py-3 pl-4 pr-3 text-sm text-t1">
-                        {/* 盖印仪式（波次1增强①）：仅 ink 双模式浓郁档渲染朱印，其余返回 null 不占布局 */}
-                        <InkSealStamp level={n.level} />
                         <span className="leading-relaxed">{n.message}</span>
                         <div className="flex shrink-0 items-center gap-1">
                             {n.level === 'error' && n.onRetry && (

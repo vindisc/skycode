@@ -212,12 +212,11 @@ const ToolCallBlock: React.FC<ToolCallBlockProps> = ({ toolUseId, toolCall, expa
                     className={`shrink-0 text-t4 transition-transform duration-base ${expanded ? 'rotate-90' : ''}`}
                 />
                 <Wrench size={14} className="shrink-0 text-t3" />
-                <span data-spider-anchor="tool" className="min-w-[3rem] max-w-[40%] font-semibold text-sm text-t1 truncate">
+                <span className="min-w-[3rem] max-w-[40%] font-semibold text-sm text-t1 truncate">
                     {toolCall.toolName}
                 </span>
                 {primaryTarget && (
                     <span
-                        data-spider-anchor="tool"
                         className="min-w-0 max-w-[60%] truncate rounded-xs bg-sunken2 px-2 py-0.5 font-mono text-13 text-t2"
                         title={primaryTarget.target}
                     >

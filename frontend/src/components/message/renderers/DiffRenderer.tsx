@@ -67,7 +67,7 @@ export const DiffRenderer: React.FC<{ content: string; filePath?: string; trunca
             {truncated && <p className="px-3 py-2 text-13 text-warn">差异过大，仅展示部分内容；请核对完整文件变更。</p>}
             <div className="font-mono panel-code max-h-96 overflow-auto">
                 {diffLines.map((line, i) => (
-                    <div key={i} data-galaxy-diff={filePath ? line.type : undefined} data-galaxy-path={filePath} data-galaxy-line={line.newLine ?? line.oldLine} className={`flex
+                    <div key={i} className={`flex
                         ${line.type === 'add' ? 'bg-[var(--v2-diff-add-bg)]' : ''}
                         ${line.type === 'remove' ? 'bg-[var(--v2-diff-remove-bg)]' : ''}
                         ${line.type === 'header' ? 'bg-accent2-soft text-accent2-ink' : ''}`}>

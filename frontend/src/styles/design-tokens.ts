@@ -16,7 +16,7 @@
  * - getXtermPalette(mode, accentHex?)：XTERM_ANSI 基底 + cursor/selection 派生
  * （accents.ts 不依赖本文件，无循环依赖风险）
  */
-import { ACCENT_PRESETS, DEFAULT_ACCENT_HEX, normalizeAccentHex, SPIDER_ACCENT, GALAXY_ACCENT } from '@/theme/accents';
+import { ACCENT_PRESETS, DEFAULT_ACCENT_HEX, normalizeAccentHex } from '@/theme/accents';
 
 export const TOKENS = {
     light: {
@@ -148,25 +148,20 @@ export const CHART_COLORS = {
     dark: ['#8A8FF0', '#5FC4B2', '#E0A94A', '#EF6B63', '#6DB4E6', '#B58CD6', '#A3C24E', '#8B99AD'],
 } as const;
 
-export type ThemeMode = 'light' | 'dark' | 'glass' | 'spaceship' | 'ink-havoc' | 'ink-havoc-night' | 'jelly' | 'spider' | 'galaxy';
+export type ThemeMode = 'light' | 'dark';
 
 /**
  * resolveTheme — effectiveTheme 解析（§4.5 第二职责）
- * Glass → 'light'；Spaceship → 'dark'（星舰 HUD 为深空暗色系）；
- * ink-havoc（花果晨绢纸底）→ 'light'；ink-havoc-night（灵霄夜群青底）→ 'dark'；
- * jelly（果冻·香草奶油浅色单主题）→ 'light'；其余原样返回。
+ * light / dark 原样返回（归一已在 configStore.normalizeThemeMode 完成）。
  * Recharts / Mermaid / Monaco 三处统一消费，替代裸 isDark 布尔。
  */
 export function resolveTheme(mode: ThemeMode): 'light' | 'dark' {
-    if (mode === 'glass' || mode === 'ink-havoc' || mode === 'jelly') return 'light';
-    if (mode === 'spaceship' || mode === 'ink-havoc-night' || mode === 'spider' || mode === 'galaxy') return 'dark';
     return mode;
 }
 
 /**
  * accentForMode — 从 ACCENT_PRESETS 查当前强调色在指定档位的 accent 值。
  * 空值/未知值回退 DEFAULT_ACCENT_HEX（青瓷）；大小写与旧版 hex 经 normalizeAccentHex 归一。
- * mode='glass' 的调用方应先经 resolveTheme 归一为 light。
  */
 function accentForMode(mode: 'light' | 'dark', accentHex?: string): string {
     const normalized = normalizeAccentHex(accentHex);
@@ -181,9 +176,7 @@ function accentForMode(mode: 'light' | 'dark', accentHex?: string): string {
  * 返回 CHART_COLORS[mode] 的拷贝，chart-1（[0]）替换为当前 accent 在该档位的值；
  * 静态 CHART_COLORS 保持不变（globals.css 对拍与存量消费方不受影响）。
  */
-export function getChartColors(mode: 'light' | 'dark', accentHex?: string, skinMode?: ThemeMode): string[] {
-    if (skinMode === 'galaxy') return [GALAXY_ACCENT.accent, '#A765FF', '#FF459F', '#69C7EE', '#97E4C0', '#FFC66E', '#D4B8FF', '#B9D8FF'];
-    if (skinMode === 'spider') return [SPIDER_ACCENT.accent, '#F277DA', '#AD8BFA', '#84B9FA', '#97E4C0', '#EBC378', '#D79FF5', '#ADC6D0'];
+export function getChartColors(mode: 'light' | 'dark', accentHex?: string): string[] {
     const colors: string[] = [...CHART_COLORS[mode]];
     colors[0] = accentForMode(mode, accentHex);
     return colors;
@@ -279,17 +272,15 @@ export const MONACO_ZK_THEMES: Record<'zk-light' | 'zk-dark', MonacoThemeDef> = 
  * - editorBracketMatch.border：accent + '80'
  * 缺省/未知 accentHex 的结果与静态 MONACO_ZK_THEMES 完全等值。
  */
-export function getMonacoZkThemes(mode: 'light' | 'dark', accentHex?: string, skinMode?: ThemeMode): MonacoThemeDef {
+export function getMonacoZkThemes(mode: 'light' | 'dark', accentHex?: string): MonacoThemeDef {
     const base = MONACO_ZK_THEMES[mode === 'light' ? 'zk-light' : 'zk-dark'];
-    const accent = skinMode === 'galaxy' ? GALAXY_ACCENT.accent : skinMode === 'spider' ? SPIDER_ACCENT.accent : accentForMode(mode, accentHex);
+    const accent = accentForMode(mode, accentHex);
     return {
         base: base.base,
         inherit: base.inherit,
         rules: base.rules.map((rule) => ({ ...rule })),
         colors: {
             ...base.colors,
-            ...(skinMode === 'galaxy' ? { 'editor.background': '#060D1B', 'editorGutter.background': '#060D1B', 'editorWidget.background': '#0B1427' } : {}),
-            ...(skinMode === 'spider' ? { 'editor.background': '#05070C', 'editorGutter.background': '#05070C', 'editorWidget.background': '#0B1019' } : {}),
             'editor.selectionBackground': `${accent}40`,
             'editorCursor.foreground': accent,
             'editorSuggestWidget.selectedBackground': `${accent}1F`,
@@ -361,9 +352,9 @@ export const XTERM_ANSI: Record<'light' | 'dark', AnsiPalette> = {
  * selectionBackground（accent + '40' alpha）由当前 accent 派生；
  * 缺省/未知 accentHex 的结果与静态 XTERM_ANSI 完全等值。
  */
-export function getXtermPalette(mode: 'light' | 'dark', accentHex?: string, skinMode?: ThemeMode): AnsiPalette {
-    const accent = skinMode === 'galaxy' ? GALAXY_ACCENT.accent : skinMode === 'spider' ? SPIDER_ACCENT.accent : accentForMode(mode, accentHex);
-    return { ...XTERM_ANSI[mode], ...(skinMode === 'galaxy' ? { background: '#060D1B', cyan: '#69C7EE', magenta: '#E984BF', blue: GALAXY_ACCENT.accent } : {}), ...(skinMode === 'spider' ? { background: '#05070C', cyan: SPIDER_ACCENT.accent, magenta: '#F277DA', blue: '#AD8BFA' } : {}), cursor: accent, selectionBackground: `${accent}40` };
+export function getXtermPalette(mode: 'light' | 'dark', accentHex?: string): AnsiPalette {
+    const accent = accentForMode(mode, accentHex);
+    return { ...XTERM_ANSI[mode], cursor: accent, selectionBackground: `${accent}40` };
 }
 
 /** ANSI 数字码 → AnsiPalette 键名（供 ANSI-to-HTML 渲染器查色） */

@@ -343,7 +343,7 @@ test.describe('前端 E2E 与 UI 功能测试 (Task 13)', () => {
     await expect(dialog).toBeVisible();
     // 默认落在「模型服务商」，主题在外观页
     await dialog.getByRole('tab', { name: '外观' }).click();
-    for (const [mode, label] of [['dark', '深色'], ['glass', '液态玻璃'], ['light', '浅色']]) {
+    for (const [mode, label] of [['dark', '深色'], ['light', '浅色']]) {
       const option = dialog.getByRole('button', { name: label, exact: true });
       await option.click();
       await expect(option).toHaveAttribute('aria-pressed', 'true');
@@ -373,6 +373,26 @@ test.describe('前端 E2E 与 UI 功能测试 (Task 13)', () => {
       await expect(page.getByRole('button', { name: '设置', exact: true })).toBeVisible();
       await expect(page.locator('html')).toHaveClass(new RegExp(`(^|\\s)${colorScheme}(\\s|$)`));
       expect(await page.evaluate(() => JSON.parse(localStorage.getItem('ai-coder-config')!).state.theme.mode)).toBe(colorScheme);
+      expect(errors).toEqual([]);
+    });
+  }
+
+  // 已下线主题：历史 localStorage 里的旧值迁到保留主题（浅色系→light，深色系→dark），首屏不出现无主题页面
+  for (const [retired, expected] of [['glass', 'light'], ['ink-havoc', 'light'], ['ink-havoc-night', 'dark'], ['galaxy', 'dark']] as const) {
+    test(`TC-FE-06: 已下线主题 ${retired} 迁移为 ${expected}，首屏正常`, async ({ page }) => {
+      await page.route('**/api/config', route => route.fulfill({ json: {} }));
+      await page.addInitScript((mode: string) => {
+        localStorage.setItem('ai-coder-config', JSON.stringify({
+          version: 3, state: { theme: { mode, accentColor: '#6366F1' }, themePreferenceSet: true },
+        }));
+      }, retired);
+      const errors: string[] = [];
+      page.on('pageerror', error => errors.push(error.message));
+      await page.goto('/');
+      await expect(page.getByRole('button', { name: '设置', exact: true })).toBeVisible();
+      await expect(page.locator('html')).toHaveClass(new RegExp(`(^|\\s)${expected}(\\s|$)`));
+      expect(await page.evaluate(() => document.documentElement.className.trim())).toBe(expected);
+      expect(await page.evaluate(() => JSON.parse(localStorage.getItem('ai-coder-config')!).state.theme.mode)).toBe(expected);
       expect(errors).toEqual([]);
     });
   }

@@ -1,4 +1,3 @@
-import { GlassMaterial } from '@/components/theme/GlassMaterial';
 /**
  * Drawer — 移动端抽屉覆盖层组件
  * SPEC: §8.8.2 / §7.5 / §8.5
@@ -62,7 +61,7 @@ export function Drawer({
                 aria-hidden={!open}
                 {...(!open ? { inert: '' } : {})}
                 aria-label="侧边栏"
-                className={`glass-surface fixed top-0 ${side === 'left' ? 'left-0' : 'right-0'} z-50
+                className={`fixed top-0 ${side === 'left' ? 'left-0' : 'right-0'} z-50
                     h-full bg-surfacev2 shadow-e4 overflow-hidden
                     ${side === 'left' ? 'rounded-r-panel' : 'rounded-l-panel'}
                     transition-transform duration-sheet ease-soft
@@ -74,7 +73,6 @@ export function Drawer({
                     }`}
                 style={{ width: `${width}px`, maxWidth: '82%' }}
             >
-                <GlassMaterial kind="overlay" />
                 <div className="h-full flex flex-col overscroll-contain">
                     {children}
                 </div>

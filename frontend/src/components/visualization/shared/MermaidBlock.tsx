@@ -49,7 +49,7 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({ code }) => {
     const cacheRef = useRef<Map<string, string>>(new Map());
 
     const theme = useConfigStore(s => s.theme);
-    // Glass diagrams use the light palette for a stable reading surface.
+    // Diagrams follow the effective light / dark palette.
     const effectiveTheme = useMemo(() => resolveTheme(theme.mode), [theme.mode]);
     const accentColor = theme.accentColor;
 
@@ -82,7 +82,7 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({ code }) => {
 
         (async () => {
             try {
-                initMermaid(effectiveTheme, accentColor, theme.mode);
+                initMermaid(effectiveTheme, accentColor);
                 const result = await renderMermaid(id, code);
                 if (!cancelled) {
                     cacheRef.current.set(cacheKey, result.svg);

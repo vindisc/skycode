@@ -7,13 +7,10 @@
  * 先确认再走——填了几项、还粘贴了密钥的表单，不该被顺手一点就没了。
  */
 import { useCallback, useRef, useState } from 'react';
-import { Moon, Sun, Sparkles, Check, Rocket, Flower2, Landmark, Candy, Bug, Orbit } from 'lucide-react';
+import { Moon, Sun, Check } from 'lucide-react';
 import { useConfigStore } from '@/store/configStore';
 import { useDialogStore } from '@/store/dialogStore';
 import { Button, Dialog, Tabs, cn } from '@/components/ui';
-import { SpaceshipFxControls } from '@/components/theme/SpaceshipFxControls';
-import { InkHavocFxControls } from '@/components/theme/InkHavocFxControls';
-import { JellyFxControls } from '@/components/theme/JellyFxControls';
 import { ACCENT_PRESETS, normalizeAccentHex } from '@/theme/accents';
 import { LlmProvidersSettings } from '@/components/settings/LlmProvidersSettings';
 import { SceneBindingsSettings } from '@/components/settings/SceneBindingsSettings';
@@ -35,13 +32,6 @@ function toSettingsTab(value: string): SettingsTab {
 const THEMES: { mode: ThemeConfig['mode']; label: string; icon: typeof Sun }[] = [
     { mode: 'light', label: '浅色', icon: Sun },
     { mode: 'dark', label: '深色', icon: Moon },
-    { mode: 'glass', label: '液态玻璃', icon: Sparkles },
-    { mode: 'spaceship', label: '星舰', icon: Rocket },
-    { mode: 'ink-havoc', label: '花果晨', icon: Flower2 },
-    { mode: 'ink-havoc-night', label: '灵霄夜', icon: Landmark },
-    { mode: 'jelly', label: '果冻', icon: Candy },
-    { mode: 'spider', label: '蜘蛛爬虫', icon: Bug },
-    { mode: 'galaxy', label: '璀璨银河', icon: Orbit },
 ];
 
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
@@ -90,17 +80,10 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
 
 function AppearanceSettings() {
     const { theme, setTheme } = useConfigStore();
-    const spaceshipMode = theme.mode === 'spaceship';
-    // 大闹天宫重彩双模式：accent 写死主题色（朱砂/鎏金），强调色预设区禁用并说明
-    const inkHavocMode = theme.mode === 'ink-havoc' || theme.mode === 'ink-havoc-night';
-    // 果冻主题：accent 写死法式主题色（酒渍樱桃），强调色预设区同禁用并说明
-    const jellyMode = theme.mode === 'jelly';
-    const spiderMode = theme.mode === 'spider';
-    const fixedAccentMode = inkHavocMode || jellyMode || spiderMode || theme.mode === 'galaxy';
 
     return (
         <>
-        {/* 9 个主题：桌面 4 列、窄屏 2 列 */}
+        {/* 主题：桌面 4 列、窄屏 2 列 */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" role="group" aria-label="主题">
                 {THEMES.map(({ mode, label, icon: Icon }) => (
                     <button
@@ -121,28 +104,11 @@ function AppearanceSettings() {
                     </button>
                 ))}
             </div>
-            {/* 星舰特效：仅 spaceship 主题可见（其他主题隐藏） */}
-            {spaceshipMode && <SpaceshipFxControls className="mt-5 border-t border-hairline pt-5" />}
-            {/* 天宫特效：仅 ink-havoc 双主题可见（其他主题隐藏） */}
-            {inkHavocMode && <InkHavocFxControls className="mt-5 border-t border-hairline pt-5" />}
-            {/* 果冻特效：仅 jelly 主题可见（第二阶段 Q 弹/装饰控件位在此组件内扩展） */}
-            {jellyMode && <JellyFxControls className="mt-5 border-t border-hairline pt-5" />}
             <div className="mt-5">
                 <div className="text-sm font-medium text-t2 mb-3">强调色</div>
-                {/* ink 双模式 / jelly accent 写死主题色（applyAccent 提前返回）：禁用预设并说明 */}
-                {inkHavocMode && (
-                    <div className="mb-3 text-13 text-t3">本主题使用专属重彩配色</div>
-                )}
-                {jellyMode && (
-                    <div className="mb-3 text-13 text-t3">本主题使用专属法式配色</div>
-                )}
-                {theme.mode === 'galaxy' && <div className="mb-3 text-13 text-t3">本主题使用专属星蓝、紫罗兰与玫红配色</div>}
-                {spiderMode && (
-                    <div className="mb-3 text-13 text-t3">本主题使用专属青色、洋红与紫色配色</div>
-                )}
                 <div className="flex gap-2 flex-wrap" role="group" aria-label="强调色">
                     {ACCENT_PRESETS.map(({ hex, label }) => {
-                        const selected = !fixedAccentMode && normalizeAccentHex(theme.accentColor) === hex;
+                        const selected = normalizeAccentHex(theme.accentColor) === hex;
                         return (
                             <button
                                 key={hex}
@@ -150,12 +116,11 @@ function AppearanceSettings() {
                                 aria-pressed={selected}
                                 aria-label={`强调色 ${label}`}
                                 title={label}
-                                disabled={fixedAccentMode}
                                 onClick={() => setTheme({ accentColor: hex })}
                                 className={cn(
                                     'w-8 h-8 rounded-full border-2 border-transparent transition-interactive duration-fast',
                                     'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring',
-                                    fixedAccentMode ? 'opacity-40 cursor-not-allowed' : selected ? 'scale-110' : 'hover:scale-105',
+                                    selected ? 'scale-110' : 'hover:scale-105',
                                 )}
                                 style={{
                                     backgroundColor: hex,

@@ -1,7 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { Drawer } from './Drawer';
-vi.mock('@/components/theme/GlassMaterial', () => ({ GlassMaterial: () => null }));
 afterEach(cleanup);
 it('portals outside workspace stacking contexts and disables the closed panel', () => {
     const close = vi.fn();

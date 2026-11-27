@@ -33,7 +33,7 @@
     /* 阅读列宽：消息列与输入区共用，宽屏下居中 */
     --thread-max-width: 920px;
 }
-:root.dark, :root.glass {
+:root.dark {
     --text-primary: var(--v2-text-1);
     --text-secondary: var(--v2-text-2);
     --text-muted: var(--v2-text-3);
@@ -61,10 +61,6 @@
     background: var(--v2-accent-strong);
 }
 
-:root.glass .app-header [role=tab][aria-selected=true] {
-    background: transparent;
-}
-
 :root .chat-composer-surface textarea {
     font-size: 15px;
     line-height: 1.65;
@@ -84,13 +80,8 @@
     box-shadow: none;
 }
 
-:root .glass-light {
-    box-shadow: inset 0 1px 0 var(--glass-highlight),inset 1px 0 1px rgba(255,255,255,.5),inset 0 -1px 1px rgba(31,30,27,.12);
-}
-
 @media (max-width: 767px) {
     :root .chat-composer-surface textarea { font-size: 16px; }
-    :root.glass .chat-composer-surface textarea { background: transparent; }
 }
 
 /* Shared by highlighted and plain code; CSS variables also work in inline Prism styles. */
@@ -101,9 +92,8 @@
 @media (max-width: 767px) {
     .code-block { --code-font-size: 14px; }
 }
-/* Keep accessibility modes stronger than decorative glass highlights. */
+/* Keep accessibility modes stronger than decorative colours. */
 @media (forced-colors: active) {
-    :root .glass-light { box-shadow: none; }
     :root .tool-call-block .text-ok,
     :root .tool-call-block .text-err,
     :root .tool-call-block .text-accent2 { color: CanvasText; }

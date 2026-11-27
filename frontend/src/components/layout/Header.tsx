@@ -1,6 +1,5 @@
 import { useMessageStore } from '@/store/messageStore';
 import { BrandLogo } from '@/components/ui/BrandLogo';
-import { GlassMaterial } from '@/components/theme/GlassMaterial';
 /**
  * Header — 顶部导航栏组件
  * SPEC: §8.6.1
@@ -11,16 +10,14 @@ import { GlassMaterial } from '@/components/theme/GlassMaterial';
  */
 
 import { useEffect } from 'react';
-import { Menu, Settings, Coins, Loader2, Flag, Cable, Brain, Puzzle, Zap } from 'lucide-react';
+import { Menu, Settings, Coins, Loader2, Cable, Brain, Puzzle, Zap } from 'lucide-react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useCostStore } from '@/store/costStore';
 import { useDialogStore } from '@/store/dialogStore';
-import { defaultInkHavocFx, useConfigStore } from '@/store/configStore';
 import { useModelStore } from '@/store/modelStore';
 import { useBridgeStore } from '@/store/bridgeStore';
 import { clearSessionSelection } from '@/services/sessionActivation';
 import { SessionStatusCapsule } from '@/components/status/SessionStatusCapsule';
-import { DriftSyncBadge } from '@/components/theme/DriftSyncBadge';
 
 /** §7.4 头部按钮共性：hover/active/焦点环（ring-accent2-ring） */
 const HEADER_BUTTON_CLASS =
@@ -51,10 +48,6 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
         || sessionCost > 0 || totalCost > 0;
     const { bridgeStatus } = useBridgeStore();
     const { openDialog } = useDialogStore();
-    const { theme, setTheme } = useConfigStore();
-    // 波次3② 闭关令旗：仅 ink 双主题显示（normalizeTheme 保证 fx 恒有值，瞬态默认兜底）
-    const isInkMode = theme.mode === 'ink-havoc' || theme.mode === 'ink-havoc-night';
-    const inkFx = theme.inkHavocFx ?? defaultInkHavocFx();
 
     // 动态加载可用模型列表（统一从 modelStore 缓存读取；移动端头部展示当前模型名）
     const {
@@ -99,8 +92,7 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
             : 'border-accent2-ring bg-accent2-soft text-accent2-ink';
 
     return (
-        <header className="app-header glass-surface relative h-14 border-b border-hairline bg-surface2 flex items-center px-2 md:px-4 shrink-0">
-            <GlassMaterial interactive />
+        <header className="app-header relative h-14 border-b border-hairline bg-surface2 flex items-center px-2 md:px-4 shrink-0">
             <div className="flex md:hidden min-w-0 w-full items-center gap-3 px-1" aria-label="当前会话信息">
                 <button type="button" onClick={onMenuClick} aria-label="打开会话列表" title="打开会话列表" className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-sm text-t2 hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink"><Menu size={20} /></button>
                 <div className="min-w-0 flex-1">
@@ -147,8 +139,6 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                 {/* 会话状态 + 用量指标（自底部状态栏右簇上移；指标细节 ≥lg 展示，空间不足时让位） */}
                 <div className="flex items-center gap-2.5 pr-1 text-13 font-mono tabular-nums text-t3">
                     <SessionStatusCapsule />
-                    {/* 星舰 HUD 事件特效：streaming 时呈现 DRIFT SYNCED 徽章（内部三重门控，其他主题返回 null） */}
-                    <DriftSyncBadge />
                     {hasUsage && <>
                     <MetricDivider className="hidden lg:block" />
                     <div className="hidden lg:flex items-center gap-2 tabular-nums">
@@ -171,21 +161,6 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     </span>
                     </>}
                 </div>
-
-                {/* 波次3② 闭关令旗（ink 双主题限定）：挂匾收起装饰专注书写 / 摘匾装饰回归；
-                    仪式动画由 App 挂载的 InkRetreatCeremony 订阅 retreat 翻转驱动 */}
-                {isInkMode && (
-                    <button
-                        type="button"
-                        onClick={() => setTheme({ inkHavocFx: { ...inkFx, retreat: !inkFx.retreat } })}
-                        className={`panel-control hidden md:inline-flex ${HEADER_BUTTON_CLASS}${inkFx.retreat ? ' text-accent2-ink' : ''}`}
-                        title="闭关 · 收起装饰，专注书写"
-                        aria-label="闭关 · 收起装饰，专注书写"
-                        aria-pressed={inkFx.retreat}
-                    >
-                        <Flag className="w-4 h-4" aria-hidden="true" />
-                    </button>
-                )}
 
                 {/* MCP / 记忆 / Skill / 设置：四个入口统一成同规格的图标按钮（悬停有名称提示）。
                     原先前三个是三块宽度不一的文字徽标，和最右边的齿轮图标不是一套 */}

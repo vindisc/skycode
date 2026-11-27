@@ -11,7 +11,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { subscribeWithSelector } from 'zustand/middleware';
 import { broadcastMiddleware } from './broadcastMiddleware';
 import { DEFAULT_ACCENT_HEX } from '@/theme/accents';
-import type { ThemeConfig, SpaceshipFxConfig, InkHavocFxConfig, JellyFxConfig, OutputStyleDef, Config } from '@/types';
+import type { ThemeConfig, OutputStyleDef, Config } from '@/types';
 
 export interface ConfigStoreState {
     // 状态
@@ -41,94 +41,53 @@ const DEFAULT_THEME: ThemeConfig = {
     fontSize: 'medium',
     fontFamily: 'monospace',
     borderRadius: 'md',
-    spaceshipFx: defaultSpaceshipFx(),
-    inkHavocFx: defaultInkHavocFx(),
-    jellyFx: defaultJellyFx(),
 };
 
-/** 旧 system 偏好按当前系统外观迁移一次；未知值回退浅色。 */
+/** ThemeConfig 的全部字段；归一时只拾取这些键 */
+const THEME_KEYS: readonly (keyof ThemeConfig)[] = ['mode', 'accentColor', 'fontSize', 'fontFamily', 'borderRadius'];
+
+/**
+ * 已下线主题的迁移目标：历史 localStorage / 服务端配置 / 旧版本标签页广播里仍可能带着这些值。
+ * 浅色系（液态玻璃 / 果冻 / 花果晨）归 light，深色系（灵霄夜 / 星舰 / 蜘蛛爬虫 / 璀璨银河）归 dark。
+ */
+const RETIRED_THEME_MODES: ReadonlyMap<string, ThemeConfig['mode']> = new Map([
+    ['glass', 'light'],
+    ['jelly', 'light'],
+    ['ink-havoc', 'light'],
+    ['ink-havoc-night', 'dark'],
+    ['spaceship', 'dark'],
+    ['spider', 'dark'],
+    ['galaxy', 'dark'],
+]);
+
+/**
+ * 主题模式归一（所有写入路径的唯一入口：persist 水合 / migrate、setTheme、服务端配置、跨 Tab 广播）。
+ * - light / dark 原样返回；
+ * - 旧 system 偏好按当前系统外观迁移一次（无法探测时回退浅色）；
+ * - 已下线主题按 RETIRED_THEME_MODES 迁到保留主题；
+ * - 其余未知值回退 dark（产品默认）。
+ */
 export function normalizeThemeMode(mode: unknown): ThemeConfig['mode'] {
-    if (mode === 'light' || mode === 'dark' || mode === 'glass' || mode === 'spaceship'
-        || mode === 'ink-havoc' || mode === 'ink-havoc-night' || mode === 'jelly' || mode === 'spider' || mode === 'galaxy') return mode;
-    if (mode === 'system' && typeof window !== 'undefined'
-        && typeof window.matchMedia === 'function'
-        && window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
-    return 'light';
-}
-
-/** 星舰 HUD 特效默认值：系统偏好减少动态时 motion 默认 'reduced'（仍可手动切回 full） */
-export function defaultSpaceshipFx(): SpaceshipFxConfig {
-    const reduced = typeof window !== 'undefined'
-        && typeof window.matchMedia === 'function'
-        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    return { cinematic: true, eventFx: true, motion: reduced ? 'reduced' : 'full' };
-}
-
-/** spaceshipFx 字段级归一：非法值逐项回退 base/默认，保证三档 motion 恒为合法值 */
-export function normalizeSpaceshipFx(value: unknown, base: SpaceshipFxConfig = defaultSpaceshipFx()): SpaceshipFxConfig {
-    const update = value && typeof value === 'object' && !Array.isArray(value)
-        ? value as Partial<SpaceshipFxConfig> : {};
-    const motion = update.motion === 'full' || update.motion === 'reduced' || update.motion === 'off'
-        ? update.motion : base.motion;
-    return {
-        cinematic: typeof update.cinematic === 'boolean' ? update.cinematic : base.cinematic,
-        eventFx: typeof update.eventFx === 'boolean' ? update.eventFx : base.eventFx,
-        motion,
-    };
-}
-
-/** inkHavocFx 默认值：系统偏好减少动态时 motion 默认 'reduced'（仍可手动切回 full）；闭关默认关闭 */
-export function defaultInkHavocFx(): InkHavocFxConfig {
-    const reduced = typeof window !== 'undefined'
-        && typeof window.matchMedia === 'function'
-        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    return { cinematic: true, motion: reduced ? 'reduced' : 'full', retreat: false };
-}
-
-/** inkHavocFx 字段级归一：非法值逐项回退 base/默认，保证三档 motion 恒为合法值 */
-export function normalizeInkHavocFx(value: unknown, base: InkHavocFxConfig = defaultInkHavocFx()): InkHavocFxConfig {
-    const update = value && typeof value === 'object' && !Array.isArray(value)
-        ? value as Partial<InkHavocFxConfig> : {};
-    const motion = update.motion === 'full' || update.motion === 'reduced' || update.motion === 'off'
-        ? update.motion : base.motion;
-    return {
-        cinematic: typeof update.cinematic === 'boolean' ? update.cinematic : base.cinematic,
-        retreat: typeof update.retreat === 'boolean' ? update.retreat : base.retreat,
-        motion,
-    };
-}
-
-/** 果冻主题特效默认值：系统偏好减少动态时 motion 默认 'reduced'（仍可手动切回 full） */
-export function defaultJellyFx(): JellyFxConfig {
-    const reduced = typeof window !== 'undefined'
-        && typeof window.matchMedia === 'function'
-        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    return { cinematic: true, motion: reduced ? 'reduced' : 'full' };
-}
-
-/** jellyFx 字段级归一：非法值逐项回退 base/默认，保证三档 motion 恒为合法值 */
-export function normalizeJellyFx(value: unknown, base: JellyFxConfig = defaultJellyFx()): JellyFxConfig {
-    const update = value && typeof value === 'object' && !Array.isArray(value)
-        ? value as Partial<JellyFxConfig> : {};
-    const motion = update.motion === 'full' || update.motion === 'reduced' || update.motion === 'off'
-        ? update.motion : base.motion;
-    return {
-        cinematic: typeof update.cinematic === 'boolean' ? update.cinematic : base.cinematic,
-        motion,
-    };
+    if (mode === 'light' || mode === 'dark') return mode;
+    if (mode === 'system') {
+        const prefersDark = typeof window !== 'undefined'
+            && typeof window.matchMedia === 'function'
+            && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return prefersDark ? 'dark' : 'light';
+    }
+    return RETIRED_THEME_MODES.get(mode as string) ?? 'dark';
 }
 
 export function normalizeTheme(value: unknown, base: ThemeConfig = DEFAULT_THEME): ThemeConfig {
     const raw = value && typeof value === 'object' && !Array.isArray(value) ? value as Partial<ThemeConfig> : {};
-    // 字符串形式的 mode 先断言进联合类型，合法性由下方 normalizeThemeMode 白名单兜底
+    // 字符串形式的 mode 先断言进联合类型，合法性由上方 normalizeThemeMode 白名单兜底
     const update: Partial<ThemeConfig> = typeof value === 'string' ? { mode: value as ThemeConfig['mode'] } : raw;
+    // 只拾取仍在使用的外观字段：旧版本持久化里随已下线主题一并删除的特效配置不再进入 state
+    const picked = Object.fromEntries(THEME_KEYS.filter((key) => key in update).map((key) => [key, update[key]])) as Partial<ThemeConfig>;
     return {
         ...base,
-        ...update,
+        ...picked,
         mode: normalizeThemeMode(update.mode ?? base.mode),
-        spaceshipFx: normalizeSpaceshipFx(raw.spaceshipFx, base.spaceshipFx ?? defaultSpaceshipFx()),
-        inkHavocFx: normalizeInkHavocFx(raw.inkHavocFx, base.inkHavocFx ?? defaultInkHavocFx()),
-        jellyFx: normalizeJellyFx(raw.jellyFx, base.jellyFx ?? defaultJellyFx()),
     };
 }
 
@@ -146,7 +105,9 @@ export const useConfigStore = create<ConfigStoreState>()(
                     expandedView: s.expandedView,
                     outputStyle: s.outputStyle,
                     defaultModel: s.defaultModel,
-                })
+                }),
+                // 其他标签页可能仍跑旧版本：广播来的已下线主题在进入 state 前迁回保留主题
+                (s) => (s.theme ? { ...s, theme: normalizeTheme(s.theme) } : s)
             )(
                 immer((set) => ({
                 theme: { ...DEFAULT_THEME },
@@ -258,7 +219,9 @@ export const useConfigStore = create<ConfigStoreState>()(
                     outputStyle: s.outputStyle,
                     defaultModel: s.defaultModel,
                 }),
-                version: 3,
+                // v4：主题只剩 light / dark。版本号前移让 v3 及更早的持久化状态都走一次 migrate，
+                // 归一结果由 persist 立即写回 localStorage，旧主题值不再残留到下次加载。
+                version: 4,
                 migrate: (persisted: unknown, version: number) => {
                     const data = (persisted ?? {}) as Record<string, unknown>;
                     if (version <= 1) {
@@ -271,6 +234,7 @@ export const useConfigStore = create<ConfigStoreState>()(
                             outputStyle: data.outputStyle ?? { availableStyles: [], activeStyleName: null },
                         };
                     }
+                    // 已下线主题迁到保留主题；随主题删除的特效配置不再保留
                     return { ...data, theme: normalizeTheme(data.theme) };
                 },
                 merge: (persisted, current) => {

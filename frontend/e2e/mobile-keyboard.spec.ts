@@ -5,7 +5,7 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/api/**', route => {
     const path = new URL(route.request().url()).pathname;
     if (!path.startsWith('/api/')) return route.continue();
-    return route.fulfill({ json: path === '/api/config' ? { theme: 'glass' }
+    return route.fulfill({ json: path === '/api/config' ? { theme: 'light' }
       : path.startsWith('/api/sessions') ? { sessions: [], hasMore: false }
       : path.endsWith('/workbench/current') ? null : path === '/api/skills' ? [] : {} });
   });

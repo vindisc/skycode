@@ -1,6 +1,5 @@
 import { ActivityDecisionStatus } from './ActivityDecisionStatus';
 import { useModalBehavior } from '@/hooks/useModalBehavior';
-import { GlassMaterial } from '@/components/theme/GlassMaterial';
 /**
  * MobileBottomSheet — 移动端 Bottom Sheet 体系（§8.4）
  *
@@ -109,10 +108,9 @@ export function SheetShell({ isOpen, onClose, ariaLabel, children, header, foote
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.6 }}
             onDragEnd={handleDragEnd}
-            className="glass-surface relative w-full rounded-t-panel bg-surfacev2 shadow-e4 border-t border-hairline z-10 flex flex-col outline-none"
+            className="relative w-full rounded-t-panel bg-surfacev2 shadow-e4 border-t border-hairline z-10 flex flex-col outline-none"
             style={{ maxHeight: '85dvh' }}
           >
-            <GlassMaterial kind="overlay" />
             {/* Grabber — 36×4px，整区可拖拽 */}
             <div
               onPointerDown={startDrag}

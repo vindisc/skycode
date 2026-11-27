@@ -42,11 +42,10 @@ function message(id: string, text: string) {
 
 function Fixture() {
     const mode = useConfigStore(s => s.theme.mode);
-    const rich = useConfigStore(s => s.theme.mode === 'jelly' ? s.theme.jellyFx?.cinematic : s.theme.inkHavocFx?.cinematic);
     const [expanded, setExpanded] = useState(false);
     // Remount the message examples when the theme changes so long-code toggles
     // and copy feedback from a previous case cannot mask a regression.
-    return <main key={`${mode}-${rich}`} data-theme={mode} data-rich={String(rich)}>
+    return <main key={mode} data-theme={mode}>
         {messages.map(([id, text]) => <section id={id} key={id}>
             <UserMessage message={message(id, text)} />
         </section>)}
@@ -62,7 +61,7 @@ function Fixture() {
 }
 
 const testWindow = window as unknown as {
-    configureTheme: (mode: string, cinematic: boolean) => void;
+    configureTheme: (mode: string) => void;
     copiedText: string;
     copiedImages: number;
 };
@@ -76,13 +75,11 @@ Object.defineProperty(navigator, 'clipboard', { configurable: true, value: {
 Object.defineProperty(window, 'ClipboardItem', { configurable: true, value: class {
     constructor(public data: Record<string, Blob>) {}
 } });
-testWindow.configureTheme = (mode, cinematic) => {
-    document.documentElement.className = [mode, cinematic ? (mode === 'jelly' ? 'fx-jelly-rich' : 'fx-ink-rich') : '', 'motion-off'].join(' ');
+testWindow.configureTheme = (mode) => {
+    document.documentElement.className = mode;
     applyAccent(DEFAULT_ACCENT_HEX, mode as Parameters<typeof applyAccent>[1]);
     useConfigStore.setState({ theme: {
         mode: mode as Parameters<typeof applyAccent>[1], accentColor: DEFAULT_ACCENT_HEX,
-        inkHavocFx: { cinematic, motion: 'off', retreat: false },
-        jellyFx: { cinematic, motion: 'off' },
     } });
 };
 createRoot(document.getElementById('root')!).render(<Fixture />);

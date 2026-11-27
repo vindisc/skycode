@@ -2,7 +2,7 @@
  * visual-regression.spec.ts — P0 视觉基线（改造指南 §12-4）
  *
  * fixture：① 主界面空态 ② 设置面板打开态 ③ 393×852 移动主界面
- * 每个 fixture × { light, dark, glass } 三主题。
+ * 每个 fixture × { light, dark } 两主题。
  *
  * 主题播种（双保险）：
  *  1. addInitScript 在页面脚本执行前写入 zustand persist 键 `ai-coder-config`
@@ -14,8 +14,8 @@
  */
 import { test, expect, type Page, type Locator } from '@playwright/test';
 
-type VisualTheme = 'light' | 'dark' | 'glass';
-const THEMES: VisualTheme[] = ['light', 'dark', 'glass'];
+type VisualTheme = 'light' | 'dark';
+const THEMES: VisualTheme[] = ['light', 'dark'];
 
 interface PersistedTheme {
     mode: VisualTheme;
@@ -105,7 +105,7 @@ function dynamicMasks(page: Page): Locator[] {
     ];
 }
 
-test.describe('三主题视觉基线', () => {
+test.describe('双主题视觉基线', () => {
     for (const theme of THEMES) {
         test(`①主界面空态 - ${theme}`, async ({ page }) => {
             await openApp(page, theme);

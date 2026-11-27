@@ -49,11 +49,11 @@ import {
 
 // ── 层级颜色 & 图标配置 ──
 
-/** 当前主题模式 + 强调色的图表色板（§4.1 动态版；glass 归一为 light） */
+/** 当前主题模式 + 强调色的图表色板（§4.1 动态版） */
 function useChartColors(): string[] {
   const mode = useConfigStore(s => s.theme.mode);
   const accentColor = useConfigStore(s => s.theme.accentColor);
-  return useMemo(() => getChartColors(resolveTheme(mode), accentColor, mode), [mode, accentColor]);
+  return useMemo(() => getChartColors(resolveTheme(mode), accentColor), [mode, accentColor]);
 }
 
 function getLayerConfig(colors: string[]): Record<string, { color: string; icon: LucideIcon; label: string }> {

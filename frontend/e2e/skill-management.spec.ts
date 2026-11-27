@@ -2,7 +2,7 @@ import { test, expect, type BrowserContext, type Page } from '@playwright/test';
 
 test.use({ reducedMotion: 'reduce' });
 
-type Theme = 'light' | 'dark' | 'glass';
+type Theme = 'light' | 'dark';
 const viewports = [
   { name: 'phone', width: 393, height: 852 },
   { name: 'tablet', width: 800, height: 1024 },
@@ -85,7 +85,7 @@ async function openManagement(page: Page) {
 for (const viewport of viewports) {
   test.describe(viewport.name, () => {
     test.use({ viewport, isMobile: viewport.width < 768, hasTouch: viewport.width < 1024, deviceScaleFactor: 1 });
-    for (const theme of ['light', 'dark', 'glass'] as const) {
+    for (const theme of ['light', 'dark'] as const) {
       test(`${theme}: layout, details, search and toggles`, async ({ page, context }, testInfo) => {
         await mockBackend(context, theme);
         await page.goto('/');

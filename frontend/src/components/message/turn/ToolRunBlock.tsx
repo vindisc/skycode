@@ -137,17 +137,17 @@ const ToolRunBlock: React.FC<ToolRunBlockProps> = ({ blocks, activeToolCalls }) 
                             aria-label="执行中"
                             data-testid="tool-run-active-dot"
                         />
-                        <span data-spider-anchor="tool" data-tool-use-id={activeToolUseId ?? undefined} className="min-w-0 truncate text-sm text-t1">
+                        <span data-tool-use-id={activeToolUseId ?? undefined} className="min-w-0 truncate text-sm text-t1">
                             执行中 · <span className="font-semibold">{current.tc.toolName}</span>
                             <span className="tabular-nums text-t3"> ({summary.activeIndex + 1}/{total})</span>
                         </span>
                     </>
                 ) : (
                     <>
-                        <span data-spider-anchor="tool" className="shrink-0 text-sm font-semibold text-t1">
+                        <span className="shrink-0 text-sm font-semibold text-t1">
                             {total} 次工具调用
                         </span>
-                        <span data-spider-anchor="tool" className="min-w-0 truncate text-13 text-t3">
+                        <span className="min-w-0 truncate text-13 text-t3">
                             {summary.topNames.map(([name, count]) => `${name}×${count}`).join(' · ')}
                         </span>
                     </>
@@ -208,12 +208,11 @@ const ToolRunBlock: React.FC<ToolRunBlockProps> = ({ blocks, activeToolCalls }) 
                                             )}
                                         />
                                     )}
-                                    <span data-spider-anchor="tool" className="shrink-0 text-sm font-medium text-t1">
+                                    <span className="shrink-0 text-sm font-medium text-t1">
                                         {tc.toolName}
                                     </span>
                                     {target && (
                                         <span
-                                            data-spider-anchor="tool"
                                             className="min-w-0 truncate rounded bg-sunken2 px-1.5 py-0.5 font-mono text-13 text-t2"
                                             title={target.target}
                                         >

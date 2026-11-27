@@ -1,4 +1,3 @@
-import { GlassMaterial } from '@/components/theme/GlassMaterial';
 /**
  * CommandPalette — Slash 命令面板
  *
@@ -137,11 +136,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
             onKeyDown={handleKeyDown}
         >
             <div
-                className={`glass-menu glass-surface relative bg-surfacev2 border border-hairline rounded-panel shadow-e4 overflow-hidden
+                className={`relative bg-surfacev2 border border-hairline rounded-panel shadow-e4 overflow-hidden
                     ${isGlobal ? 'w-full max-w-lg mx-4' : 'w-full'}`}
                 onClick={e => e.stopPropagation()}
             >
-                <GlassMaterial kind="overlay" />
                 {/* Search input (global mode) */}
                 {isGlobal && (
                     <div className="flex items-center gap-2 px-3 py-2.5 border-b border-hairline">

@@ -1,6 +1,5 @@
 import { pageSessionOrder } from '@/utils/pageSessionOrder';
 import { selectMergeSourceIds, useSessionMergeStore } from '@/store/sessionMergeStore';
-import { GlassMaterial } from '@/components/theme/GlassMaterial';
 import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
 /**
  * Sidebar — 左侧边栏组件
@@ -205,8 +204,6 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
     });
     const themeMode = useConfigStore(s => s.theme.mode);
     const setTheme = useConfigStore(s => s.setTheme);
-    const glassMode = themeMode === 'glass';
-    const reducedMotion = useReducedMotion();
     const [panelCollapsed, setPanelCollapsed] = useState(() => localStorage.getItem('sidebar-panel-collapsed') === 'true');
     useEffect(() => {
         localStorage.setItem('sidebar-panel-collapsed', String(panelCollapsed));
@@ -332,12 +329,11 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
 
     return (
         <motion.aside
-            className={`app-sidebar ${isDrawerMode ? '' : 'glass-surface'} ${sidebarWidthClass} h-full bg-app2 ${isDrawerMode ? '' : 'border-r border-hairline'} flex flex-col relative z-10 overflow-hidden ${className}`}
+            className={`app-sidebar ${sidebarWidthClass} h-full bg-app2 ${isDrawerMode ? '' : 'border-r border-hairline'} flex flex-col relative z-10 overflow-hidden ${className}`}
             style={sidebarStyle}
             animate={isDrawerMode ? undefined : { width: panelCollapsed ? COLLAPSED_STRIP_WIDTH : width }}
-            transition={{ duration: glassMode && !reducedMotion && !isDragging ? .24 : 0, ease: [.2, .8, .2, 1] }}
+            transition={{ duration: 0, ease: [.2, .8, .2, 1] }}
         >
-            {!isDrawerMode && <GlassMaterial interactive />}
             {isDrawerMode ? (
                 /* §7.5 移动端抽屉 = 文字列表：图标 + 文字 + badge，38px 行高、rounded-md、
                    active = accent2-soft 底 + accent 字 + 600 字重；选中后自动关闭抽屉 */
@@ -433,13 +429,6 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
                         >
                             <option value="light">浅色</option>
                             <option value="dark">深色</option>
-                            <option value="glass">液态玻璃</option>
-                            <option value="spaceship">星舰</option>
-                            <option value="ink-havoc">花果晨</option>
-                            <option value="ink-havoc-night">灵霄夜</option>
-                            <option value="jelly">果冻</option>
-                            <option value="spider">蜘蛛爬虫</option>
-                            <option value="galaxy">璀璨银河</option>
                         </select>
                     </label>
                 </div>

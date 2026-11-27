@@ -5,7 +5,7 @@ interface MemoryIconProps {
 /**
  * Memory 入口徽章 — 与 McpIcon 同构的 badge 风格：
  * 圆角描边框内嵌 Brain glyph + "记忆"汉字，一体成型。
- * 全部使用 currentColor，随按钮文字色自动适配 light/dark/glass 皮肤。
+ * 全部使用 currentColor，随按钮文字色自动适配 light/dark 皮肤。
  */
 export function MemoryIcon({ className }: MemoryIconProps) {
   return (

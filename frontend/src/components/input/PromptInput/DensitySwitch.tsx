@@ -1,11 +1,10 @@
-import { GlassSelection } from '@/components/theme/GlassSelection';
 /**
  * 显示方式切换（消息展示密度）：桌面分段控件，移动端常驻卡片中的单按钮 + 底部 Sheet。
  * 档位命名三端统一：精简 / 标准 / 完整过程；切档沿用现有 setDensity，
  * 清除当前会话的手动展开偏好。
  */
 
-import React, { useCallback, useState, useId } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Rows3, Check, X } from 'lucide-react';
 import { SheetShell } from '@/components/apos/MobileBottomSheet';
 import { useSessionStore } from '@/store/sessionStore';
@@ -28,7 +27,6 @@ function useDensitySelect(): (value: TurnDensity) => void {
 // ==================== 桌面端：紧凑分段控件 ====================
 
 export const DensitySwitch: React.FC = () => {
-    const glassId = useId();
     const density = useTurnViewStore(s => s.density);
     const handleSelect = useDensitySelect();
 
@@ -37,7 +35,7 @@ export const DensitySwitch: React.FC = () => {
             role="tablist"
             aria-label="显示方式"
             data-testid="density-switch"
-            className="glass-segments inline-flex h-7 shrink-0 items-center gap-0.5 rounded-full border border-hairline bg-sunken2 p-0.5 shadow-pressed"
+            className="inline-flex h-7 shrink-0 items-center gap-0.5 rounded-full border border-hairline bg-sunken2 p-0.5 shadow-pressed"
         >
             {DENSITY_OPTIONS.map(option => {
                 const selected = option.value === density;
@@ -58,7 +56,6 @@ export const DensitySwitch: React.FC = () => {
                                 : 'text-t2 hover:text-t1 hover:bg-hover2',
                         )}
                     >
-                        {selected && <GlassSelection id={glassId} />}
                         {option.label}
                     </button>
                 );

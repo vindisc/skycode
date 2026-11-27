@@ -9,8 +9,7 @@
  * §7.2 代码块：bg-sunken2 + rounded-md + border-hairline；
  * 头行（文件名或语言 + 复制 ghost 钮）；
  * 正文系统等宽字体 13px（手机 14px）/ 行高 1.65，横向滚动。
- * 语法色由 zkSyntax 按主题提供：默认浅深色沿用 §4.2 语法表，
- * ink 双主题与 jelly（黑巧丝绒）使用针对代码块背景校准的专属色板。
+ * 语法色由 zkSyntax 按主题提供：浅深色沿用 §4.2 语法表。
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
@@ -45,21 +44,9 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
 }) => {
     const [copied, setCopied] = useState(false);
     const [forceHighlight, setForceHighlight] = useState(false);
-    // 主题感知语法表（§4.2）：ink 双主题直达天宫色板，其余归一 light/dark；
-    // configStore 订阅保证主题切换即时重渲染
+    // 主题感知语法表（§4.2）：light / dark 两套色板；configStore 订阅保证主题切换即时重渲染
     const themeMode = useConfigStore(s => s.theme.mode);
     const syntaxStyle = resolveZkSyntaxStyle(themeMode);
-    // 深区代码块（ink 双主题 / jelly 黑巧丝绒）：块内使用本地色域，标题、控件和纯文本
-    // 一并跟随代码块自身背景（黑巧底上不能继承外层深色文字，否则不可读）
-    const deepCodeTheme = themeMode === 'ink-havoc' || themeMode === 'ink-havoc-night' || themeMode === 'jelly';
-    const inkColors = deepCodeTheme ? {
-        '--code-ink-text': syntaxStyle['pre[class*="language-"]'].color,
-        '--code-ink-muted': syntaxStyle.comment.color,
-        color: syntaxStyle['pre[class*="language-"]'].color,
-    } as React.CSSProperties : undefined;
-    const controlColors = deepCodeTheme
-        ? 'text-[color:var(--code-ink-muted)] hover:text-[color:var(--code-ink-text)]'
-        : 'text-t4 hover:text-t1';
 
     const resolvedLang = useMemo(
         () => language ?? inferLanguage(fileName) ?? 'text',
@@ -87,17 +74,17 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
     }, [highlightLines]);
 
     return (
-        <div data-spider-exclude="code-block" className="code-block relative rounded-sm border border-hairline bg-sunken2 overflow-hidden" style={inkColors}>
+        <div className="code-block relative rounded-sm border border-hairline bg-sunken2 overflow-hidden">
             {/* Header：文件名或语言 + 复制 */}
             <div className="flex items-center gap-2 border-b border-hairline px-3 py-1.5">
-                <span className={`min-w-0 flex-1 truncate font-mono text-13 ${deepCodeTheme ? 'text-[color:var(--code-ink-muted)]' : 'text-t3'}`}>
+                <span className="min-w-0 flex-1 truncate font-mono text-13 text-t3">
                     {fileName ?? resolvedLang}
                 </span>
                 <span className="flex shrink-0 items-center gap-1">
                     {isLong && !forceHighlight && (
                         <button
                             onClick={() => setForceHighlight(true)}
-                            className={`panel-control rounded-xs px-1.5 py-1 text-13 transition-colors duration-fast hover:bg-hover2 ${controlColors}`}
+                            className="panel-control rounded-xs px-1.5 py-1 text-13 transition-colors duration-fast hover:bg-hover2 text-t4 hover:text-t1"
                         >
                             Enable highlighting
                         </button>
@@ -105,11 +92,11 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
                     {copyable && (
                         <button
                             onClick={handleCopy}
-                            className={`panel-control rounded-xs p-1 transition-colors duration-fast hover:bg-hover2 ${controlColors}`}
+                            className="panel-control rounded-xs p-1 transition-colors duration-fast hover:bg-hover2 text-t4 hover:text-t1"
                             aria-label="Copy code"
                             title={copied ? '已复制' : '复制'}
                         >
-                            {copied ? <Check size={14} className="text-ok" style={deepCodeTheme ? { color: syntaxStyle.string.color } : undefined} /> : <Copy size={14} />}
+                            {copied ? <Check size={14} className="text-ok" /> : <Copy size={14} />}
                         </button>
                     )}
                 </span>
@@ -141,7 +128,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
                     </SyntaxHighlighter>
                 ) : (
                     <pre
-                        className={`px-3.5 py-3 overflow-x-auto whitespace-pre ${deepCodeTheme ? 'text-[color:var(--code-ink-text)]' : 'text-t1'}`}
+                        className="px-3.5 py-3 overflow-x-auto whitespace-pre text-t1"
                         style={{ fontFamily: CODE_FONT_FAMILY, fontSize: 'var(--code-font-size)', lineHeight: 'var(--code-line-height)' }}
                     >
                         {code}

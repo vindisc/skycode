@@ -354,7 +354,7 @@ const MessageList = React.forwardRef<MessageListHandle, { keyboardHeight?: numbe
                 initialTopMostItemIndex={Math.max(0, turns.length - 1)}
                 ref={virtuosoRef}
                 scrollerRef={handleScrollerRef}
-                components={{ Footer: GlassComposerSpacer }}
+                components={{ Footer: ComposerSpacer }}
                 data={turns}
                 computeItemKey={turnItemKey}
                 itemContent={turnItemContent}
@@ -383,6 +383,6 @@ MessageList.displayName = 'MessageList';
 export default React.memo(MessageList);
 
 /** Stable footer identity keeps Virtuoso measurement intact while the composer grows. */
-function GlassComposerSpacer() {
+function ComposerSpacer() {
     return <div className="glass-chat-spacer" aria-hidden="true" />;
 }

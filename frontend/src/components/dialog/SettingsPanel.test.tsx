@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SettingsPanel } from '@/components/dialog/SettingsPanel';
 import { KeyboardShortcutsDialog } from '@/components/dialog/KeyboardShortcutsDialog';
@@ -34,10 +34,14 @@ describe('Appearance settings and shortcut help', () => {
         fireEvent.click(screen.getByRole('tab', { name: '外观' }));
         expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
         expect(screen.queryByRole('button', { name: '跟随系统' })).not.toBeInTheDocument();
-        fireEvent.click(screen.getByRole('button', { name: '液态玻璃' }));
-        expect(useConfigStore.getState().theme.mode).toBe('glass');
-        expect(screen.getByRole('button', { name: '液态玻璃' })).toHaveAttribute('aria-pressed', 'true');
-        expect(JSON.parse(localStorage.getItem('ai-coder-config')!).state.theme.mode).toBe('glass');
+        // 外观页只提供两个保留主题 + 强调色
+        expect(within(screen.getByRole('group', { name: '主题' })).getAllByRole('button').map(button => button.textContent))
+            .toEqual(['浅色', '深色']);
+        expect(within(screen.getByRole('group', { name: '强调色' })).getAllByRole('button')).toHaveLength(8);
+        fireEvent.click(screen.getByRole('button', { name: '深色' }));
+        expect(useConfigStore.getState().theme.mode).toBe('dark');
+        expect(screen.getByRole('button', { name: '深色' })).toHaveAttribute('aria-pressed', 'true');
+        expect(JSON.parse(localStorage.getItem('ai-coder-config')!).state.theme.mode).toBe('dark');
     });
 
     it('closes appearance settings with Escape', () => {

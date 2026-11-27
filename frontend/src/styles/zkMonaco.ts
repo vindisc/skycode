@@ -6,8 +6,8 @@
  *   每次按当前 store 的 accentColor 重新 defineTheme，accent 变化时编辑器跟随。
  * - 首次注册后订阅 configStore 的 theme.mode / theme.accentColor：
  *   变化时重注册两主题并 `monaco.editor.setTheme(...)` 热切换全部已挂载编辑器。
- * - `getEffectiveTheme()`：以 documentElement 已应用的类为准（dark/spaceship/ink-havoc-night→dark，
- *   其余含 glass/jelly→light），与 ThemeProvider/resolveTheme 语义一致；`zkMonacoTheme()` 返回当前应使用的主题名。
+ * - `getEffectiveTheme()`：以 documentElement 已应用的类为准（dark 类→dark，其余→light），
+ *   与 ThemeProvider/resolveTheme 语义一致；`zkMonacoTheme()` 返回当前应使用的主题名。
  */
 import type * as MonacoNS from 'monaco-editor';
 import { getMonacoZkThemes, resolveTheme } from './design-tokens';
@@ -19,9 +19,9 @@ let storeSubscribed = false;
 /** 按当前 store 的 accent 注册/覆盖 zk-light / zk-dark（monaco 实例由 loader 提供，单例） */
 export function ensureZkMonacoThemes(monaco: typeof MonacoNS): void {
     monacoInstance = monaco;
-    const { accentColor: accentHex, mode } = useConfigStore.getState().theme;
+    const { accentColor: accentHex } = useConfigStore.getState().theme;
     monaco.editor.defineTheme('zk-light', getMonacoZkThemes('light', accentHex) as MonacoNS.editor.IStandaloneThemeData);
-    monaco.editor.defineTheme('zk-dark', getMonacoZkThemes('dark', accentHex, mode) as MonacoNS.editor.IStandaloneThemeData);
+    monaco.editor.defineTheme('zk-dark', getMonacoZkThemes('dark', accentHex) as MonacoNS.editor.IStandaloneThemeData);
     subscribeThemeChanges();
 }
 
@@ -44,12 +44,10 @@ function subscribeThemeChanges(): void {
     );
 }
 
-/** 当前生效主题（DOM 类为准；spaceship/ink-havoc-night 等同 dark 基准；
-    glass/jelly 无 dark 类 → light；system 由应用方落类） */
+/** 当前生效主题（DOM 类为准：有 dark 类 → dark，否则 light；system 由应用方落类） */
 export function getEffectiveTheme(): 'light' | 'dark' {
     if (typeof document === 'undefined') return 'light';
-    const cls = document.documentElement.classList;
-    return cls.contains('dark') || cls.contains('spaceship') || cls.contains('ink-havoc-night') || cls.contains('spider') || cls.contains('galaxy') ? 'dark' : 'light';
+    return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
 }
 
 /** 当前应使用的 Monaco zk 主题名 */

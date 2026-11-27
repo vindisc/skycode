@@ -25,10 +25,13 @@ const hasBroadcastChannel = typeof BroadcastChannel !== 'undefined';
  *
  * @param channelName BroadcastChannel 名称 (每个 store 应唯一)
  * @param partialize  可选的状态过滤函数，只广播需要同步的字段
+ * @param normalizeIncoming 可选的入站归一函数：其他标签页发来的 state 在合并前先经它处理
+ *                          （如配置仓库把旧版本广播来的已下线主题值迁回保留主题）
  */
 export function broadcastMiddleware<T>(
     channelName: string,
-    partialize?: (state: T) => Partial<T>
+    partialize?: (state: T) => Partial<T>,
+    normalizeIncoming?: (state: Partial<T>) => Partial<T>
 ) {
     return <
         Mps extends [StoreMutatorIdentifier, unknown][] = [],
@@ -53,7 +56,8 @@ export function broadcastMiddleware<T>(
                     try {
                         // 广播是 partialize 后的可持久化数据。合并更新，保留本标签的
                         // action 函数和未参与广播的临时状态；整包替换会删除 setTheme 等动作。
-                        set(data.state as T extends object ? Partial<T> : T, false as any);
+                        const incoming = normalizeIncoming ? normalizeIncoming(data.state) : data.state;
+                        set(incoming as T extends object ? Partial<T> : T, false as any);
                     } finally {
                         isBroadcasting = false;
                     }

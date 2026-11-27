@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { Sun, Moon, Check, Sparkles, Rocket, Flower2, Landmark, Candy, Bug, Orbit } from 'lucide-react';
+import { Sun, Moon, Check } from 'lucide-react';
 import { useConfigStore } from '@/store/configStore';
 import { ACCENT_PRESETS, normalizeAccentHex } from '@/theme/accents';
 import { cn } from '@/components/ui';
@@ -15,18 +15,10 @@ import type { ThemeConfig } from '@/types';
 
 export const ThemePicker: React.FC = () => {
     const { theme, setTheme } = useConfigStore();
-    const fixedAccentMode = ['ink-havoc', 'ink-havoc-night', 'jelly', 'spider', 'galaxy'].includes(theme.mode);
 
     const modes: { value: ThemeConfig['mode']; label: string; icon: typeof Sun }[] = [
         { value: 'light', label: '浅色', icon: Sun },
         { value: 'dark', label: '深色', icon: Moon },
-        { value: 'glass', label: '液态玻璃', icon: Sparkles },
-        { value: 'spaceship', label: '星舰', icon: Rocket },
-        { value: 'ink-havoc', label: '花果晨', icon: Flower2 },
-        { value: 'ink-havoc-night', label: '灵霄夜', icon: Landmark },
-        { value: 'jelly', label: '果冻', icon: Candy },
-        { value: 'spider', label: '蜘蛛爬虫', icon: Bug },
-        { value: 'galaxy', label: '璀璨银河', icon: Orbit },
     ];
 
     const accentColors = ACCENT_PRESETS.map(({ hex, label }) => ({ value: hex, label }));
@@ -70,19 +62,17 @@ export const ThemePicker: React.FC = () => {
             {/* 强调色 */}
             <div>
                 <h4 className="text-sm font-medium text-t2 mb-3">强调色</h4>
-                {fixedAccentMode && <p className="mb-3 text-13 text-t3">{theme.mode === 'galaxy' ? '本主题使用专属星蓝、紫罗兰与玫红配色' : theme.mode === 'spider' ? '本主题使用专属青色、洋红与紫色配色' : '本主题使用专属配色'}</p>}
                 <div className="flex gap-2 flex-wrap" role="group" aria-label="强调色">
                     {accentColors.map(({ value, label }) => {
-                        const selected = !fixedAccentMode && normalizeAccentHex(theme.accentColor) === value;
+                        const selected = normalizeAccentHex(theme.accentColor) === value;
                         return (
                             <button
                                 key={value}
                                 onClick={() => setTheme({ accentColor: value })}
                                 title={label}
                                 aria-label={`强调色 ${label}`}
-                                disabled={fixedAccentMode}
                                 className={cn(
-                                    'w-8 h-8 rounded-full border-2 transition-interactive duration-fast disabled:opacity-40 disabled:cursor-not-allowed',
+                                    'w-8 h-8 rounded-full border-2 transition-interactive duration-fast',
                                     selected
                                         ? 'border-transparent scale-110'
                                         : 'border-transparent hover:scale-105'

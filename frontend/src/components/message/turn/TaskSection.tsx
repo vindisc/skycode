@@ -142,10 +142,9 @@ const ToolSummaryRow: React.FC<{
             ) : (
                 <Check size={13} className="shrink-0 text-ok" aria-label="完成" />
             )}
-            <span data-spider-anchor="tool" className="shrink-0 text-sm font-medium text-t1">{tc.toolName}</span>
+            <span className="shrink-0 text-sm font-medium text-t1">{tc.toolName}</span>
             {target && (
                 <span
-                    data-spider-anchor="tool"
                     className="shrink-0 max-w-[36%] truncate rounded bg-sunken2 px-1.5 py-0.5 font-mono text-13 text-t2"
                     style={target.isPath ? { direction: 'rtl', textAlign: 'left' } : undefined}
                     title={target.target}

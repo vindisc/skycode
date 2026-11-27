@@ -22,7 +22,7 @@ describe('Header', () => {
     afterEach(() => {
         vi.restoreAllMocks();
         vi.unstubAllGlobals();
-        document.documentElement.classList.remove('light', 'dark', 'glass', 'system');
+        document.documentElement.classList.remove('light', 'dark', 'system');
     });
 
     it.each(['system', 'unknown'])('safely renders unexpected runtime theme %s', mode => {
