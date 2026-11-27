@@ -13,7 +13,6 @@ on:
       - 'frontend/src/store/coordinatorStore.ts'
       - 'python-service/src/services/browser_service.py'
       - 'scripts/task3-5-*.sh'
-      - 'scripts/cross-module-regression.sh'
       - '.github/workflows/task3-5-regression.yml'
   schedule:
     - cron: '0 18 * * *'   # 每日 UTC 18:00 跑 P1 nightly

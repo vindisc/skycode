@@ -2,8 +2,13 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
-source_dir="/Users/guoqingtao/Desktop/dev/project/过程录屏"
+# 源录屏在案例作者本机，不进仓库：用第一个参数指定目录（原作者是 /Users/guoqingtao/Desktop/dev/project/过程录屏）
+source_dir="${1:-/Users/guoqingtao/Desktop/dev/project/过程录屏}"
 output_dir="$repo_root/docs/case-studies/assets/king/videos/previews"
+if [ ! -d "$source_dir" ]; then
+  echo "源录屏目录不存在：$source_dir（用法：$0 <录屏目录>）" >&2
+  exit 1
+fi
 mkdir -p "$output_dir"
 
 encode() {

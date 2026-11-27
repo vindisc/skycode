@@ -1101,7 +1101,9 @@ const logVisualizationRichness = {
   totalTextLabels: logVisualizations.reduce((sum, item) => sum + item.richness.textLabels, 0),
   totalInteractiveNodes: logVisualizations.reduce((sum, item) => sum + item.richness.interactiveNodes, 0),
   pcFirstCanvases: logVisualizations.filter((item) => item.richness.viewBox[0] === 1200).length,
-  generatedBy: 'scripts/enhance-king-log-viz.mjs',
+  // 这批 SVG 是一次性增强脚本直接写入已冻结的公开报告 HTML 的，产物已提交，
+  // 一次性脚本已删除（2026-11-27 审计），这里保留来源说明。
+  generatedBy: 'docs/case-studies/（已冻结的公开报告 HTML，含内联 SVG）',
 };
 assert(logVisualizationRichness.figures === 3 && logVisualizationRichness.pcFirstCanvases === 3, 'Log visualization count or PC-first canvas count differs');
 const productFigureHtml = [...html.matchAll(/<figure class="product-viz"[\s\S]*?<\/figure>/g)].map((match) => match[0]);
@@ -1199,7 +1201,7 @@ const productVisualizationRichness = {
   totalSourceSymbolLabels: productVisualizations.reduce((sum, item) => sum + item.richness.sourceSymbolLabels, 0),
   screenshotOverlays: screenshotOverlayFigureIds.size,
   professionalCanvasCount: productVisualizations.filter((item) => item.richness.viewBox[0] === 1200 && item.richness.viewBox[1] >= 700).length,
-  generatedBy: 'scripts/enhance-king-product-viz.mjs',
+  generatedBy: 'docs/case-studies/（已冻结的公开报告 HTML，含内联 SVG）',
 };
 assert(productVisualizationRichness.professionalCanvasCount === 26, 'Not every product visualization uses the professional source-audit canvas');
 assert(productVisualizationRichness.totalTextLabels === 1239, `Product SVG label total ${productVisualizationRichness.totalTextLabels} != 1239`);
