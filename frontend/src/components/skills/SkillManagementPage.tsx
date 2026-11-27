@@ -1,8 +1,11 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { ChevronDown, ChevronRight, Loader2, RefreshCw, Search, ShieldCheck, X } from 'lucide-react';
-import { useModalBehavior } from '@/hooks/useModalBehavior';
+import { useEffect, useId, useMemo, useState } from 'react';
+import { Puzzle } from 'lucide-react';
 import { isSkillDetail, useSkillStore, type SkillDetail, type SkillItem } from '@/store/skillStore';
-import { SkillIcon } from './SkillIcon';
+import { Button } from '@/components/ui/Button';
+import { Spinner } from '@/components/ui/Spinner';
+import {
+  AlertStrip, EntryList, EntryRow, EntryToggle, LoadingBlock, ManagementDialog, NothingHere, SearchField, Tag, ToolbarStats,
+} from '@/components/ui/ManagementDialog';
 
 const SOURCE_LABELS: Record<string, string> = {
   BUNDLED: '内置',
@@ -13,16 +16,10 @@ const SOURCE_LABELS: Record<string, string> = {
   MCP: 'MCP',
 };
 
-const focusRing = 'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring';
-
 export function SkillManagementPage({ onClose }: { onClose: () => void }) {
   const { skills, loaded, loading, error, stateError, pending, loadSkills, toggleSkill } = useSkillStore();
   const [query, setQuery] = useState('');
   const [detailVersion, setDetailVersion] = useState(0);
-  const panel = useRef<HTMLDivElement>(null);
-  const titleId = useId();
-  const descriptionId = useId();
-  useModalBehavior(true, panel, onClose);
 
   useEffect(() => { void loadSkills(); }, [loadSkills]);
 
@@ -40,87 +37,51 @@ export function SkillManagementPage({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay2 backdrop-blur-[3px] md:p-3">
-      <div
-        ref={panel}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        aria-describedby={descriptionId}
-        tabIndex={-1}
-        className="flex h-[100dvh] w-full flex-col overflow-hidden bg-surfacev2 shadow-e4 outline-none motion-safe:animate-scale-in max-md:pt-[env(safe-area-inset-top)] max-md:pb-[env(safe-area-inset-bottom)] md:h-[88dvh] md:max-w-5xl md:rounded-panel md:border md:border-hairline"
-      >
-        <header className="flex shrink-0 items-start justify-between gap-2 border-b border-hairline px-4 py-4 md:px-6">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <SkillIcon className="h-6 w-auto shrink-0 text-accent2-ink" />
-              <h2 id={titleId} className="text-xl font-semibold text-t1">Skill 管理</h2>
-            </div>
-            <p id={descriptionId} className="mt-2 text-sm leading-relaxed text-t2">
-              关闭后立即阻止新的技能调用；下一条消息使用更新后的配置，无需重启。
-            </p>
-            <p className="mt-1 text-13 leading-relaxed text-t2">
-              当前回答继续，历史中的技能内容仍可能影响模型；新聊天可获得干净上下文。
-            </p>
-          </div>
-          <button type="button" onClick={onClose} aria-label="关闭 Skill 管理" className={`dialog-control flex h-11 w-11 shrink-0 items-center justify-center rounded-sm text-t2 hover:bg-hover2 ${focusRing}`}>
-            <X className="h-5 w-5" aria-hidden="true" />
-          </button>
-        </header>
-
-        <div className="shrink-0 border-b border-hairline px-4 py-3 md:px-6 md:py-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="min-w-0 text-sm text-t2">
-              <div className="flex flex-wrap gap-x-4 gap-y-1" aria-live="polite">
-                <span>{skills.length} 个 Skill</span>
-                <span className="text-ok">{enabledCount} 个已启用</span>
-              </div>
-              <p className="mt-1 flex items-start gap-1 text-13 leading-relaxed">
-                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                设置保存在服务端，所有设备和会话共享。
-              </p>
-            </div>
-            <div className="flex min-w-0 gap-2 md:w-80 md:shrink-0">
-              <label className="relative block min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-t2" aria-hidden="true" />
-                <input
-                  value={query}
-                  onChange={event => setQuery(event.target.value)}
-                  aria-label="搜索 Skill"
-                  placeholder="搜索名称、描述或来源"
-                  className={`min-h-11 w-full rounded-sm border border-hairline bg-sunken2 py-2 pl-9 pr-3 text-sm text-t1 ${focusRing}`}
-                />
-              </label>
-              <button type="button" onClick={() => void refresh()} disabled={loading} aria-label="刷新 Skill 列表" className={`dialog-control flex h-11 w-11 shrink-0 items-center justify-center rounded-sm border border-hairline text-t2 hover:bg-hover2 disabled:opacity-50 ${focusRing}`}>
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-          {error && <p role="alert" className="mt-3 break-words rounded-sm bg-errsoft px-3 py-2 text-sm text-err">加载或更新失败：{error}</p>}
-          {stateError && <p role="alert" className="mt-3 break-words rounded-sm bg-errsoft px-3 py-2 text-sm text-err">技能设置暂不可用：{stateError} 所有技能已关闭，暂时无法修改开关。修复设置并重启服务后请刷新。</p>}
-        </div>
-
-        <main className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-6">
-          {loading && !loaded ? (
-            <div role="status" className="flex items-center justify-center gap-2 py-16 text-sm text-t2">
-              <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />正在读取 Skill 配置…
-            </div>
-          ) : visibleSkills.length === 0 ? (
-            <p className="py-16 text-center text-sm text-t2">{query.trim() ? '没有匹配的 Skill' : error ? '暂时无法读取 Skill，请重试。' : '暂无可管理的 Skill'}</p>
-          ) : (
-            <div className="grid items-start gap-3 lg:grid-cols-2">
-              {visibleSkills.map(skill => (
-                <SkillCard key={skill.id} skill={skill} busy={pending[skill.id] === true} blocked={stateError !== null} detailVersion={detailVersion} onToggle={() => void toggleSkill(skill.id, !skill.enabled)} />
-              ))}
-            </div>
-          )}
-        </main>
-      </div>
-    </div>
+    <ManagementDialog
+      icon={<Puzzle />}
+      title="Skill 管理"
+      description="关闭后立即阻止新的技能调用，下一条消息按更新后的配置执行，无需重启。"
+      onClose={onClose}
+      closeLabel="关闭 Skill 管理"
+      onRefresh={() => void refresh()}
+      refreshLabel="刷新 Skill 列表"
+      refreshing={loading}
+      alerts={(
+        <>
+          {error && <AlertStrip>加载或更新失败：{error}</AlertStrip>}
+          {stateError && <AlertStrip>技能设置暂不可用：{stateError} 所有技能已关闭，暂时无法修改开关。修复设置并重启服务后请刷新。</AlertStrip>}
+        </>
+      )}
+      toolbar={(
+        <>
+          <ToolbarStats note="设置保存在服务端，所有设备和会话共享；历史中的技能内容仍可能影响当前回答，新聊天不受影响。">
+            <span>{skills.length} 个 Skill</span>
+            <span className="text-ok">{enabledCount} 个已启用</span>
+          </ToolbarStats>
+          <SearchField value={query} onChange={setQuery} label="搜索 Skill" placeholder="搜索名称、描述或来源" />
+        </>
+      )}
+    >
+      {loading && !loaded ? (
+        <LoadingBlock>正在读取 Skill 配置…</LoadingBlock>
+      ) : visibleSkills.length === 0 ? (
+        <NothingHere
+          icon={<Puzzle />}
+          title={query.trim() ? '没有匹配的 Skill' : error ? '暂时无法读取 Skill，请重试。' : '暂无可管理的 Skill'}
+          description={query.trim() ? '换个关键词，或清空搜索。' : undefined}
+        />
+      ) : (
+        <EntryList>
+          {visibleSkills.map(skill => (
+            <SkillRow key={skill.id} skill={skill} busy={pending[skill.id] === true} blocked={stateError !== null} detailVersion={detailVersion} onToggle={() => void toggleSkill(skill.id, !skill.enabled)} />
+          ))}
+        </EntryList>
+      )}
+    </ManagementDialog>
   );
 }
 
-function SkillCard({ skill, busy, blocked, detailVersion, onToggle }: {
+function SkillRow({ skill, busy, blocked, detailVersion, onToggle }: {
   skill: SkillItem;
   busy: boolean;
   blocked: boolean;
@@ -155,41 +116,39 @@ function SkillCard({ skill, busy, blocked, detailVersion, onToggle }: {
   }, [expanded, skill.id, detailVersion, retry]);
 
   return (
-    <article className={`min-w-0 rounded-md border p-3 transition-colors md:p-4 ${skill.enabled ? 'border-accent2-ring bg-accent2-soft' : 'border-hairline bg-sunken2'}`}>
-      <div className="flex items-start gap-2">
-        <button type="button" onClick={() => setExpanded(value => !value)} aria-label={`${expanded ? '收起' : '展开'} ${skill.name} 详情`} aria-expanded={expanded} aria-controls={detailId} className={`dialog-control flex h-11 w-11 shrink-0 items-center justify-center rounded-sm text-t2 hover:bg-hover2 ${focusRing}`}>
-          {expanded ? <ChevronDown className="h-4 w-4" aria-hidden="true" /> : <ChevronRight className="h-4 w-4" aria-hidden="true" />}
-        </button>
-        <div className="min-w-0 flex-1 pt-2">
-          <h3 className="break-words text-base font-semibold text-t1 [overflow-wrap:anywhere]">{skill.name}</h3>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-13">
-            <span className="rounded bg-hover2 px-2 py-0.5 text-t2">{SOURCE_LABELS[skill.source] ?? skill.source}</span>
-            <span className={`rounded px-2 py-0.5 ${skill.enabled ? 'bg-oksoft text-ok' : 'bg-hover2 text-t2'}`}>{skill.enabled ? '已启用' : '已关闭'}</span>
-          </div>
-          <p className="mt-2 line-clamp-3 break-words text-13 leading-relaxed text-t2 [overflow-wrap:anywhere]">{skill.description}</p>
+    <EntryRow
+      title={skill.name}
+      badges={<Tag>{SOURCE_LABELS[skill.source] ?? skill.source}</Tag>}
+      description={skill.description}
+      actions={(
+        <EntryToggle
+          checked={skill.enabled}
+          onCheckedChange={onToggle}
+          disabled={busy || blocked}
+          label={`${skill.enabled ? '关闭' : '启用'} ${skill.name}`}
+        />
+      )}
+      expand={{
+        expanded,
+        onToggle: () => setExpanded(value => !value),
+        label: `${expanded ? '收起' : '展开'} ${skill.name} 详情`,
+        controls: detailId,
+      }}
+    >
+      {loading ? (
+        <p className="flex items-center gap-2"><Spinner size="sm" label="正在读取详情" />正在读取详情…</p>
+      ) : error ? (
+        <div>
+          <p role="alert" className="break-words text-err [overflow-wrap:anywhere]">读取详情失败：{error}</p>
+          <Button size="sm" className="mt-2" onClick={() => setRetry(value => value + 1)}>重试读取详情</Button>
         </div>
-        <button type="button" role="switch" aria-checked={skill.enabled} aria-label={`${skill.enabled ? '关闭' : '启用'} ${skill.name}`} disabled={busy || blocked} onClick={onToggle} className={`panel-control flex h-11 w-11 shrink-0 items-center rounded-sm disabled:opacity-50 ${busy ? 'cursor-wait' : blocked ? 'cursor-not-allowed' : ''} ${focusRing}`}>
-          <span aria-hidden="true" className={`inline-flex h-6 w-11 items-center rounded-full transition-colors ${skill.enabled ? 'bg-accent2-strong' : 'bg-t3'}`}>
-            <span className={`inline-block h-4 w-4 rounded-full transition-transform ${skill.enabled ? 'translate-x-6 bg-white' : 'translate-x-1 bg-surfacev2'}`} />
-          </span>
-        </button>
-      </div>
-      {expanded && (
-        <div id={detailId} className="mt-3 min-w-0 border-t border-hairline pt-3 text-13 text-t2">
-          {loading ? <p role="status" className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />正在读取详情…</p> : error ? (
-            <div>
-              <p role="alert" className="break-words text-err">读取详情失败：{error}</p>
-              <button type="button" onClick={() => setRetry(value => value + 1)} className={`mt-2 min-h-11 rounded-sm border border-hairline px-3 text-t1 hover:bg-hover2 ${focusRing}`}>重试读取详情</button>
-            </div>
-          ) : detail && (
-            <div className="space-y-3">
-              <p className="break-words leading-relaxed [overflow-wrap:anywhere]">{skill.description}</p>
-              <p className="break-all"><span className="font-medium">文件：</span>{detail.filePath || '内置 Skill'}</p>
-              <pre className="max-h-80 overflow-y-auto whitespace-pre-wrap break-words rounded-sm bg-surfacev2 p-3 font-mono leading-relaxed [overflow-wrap:anywhere]">{detail.content || '暂无内容'}</pre>
-            </div>
-          )}
+      ) : detail && (
+        <div className="space-y-2">
+          <p className="break-words leading-relaxed [overflow-wrap:anywhere]">{skill.description}</p>
+          <p className="break-all"><span className="font-medium text-t1">文件：</span>{detail.filePath || '内置 Skill'}</p>
+          <pre tabIndex={0} aria-label={`${skill.name} 的技能正文`} className="max-h-80 overflow-y-auto whitespace-pre-wrap break-words rounded-sm bg-sunken2 p-3 font-mono leading-relaxed outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring [overflow-wrap:anywhere]">{detail.content || '暂无内容'}</pre>
         </div>
       )}
-    </article>
+    </EntryRow>
   );
 }

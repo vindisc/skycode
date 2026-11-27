@@ -94,22 +94,32 @@ for (const viewport of viewports) {
         expect(bounds!.x).toBeGreaterThanOrEqual(0);
         expect(bounds!.width).toBeLessThanOrEqual(viewport.width);
         if (viewport.width < 768) expect(Math.abs(bounds!.height - viewport.height)).toBeLessThanOrEqual(1);
-        const cards = dialog.locator('article');
-        const first = await cards.nth(0).boundingBox();
-        const second = await cards.nth(1).boundingBox();
-        if (viewport.width >= 1024) expect(Math.abs(first!.y - second!.y)).toBeLessThanOrEqual(1);
-        else expect(second!.y).toBeGreaterThan(first!.y);
+        // 列表是一张卡里的分隔行，任何宽度都是单列：第二行整体落在第一行下面
+        const rows = dialog.locator('article');
+        const first = await rows.nth(0).boundingBox();
+        const second = await rows.nth(1).boundingBox();
+        expect(second!.y).toBeGreaterThanOrEqual(first!.y + first!.height);
 
+        // 开关沿用设置页的 Toggle 基元：可见轨道 50×30；触屏上靠一圈透明命中区补到 44px 高
         const toggle = dialog.getByRole('switch', { name: '关闭 commit', exact: true });
         const toggleBounds = await toggle.boundingBox();
         expect(toggleBounds!.width).toBeGreaterThanOrEqual(44);
-        expect(toggleBounds!.height).toBeGreaterThanOrEqual(44);
+        expect(toggleBounds!.height).toBeGreaterThanOrEqual(24);
+        if (viewport.width < 1024) {
+          const reachable = await toggle.evaluate(element => {
+            const rect = element.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const hitAt = (y: number) => element.contains(document.elementFromPoint(x, y));
+            return { above: hitAt(rect.top - 6), below: hitAt(rect.bottom + 6) };
+          });
+          expect(reachable).toEqual({ above: true, below: true });
+        }
         await toggle.click();
         await expect(dialog.getByRole('switch', { name: '启用 commit', exact: true })).toHaveAttribute('aria-checked', 'false');
         await dialog.getByRole('switch', { name: '启用 commit', exact: true }).click();
         await expect(dialog.getByRole('switch', { name: '关闭 commit', exact: true })).toHaveAttribute('aria-checked', 'true');
         await dialog.getByRole('textbox', { name: '搜索 Skill' }).fill('项目质量');
-        await expect(cards).toHaveCount(1);
+        await expect(rows).toHaveCount(1);
         await dialog.getByRole('button', { name: /^展开 项目质量/ }).click();
         await expect(dialog.locator('pre')).toContainText('技能正文');
         expect(await dialog.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);

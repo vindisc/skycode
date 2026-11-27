@@ -1,14 +1,17 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Eye, Edit3, FileText, Plus } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import DOMPurify from 'dompurify';
+import { Button } from '@/components/ui/Button';
 
 /**
  * MemoryEditorPanel — 整篇 Markdown 编辑器（受控组件）。
  *
- * 仅负责编辑/预览/模板插入；保存由外层页面统一触发（MemoryPage 顶栏保存按钮）。
+ * 仅负责编辑/预览/模板插入；保存由外层页面统一触发（记忆弹窗头部的保存按钮）。
+ * 版式与 EntryList 的卡片一致：一张带描边的卡，顶部一行工具，下面是编辑区。
  */
+
 interface MemoryEditorPanelProps {
     content: string;
     onChange: (value: string) => void;
@@ -28,58 +31,72 @@ export const MemoryEditorPanel: React.FC<MemoryEditorPanelProps> = ({
 }) => {
     const [isPreview, setIsPreview] = useState(false);
     const [showTemplateMenu, setShowTemplateMenu] = useState(false);
+    const templateRef = useRef<HTMLDivElement>(null);
 
     const insertTemplate = useCallback((template: string) => {
         onChange(content + '\n\n' + template);
     }, [content, onChange]);
 
+    // 点到菜单外面收起模板菜单
+    useEffect(() => {
+        if (!showTemplateMenu) return;
+        const onPointerDown = (event: PointerEvent) => {
+            if (!templateRef.current?.contains(event.target as Node)) setShowTemplateMenu(false);
+        };
+        document.addEventListener('pointerdown', onPointerDown);
+        return () => document.removeEventListener('pointerdown', onPointerDown);
+    }, [showTemplateMenu]);
+
     return (
-        <div className="flex flex-col h-full border border-[var(--v2-border-hairline)] rounded-md overflow-hidden">
-            {/* Toolbar */}
-            <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]">
-                <div className="flex items-center gap-2">
-                    <FileText size={14} className="text-[var(--v2-text-2)]" />
-                    <span className="text-sm font-medium text-[var(--v2-text-1)]">{fileName}</span>
-                    {dirty && <span className="text-13 text-warn">● 未保存</span>}
+        <div className="flex h-full flex-col overflow-hidden rounded-md border border-hairline bg-surface2">
+            <div className="flex shrink-0 items-center justify-between gap-2 border-b border-hairline px-3 py-1.5">
+                <div className="flex min-w-0 items-center gap-2">
+                    <FileText className="h-4 w-4 shrink-0 text-t3" aria-hidden="true" />
+                    <span className="truncate font-mono text-13 text-t2">{fileName}</span>
+                    {dirty && <span className="shrink-0 text-13 text-warn">● 未保存</span>}
                 </div>
-                <div className="flex items-center gap-1">
-                    <div className="relative">
-                        <button className="panel-control p-1.5 min-h-10 min-w-10 rounded hover:bg-[var(--bg-tertiary)] flex items-center justify-center"
-                            title="插入模板" aria-label="插入模板" onClick={() => setShowTemplateMenu(!showTemplateMenu)}>
-                            <Plus size={14} />
-                        </button>
+                <div className="flex shrink-0 items-center gap-1">
+                    <div className="relative" ref={templateRef}>
+                        <Button size="sm" variant="ghost" onClick={() => setShowTemplateMenu(value => !value)} title="插入模板" aria-label="插入模板">
+                            <Plus className="h-4 w-4" aria-hidden="true" />
+                        </Button>
                         {showTemplateMenu && (
-                            <div className="absolute right-0 top-full mt-1 bg-[var(--v2-bg-surface)] border border-[var(--v2-border-hairline)] rounded-sm shadow-e3 z-10 min-w-[140px]">
+                            <div className="absolute right-0 top-full z-10 mt-1 min-w-[140px] overflow-hidden rounded-sm border border-hairline bg-surfacev2 py-1 shadow-e3">
                                 {Object.entries(MEMORY_TEMPLATES).map(([name, tpl]) => (
-                                    <button key={name}
+                                    <button
+                                        key={name}
+                                        type="button"
                                         onClick={() => { insertTemplate(tpl); setShowTemplateMenu(false); }}
-                                        className="panel-control block w-full text-left px-3 py-2 min-h-10 text-13 hover:bg-[var(--bg-tertiary)]">
+                                        className="dialog-control flex w-full items-center px-3 py-1.5 text-left text-13 text-t1 hover:bg-hover2 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
+                                    >
                                         {name}
                                     </button>
                                 ))}
                             </div>
                         )}
                     </div>
-                    <button onClick={() => setIsPreview(!isPreview)}
-                        className="panel-control p-1.5 min-h-10 min-w-10 rounded hover:bg-[var(--bg-tertiary)] flex items-center justify-center"
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setIsPreview(value => !value)}
                         title={isPreview ? '编辑模式' : '预览模式'}
-                        aria-label={isPreview ? '切换到编辑模式' : '切换到预览模式'}>
-                        {isPreview ? <Edit3 size={14} /> : <Eye size={14} />}
-                    </button>
+                        aria-label={isPreview ? '切换到编辑模式' : '切换到预览模式'}
+                    >
+                        {isPreview ? <Edit3 className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+                    </Button>
                 </div>
             </div>
 
-            {/* Editor / Preview */}
-            <div className="flex-1 overflow-auto">
+            <div className="min-h-0 flex-1 overflow-auto">
                 {isPreview ? (
-                    <div className="p-4 prose prose-invert prose-sm max-w-none">
+                    <div className="prose prose-sm max-w-none p-4 dark:prose-invert">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{DOMPurify.sanitize(content)}</ReactMarkdown>
                     </div>
                 ) : (
                     <textarea
                         value={content}
                         onChange={e => onChange(e.target.value)}
-                        className="w-full h-full p-4 bg-transparent text-sm font-mono text-[var(--v2-text-1)] resize-none focus:outline-none"
+                        className="h-full w-full resize-none bg-transparent p-4 font-mono text-13 leading-relaxed text-t1 outline-none"
                         placeholder="# 项目记忆&#10;&#10;在此输入项目记忆内容..."
                         spellCheck={false}
                         aria-label="记忆文件内容"

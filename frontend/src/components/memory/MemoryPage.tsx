@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Brain, Check, FileText, LayoutGrid, Loader2, Plus, RefreshCw, Save, Trash2, X } from 'lucide-react';
+import { Brain, Check, FileText, LayoutGrid, Plus, Save, Trash2 } from 'lucide-react';
 import { useMemoryStore, type MemoryEntry, type MemorySnapshot } from '@/store/memoryStore';
 import { usePageExitGuard } from '@/hooks/usePageExitGuard';
+import { Button } from '@/components/ui/Button';
+import { Tabs } from '@/components/ui/Tabs';
+import { AlertStrip, EntryList, EntryRow, LoadingBlock, ManagementDialog, NothingHere, Tag } from '@/components/ui/ManagementDialog';
 import { MemoryEditorPanel } from './MemoryEditorPanel';
 
 interface MemoryPageProps {
@@ -15,10 +18,11 @@ const MODE_OPTIONS: { id: ViewMode; label: string; icon: typeof LayoutGrid }[] =
   { id: 'raw', label: '整篇', icon: FileText },
 ];
 
-const SOURCE_BADGE: Record<MemoryEntry['source'], string> = {
-  AUTO: 'bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)]',
-  USER: 'bg-accent2-soft text-accent2-ink',
-  TOOL: 'bg-oksoft text-ok',
+/** 来源标签的色调：手动写入的用强调色，工具写入的用成功色，自动汇总的用中性色 */
+const SOURCE_TONE: Record<MemoryEntry['source'], 'accent' | 'ok' | 'neutral'> = {
+  AUTO: 'neutral',
+  USER: 'accent',
+  TOOL: 'ok',
 };
 
 /** size / maxSize 为字符数（与后端 MAX_MEMORY_SIZE 单位一致）。 */
@@ -184,168 +188,136 @@ export function MemoryPage({ onClose }: MemoryPageProps) {
   const nearLimit = usageRatio > 0.8;
   const saveDisabled = saving || loading || conflict || !dirtyNow;
   const saveButton = (
-    <button
+    <Button
+      size="sm"
+      variant={dirtyNow && !conflict ? 'primary' : 'secondary'}
       onClick={() => void handleSave()}
       disabled={saveDisabled}
-      className={`panel-control inline-flex min-h-11 md:min-h-0 items-center gap-1.5 rounded-sm px-3 py-2 text-sm transition-interactive duration-fast
-        focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring disabled:cursor-not-allowed disabled:opacity-50
-        ${dirtyNow && !conflict ? 'bg-accent2-strong text-white hover:bg-accent2' : 'bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)]'}`}
+      loading={saving}
       aria-label="保存记忆"
     >
-      {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+      <Save className="h-4 w-4" aria-hidden="true" />
       保存
-    </button>
+    </Button>
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay2 backdrop-blur-[3px] max-md:p-0 md:p-3">
+    <>
       {dirtyNow && <DirtyPageExitGuard />}
-      <div className="flex h-full w-full flex-col overflow-hidden border border-hairline bg-surfacev2 shadow-e4 motion-safe:animate-scale-in md:h-[88vh] md:max-w-[900px] md:rounded-panel max-md:border-0">
-        {/* 顶栏：标题 + 模式切换 + 保存 + 关闭 */}
-        <header className="flex items-center justify-between gap-2 border-b border-[var(--v2-border-hairline)] px-4 md:px-6 py-4">
-          <div className="flex min-w-0 items-center gap-2">
-            <Brain className="h-5 w-5 shrink-0 text-accent2-ink" aria-hidden="true" />
-            <h2 className="text-[var(--v2-text-1)] text-xl font-semibold whitespace-nowrap">记忆</h2>
-            <div className="ml-1 flex rounded-sm border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] p-0.5" role="tablist" aria-label="记忆视图模式">
-              {MODE_OPTIONS.map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  role="tab"
-                  aria-selected={mode === id}
-                  onClick={() => switchMode(id)}
-                  disabled={saving}
-                  className={`flex min-h-11 md:min-h-9 items-center gap-1 rounded-sm px-3 text-sm transition-colors
-                    focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring disabled:cursor-not-allowed disabled:opacity-50
-                    ${mode === id ? 'bg-surfacev2 text-[var(--v2-text-1)] shadow-e1' : 'text-[var(--v2-text-2)] hover:text-[var(--v2-text-1)]'}`}
-                >
-                  <Icon className="h-4 w-4" aria-hidden="true" />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
+      <ManagementDialog
+        icon={<Brain />}
+        title="记忆"
+        description="AI 会通过 Memory 工具写入，也可以在这里手动编辑；内容会在后续对话中自动加载。"
+        onClose={handleClose}
+        closeLabel="关闭记忆页面"
+        actions={(
+          <>
             {savedHint && (
-              <span className="flex items-center gap-1 text-sm text-ok" role="status">
+              <span className="flex items-center gap-1 text-13 text-ok" role="status">
                 <Check className="h-4 w-4" aria-hidden="true" />已保存
               </span>
             )}
-            <span className="max-md:hidden">{saveButton}</span>
-            <button
-              onClick={handleRefresh}
-              disabled={loading || saving}
-              className="dialog-control rounded-sm border border-[var(--v2-border-hairline)] p-2 max-md:min-h-11 max-md:min-w-11 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)] disabled:opacity-50"
-              aria-label="刷新记忆"
-              title="刷新"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            </button>
-            <button
-              onClick={handleClose}
-              className="dialog-control rounded-sm p-2 max-md:min-h-11 max-md:min-w-11 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)]"
-              aria-label="关闭记忆页面"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-        </header>
-
-        {/* 冲突警示条 */}
-        {conflict && (
-          <div className="flex items-center justify-between gap-3 border-b border-warnsoft bg-warnsoft px-4 md:px-6 py-2.5 text-sm text-warnstrong dark:text-warn" role="alert">
-            <span>内容已在别处修改，草稿已保留。请先复制需要保留的内容；刷新将丢弃草稿并加载最新内容。</span>
-            <button
-              onClick={handleRefresh}
-              disabled={loading || saving}
-              className="panel-control shrink-0 rounded-sm border border-current px-3 py-1.5 min-h-11 md:min-h-0 text-13 hover:opacity-80"
-            >
-              刷新
-            </button>
-          </div>
+            {saveButton}
+          </>
         )}
-
-        {/* 错误提示 */}
-        {error && (
-          <p className="border-b border-[var(--v2-border-hairline)] bg-errsoft px-4 md:px-6 py-2.5 text-sm text-err" role="alert">
-            加载或保存失败：{error}
-          </p>
-        )}
-
-        {/* 内容区 */}
-        <main className="flex-1 overflow-y-auto px-4 md:px-6 py-4">
-          {loading && !loaded ? (
-            <div className="flex h-full flex-col items-center justify-center gap-3 py-16 text-sm text-[var(--v2-text-2)]">
-              <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
-              正在读取记忆文件…
-            </div>
-          ) : mode === 'raw' ? (
-            <div className="h-full">
-              <MemoryEditorPanel content={rawContent} onChange={handleRawChange} fileName="MEMORY.md" dirty={rawDirty} />
-            </div>
-          ) : editedEntries.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center gap-3 py-16 text-center">
-              <Brain className="h-10 w-10 text-[var(--v2-text-2)]" aria-hidden="true" />
-              <p className="text-sm text-[var(--v2-text-2)]">暂无记忆。AI 可通过 Memory 工具写入，你也可以手动添加；内容会在后续对话中自动加载</p>
-              <button
-                onClick={addEntry}
-                className="panel-control inline-flex min-h-11 items-center gap-1.5 rounded-sm border border-[var(--v2-border-hairline)] px-4 py-2 text-sm text-[var(--v2-text-1)] hover:bg-[var(--v2-bg-hover)]"
+        onRefresh={handleRefresh}
+        refreshLabel="刷新记忆"
+        refreshing={loading}
+        refreshDisabled={saving}
+        alerts={(
+          <>
+            {conflict && (
+              <AlertStrip
+                tone="warn"
+                action={<Button size="sm" onClick={handleRefresh} disabled={loading || saving}>刷新</Button>}
               >
-                <Plus className="h-4 w-4" aria-hidden="true" />新增条目
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-3">
+                内容已在别处修改，草稿已保留。请先复制需要保留的内容；刷新将丢弃草稿并加载最新内容。
+              </AlertStrip>
+            )}
+            {error && <AlertStrip>加载或保存失败：{error}</AlertStrip>}
+          </>
+        )}
+        toolbar={(
+          <>
+            <Tabs
+              className="w-auto"
+              aria-label="记忆视图模式"
+              value={mode}
+              onValueChange={value => switchMode(value as ViewMode)}
+              items={MODE_OPTIONS.map(({ id, label, icon: Icon }) => ({
+                value: id,
+                label: <><Icon className="h-4 w-4" aria-hidden="true" />{label}</>,
+              }))}
+            />
+            {mode === 'cards' && <span className="text-13 text-t3">{editedEntries.length} 条记忆</span>}
+          </>
+        )}
+        footer={(
+          <>
+            <span className={nearLimit ? 'text-warnstrong dark:text-warn' : undefined}>
+              文件大小 {formatSize(size)}{maxSize > 0 ? ` / ${formatSize(maxSize)}` : ''}
+              {nearLimit && '（接近上限）'}
+            </span>
+            {updatedAt && <span className="max-md:hidden">更新于 {formatTime(updatedAt)}</span>}
+          </>
+        )}
+      >
+        {loading && !loaded ? (
+          <LoadingBlock>正在读取记忆文件…</LoadingBlock>
+        ) : mode === 'raw' ? (
+          <div className="h-full">
+            <MemoryEditorPanel content={rawContent} onChange={handleRawChange} fileName="MEMORY.md" dirty={rawDirty} />
+          </div>
+        ) : editedEntries.length === 0 ? (
+          <NothingHere
+            icon={<Brain />}
+            title="暂无记忆"
+            description="AI 可通过 Memory 工具写入，也可以在这里手动添加；内容会在后续对话中自动加载。"
+            action={<Button size="sm" onClick={addEntry}><Plus className="h-4 w-4" aria-hidden="true" />新增条目</Button>}
+          />
+        ) : (
+          <>
+            <EntryList>
               {editedEntries.map((entry, index) => (
-                <article key={index} className="rounded-md border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] p-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className={`rounded px-2 py-0.5 text-13 font-medium ${SOURCE_BADGE[entry.source] ?? SOURCE_BADGE.AUTO}`}>
-                      {entry.source}
-                    </span>
-                    <span className="rounded bg-[var(--v2-bg-hover)] px-2 py-0.5 text-13 text-[var(--v2-text-2)]">{entry.category}</span>
-                    <time className="text-13 text-[var(--v2-text-2)]">{formatTime(entry.timestamp)}</time>
-                    <button
-                      onClick={() => removeEntry(index)}
-                      className="dialog-control ml-auto rounded-sm p-2 max-md:min-h-11 max-md:min-w-11 text-[var(--v2-text-2)] hover:bg-errsoft hover:text-err"
-                      aria-label={`删除记忆条目 ${index + 1}`}
-                      title="删除"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <textarea
-                    ref={autoResize}
-                    value={entry.content}
-                    onChange={e => { updateEntry(index, { content: e.target.value }); autoResize(e.target); }}
-                    rows={1}
-                    className="mt-2 w-full resize-none overflow-hidden rounded-sm border border-transparent bg-transparent p-2 text-sm leading-relaxed text-[var(--v2-text-1)] outline-none focus:border-[var(--v2-border-hairline)] focus:bg-[var(--v2-bg-surface)]"
-                    placeholder="记录一条记忆…"
-                    aria-label={`记忆条目 ${index + 1} 内容`}
-                  />
-                </article>
+                <EntryRow
+                  key={index}
+                  badges={(
+                    <>
+                      <Tag tone={SOURCE_TONE[entry.source] ?? 'neutral'} className="font-mono">{entry.source}</Tag>
+                      <Tag className="font-mono">{entry.category}</Tag>
+                      <time className="text-13 text-t3" dateTime={entry.timestamp}>{formatTime(entry.timestamp)}</time>
+                    </>
+                  )}
+                  actions={(
+                    <Button size="sm" variant="ghost" onClick={() => removeEntry(index)} aria-label={`删除记忆条目 ${index + 1}`} title="删除">
+                      <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    </Button>
+                  )}
+                  body={(
+                    <textarea
+                      ref={autoResize}
+                      value={entry.content}
+                      onChange={e => { updateEntry(index, { content: e.target.value }); autoResize(e.target); }}
+                      rows={1}
+                      className="w-full resize-none overflow-hidden rounded-sm border border-transparent bg-transparent p-2 text-13 leading-relaxed text-t1 outline-none focus:border-hairline focus:bg-surfacev2"
+                      placeholder="记录一条记忆…"
+                      aria-label={`记忆条目 ${index + 1} 内容`}
+                    />
+                  )}
+                />
               ))}
-              <button
-                onClick={addEntry}
-                className="panel-control flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-dashed border-[var(--v2-border-hairline)] py-3 text-sm text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)] hover:text-[var(--v2-text-1)]"
-              >
-                <Plus className="h-4 w-4" aria-hidden="true" />新增条目
-              </button>
-            </div>
-          )}
-        </main>
-
-        {/* 底栏：文件用量（移动端含固定保存按钮） */}
-        <footer className="flex items-center justify-between gap-3 border-t border-[var(--v2-border-hairline)] px-4 md:px-6 py-3">
-          <span className={`text-13 ${nearLimit ? 'text-warnstrong dark:text-warn' : 'text-[var(--v2-text-2)]'}`}>
-            文件大小 {formatSize(size)}{maxSize > 0 ? ` / ${formatSize(maxSize)}` : ''}
-            {nearLimit && '（接近上限）'}
-          </span>
-          {updatedAt && (
-            <span className="hidden md:inline text-13 text-[var(--v2-text-2)]">更新于 {formatTime(updatedAt)}</span>
-          )}
-          <span className="md:hidden ml-auto">{saveButton}</span>
-        </footer>
-      </div>
-    </div>
+            </EntryList>
+            <button
+              type="button"
+              onClick={addEntry}
+              className="dialog-control mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-md border border-dashed border-hairline py-2.5 text-13 text-t2 hover:bg-hover2 hover:text-t1 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />新增条目
+            </button>
+          </>
+        )}
+      </ManagementDialog>
+    </>
   );
 }
 

@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, ChevronRight, RefreshCw, Search, ShieldCheck, X } from 'lucide-react';
+import { useEffect, useId, useMemo, useState } from 'react';
+import { Cable } from 'lucide-react';
 import { useMcpServiceStore, type McpService } from '@/store/mcpServiceStore';
-import { McpIcon } from './McpIcon';
+import {
+  AlertStrip, EntryList, EntryRow, EntryToggle, LoadingBlock, ManagementDialog, NothingHere, SearchField, Tag, ToolbarStats,
+} from '@/components/ui/ManagementDialog';
 
 interface McpManagementPageProps {
   onClose: () => void;
@@ -54,135 +56,107 @@ export function McpManagementPage({ onClose }: McpManagementPageProps) {
     );
   }, [query, services]);
 
+  const searching = query.trim().length > 0;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay2 p-3 backdrop-blur-[3px]">
-      <div className="flex h-[88vh] w-full max-w-5xl flex-col overflow-hidden rounded-panel border border-hairline bg-surfacev2 shadow-e4 motion-safe:animate-scale-in">
-        <header className="flex items-start justify-between border-b border-[var(--v2-border-hairline)] px-4 md:px-6 py-5">
-          <div>
-            <div className="flex items-center gap-2">
-              <McpIcon className="h-6 w-auto text-accent2-ink" />
-              <h2 className="text-[var(--v2-text-1)] text-xl font-semibold">MCP 管理</h2>
-            </div>
-            <p className="mt-1 text-sm text-[var(--v2-text-2)]">
-              低频或高风险 MCP 默认关闭；你可以随时决定哪些服务向模型开放工具。
-            </p>
-          </div>
-          <button onClick={onClose} className="dialog-control rounded-sm p-2 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)]" aria-label="关闭 MCP 管理">
-            <X className="h-5 w-5" />
-          </button>
-        </header>
-
-        <div className="border-b border-[var(--v2-border-hairline)] px-4 md:px-6 py-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-sm text-[var(--v2-text-2)]">
-              <span>{total} 个服务</span>
-              <span className="text-ok">{enabledCount} 个已启用</span>
-              <span className="flex items-center gap-1 text-13 text-[var(--v2-text-2)]">
-                <ShieldCheck className="h-4 w-4" /> 状态保存在本机
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <label className="relative block min-w-0 flex-1 md:w-72">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--v2-text-2)]" />
-                <input
-                  value={query}
-                  onChange={event => setQuery(event.target.value)}
-                  placeholder="搜索服务或工具"
-                  className="w-full max-md:min-h-11 rounded-sm border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] py-2 pl-9 pr-3 text-sm text-[var(--v2-text-1)] outline-none focus:ring-2 focus:ring-accent2-ring"
-                />
-              </label>
-              <button onClick={() => void loadServices()} disabled={loading} className="dialog-control rounded-sm border border-[var(--v2-border-hairline)] p-2 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)] disabled:opacity-50" aria-label="刷新 MCP 服务">
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
-          </div>
-          {error && <p className="mt-3 rounded-sm bg-errsoft px-3 py-2 text-sm text-err">加载或更新失败：{error}</p>}
-        </div>
-
-        <main className="flex-1 overflow-y-auto px-4 md:px-6 py-4">
-          {loading && services.length === 0 ? (
-            <div className="py-16 text-center text-sm text-[var(--v2-text-2)]">正在读取 MCP 配置…</div>
-          ) : visibleServices.length === 0 ? (
-            <div className="py-16 text-center text-sm text-[var(--v2-text-2)]">没有匹配的 MCP 服务</div>
-          ) : (
-            <div className="grid gap-3 lg:grid-cols-2">
-              {visibleServices.map(service => (
-                <ServiceCard
-                  key={service.serverKey}
-                  service={service}
-                  busy={Boolean(pending[service.serverKey])}
-                  expanded={Boolean(expanded[service.serverKey])}
-                  onExpand={() => setExpanded(current => ({ ...current, [service.serverKey]: !current[service.serverKey] }))}
-                  onToggle={() => void toggleService(service.serverKey, !service.enabled)}
-                />
-              ))}
-            </div>
-          )}
-        </main>
-      </div>
-    </div>
+    <ManagementDialog
+      icon={<Cable />}
+      title="MCP 管理"
+      description="决定哪些服务向模型开放工具；低频或高风险的服务默认关闭。"
+      onClose={onClose}
+      closeLabel="关闭 MCP 管理"
+      onRefresh={() => void loadServices()}
+      refreshLabel="刷新 MCP 服务"
+      refreshing={loading}
+      alerts={error && <AlertStrip>加载或更新失败：{error}</AlertStrip>}
+      toolbar={(
+        <>
+          <ToolbarStats note="状态保存在本机">
+            <span>{total} 个服务</span>
+            <span className="text-ok">{enabledCount} 个已启用</span>
+          </ToolbarStats>
+          <SearchField value={query} onChange={setQuery} label="搜索 MCP 服务" placeholder="搜索服务或工具" />
+        </>
+      )}
+    >
+      {loading && services.length === 0 ? (
+        <LoadingBlock>正在读取 MCP 配置…</LoadingBlock>
+      ) : visibleServices.length === 0 ? (
+        <NothingHere
+          icon={<Cable />}
+          title={searching ? '没有匹配的 MCP 服务' : '暂无可管理的 MCP 服务'}
+          description={searching ? '换个关键词，或清空搜索。' : undefined}
+        />
+      ) : (
+        <EntryList>
+          {visibleServices.map(service => (
+            <ServiceRow
+              key={service.serverKey}
+              service={service}
+              busy={Boolean(pending[service.serverKey])}
+              expanded={Boolean(expanded[service.serverKey])}
+              onExpand={() => setExpanded(current => ({ ...current, [service.serverKey]: !current[service.serverKey] }))}
+              onToggle={() => void toggleService(service.serverKey, !service.enabled)}
+            />
+          ))}
+        </EntryList>
+      )}
+    </ManagementDialog>
   );
 }
 
-function ServiceCard({ service, busy, expanded, onExpand, onToggle }: {
+function ServiceRow({ service, busy, expanded, onExpand, onToggle }: {
   service: McpService;
   busy: boolean;
   expanded: boolean;
   onExpand: () => void;
   onToggle: () => void;
 }) {
-  const statusTone = service.status === 'connected'
-    ? 'bg-oksoft text-ok'
-    : ['failed', 'needs_auth', 'missing_endpoint'].includes(service.status)
-      ? 'bg-warnsoft text-warnstrong dark:text-warn'
-      : 'bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)]';
+  const detailId = useId();
+  // 开关关着时不必再标「未启用」；开着时只把连不上、缺密钥这类异常标成警告色
+  const needsAttention = ['failed', 'needs_auth', 'missing_endpoint'].includes(service.status);
+  const status = !service.enabled ? null : (
+    <Tag tone={service.status === 'connected' ? 'ok' : needsAttention ? 'warn' : 'neutral'}>
+      {STATUS_LABELS[service.status] ?? service.status}
+    </Tag>
+  );
+  const toolSummary = service.source === 'registry'
+    ? `${service.toolCount} 个白名单工具`
+    : service.toolCount > 0 ? `${service.toolCount} 个已发现工具` : '工具将在连接后发现';
 
   return (
-    <article className={`rounded-md border p-4 transition-colors ${service.enabled ? 'border-accent2-ring bg-accent2-soft' : 'border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]'}`}>
-      <div className="flex items-start gap-3">
-        <button onClick={onExpand} disabled={service.tools.length === 0} className="dialog-control mt-0.5 rounded p-1 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)] disabled:opacity-30" aria-label={`${expanded ? '收起' : '展开'} ${service.displayName} 工具`}>
-          {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-        </button>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-[var(--v2-text-1)] text-base font-semibold">{service.displayName}</h3>
-            <span className="rounded bg-[var(--v2-bg-hover)] px-2 py-0.5 text-13 text-[var(--v2-text-2)]">{DOMAIN_LABELS[service.domain] ?? service.domain}</span>
-            <span className={`rounded px-2 py-0.5 text-13 ${statusTone}`}>{STATUS_LABELS[service.status] ?? service.status}</span>
-          </div>
-          <p className="mt-1 line-clamp-2 text-13 leading-relaxed text-[var(--v2-text-2)]">{service.description}</p>
-          <p className="mt-2 text-13 text-[var(--v2-text-2)]">
-            {service.source === 'registry' ? `${service.toolCount} 个白名单工具` : service.toolCount > 0 ? `${service.toolCount} 个已发现工具` : '工具将在连接后发现'}
-            {' · '}{service.transportType}
-          </p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={service.enabled}
-          aria-label={`${service.enabled ? '停用' : '启用'} ${service.displayName}`}
+    <EntryRow
+      title={service.displayName}
+      badges={<><Tag>{DOMAIN_LABELS[service.domain] ?? service.domain}</Tag>{status}</>}
+      description={service.description}
+      meta={<>{toolSummary}<span aria-hidden="true"> · </span><span className="font-mono">{service.transportType}</span></>}
+      actions={(
+        <EntryToggle
+          checked={service.enabled}
+          onCheckedChange={onToggle}
           disabled={busy}
-          onClick={onToggle}
-          className={`panel-control relative mt-1 before:absolute before:inset-x-0 before:top-1/2 before:h-11 before:-translate-y-1/2 md:before:hidden inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:cursor-wait disabled:opacity-50 ${service.enabled ? 'bg-accent2-strong' : 'bg-t3'}`}
-        >
-          <span className={`inline-block h-4 w-4 rounded-full transition-transform ${service.enabled ? 'translate-x-6 bg-white' : 'translate-x-1 bg-surfacev2'}`} />
-        </button>
-      </div>
-
-      {expanded && service.tools.length > 0 && (
-        <div className="mt-3 border-t border-[var(--v2-border-hairline)] pt-3">
-          <ul className="space-y-2">
-            {service.tools.map(tool => (
-              <li key={tool.id} className="flex items-start justify-between gap-3 text-13">
-                <div className="min-w-0">
-                  <span className="text-[var(--v2-text-2)]">{tool.name}</span>
-                  <span className="ml-2 font-mono text-13 text-[var(--v2-text-2)]">{tool.toolName}</span>
-                </div>
-                {!tool.allowlisted && <span className="shrink-0 text-warnstrong dark:text-warn">未授权</span>}
-              </li>
-            ))}
-          </ul>
-        </div>
+          label={`${service.enabled ? '停用' : '启用'} ${service.displayName}`}
+        />
       )}
-    </article>
+      expand={{
+        expanded,
+        onToggle: onExpand,
+        label: `${expanded ? '收起' : '展开'} ${service.displayName} 工具`,
+        disabled: service.tools.length === 0,
+        controls: detailId,
+      }}
+    >
+      <ul className="space-y-1.5">
+        {service.tools.map(tool => (
+          <li key={tool.id} className="flex items-start justify-between gap-3">
+            <span className="min-w-0 break-words [overflow-wrap:anywhere]">
+              {tool.name}
+              <span className="ml-2 font-mono text-t3">{tool.toolName}</span>
+            </span>
+            {!tool.allowlisted && <Tag tone="warn" className="shrink-0">未授权</Tag>}
+          </li>
+        ))}
+      </ul>
+    </EntryRow>
   );
 }
