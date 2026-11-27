@@ -514,6 +514,13 @@ class BrowserService:
                     self._creating.pop(session_id)
                 self._js_errors.pop(session_id, None)
                 reservation.done.set()
+            # close_session 对创建中的会话挂在 done.wait 上（_close_session），
+            # 那条关闭任务平时靠自身的成功回调清账，但回调是下一拍才跑的。
+            # reservation 生命周期在此终结，等它落定并同步清掉，不留悬空条目。
+            stale = self._resource_close_tasks.get(reservation.done.wait)
+            if stale is not None:
+                await asyncio.wait({stale}, timeout=self.cleanup_timeout)
+                self._forget_released_close(reservation.done.wait)
 
     async def close_session(self, session_id: str, expected_session=None) -> bool:
         return await self._finish_cleanup(self._close_session(
@@ -668,7 +675,7 @@ class BrowserService:
         else:
             raw = await session.page.screenshot(full_page=full_page, type="png")
 
-        # 保存截图到文件
+        # 保存截图到文件（目录设保留上限，长跑容器不再只写不删）
         screenshot_dir = os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
             "workspace", "screenshots"
@@ -679,6 +686,7 @@ class BrowserService:
         filepath = os.path.join(screenshot_dir, filename)
         with open(filepath, "wb") as f:
             f.write(raw)
+        self._prune_screenshots(screenshot_dir)
         logger.info(f"Screenshot saved: {filepath} ({len(raw)} bytes)")
 
         return {
@@ -687,6 +695,26 @@ class BrowserService:
             "size": len(raw),
             "filename": filename,
         }
+
+    @staticmethod
+    def _prune_screenshots(screenshot_dir: str, keep: int = 200) -> None:
+        """按文件时间保留最近 keep 张截图，超出部分删除（best-effort）"""
+        try:
+            entries = [
+                os.path.join(screenshot_dir, name)
+                for name in os.listdir(screenshot_dir)
+                if name.startswith("screenshot_") and name.endswith(".png")
+            ]
+            if len(entries) <= keep:
+                return
+            entries.sort(key=os.path.getmtime)
+            for stale in entries[:-keep]:
+                try:
+                    os.remove(stale)
+                except OSError:
+                    pass
+        except Exception:
+            pass  # 清理失败不影响截图本身
 
     async def click(
         self, session_id: str, selector: str, timeout: int = None,
@@ -714,17 +742,12 @@ class BrowserService:
             # 可见性 / 可操作性 / 超时错误 → 自动降级到 JS click
             if any(kw in error_msg for kw in ("not visible", "not stable", "intercept", "Timeout")):
                 try:
-                    safe_selector = selector.replace("'", "\\'")
                     page = session.page
                     url_before = page.url
 
-                    await page.evaluate(f"""
-                        (() => {{
-                            const el = document.querySelector('{safe_selector}');
-                            if (el) {{ el.click(); return true; }}
-                            throw new Error('Element not found: {safe_selector}');
-                        }})()
-                    """)
+                    # 不把 selector 拼进 JS 字符串（转义遗漏会变成代码注入），
+                    # 用 locator API 传原生元素给纯函数形式的回调
+                    await page.locator(selector).first.evaluate("el => el.click()")
 
                     result = {
                         "clicked": selector,
@@ -1092,6 +1115,7 @@ class BrowserService:
 
     async def _create_context_for_journey(self, session_id: str, record_opts: dict, viewport: dict):
         """为 journey 创建带录制能力的新 context（必须在 new_context 时传入 record 参数）"""
+        import shutil
         import tempfile
 
         context_kwargs = {
@@ -1099,21 +1123,32 @@ class BrowserService:
             "ignore_https_errors": True,
         }
 
-        # 录制选项必须在 new_context 时传入
+        recording_dirs: list[str] = []
+
+        # 录制选项必须在 new_context 时传入。
+        # video / HAR 目前没有消费方（artifacts 只交付 trace），但录制会持续占盘，
+        # 所以目录挂在 context 的 close 回调上随会话一并删掉，不再慢性泄漏。
         if record_opts.get("video"):
             video_dir = tempfile.mkdtemp(prefix="rv-video-")
             context_kwargs["record_video_dir"] = video_dir
             context_kwargs["record_video_size"] = viewport
+            recording_dirs.append(video_dir)
 
         if record_opts.get("har"):
             har_dir = tempfile.mkdtemp(prefix="rv-har-")
             har_path = os.path.join(har_dir, f"{session_id}.har")
             context_kwargs["record_har_path"] = har_path
+            recording_dirs.append(har_dir)
 
         async def initialize(context):
             await context.add_init_script("""
                 Object.defineProperty(navigator, 'webdriver', { get: () => false });
             """)
+            if recording_dirs:
+                def _remove_recording_dirs(_context, dirs=tuple(recording_dirs)):
+                    for d in dirs:
+                        shutil.rmtree(d, ignore_errors=True)
+                context.on("close", _remove_recording_dirs)
             page = await context.new_page()
             page.set_default_timeout(self.default_timeout)
             js_errors: list[str] = []

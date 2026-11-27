@@ -7,6 +7,7 @@ httpx 同步/异步 HTTP + SSE 客户端封装。
 
 import json
 import logging
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator, Optional
@@ -123,8 +124,12 @@ class AicaClient:
                 buffer = ""
                 for chunk in response.iter_text():
                     buffer += chunk
-                    while "\n\n" in buffer:
-                        event_str, buffer = buffer.split("\n\n", 1)
+                    # 服务端可能发 CRLF 行尾；只按 "\n\n" 切会把 CRLF 流黏成一个大事件
+                    while True:
+                        m = re.search(r"\r?\n\r?\n", buffer)
+                        if not m:
+                            break
+                        event_str, buffer = buffer[:m.start()], buffer[m.end():]
                         parsed = self._parse_sse_event(event_str)
                         if parsed:
                             yield parsed
@@ -152,11 +157,10 @@ class AicaClient:
     def _parse_sse_event(event_str: str) -> Optional[dict]:
         """解析 SSE 事件字符串为 dict"""
         data_lines = []
-        for line in event_str.strip().split("\n"):
+        for line in event_str.strip().splitlines():
             if line.startswith("data:"):
+                # "data:xxx" 与 "data: xxx" 两种写法都覆盖（strip 去掉冒号后的空格）
                 data_lines.append(line[5:].strip())
-            elif line.startswith("data: "):
-                data_lines.append(line[6:])
         if data_lines:
             raw = "\n".join(data_lines)
             try:

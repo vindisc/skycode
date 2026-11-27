@@ -15,17 +15,13 @@ import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-from main import app
+from fastapi import FastAPI
 from routers.file_processing import router as fp_router
 
-# 手动挂载 file_processing 路由（lifespan 动态注册在测试中不一定触发）
-_fp_mounted = False
-if not _fp_mounted:
-    try:
-        app.include_router(fp_router, prefix="/api/files", tags=["File Processing"])
-        _fp_mounted = True
-    except Exception:
-        pass  # 已挂载则忽略
+# 用独立的 FastAPI 实例挂路由（不要挂到共享的 main.app 上：
+# 跨测试模块会互相污染，lifespan 真正运行时还会得到重复路由）
+app = FastAPI()
+app.include_router(fp_router, prefix="/api/files", tags=["File Processing"])
 
 
 @pytest_asyncio.fixture

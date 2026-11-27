@@ -28,8 +28,10 @@ def _get_encoder():
             import tiktoken
             _encoder = tiktoken.get_encoding("cl100k_base")
             logger.info("tiktoken cl100k_base 编码器已初始化 (tokenizer router)")
-        except ImportError:
-            logger.warning("tiktoken 未安装，将使用字符估算回退")
+        except Exception:
+            # 与 token_estimator 保持一致：tiktoken 装了但编码表没缓存（离线环境
+            # 首次加载要走网络）时也不能 500，计数服务必须保持可用
+            logger.warning("tiktoken 编码器不可用，将使用字符估算回退 (tokenizer router)")
             _encoder = "fallback"
     return _encoder
 

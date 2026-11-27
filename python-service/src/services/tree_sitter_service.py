@@ -171,7 +171,10 @@ class TreeSitterService:
 
     def extract_symbols(self, code: str, language: str) -> list[SymbolInfo]:
         """从 AST 提取所有符号 — 用于 LLM 上下文的代码地图"""
-        root = self.parse(code, language)
+        return self._extract_symbols_from(self.parse(code, language), code)
+
+    def _extract_symbols_from(self, root, code: str) -> list[SymbolInfo]:
+        """从已解析的 AST 根节点提取符号（避免调用方重复解析）"""
         symbols: list[SymbolInfo] = []
         self._walk_symbols(root, code, symbols, parent=None)
         return symbols

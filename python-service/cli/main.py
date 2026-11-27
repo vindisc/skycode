@@ -342,6 +342,9 @@ def main(
     except httpx.ConnectError:
         console.print(f"[red]Error: Backend not reachable at {server}[/red]")
         raise typer.Exit(code=3)
+    except httpx.TimeoutException:
+        console.print(f"[red]Error: Backend timed out after {client.timeout}s at {server}[/red]")
+        raise typer.Exit(code=3)
     except httpx.HTTPStatusError as e:
         if e.response.status_code == 409:
             try:

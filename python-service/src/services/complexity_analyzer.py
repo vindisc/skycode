@@ -29,6 +29,7 @@ class ComplexityNode(BaseModel):
     children: Optional[List["ComplexityNode"]] = None
     file_path: Optional[str] = None
     language: Optional[str] = None
+    truncated: bool = False  # 分析预算耗尽被截断时置位（加在根节点上）
 
 
 class ComplexityStats(BaseModel):
@@ -342,6 +343,8 @@ class ComplexityAnalyzer:
         for lang in self.languages:
             for ext in LANG_EXTENSIONS.get(lang, []):
                 self._allowed_exts.add(ext)
+        # 已分析的文件数预算（跨目录共享）；每次 analyze 重新计
+        self._budget_used = 0
 
     async def analyze(
         self,
@@ -378,6 +381,10 @@ class ComplexityAnalyzer:
             raise FileNotFoundError(f"Path not found: {scan_root}")
 
         root_node = self._build_tree(scan_root, project_root)
+        if self._budget_used >= _MAX_FILES:
+            # 多目录项目此前只对「单个目录内的文件」计数，cap 形同虚设，
+            # 大项目会一路分析到 60s 超时被外层吞成空结果；现在预算是全局的
+            root_node.truncated = True
         stats = self._compute_stats(root_node)
 
         return ComplexityResult(root=root_node, stats=stats)
@@ -409,6 +416,9 @@ class ComplexityAnalyzer:
                 continue
 
             if os.path.isdir(full_path):
+                if self._budget_used >= _MAX_FILES:
+                    logger.warning(f"File limit ({_MAX_FILES}) reached, skipping remaining entries")
+                    break
                 child = self._build_tree(full_path, project_root)
                 if child.loc > 0:  # 只保留有代码的目录
                     children.append(child)
@@ -416,8 +426,8 @@ class ComplexityAnalyzer:
             elif os.path.isfile(full_path):
                 ext = os.path.splitext(entry)[1]
                 if ext in self._allowed_exts:
-                    if file_count >= _MAX_FILES:
-                        logger.warning(f"File limit ({_MAX_FILES}) reached, skipping remaining files")
+                    if self._budget_used >= _MAX_FILES:
+                        logger.warning(f"File limit ({_MAX_FILES}) reached, skipping remaining entries")
                         break
                     child = self._analyze_file(full_path)
                     children.append(child)
@@ -428,6 +438,7 @@ class ComplexityAnalyzer:
 
     def _analyze_file(self, file_path: str) -> ComplexityNode:
         """分析单个文件，带缓存"""
+        self._budget_used += 1
         cached = _get_cached(file_path)
         if cached is not None:
             return cached

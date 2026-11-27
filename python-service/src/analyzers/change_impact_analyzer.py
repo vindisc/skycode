@@ -11,6 +11,7 @@
 import asyncio
 import hashlib
 import logging
+import threading
 import time
 from collections import deque
 from pathlib import Path
@@ -27,12 +28,12 @@ logger = logging.getLogger(__name__)
 _ANALYSIS_TIMEOUT = 60
 
 # ── 调用图缓存 ──
-_graph_cache: Dict[str, Any] = {
-    "graph": None,
-    "builder": None,
-    "key": None,
-    "timestamp": 0.0,
-}
+# 整个条目是一个元组，整体替换（先前的「逐字段写 dict」在超时线程与并发请求交错时
+# 会写出 key 与 graph 不匹配的脏缓存）。读 / 写都在锁内做快照。
+# 注意：asyncio.wait_for 超时并不会取消已在线程池里跑的构建，它会继续跑完并写回
+# 缓存——元组整体替换保证写回的 key/graph/builder 永远自洽。
+_graph_cache: Optional[Tuple[str, nx.DiGraph, CallGraphBuilder, float]] = None
+_graph_cache_lock = threading.Lock()
 _CACHE_TTL = 300  # 5 minutes
 
 
@@ -203,24 +204,28 @@ class ChangeImpactAnalyzer:
         global _graph_cache
 
         cache_key = self._compute_cache_key(project_root)
-        now = time.time()
 
+        with _graph_cache_lock:
+            cached = _graph_cache
         if (
-            _graph_cache["key"] == cache_key
-            and _graph_cache["graph"] is not None
-            and (now - _graph_cache["timestamp"]) < _CACHE_TTL
+            cached is not None
+            and cached[0] == cache_key
+            and (time.time() - cached[3]) < _CACHE_TTL
         ):
             logger.debug("Using cached call graph for %s", project_root)
-            return _graph_cache["graph"], _graph_cache["builder"]
+            return cached[1], cached[2]
 
         logger.info("Building call graph for %s", project_root)
         builder = CallGraphBuilder()
         graph = builder.build(project_root)
+        if builder.truncated:
+            logger.warning(
+                "Call graph for %s was truncated by build budget; "
+                "impact results may be partial", project_root,
+            )
 
-        _graph_cache["graph"] = graph
-        _graph_cache["builder"] = builder
-        _graph_cache["key"] = cache_key
-        _graph_cache["timestamp"] = now
+        with _graph_cache_lock:
+            _graph_cache = (cache_key, graph, builder, time.time())
 
         logger.info(
             "Call graph built: %d nodes, %d edges",
@@ -230,18 +235,21 @@ class ChangeImpactAnalyzer:
 
     @staticmethod
     def _compute_cache_key(project_root: str) -> str:
-        """基于项目根路径 + 文件修改时间的最大值计算缓存 key"""
+        """基于项目根路径 + 源文件最新修改时间计算缓存 key。
+
+        纯 stat 遍历（不解析内容），数千文件量级在百毫秒内；
+        覆盖全树而不是采样，改动任何文件都能让下一次请求重建图。
+        """
         root = Path(project_root)
         max_mtime = 0.0
         try:
             for p in root.rglob("*"):
                 if (not p.is_symlink() and p.is_file()
                         and p.suffix in (".py", ".java", ".ts", ".tsx")):
-                    # 快速采样：只检查前 200 个文件
                     mtime = p.stat().st_mtime
                     if mtime > max_mtime:
                         max_mtime = mtime
-        except (OSError, StopIteration):
+        except OSError:
             pass
         raw = f"{project_root}:{max_mtime}"
         return hashlib.md5(raw.encode()).hexdigest()

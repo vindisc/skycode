@@ -1,6 +1,7 @@
 """
 Git Enhanced Router — Git 增强能力域路由
 """
+import asyncio
 import logging
 from typing import Optional
 from fastapi import APIRouter
@@ -85,12 +86,15 @@ def _get_service():
 
 
 # ── 路由端点 ──
+# GitPython 底层是同步 spawn 的 git 子进程，大仓库 diff/log/blame 能跑很久；
+# 直接在事件循环里调会把整个服务（含 /api/health）卡死，一律丢进线程池。
 
 @router.post("/diff", response_model=GitResponse)
 async def git_diff(request: DiffRequest):
     try:
         svc = _get_service()
-        result = svc.semantic_diff(request.repo_path, request.ref1, request.ref2)
+        result = await asyncio.to_thread(
+            svc.semantic_diff, request.repo_path, request.ref1, request.ref2)
         return GitResponse(success=True, data=result)
     except ValueError as e:
         return GitResponse(success=False, error_code="INVALID_INPUT", error_message=str(e))
@@ -103,7 +107,8 @@ async def git_diff(request: DiffRequest):
 async def git_log(request: LogRequest):
     try:
         svc = _get_service()
-        result = svc.enhanced_log(request.repo_path, request.max_count, request.branch)
+        result = await asyncio.to_thread(
+            svc.enhanced_log, request.repo_path, request.max_count, request.branch)
         return GitResponse(success=True, data=result)
     except ValueError as e:
         return GitResponse(success=False, error_code="INVALID_INPUT", error_message=str(e))
@@ -116,7 +121,8 @@ async def git_log(request: LogRequest):
 async def git_blame(request: BlameRequest):
     try:
         svc = _get_service()
-        result = svc.file_blame(request.repo_path, request.file_path, request.ref)
+        result = await asyncio.to_thread(
+            svc.file_blame, request.repo_path, request.file_path, request.ref)
         return GitResponse(success=True, data=result)
     except ValueError as e:
         return GitResponse(success=False, error_code="INVALID_INPUT", error_message=str(e))

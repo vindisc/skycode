@@ -4,6 +4,7 @@ Code Intelligence Router — §4.14.1 / §4.14.7a
 对齐 5 个 Code Intel 端点: parse/symbols/dependencies/refactor/complete
 """
 
+import asyncio
 import logging
 from typing import Optional
 
@@ -130,6 +131,11 @@ def _resolve_language(file_path: Optional[str], language: Optional[str]) -> str:
 
 # ── 路由端点 ──
 
+# /parse 的内容上限（字符）。tree-sitter 解析是 O(内容长度) 的 CPU 活，
+# 无上限的请求会长时间占住解析线程
+_MAX_PARSE_CHARS = 1_000_000
+
+
 @router.post("/parse", response_model=ParseResponse)
 async def parse_code(request: ParseRequest):
     """解析源代码 — 返回符号 + 导入 + 代码地图"""
@@ -137,9 +143,25 @@ async def parse_code(request: ParseRequest):
         svc = _get_service()
         lang = _resolve_language(request.file_path, request.language)
         code_content = request.get_content()
-        symbols = svc.extract_symbols(code_content, lang)
-        imports = svc.extract_imports(code_content, lang)
-        code_map = svc.build_code_map(code_content, lang)
+        if len(code_content) > _MAX_PARSE_CHARS:
+            raise ValueError(
+                f"content too large: {len(code_content)} chars (limit {_MAX_PARSE_CHARS})")
+
+        # tree-sitter 解析是 CPU 密集的同步调用，放线程池避免卡事件循环；
+        # 只解析一次，符号 / 导入 / 代码地图复用同一棵 AST（原先重复解析 3 遍）
+        def _parse_all():
+            root = svc.parse(code_content, lang)
+            symbols = svc._extract_symbols_from(root, code_content)
+            imports: list[str] = []
+            svc._walk_imports(root, code_content, imports)
+            lines: list[str] = []
+            for s in symbols:
+                indent = "  " if s.parent else ""
+                doc = f" — {s.docstring[:50]}..." if s.docstring else ""
+                lines.append(f"{indent}{s.kind} {s.name} (L{s.start_line}-{s.end_line}){doc}")
+            return symbols, imports, "\n".join(lines)
+
+        symbols, imports, code_map = await asyncio.to_thread(_parse_all)
         return ParseResponse(
             language=lang,
             symbols=[SymbolItem(

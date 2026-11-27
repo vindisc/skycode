@@ -233,7 +233,11 @@ async def _handle_http_delete(step: dict, base_url: str, last_response, context_
 async def _handle_assert_status(step: dict, base_url: str, last_response, context_vars: dict, client: httpx.AsyncClient, timeout: int) -> dict:
     expected = step.get("expected_code")
     actual = last_response.status_code if last_response else None
-    
+
+    # 没填 expected_code 或前面没有响应都不能算断言通过——None == None 会把畸形步骤静默放行
+    if expected is None or last_response is None:
+        return {"success": False,
+                "error": "assert_status requires both expected_code and a preceding request step"}
     if actual != expected:
         return {"success": False, "error": f"assert_status failed: expected {expected}, got {actual}"}
     return {"success": True}

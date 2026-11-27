@@ -8,7 +8,7 @@
 """
 
 import logging
-import signal
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
@@ -30,8 +30,12 @@ TEST_PATTERNS: Set[str] = {
     "*.spec.ts", "*.spec.tsx", "*.test.ts", "*.test.tsx",
 }
 
-# 单文件解析超时 (秒)
-_PARSE_TIMEOUT = 5
+# ── 构建预算 ──
+# 以前只有两个摆设常量（单文件超时从未实现，遍历无上限），大项目会一路解析到
+# 60s 分析超时、被上层吞成空结果。现在的口径：
+_MAX_FILES = 800                    # 最多解析的文件数（全项目共享，超出即截断）
+_MAX_FILE_BYTES = 512 * 1024        # 单文件超过 512KB 跳过（巨型文件是解析慢的主因）
+_BUILD_DEADLINE_SECONDS = 45.0      # 整个构建的墙钟预算（留出余量给 60s 分析超时）
 
 
 @dataclass
@@ -52,6 +56,15 @@ class CallGraphBuilder:
     def __init__(self):
         self.graph: nx.DiGraph = nx.DiGraph()
         self._nodes: Dict[str, CallGraphNode] = {}
+        # ── 构建预算状态 ──
+        self.truncated: bool = False       # 预算耗尽被截断时置位
+        self._files_parsed: int = 0
+        self._deadline: Optional[float] = None
+        # ── 调用匹配索引（调用边延到 build 末尾统一解析，避免每处调用全量扫节点）──
+        self._by_name: Dict[str, List[str]] = {}        # 末段名字 -> 节点 id 列表
+        self._ids_by_module: Dict[str, List[str]] = {}  # 模块名 -> 该模块的节点 id
+        self._pending_calls: List[Tuple[str, str]] = []     # (caller_id, callee 简名)
+        self._pending_imports: List[Tuple[str, str]] = []   # (from_module, imported)
 
     def build(
         self,
@@ -68,6 +81,16 @@ class CallGraphBuilder:
         if languages is None:
             languages = ["python", "java", "typescript"]
 
+        # 一次 build 一套预算；调用/导入边延后到全部文件解析完再统一解析
+        # （顺带修掉「前向引用解析不到」的旧问题：调用目标后解析也能连上）
+        self.truncated = False
+        self._files_parsed = 0
+        self._deadline = time.monotonic() + _BUILD_DEADLINE_SECONDS
+        self._by_name.clear()
+        self._ids_by_module.clear()
+        self._pending_calls.clear()
+        self._pending_imports.clear()
+
         if "python" in languages:
             self._build_python(root, skip_tests)
         if "java" in languages:
@@ -75,11 +98,17 @@ class CallGraphBuilder:
         if "typescript" in languages:
             self._build_typescript(root, skip_tests)
 
+        self._resolve_pending()
+        if self.truncated:
+            logger.warning(
+                "Call graph build truncated (files=%d): %s",
+                self._files_parsed, project_root,
+            )
         return self.graph
 
     # ── 节点管理 ────────────────────────────────────────────
 
-    def _add_node(self, node: CallGraphNode) -> None:
+    def _add_node(self, node: CallGraphNode, module_name: str) -> None:
         if node.id not in self._nodes:
             self._nodes[node.id] = node
             self.graph.add_node(node.id, **{
@@ -90,16 +119,48 @@ class CallGraphBuilder:
                 "language": node.language,
                 "confidence": node.confidence,
             })
+            # 末段名字索引：调用匹配用（等价于旧的 nid.endswith(".名字")，但 O(1)）
+            self._by_name.setdefault(node.id.rsplit(".", 1)[-1], []).append(node.id)
+            self._ids_by_module.setdefault(module_name, []).append(node.id)
 
     def _add_edge(self, source: str, target: str, edge_type: str = "call") -> None:
         if source in self._nodes and target in self._nodes:
             self.graph.add_edge(source, target, type=edge_type, weight=1.0)
 
+    def _budget_exceeded(self) -> bool:
+        """文件数或墙钟预算耗尽（各语言构建循环里轮询）"""
+        if self._files_parsed >= _MAX_FILES:
+            self.truncated = True
+            return True
+        if self._deadline is not None and time.monotonic() > self._deadline:
+            self.truncated = True
+            return True
+        return False
+
+    def _resolve_pending(self) -> None:
+        """统一解析收集到的调用/导入边"""
+        for caller_id, callee in self._pending_calls:
+            for target_id in self._by_name.get(callee, ()):
+                if target_id != caller_id:
+                    self._add_edge(caller_id, target_id, "call")
+        for from_module, imported in self._pending_imports:
+            if imported == "*":
+                targets: List[str] = []
+                for mod, ids in self._ids_by_module.items():
+                    if mod == from_module or mod.startswith(f"{from_module}."):
+                        targets.extend(ids)
+            else:
+                targets = list(self._by_name.get(imported, ()))
+            for target_id in targets:
+                self._add_edge(from_module, target_id, "dependency")
+
     # ── 文件遍历 ───────────────────────────────────────────
 
     def _iter_files(self, root: Path, extensions: Set[str], skip_tests: bool):
-        """递归遍历项目文件，跳过排除目录和测试文件"""
+        """递归遍历项目文件，跳过排除目录和测试文件；受文件数/单文件大小预算约束"""
         for path in root.rglob("*"):
+            if self._budget_exceeded():
+                return
             if path.is_symlink() or not path.is_file():
                 continue
             if path.suffix not in extensions:
@@ -109,6 +170,13 @@ class CallGraphBuilder:
                 continue
             # 跳过测试文件
             if skip_tests and self._is_test_file(path):
+                continue
+            # 巨型文件（打包产物、生成的代码）解析极慢且贡献的边很少
+            try:
+                if path.stat().st_size > _MAX_FILE_BYTES:
+                    logger.debug("Skipping oversized file: %s", path)
+                    continue
+            except OSError:
                 continue
             yield path
 
@@ -150,6 +218,9 @@ class CallGraphBuilder:
                 return
 
         for path in self._iter_files(root, {".py"}, skip_tests):
+            if self._budget_exceeded():
+                break
+            self._files_parsed += 1
             try:
                 code = path.read_text(encoding="utf-8", errors="replace")
                 module_name = self._module_name_from_path(path, root)
@@ -183,7 +254,7 @@ class CallGraphBuilder:
                 file_path=file_path,
                 line_range=(func["line_start"], func["line_end"]),
                 language="python", confidence="high",
-            ))
+            ), module_name)
 
         # 注册类节点
         for cls in visitor.classes:
@@ -193,27 +264,14 @@ class CallGraphBuilder:
                 file_path=file_path,
                 line_range=(cls["line_start"], cls["line_end"]),
                 language="python", confidence="high",
-            ))
+            ), module_name)
 
-        # 添加调用边
+        # 调用/导入边延后到 build 末尾统一解析（跨文件前向引用也能连上）
         for caller, callee in visitor.calls:
             caller_id = f"{module_name}.{caller}" if caller else module_name
-            # 尝试匹配已知节点
-            callee_candidates = [
-                nid for nid in self._nodes if nid.endswith(f".{callee}")
-            ]
-            for target_id in callee_candidates:
-                self._add_edge(caller_id, target_id, "call")
-
-        # 添加 import 依赖边
+            self._pending_calls.append((caller_id, callee))
         for from_module, imported in visitor.imports:
-            target_candidates = [
-                nid for nid in self._nodes
-                if nid.startswith(from_module) or nid.endswith(f".{imported}")
-            ]
-            source_id = module_name
-            for target_id in target_candidates:
-                self._add_edge(source_id, target_id, "dependency")
+            self._pending_imports.append((from_module, imported))
 
     # ── Java (tree-sitter) ────────────────────────────────
 
@@ -231,6 +289,9 @@ class CallGraphBuilder:
             return
 
         for path in self._iter_files(root, {".java"}, skip_tests):
+            if self._budget_exceeded():
+                break
+            self._files_parsed += 1
             try:
                 code = path.read_text(encoding="utf-8", errors="replace")
                 module_name = self._module_name_from_path(path, root)
@@ -258,7 +319,7 @@ class CallGraphBuilder:
                     file_path=file_path,
                     line_range=(node.start_point[0] + 1, node.end_point[0] + 1),
                     language="java", confidence="medium",
-                ))
+                ), module_name)
                 for child in node.children:
                     self._walk_java(child, code, file_path, module_name,
                                     parent_class=class_name)
@@ -276,7 +337,7 @@ class CallGraphBuilder:
                     file_path=file_path,
                     line_range=(node.start_point[0] + 1, node.end_point[0] + 1),
                     language="java", confidence="medium",
-                ))
+                ), module_name)
                 # 提取方法内调用
                 self._extract_java_calls(node, code, node_id, module_name)
                 return
@@ -319,17 +380,12 @@ class CallGraphBuilder:
 
     def _extract_java_calls(self, node, code: str, caller_id: str,
                             module_name: str) -> None:
-        """提取 Java 方法内的调用关系"""
+        """提取 Java 方法内的调用关系（延后统一解析）"""
         if node.type == "method_invocation":
             name_node = node.child_by_field_name("name")
             if name_node:
                 callee_name = code[name_node.start_byte:name_node.end_byte]
-                callee_candidates = [
-                    nid for nid in self._nodes if nid.endswith(f".{callee_name}")
-                ]
-                for target_id in callee_candidates:
-                    if target_id != caller_id:
-                        self._add_edge(caller_id, target_id, "call")
+                self._pending_calls.append((caller_id, callee_name))
         for child in node.children:
             self._extract_java_calls(child, code, caller_id, module_name)
 
@@ -349,6 +405,9 @@ class CallGraphBuilder:
             return
 
         for path in self._iter_files(root, {".ts", ".tsx"}, skip_tests):
+            if self._budget_exceeded():
+                break
+            self._files_parsed += 1
             try:
                 code = path.read_text(encoding="utf-8", errors="replace")
                 lang = "tsx" if path.suffix == ".tsx" else "typescript"
@@ -376,7 +435,7 @@ class CallGraphBuilder:
                     file_path=file_path,
                     line_range=(node.start_point[0] + 1, node.end_point[0] + 1),
                     language="typescript", confidence="low",
-                ))
+                ), module_name)
                 for child in node.children:
                     self._walk_ts(child, code, file_path, module_name,
                                   parent_class=class_name)
@@ -387,13 +446,13 @@ class CallGraphBuilder:
             if name_node:
                 func_name = code[name_node.start_byte:name_node.end_byte]
                 qualified = f"{parent_class}.{func_name}" if parent_class else func_name
-                node_id = f"{module_name}.{qualified}"
+                node_id = f"{module_name}.{func_name}"
                 self._add_node(CallGraphNode(
                     id=node_id, name=func_name, type="function",
                     file_path=file_path,
                     line_range=(node.start_point[0] + 1, node.end_point[0] + 1),
                     language="typescript", confidence="low",
-                ))
+                ), module_name)
                 self._extract_ts_calls(node, code, node_id, module_name)
                 return
 
@@ -411,7 +470,7 @@ class CallGraphBuilder:
                             file_path=file_path,
                             line_range=(node.start_point[0] + 1, node.end_point[0] + 1),
                             language="typescript", confidence="low",
-                        ))
+                        ), module_name)
                         self._extract_ts_calls(value_n, code, node_id, module_name)
 
         for child in node.children:
@@ -419,19 +478,14 @@ class CallGraphBuilder:
 
     def _extract_ts_calls(self, node, code: str, caller_id: str,
                           module_name: str) -> None:
-        """提取 TypeScript 调用关系"""
+        """提取 TypeScript 调用关系（延后统一解析）"""
         if node.type == "call_expression":
             func_node = node.child_by_field_name("function")
             if func_node:
                 callee_name = code[func_node.start_byte:func_node.end_byte]
                 # 取最后一个标识符 (e.g. "obj.method" → "method")
                 simple_name = callee_name.split(".")[-1]
-                callee_candidates = [
-                    nid for nid in self._nodes if nid.endswith(f".{simple_name}")
-                ]
-                for target_id in callee_candidates:
-                    if target_id != caller_id:
-                        self._add_edge(caller_id, target_id, "call")
+                self._pending_calls.append((caller_id, simple_name))
         for child in node.children:
             self._extract_ts_calls(child, code, caller_id, module_name)
 

@@ -5,6 +5,8 @@ File Processing Router — §4.14.7
 安全读取 (自动编码)、文件变更监听 (watchfiles SSE)。
 """
 
+import asyncio
+import binascii
 import json
 import logging
 import os
@@ -160,7 +162,8 @@ async def get_file_tree(request: FileTreeRequest):
     max_depth = request.max_depth if request.max_depth is not None else 5
 
     try:
-        tree = build_tree(root, 0)  # noqa: uses max_depth from closure
+        # 深目录的同步递归 listdir 会占住事件循环，放线程池跑
+        tree = await asyncio.to_thread(build_tree, root, 0)
         return {"success": True, "data": tree}
     except Exception as e:
         logger.error(f"File tree build failed: {e}")
@@ -239,7 +242,11 @@ async def detect_encoding_bytes(request: EncodingDetectBytesRequest):
     """从 Base64 编码的原始字节检测编码"""
     import base64
     try:
-        raw = base64.b64decode(request.data_base64)
+        raw = base64.b64decode(request.data_base64, validate=True)
+    except (binascii.Error, ValueError) as e:
+        # 客户端传的不是合法 base64 是请求错误，不是服务端错误
+        raise HTTPException(status_code=400, detail=f"invalid base64 payload: {e}")
+    try:
         det = _get_detector()
         result = det.detect_encoding_bytes(raw)
         return EncodingResponse(
