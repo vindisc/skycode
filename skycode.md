@@ -29,7 +29,7 @@ ZhikunCode 是一个自托管的 AI 编程工作台。仓库由多个服务组�
 - 单元测试：`npm run test:run`（监听模式：`npm test`）
 - 单元测试覆盖率：`npm run test:coverage`
 - 浏览器端到端测试：`npm run test:e2e`
-- 主题/jelly 浏览器回归测试：`npm run test:theme-regression`、`npm run test:jelly-regression`
+- 主题浏览器回归测试：`npm run test:theme-regression`
 
 ### Python 服务（`python-service/`）
 
