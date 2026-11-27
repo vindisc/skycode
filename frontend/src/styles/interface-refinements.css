@@ -30,8 +30,9 @@
     --color-danger: var(--v2-err);
     --color-danger-bg: var(--v2-err-soft);
     --color-overlay: var(--v2-overlay);
-    /* 阅读列宽：消息列与输入区共用，宽屏下居中 */
+    /* 阅读列：消息列与输入区共用同一个宽度和两侧留白，宽屏下居中 */
     --thread-max-width: 920px;
+    --thread-gutter: 12px;
 }
 :root.dark {
     --text-primary: var(--v2-text-1);
@@ -61,8 +62,8 @@
     background: var(--v2-accent-strong);
 }
 
+/* 输入文字 14px（与 text-sm 一致）；手机上 16px，避免 iOS 聚焦时自动放大页面 */
 :root .chat-composer-surface textarea {
-    font-size: 15px;
     line-height: 1.65;
 }
 
@@ -154,7 +155,7 @@
 
 /* Reading widths are applied to content, never to the virtual scroll viewport.
    输入区是工作区底部通栏的条带，不随阅读列宽收窄。 */
-.turn-card { width: 100%; max-width: var(--thread-max-width); margin-inline: auto; }
+.turn-card { width: calc(100% - var(--thread-gutter) * 2); max-width: var(--thread-max-width); margin-inline: auto; }
 .text-block > :is(p, ul, ol, blockquote) { max-width: 860px; }
 .panel-control > .lucide, .dialog-control > .lucide, .workbench-control > .lucide {
     width: 18px; height: 18px; flex-shrink: 0;

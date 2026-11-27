@@ -131,7 +131,7 @@ const PromptTextarea: React.FC<PromptTextareaProps> = ({
                     : simpleMode
                     ? '描述你希望完成或继续修改的事情…'
                     : isMobileVariant ? '输入消息…'
-                    : `输入消息…（/ 查看命令，${navigator.platform.includes('Mac') ? '⌘' : 'Ctrl+'}K 打开命令面板）`
+                    : '输入消息…（/ 查看命令）'
             }
             disabled={disabled}
             aria-label="输入消息"
@@ -141,11 +141,10 @@ const PromptTextarea: React.FC<PromptTextareaProps> = ({
                     ? `w-full flex-none resize-none bg-transparent py-0.5 text-sm text-t1
                        placeholder-t4 focus:outline-none
                        disabled:opacity-50${collapsed ? ' overflow-y-hidden' : ''}`
-                    : `flex-1 resize-none rounded-sm bg-transparent
-                       px-2.5 py-2 text-sm text-t1 placeholder-t4
-                       transition-surface duration-fast
-                       focus:outline-none focus:ring-[3px] focus:ring-accent2-ring
-                       disabled:opacity-50`
+                    // 聚焦只由外层条带的边框变色来表示（见 globals.css 的 .chat-composer-surface:focus-within），这里不再画光环
+                    : `min-w-0 flex-1 resize-none bg-transparent
+                       px-2.5 py-1.5 text-sm text-t1 placeholder-t4
+                       focus:outline-none disabled:opacity-50`
             }
             rows={1}
             autoFocus={!isMobileVariant}

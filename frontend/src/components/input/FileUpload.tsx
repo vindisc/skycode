@@ -53,7 +53,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                     inputRef.current?.click();
                 }}
                 disabled={disabled}
-                className={`panel-control flex h-10 w-10 items-center justify-center shrink-0 rounded-sm transition-interactive duration-fast
+                className={`flex h-8 w-8 items-center justify-center shrink-0 rounded-sm transition-interactive duration-fast
                     focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
                     ${disabled
                         ? 'text-t4 cursor-not-allowed opacity-50'
@@ -63,7 +63,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 type="button"
                 aria-disabled={disabled}
             >
-                <ImagePlus size={18} />
+                <ImagePlus size={16} />
             </button>
         </>
     );

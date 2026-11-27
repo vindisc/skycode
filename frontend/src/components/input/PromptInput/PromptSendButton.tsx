@@ -37,20 +37,20 @@ const PromptSendButton: React.FC<PromptSendButtonProps> = ({
                 onClick={onSend}
                 disabled={sendDisabled}
                 aria-label={runActive ? '发送运行中干预' : '发送消息'}
-                title={runActive ? '发送运行中干预' : '发送消息'}
+                title={runActive ? '发送运行中干预' : '发送消息（Enter 发送，Shift+Enter 换行）'}
                 className={isMobile
                     ? `flex h-11 shrink-0 items-center justify-center rounded-full
                        text-white shadow-raised transition-interactive
                        duration-fast active:scale-95 active:shadow-pressed focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink
                        disabled:opacity-[.38] disabled:shadow-none`
-                    : `flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-white
+                    : `flex h-8 w-8 shrink-0 items-center justify-center rounded-sm text-white
                        bg-accent2-strong shadow-raised transition-interactive duration-fast
                        hover:bg-accent2-hover hover:shadow-raised-hover active:scale-[.98] active:shadow-pressed active:bg-accent2-active
                        focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
                        disabled:opacity-50 disabled:shadow-none`}
                 type="button"
             >
-                <span className={isMobile ? "flex h-8 items-center justify-center gap-1 rounded-full bg-accent2-strong px-2.5 text-sm font-medium shadow-raised" : "contents"}><Send size={isMobile ? 14 : 18} />{isMobile && <span>发送</span>}</span>
+                <span className={isMobile ? "flex h-8 items-center justify-center gap-1 rounded-full bg-accent2-strong px-2.5 text-sm font-medium shadow-raised" : "contents"}><Send size={isMobile ? 14 : 16} />{isMobile && <span>发送</span>}</span>
             </button>
             {runActive && (
                 <button
@@ -64,14 +64,14 @@ const PromptSendButton: React.FC<PromptSendButtonProps> = ({
                            duration-fast active:scale-95
                            focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink
                            disabled:opacity-[.38] disabled:shadow-none`
-                        : `stop-btn-running flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-white dark:text-app2
+                        : `stop-btn-running flex h-8 w-8 shrink-0 items-center justify-center rounded-sm text-white dark:text-app2
                            bg-err shadow-e1 transition-interactive duration-fast
                            hover:opacity-90 active:scale-[.98]
                            focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
                            disabled:opacity-50`}
                     type="button"
                 >
-                    <Square size={isMobile ? 16 : 18} />
+                    <Square size={isMobile ? 16 : 16} />
                 </button>
             )}
         </>

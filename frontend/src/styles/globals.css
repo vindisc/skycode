@@ -20,15 +20,20 @@
 /* ≥768px（平板与桌面）：输入区是工作区底部的一条横向圆角条带。桌面上它嵌在面板里，底色比面板深一档
    （对应 Skymap 的底部图片条）；平板没有面板外壳，条带用面板色，比窗口底色浅一档 */
 @media (min-width: 768px) {
-  .chat-composer-inset { padding: 0 10px 10px; }
+  /* 和会话列同宽、同两侧留白（.turn-card 用的是同一组变量），两者的左右边缘始终对齐 */
+  .chat-composer-inset { padding: 0 var(--thread-gutter, 12px) 10px; }
   .chat-composer-surface {
+    width: 100%;
+    max-width: var(--thread-max-width);
+    margin-inline: auto;
     border-radius: var(--v2-r-md);
-    padding: 8px 10px;
+    padding: 6px 8px 6px 8px;
     background: var(--v2-bg-surface);
     border: 1px solid var(--v2-border-hairline);
     transition: border-color var(--v2-dur-fast) var(--v2-ease);
   }
-  .chat-composer-surface:focus-within { border-color: color-mix(in srgb, var(--v2-accent) 55%, var(--v2-border-hairline)); }
+  /* 聚焦只有这一层表示：边框从灰变成偏蓝，不另画光环 */
+  .chat-composer-surface:focus-within { border-color: color-mix(in srgb, var(--v2-accent) 45%, var(--v2-border-hairline)); }
 }
 @media (min-width: 1024px) {
   .chat-composer-surface { background: var(--v2-bg-app); }

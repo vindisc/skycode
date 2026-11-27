@@ -231,11 +231,11 @@ export const PromptToolbar: React.FC<PromptToolbarProps> = ({
                 aria-label={fileReferenceCapability?.mode === 'oss_upload'
                     ? '上传本地文件到 OSS' : '引用本地文件路径'}
                 title={fileReferenceTitle}
-                className="panel-control flex h-10 w-10 items-center justify-center shrink-0 rounded-sm text-t2 transition-interactive duration-fast hover:bg-hover2 hover:text-t1 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring disabled:opacity-50"
+                className="flex h-8 w-8 items-center justify-center shrink-0 rounded-sm text-t3 transition-interactive duration-fast hover:bg-hover2 hover:text-t1 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring disabled:opacity-50"
             >
                 {fileReferenceBusy
-                    ? <Loader2 size={18} className="animate-spin" />
-                    : <Paperclip size={18} />}
+                    ? <Loader2 size={16} className="animate-spin" />
+                    : <Paperclip size={16} />}
             </button>
         )}
         {!runActive && !compacting && (

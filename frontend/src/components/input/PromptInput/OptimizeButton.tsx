@@ -26,9 +26,9 @@ export function OptimizeButton({ draft, draftKey, disabled }: OptimizeButtonProp
                 : '把这段提示词改写得更清晰'}
             disabled={disabled}
             onClick={handleClick}
-            className="panel-control flex h-10 w-10 items-center justify-center shrink-0 rounded-sm text-t2 transition-interactive duration-fast hover:bg-hover2 hover:text-t1 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring disabled:opacity-50"
+            className="flex h-8 w-8 items-center justify-center shrink-0 rounded-sm text-t3 transition-interactive duration-fast hover:bg-hover2 hover:text-t1 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring disabled:opacity-50"
         >
-            <Wand2 size={18} aria-hidden="true" />
+            <Wand2 size={16} aria-hidden="true" />
         </button>
     );
 }
