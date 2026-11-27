@@ -225,33 +225,17 @@ for origin in https://other.example.com null http://mobile-check.example.com \
 done
 echo "入口自检通过：匿名请求 401，同源可访问，外站/错误协议或端口来源 403。"
 
-# Do not consume or change a user's named-tunnel configuration. HTTP/2 avoids
-# requiring UDP connectivity; Quick Tunnel still requires outbound TCP 7844.
+# Do not consume or change a user's named-tunnel configuration.
 # 本机开着 TUN/Fake-IP 代理（Clash 类，DNS 把 Cloudflare edge 劫持成 198.18.0.0/15
-# 虚拟 IP）时，cloudflared 的数据面直连 TLS 会被截断（"TLS handshake with edge
-# error: EOF"）。若装了 proxychains-ng 且系统代理可用，用 SOCKS 强制全部连接
-# （含 edge 7844）经代理出网；HTTPS_PROXY 只覆盖控制面，覆盖不了 edge 连接。
-CLOUDFLARED_CMD=(cloudflared)
-if command -v proxychains4 >/dev/null 2>&1; then
-    SYS_PROXY_HOST="$(scutil --proxy 2>/dev/null | sed -nE 's/.*HTTPProxy : ([^ ]+).*/\1/p' | head -1)"
-    SYS_PROXY_PORT="$(scutil --proxy 2>/dev/null | sed -nE 's/.*HTTPPort : ([0-9]+).*/\1/p' | head -1)"
-    if [ -n "$SYS_PROXY_HOST" ] && [ -n "$SYS_PROXY_PORT" ] \
-        && nc -z -w1 "$SYS_PROXY_HOST" "$SYS_PROXY_PORT" 2>/dev/null; then
-        cat >"$RUN_DIR/proxychains.conf" <<EOF
-strict_chain
-proxy_dns
-tcp_read_time_out 15000
-tcp_connect_time_out 8000
-[ProxyList]
-socks5 ${SYS_PROXY_HOST} ${SYS_PROXY_PORT}
-EOF
-        CLOUDFLARED_CMD=(proxychains4 -f "$RUN_DIR/proxychains.conf" cloudflared)
-        echo "检测到系统代理 ${SYS_PROXY_HOST}:${SYS_PROXY_PORT}，cloudflared 经 proxychains/SOCKS 出网。"
-    fi
-fi
+# 虚拟 IP）时，cloudflared http2 数据面的 TLS 握手会被截断（"TLS handshake with
+# edge error: EOF"）——Go 1.24 默认的 X25519MLKEM768 后量子 ClientHello 过不了部分
+# 代理的 TCP 转发（标准 TLS 小握手包实测正常，MLKEM 大包必挂；GODEBUG=tlsmlkem=0
+# 与 proxychains/SOCKS 都救不了）。QUIC（UDP 7844）经 Clash TUN 转发实测正常，
+# 所以默认 protocol=quic；无 UDP 出网的环境可用 TUNNEL_PROTOCOL=http2 覆盖。
+CLOUDFLARED_PROTOCOL="${TUNNEL_PROTOCOL:-quic}"
 printf '{}\n' >"$RUN_DIR/cloudflared.yml"
-"${CLOUDFLARED_CMD[@]}" tunnel --config "$RUN_DIR/cloudflared.yml" \
-    --no-autoupdate --protocol http2 \
+cloudflared tunnel --config "$RUN_DIR/cloudflared.yml" \
+    --no-autoupdate --protocol "$CLOUDFLARED_PROTOCOL" \
     --url "$ENTRY_URL" >"$TUNNEL_LOG" 2>&1 &
 TUNNEL_PID=$!
 if command -v caffeinate >/dev/null 2>&1; then
