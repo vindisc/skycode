@@ -63,7 +63,7 @@ ENTRY_URL="http://127.0.0.1:$MOBILE_ENTRY_PORT"
 
 for dependency in caddy cloudflared curl lsof openssl; do
     if ! command -v "$dependency" >/dev/null 2>&1; then
-        echo "缺少命令: $dependency。macOS 可先执行 brew install cloudflared caddy。" >&2
+        echo "缺少命令: ${dependency}。macOS 可先执行 brew install cloudflared caddy。" >&2
         exit 1
     fi
 done
@@ -79,14 +79,21 @@ if lsof -nP -iTCP:"$MOBILE_ENTRY_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
     fi
 fi
 
-for endpoint in \
-    http://127.0.0.1:8080/actuator/health \
-    http://127.0.0.1:8000/api/health; do
-    if ! curl --noproxy '*' -fsS --max-time 5 "$endpoint" >/dev/null; then
-        echo "本地服务尚未就绪: $endpoint。请先按项目 README 启动服务。" >&2
-        exit 1
-    fi
-done
+# Java(8080) 必须就绪。Python(8000) 只在本机进程部署下直连宿主机；
+# Docker 部署时它在容器内、由 Java 转发 /api/files* 等路由，不可达属正常，
+# 此时改用 Docker 版转发配置（全部路由走 Java 8080）。
+JAVA_UPSTREAM="http://127.0.0.1:8080/actuator/health"
+if ! curl --noproxy '*' -fsS --max-time 5 "$JAVA_UPSTREAM" >/dev/null; then
+    echo "本地服务尚未就绪: ${JAVA_UPSTREAM}。请先按项目 README 启动服务。" >&2
+    exit 1
+fi
+if curl --noproxy '*' -fsS --max-time 5 http://127.0.0.1:8000/api/health >/dev/null; then
+    UPSTREAM_MODE="local"
+else
+    UPSTREAM_MODE="docker"
+    CONFIG_FILE="$SCRIPT_DIR/mobile-access.Caddyfile.docker"
+    echo "未检测到宿主机 Python(8000)；按 Docker 部署处理，全部路由经 Java(8080) 转发。"
+fi
 
 if [ "$CHECK_ONLY" = 1 ]; then
     if [ ! -f "$STATIC_ROOT/index.html" ]; then
@@ -173,7 +180,7 @@ for ((attempt=0; attempt<15; attempt++)); do
     sleep 1
 done
 if [ "$relay_ready" != true ]; then
-    echo "本地入口启动失败，请查看 $CADDY_LOG。" >&2
+    echo "本地入口启动失败，请查看 ${CADDY_LOG}。" >&2
     exit 1
 fi
 
@@ -182,7 +189,7 @@ for route in / /api/auth/status /ws/info; do
     UNAUTH_STATUS=$(curl --noproxy '*' -sS -o /dev/null -w '%{http_code}' \
         --max-time 5 "$ENTRY_URL$route")
     if [ "$UNAUTH_STATUS" != "401" ]; then
-        echo "入口认证检查失败: $route 返回 $UNAUTH_STATUS（预期 401）；不开放公网入口。" >&2
+        echo "入口认证检查失败: $route 返回 ${UNAUTH_STATUS}（预期 401）；不开放公网入口。" >&2
         exit 1
     fi
 done
@@ -190,7 +197,7 @@ WRONG_PASSWORD_STATUS=$(curl --noproxy '*' -sS -o /dev/null -w '%{http_code}' \
     --max-time 5 -u "$MOBILE_AUTH_USERNAME:${MOBILE_AUTH_PASSWORD}-invalid" \
     "$ENTRY_URL/")
 if [ "$WRONG_PASSWORD_STATUS" != "401" ]; then
-    echo "错误密码检查失败（返回 $WRONG_PASSWORD_STATUS，预期 401）；不开放公网入口。" >&2
+    echo "错误密码检查失败（返回 ${WRONG_PASSWORD_STATUS}，预期 401）；不开放公网入口。" >&2
     exit 1
 fi
 
@@ -201,7 +208,7 @@ for route in /api/auth/status /ws/info; do
         -H 'Host: mobile-check.example.com' \
         -H 'Origin: https://mobile-check.example.com' \
         "$ENTRY_URL$route" >/dev/null; then
-        echo "公网来源兼容检查失败: $route；不开放公网入口。" >&2
+        echo "公网来源兼容检查失败: ${route}；不开放公网入口。" >&2
         exit 1
     fi
 done
@@ -212,7 +219,7 @@ for origin in https://other.example.com null http://mobile-check.example.com \
         -H 'Host: mobile-check.example.com' -H "Origin: $origin" \
         "$ENTRY_URL/ws/info")
     if [ "$ORIGIN_STATUS" != "403" ]; then
-        echo "Origin 校验失败（返回 $ORIGIN_STATUS，预期 403）；不开放公网入口。" >&2
+        echo "Origin 校验失败（返回 ${ORIGIN_STATUS}，预期 403）；不开放公网入口。" >&2
         exit 1
     fi
 done
@@ -220,8 +227,30 @@ echo "入口自检通过：匿名请求 401，同源可访问，外站/错误协
 
 # Do not consume or change a user's named-tunnel configuration. HTTP/2 avoids
 # requiring UDP connectivity; Quick Tunnel still requires outbound TCP 7844.
+# 本机开着 TUN/Fake-IP 代理（Clash 类，DNS 把 Cloudflare edge 劫持成 198.18.0.0/15
+# 虚拟 IP）时，cloudflared 的数据面直连 TLS 会被截断（"TLS handshake with edge
+# error: EOF"）。若装了 proxychains-ng 且系统代理可用，用 SOCKS 强制全部连接
+# （含 edge 7844）经代理出网；HTTPS_PROXY 只覆盖控制面，覆盖不了 edge 连接。
+CLOUDFLARED_CMD=(cloudflared)
+if command -v proxychains4 >/dev/null 2>&1; then
+    SYS_PROXY_HOST="$(scutil --proxy 2>/dev/null | sed -nE 's/.*HTTPProxy : ([^ ]+).*/\1/p' | head -1)"
+    SYS_PROXY_PORT="$(scutil --proxy 2>/dev/null | sed -nE 's/.*HTTPPort : ([0-9]+).*/\1/p' | head -1)"
+    if [ -n "$SYS_PROXY_HOST" ] && [ -n "$SYS_PROXY_PORT" ] \
+        && nc -z -w1 "$SYS_PROXY_HOST" "$SYS_PROXY_PORT" 2>/dev/null; then
+        cat >"$RUN_DIR/proxychains.conf" <<EOF
+strict_chain
+proxy_dns
+tcp_read_time_out 15000
+tcp_connect_time_out 8000
+[ProxyList]
+socks5 ${SYS_PROXY_HOST} ${SYS_PROXY_PORT}
+EOF
+        CLOUDFLARED_CMD=(proxychains4 -f "$RUN_DIR/proxychains.conf" cloudflared)
+        echo "检测到系统代理 ${SYS_PROXY_HOST}:${SYS_PROXY_PORT}，cloudflared 经 proxychains/SOCKS 出网。"
+    fi
+fi
 printf '{}\n' >"$RUN_DIR/cloudflared.yml"
-cloudflared tunnel --config "$RUN_DIR/cloudflared.yml" \
+"${CLOUDFLARED_CMD[@]}" tunnel --config "$RUN_DIR/cloudflared.yml" \
     --no-autoupdate --protocol http2 \
     --url "$ENTRY_URL" >"$TUNNEL_LOG" 2>&1 &
 TUNNEL_PID=$!
@@ -243,7 +272,7 @@ for ((attempt=0; attempt<90; attempt++)); do
     sleep 1
 done
 if [ "$tunnel_ready" != true ]; then
-    echo "隧道未能连接。检查出站 TCP 7844 和诊断日志: $TUNNEL_LOG。" >&2
+    echo "隧道未能连接。检查出站 TCP 7844 和诊断日志: ${TUNNEL_LOG}。" >&2
     exit 1
 fi
 
@@ -253,7 +282,7 @@ cat <<INFO
 手机浏览器打开: $PUBLIC_URL
 用户名: $MOBILE_AUTH_USERNAME
 密码:   $MOBILE_AUTH_PASSWORD
-凭据文件: $AUTH_FILE（权限 600，不要提交、截图或外发）
+凭据文件: ${AUTH_FILE}（权限 600，不要提交、截图或外发）
 当次网址: $RUN_DIR/url.txt
 
 请用手机蜂窝网络验证页面、消息发送、流式回复及审批。
@@ -265,5 +294,5 @@ INFO
 while kill -0 "$TUNNEL_PID" 2>/dev/null && kill -0 "$CADDY_PID" 2>/dev/null; do
     sleep 2
 done
-echo "入口或隧道进程已退出，请查看诊断日志: $RUN_DIR。" >&2
+echo "入口或隧道进程已退出，请查看诊断日志: ${RUN_DIR}。" >&2
 exit 1
