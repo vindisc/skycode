@@ -43,7 +43,7 @@ export function FileChangeItem({ file, onClick }: FileChangeItemProps) {
   return (
     <div
       onClick={handleClick}
-      className={`rounded-md border px-3 py-2 cursor-pointer transition-colors hover:opacity-90 ${riskBg}`}
+      className={`rounded-xs border px-3 py-2 cursor-pointer transition-colors hover:opacity-90 ${riskBg}`}
     >
       {/* Top row: icon + path + badges */}
       <div className="flex items-center gap-2">
@@ -59,14 +59,14 @@ export function FileChangeItem({ file, onClick }: FileChangeItemProps) {
 
         {/* Touch count badge */}
         {file.touchCount > 1 && (
-          <span className="text-[13px] px-1.5 py-0.5 rounded bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)] flex-shrink-0">
+          <span className="text-13 px-1.5 py-0.5 rounded bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)] flex-shrink-0">
             ×{file.touchCount}
           </span>
         )}
 
         {/* Test coverage gap label */}
         {file.testCoverageGap && (
-          <span className="text-[13px] px-1.5 py-0.5 rounded bg-errsoft text-err flex-shrink-0">
+          <span className="text-13 px-1.5 py-0.5 rounded bg-errsoft text-err flex-shrink-0">
             缺少测试覆盖
           </span>
         )}
@@ -74,10 +74,10 @@ export function FileChangeItem({ file, onClick }: FileChangeItemProps) {
 
       {/* Additions / Deletions summary */}
       <div className="flex items-center gap-3 mt-1 ml-7">
-        <span className="text-[13px] text-ok">+{file.totalAdditions}</span>
-        <span className="text-[13px] text-err">-{file.totalDeletions}</span>
+        <span className="text-13 text-ok">+{file.totalAdditions}</span>
+        <span className="text-13 text-err">-{file.totalDeletions}</span>
         {file.riskReason && (
-          <span className="text-[13px] text-[var(--v2-text-2)] truncate">{file.riskReason}</span>
+          <span className="text-13 text-[var(--v2-text-2)] truncate">{file.riskReason}</span>
         )}
       </div>
 
@@ -86,7 +86,7 @@ export function FileChangeItem({ file, onClick }: FileChangeItemProps) {
         <div className="mt-1.5 ml-7">
           <button
             onClick={handleExpandToggle}
-            className="panel-control text-[13px] text-accent2-ink hover:text-accent2-ink transition-colors"
+            className="panel-control text-13 text-accent2-ink hover:text-accent2-ink transition-colors"
           >
             {expanded ? '▾' : '▸'} 间接影响 ({file.indirectImpacts.length})
           </button>
@@ -94,7 +94,7 @@ export function FileChangeItem({ file, onClick }: FileChangeItemProps) {
           {expanded && (
             <ul className="mt-1 space-y-0.5">
               {file.indirectImpacts.map((impact, idx) => (
-                <li key={idx} className="text-[13px] text-[var(--v2-text-2)] flex items-start gap-1.5">
+                <li key={idx} className="text-13 text-[var(--v2-text-2)] flex items-start gap-1.5">
                   <span className={`flex-shrink-0 mt-0.5 w-1.5 h-1.5 rounded-full ${
                     impact.severity === 'high' ? 'bg-err' :
                     impact.severity === 'medium' ? 'bg-warn' : 'bg-accent2'

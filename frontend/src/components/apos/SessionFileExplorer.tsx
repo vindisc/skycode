@@ -92,7 +92,7 @@ function ChangeBadge({ changeType }: { changeType?: string }) {
   const c = config[changeType];
   if (!c) return null;
   return (
-    <span className={`ml-auto text-[13px] font-bold ${c.className} flex-shrink-0`}>
+    <span className={`ml-auto text-13 font-bold ${c.className} flex-shrink-0`}>
       [{c.label}]
     </span>
   );
@@ -134,7 +134,7 @@ function TreeNodeItem({
             ? <FolderOpen className="w-3.5 h-3.5 text-[var(--v2-text-2)] flex-shrink-0" />
             : <Folder className="w-3.5 h-3.5 text-[var(--v2-text-2)] flex-shrink-0" />
           }
-          <span className="text-[13px] text-[var(--v2-text-1)] truncate">{node.name}</span>
+          <span className="text-13 text-[var(--v2-text-1)] truncate">{node.name}</span>
         </button>
         {isExpanded && node.children?.map(child => (
           <TreeNodeItem
@@ -160,7 +160,7 @@ function TreeNodeItem({
       title={`点击查看: ${node.path}`}
     >
       <FileText className={`w-3.5 h-3.5 flex-shrink-0 ${isSelected ? 'text-accent2-ink' : 'text-[var(--v2-text-2)] group-hover:text-accent2-ink'}`} />
-      <span className={`text-[13px] truncate flex-1 min-w-0 ${isSelected ? 'text-accent2-ink font-medium' : 'text-[var(--v2-text-1)] group-hover:text-accent2-ink'}`}>{node.name}</span>
+      <span className={`text-13 truncate flex-1 min-w-0 ${isSelected ? 'text-accent2-ink font-medium' : 'text-[var(--v2-text-1)] group-hover:text-accent2-ink'}`}>{node.name}</span>
       <ChangeBadge changeType={node.changeType} />
     </div>
   );
@@ -175,10 +175,10 @@ function FileDetailPanel({ file, onViewActivity }: { file: FileChange; onViewAct
 
   return (
     <div className="px-3 py-2 border-t border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]">
-      <p className="text-[13px] font-mono text-[var(--v2-text-1)] truncate mb-1" title={file.filePath}>
+      <p className="text-13 font-mono text-[var(--v2-text-1)] truncate mb-1" title={file.filePath}>
         {file.filePath}
       </p>
-      <div className="flex items-center gap-3 text-[13px] mb-2">
+      <div className="flex items-center gap-3 text-13 mb-2">
         <span className="text-ok">+{file.additions}</span>
         <span className="text-err">-{file.deletions}</span>
         <span className={`px-1 py-0.5 rounded font-medium ${
@@ -191,7 +191,7 @@ function FileDetailPanel({ file, onViewActivity }: { file: FileChange; onViewAct
         {onViewActivity && (
           <button
             onClick={onViewActivity}
-            className="panel-control ml-auto text-[13px] text-accent2-ink hover:text-accent2-ink hover:underline transition-colors"
+            className="panel-control ml-auto text-13 text-accent2-ink hover:text-accent2-ink hover:underline transition-colors"
           >
             查看详情 →
           </button>
@@ -201,7 +201,7 @@ function FileDetailPanel({ file, onViewActivity }: { file: FileChange; onViewAct
       {displayLines ? (
         <div className="panel-diff bg-[var(--code-bg)] rounded border border-[var(--v2-border-hairline)] overflow-hidden">
           <div className="max-h-[160px] overflow-y-auto overflow-x-auto">
-            <pre className="text-[13px] font-mono leading-[1.5] p-1.5 m-0">
+            <pre className="text-13 font-mono leading-[1.5] p-1.5 m-0">
               {displayLines.map((line, i) => {
                 let lineClass = 'text-[var(--v2-text-2)]';
                 if (line.startsWith('+ ')) lineClass = 'text-ok bg-oksoft';
@@ -215,13 +215,13 @@ function FileDetailPanel({ file, onViewActivity }: { file: FileChange; onViewAct
             </pre>
           </div>
           {truncated && (
-            <div className="px-2 py-0.5 text-[13px] text-[var(--v2-text-2)] border-t border-[var(--v2-border-hairline)]">
+            <div className="px-2 py-0.5 text-13 text-[var(--v2-text-2)] border-t border-[var(--v2-border-hairline)]">
               … 剩余 {diffLines!.length - maxLines} 行
             </div>
           )}
         </div>
       ) : (
-        <div className="text-[13px] text-[var(--v2-text-2)] italic">
+        <div className="text-13 text-[var(--v2-text-2)] italic">
           无预览内容
         </div>
       )}
@@ -325,11 +325,11 @@ export function SessionFileExplorer() {
           ? <ChevronRight className="w-3 h-3 text-[var(--v2-text-2)]" />
           : <ChevronDown className="w-3 h-3 text-[var(--v2-text-2)]" />
         }
-        <span className="text-[13px] font-semibold text-[var(--v2-text-2)] uppercase tracking-wider">
+        <span className="text-13 font-semibold text-[var(--v2-text-2)] uppercase tracking-wider">
           受影响文件
         </span>
         {allChangedFiles.length > 0 && (
-          <span className="text-[13px] bg-[var(--v2-bg-hover)] text-[var(--v2-text-1)] px-1.5 py-0.5 rounded-sm ml-auto">
+          <span className="text-13 bg-[var(--v2-bg-hover)] text-[var(--v2-text-1)] px-1.5 py-0.5 rounded ml-auto">
             {allChangedFiles.length}
           </span>
         )}
@@ -340,7 +340,7 @@ export function SessionFileExplorer() {
         <>
           <div className="max-h-[200px] overflow-y-auto">
             {fileTree.length === 0 ? (
-              <p className="text-[var(--v2-text-2)] text-[13px] text-center py-4">暂无文件变更</p>
+              <p className="text-[var(--v2-text-2)] text-13 text-center py-4">暂无文件变更</p>
             ) : (
               fileTree.map(node => (
                 <TreeNodeItem
@@ -364,7 +364,7 @@ export function SessionFileExplorer() {
           )}
           {/* Footer summary */}
           {summary && (
-            <div className="px-3 py-1.5 text-[13px] text-[var(--v2-text-2)]">
+            <div className="px-3 py-1.5 text-13 text-[var(--v2-text-2)]">
               {summary}
             </div>
           )}

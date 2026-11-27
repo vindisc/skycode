@@ -17,7 +17,7 @@ export const TokenWarningBanner: React.FC = () => {
                   || tokenWarning.warningLevel === 'trigger_compact';
 
   return (
-    <div className={`px-3 py-2 text-sm rounded-md mb-2 flex items-center gap-2 ${
+    <div className={`px-3 py-2 text-sm rounded-xs mb-2 flex items-center gap-2 ${
       isCritical
         ? 'bg-errsoft text-err border border-err dark:text-err'
         : 'bg-warnsoft text-warn border border-warn dark:text-warn'
@@ -25,12 +25,12 @@ export const TokenWarningBanner: React.FC = () => {
       <span className="font-medium shrink-0">
         {isCritical ? '⚠️ 上下文窗口即将用尽' : '⚠ 上下文窗口占用较高'}
       </span>
-      <span className="text-[13px] opacity-80">
+      <span className="text-13 opacity-80">
         {tokenWarning.usagePercent.toFixed(0)}% 已使用
         ({tokenWarning.currentTokens.toLocaleString()} / {tokenWarning.maxTokens.toLocaleString()} tokens)
       </span>
       {isCritical && (
-        <span className="text-[13px] opacity-70 ml-auto">
+        <span className="text-13 opacity-70 ml-auto">
           建议执行 /compact 压缩上下文
         </span>
       )}

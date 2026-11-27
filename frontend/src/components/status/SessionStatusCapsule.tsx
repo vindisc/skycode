@@ -14,7 +14,7 @@ export function SessionStatusCapsule() {
     const meta = getSessionStatusMeta(status);
     return (
         <div
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-[13px] font-medium leading-5 ${getSessionStatusChipTone(status)}`}
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-13 font-medium leading-5 ${getSessionStatusChipTone(status)}`}
             title="会话状态"
             role="status"
         >

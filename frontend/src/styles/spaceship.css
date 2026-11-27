@@ -137,18 +137,18 @@ html.spaceship:not(.fx-cinematic) .app-workspace {
    切角第 ① 层：硬编码圆角 → 斜切（border-radius 归零 + clip-path 8~10px）
    第 ② 层 --v2-r-panel:0 见上方变量块；第 ③ 层 rounded-full 不处理（保留）
    ============================================================ */
-html.spaceship [class*="rounded-[10px]"] {
+html.spaceship [class*="rounded-sm"] {
   border-radius: 0;
   clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
 }
-html.spaceship [class*="rounded-[14px]"] {
+html.spaceship [class*="rounded-md"] {
   border-radius: 0;
   clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }
 
 /* 焦点态：clip-path 会裁掉外侧 focus ring，切角元素改为 inset 发光 */
-html.spaceship [class*="rounded-[10px]"]:focus-visible,
-html.spaceship [class*="rounded-[14px]"]:focus-visible {
+html.spaceship [class*="rounded-sm"]:focus-visible,
+html.spaceship [class*="rounded-md"]:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 2px var(--hud-cyan), inset 0 0 14px rgba(0, 229, 255, .18);
 }

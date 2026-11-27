@@ -187,7 +187,7 @@ export function MemoryPage({ onClose }: MemoryPageProps) {
     <button
       onClick={() => void handleSave()}
       disabled={saveDisabled}
-      className={`panel-control inline-flex min-h-11 md:min-h-0 items-center gap-1.5 rounded-[10px] px-3 py-2 text-sm transition-interactive duration-fast
+      className={`panel-control inline-flex min-h-11 md:min-h-0 items-center gap-1.5 rounded-sm px-3 py-2 text-sm transition-interactive duration-fast
         focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring disabled:cursor-not-allowed disabled:opacity-50
         ${dirtyNow && !conflict ? 'bg-accent2-strong text-white hover:bg-accent2' : 'bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)]'}`}
       aria-label="保存记忆"
@@ -206,7 +206,7 @@ export function MemoryPage({ onClose }: MemoryPageProps) {
           <div className="flex min-w-0 items-center gap-2">
             <Brain className="h-5 w-5 shrink-0 text-accent2-ink" aria-hidden="true" />
             <h2 className="text-[var(--v2-text-1)] text-xl font-semibold whitespace-nowrap">记忆</h2>
-            <div className="ml-1 flex rounded-[10px] border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] p-0.5" role="tablist" aria-label="记忆视图模式">
+            <div className="ml-1 flex rounded-sm border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] p-0.5" role="tablist" aria-label="记忆视图模式">
               {MODE_OPTIONS.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
@@ -214,7 +214,7 @@ export function MemoryPage({ onClose }: MemoryPageProps) {
                   aria-selected={mode === id}
                   onClick={() => switchMode(id)}
                   disabled={saving}
-                  className={`flex min-h-11 md:min-h-9 items-center gap-1 rounded-[8px] px-3 text-sm transition-colors
+                  className={`flex min-h-11 md:min-h-9 items-center gap-1 rounded-sm px-3 text-sm transition-colors
                     focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring disabled:cursor-not-allowed disabled:opacity-50
                     ${mode === id ? 'bg-surfacev2 text-[var(--v2-text-1)] shadow-e1' : 'text-[var(--v2-text-2)] hover:text-[var(--v2-text-1)]'}`}
                 >
@@ -234,7 +234,7 @@ export function MemoryPage({ onClose }: MemoryPageProps) {
             <button
               onClick={handleRefresh}
               disabled={loading || saving}
-              className="dialog-control rounded-[10px] border border-[var(--v2-border-hairline)] p-2 max-md:min-h-11 max-md:min-w-11 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)] disabled:opacity-50"
+              className="dialog-control rounded-sm border border-[var(--v2-border-hairline)] p-2 max-md:min-h-11 max-md:min-w-11 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)] disabled:opacity-50"
               aria-label="刷新记忆"
               title="刷新"
             >
@@ -242,7 +242,7 @@ export function MemoryPage({ onClose }: MemoryPageProps) {
             </button>
             <button
               onClick={handleClose}
-              className="dialog-control rounded-[10px] p-2 max-md:min-h-11 max-md:min-w-11 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)]"
+              className="dialog-control rounded-sm p-2 max-md:min-h-11 max-md:min-w-11 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)]"
               aria-label="关闭记忆页面"
             >
               <X className="h-5 w-5" />
@@ -257,7 +257,7 @@ export function MemoryPage({ onClose }: MemoryPageProps) {
             <button
               onClick={handleRefresh}
               disabled={loading || saving}
-              className="panel-control shrink-0 rounded-[8px] border border-current px-3 py-1.5 min-h-11 md:min-h-0 text-[13px] hover:opacity-80"
+              className="panel-control shrink-0 rounded-sm border border-current px-3 py-1.5 min-h-11 md:min-h-0 text-13 hover:opacity-80"
             >
               刷新
             </button>
@@ -288,7 +288,7 @@ export function MemoryPage({ onClose }: MemoryPageProps) {
               <p className="text-sm text-[var(--v2-text-2)]">暂无记忆。AI 可通过 Memory 工具写入，你也可以手动添加；内容会在后续对话中自动加载</p>
               <button
                 onClick={addEntry}
-                className="panel-control inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-[var(--v2-border-hairline)] px-4 py-2 text-sm text-[var(--v2-text-1)] hover:bg-[var(--v2-bg-hover)]"
+                className="panel-control inline-flex min-h-11 items-center gap-1.5 rounded-sm border border-[var(--v2-border-hairline)] px-4 py-2 text-sm text-[var(--v2-text-1)] hover:bg-[var(--v2-bg-hover)]"
               >
                 <Plus className="h-4 w-4" aria-hidden="true" />新增条目
               </button>
@@ -296,16 +296,16 @@ export function MemoryPage({ onClose }: MemoryPageProps) {
           ) : (
             <div className="space-y-3">
               {editedEntries.map((entry, index) => (
-                <article key={index} className="rounded-[14px] border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] p-4">
+                <article key={index} className="rounded-md border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] p-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className={`rounded px-2 py-0.5 text-[13px] font-medium ${SOURCE_BADGE[entry.source] ?? SOURCE_BADGE.AUTO}`}>
+                    <span className={`rounded px-2 py-0.5 text-13 font-medium ${SOURCE_BADGE[entry.source] ?? SOURCE_BADGE.AUTO}`}>
                       {entry.source}
                     </span>
-                    <span className="rounded bg-[var(--v2-bg-hover)] px-2 py-0.5 text-[13px] text-[var(--v2-text-2)]">{entry.category}</span>
-                    <time className="text-[13px] text-[var(--v2-text-2)]">{formatTime(entry.timestamp)}</time>
+                    <span className="rounded bg-[var(--v2-bg-hover)] px-2 py-0.5 text-13 text-[var(--v2-text-2)]">{entry.category}</span>
+                    <time className="text-13 text-[var(--v2-text-2)]">{formatTime(entry.timestamp)}</time>
                     <button
                       onClick={() => removeEntry(index)}
-                      className="dialog-control ml-auto rounded-[8px] p-2 max-md:min-h-11 max-md:min-w-11 text-[var(--v2-text-2)] hover:bg-errsoft hover:text-err"
+                      className="dialog-control ml-auto rounded-sm p-2 max-md:min-h-11 max-md:min-w-11 text-[var(--v2-text-2)] hover:bg-errsoft hover:text-err"
                       aria-label={`删除记忆条目 ${index + 1}`}
                       title="删除"
                     >
@@ -317,7 +317,7 @@ export function MemoryPage({ onClose }: MemoryPageProps) {
                     value={entry.content}
                     onChange={e => { updateEntry(index, { content: e.target.value }); autoResize(e.target); }}
                     rows={1}
-                    className="mt-2 w-full resize-none overflow-hidden rounded-[10px] border border-transparent bg-transparent p-2 text-sm leading-relaxed text-[var(--v2-text-1)] outline-none focus:border-[var(--v2-border-hairline)] focus:bg-[var(--v2-bg-surface)]"
+                    className="mt-2 w-full resize-none overflow-hidden rounded-sm border border-transparent bg-transparent p-2 text-sm leading-relaxed text-[var(--v2-text-1)] outline-none focus:border-[var(--v2-border-hairline)] focus:bg-[var(--v2-bg-surface)]"
                     placeholder="记录一条记忆…"
                     aria-label={`记忆条目 ${index + 1} 内容`}
                   />
@@ -325,7 +325,7 @@ export function MemoryPage({ onClose }: MemoryPageProps) {
               ))}
               <button
                 onClick={addEntry}
-                className="panel-control flex min-h-11 w-full items-center justify-center gap-2 rounded-[14px] border border-dashed border-[var(--v2-border-hairline)] py-3 text-sm text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)] hover:text-[var(--v2-text-1)]"
+                className="panel-control flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-dashed border-[var(--v2-border-hairline)] py-3 text-sm text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)] hover:text-[var(--v2-text-1)]"
               >
                 <Plus className="h-4 w-4" aria-hidden="true" />新增条目
               </button>
@@ -335,12 +335,12 @@ export function MemoryPage({ onClose }: MemoryPageProps) {
 
         {/* 底栏：文件用量（移动端含固定保存按钮） */}
         <footer className="flex items-center justify-between gap-3 border-t border-[var(--v2-border-hairline)] px-4 md:px-6 py-3">
-          <span className={`text-[13px] ${nearLimit ? 'text-warnstrong dark:text-warn' : 'text-[var(--v2-text-2)]'}`}>
+          <span className={`text-13 ${nearLimit ? 'text-warnstrong dark:text-warn' : 'text-[var(--v2-text-2)]'}`}>
             文件大小 {formatSize(size)}{maxSize > 0 ? ` / ${formatSize(maxSize)}` : ''}
             {nearLimit && '（接近上限）'}
           </span>
           {updatedAt && (
-            <span className="hidden md:inline text-[13px] text-[var(--v2-text-2)]">更新于 {formatTime(updatedAt)}</span>
+            <span className="hidden md:inline text-13 text-[var(--v2-text-2)]">更新于 {formatTime(updatedAt)}</span>
           )}
           <span className="md:hidden ml-auto">{saveButton}</span>
         </footer>

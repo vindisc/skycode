@@ -6,7 +6,7 @@
  * - 短代码 (<100行): PrismJS 实时高亮 (react-syntax-highlighter)
  * - 长代码 (≥100行): 默认纯 <pre>，用户可点击手动触发高亮
  *
- * §7.2 代码块：bg-sunken2 + rounded-xl + border-hairline；
+ * §7.2 代码块：bg-sunken2 + rounded-md + border-hairline；
  * 头行（文件名或语言 + 复制 ghost 钮）；
  * 正文系统等宽字体 13px（手机 14px）/ 行高 1.65，横向滚动。
  * 语法色由 zkSyntax 按主题提供：默认浅深色沿用 §4.2 语法表，
@@ -87,17 +87,17 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
     }, [highlightLines]);
 
     return (
-        <div data-spider-exclude="code-block" className="code-block relative rounded-[10px] border border-hairline bg-sunken2 overflow-hidden" style={inkColors}>
+        <div data-spider-exclude="code-block" className="code-block relative rounded-sm border border-hairline bg-sunken2 overflow-hidden" style={inkColors}>
             {/* Header：文件名或语言 + 复制 */}
             <div className="flex items-center gap-2 border-b border-hairline px-3 py-1.5">
-                <span className={`min-w-0 flex-1 truncate font-mono text-[13px] ${deepCodeTheme ? 'text-[color:var(--code-ink-muted)]' : 'text-t3'}`}>
+                <span className={`min-w-0 flex-1 truncate font-mono text-13 ${deepCodeTheme ? 'text-[color:var(--code-ink-muted)]' : 'text-t3'}`}>
                     {fileName ?? resolvedLang}
                 </span>
                 <span className="flex shrink-0 items-center gap-1">
                     {isLong && !forceHighlight && (
                         <button
                             onClick={() => setForceHighlight(true)}
-                            className={`panel-control rounded-md px-1.5 py-1 text-[13px] transition-colors duration-fast hover:bg-hover2 ${controlColors}`}
+                            className={`panel-control rounded-xs px-1.5 py-1 text-13 transition-colors duration-fast hover:bg-hover2 ${controlColors}`}
                         >
                             Enable highlighting
                         </button>
@@ -105,7 +105,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
                     {copyable && (
                         <button
                             onClick={handleCopy}
-                            className={`panel-control rounded-md p-1 transition-colors duration-fast hover:bg-hover2 ${controlColors}`}
+                            className={`panel-control rounded-xs p-1 transition-colors duration-fast hover:bg-hover2 ${controlColors}`}
                             aria-label="Copy code"
                             title={copied ? '已复制' : '复制'}
                         >

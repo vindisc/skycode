@@ -100,13 +100,13 @@ const COLLAPSED_STRIP_WIDTH = 36;
 // ═══ §7.5 桌面面板配方常量（移动抽屉文字列表路径不消费） ═══
 /** 面板 Label：12px/500/大写/tracking .06em（视觉换肤 §1.6 小标签）。
  *  颜色取 text-t3：t3 终值 #596A60 / #8B99AD 在 surface-2 上对比度 ≥4.5，满足 AA 红线。 */
-const PANEL_LABEL_CLASS = 'text-[12px] font-medium uppercase tracking-[.06em] text-t3';
+const PANEL_LABEL_CLASS = 'text-xs font-medium uppercase tracking-[.06em] text-t3';
 
 /** 「新建」按钮：主操作实心 accent-strong + 白字（≥4.5:1，与公共 Button primary 一致）。
  *  注意不可用 bg-accent2：--v2-accent 是表面强调色（dark 档刻意取亮如 #7FD4E8），压白字不达标；
  *  strong 档三主题复用 light 深值，专为白字实心底设计（accents.ts §3.4）。 */
 const PANEL_NEW_BUTTON_CLASS =
-    'w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl ' +
+    'w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md ' +
     'bg-accent2-strong text-white text-sm font-medium shadow-e2 ' +
     'transition-interactive duration-fast hover:bg-accent2-hover active:bg-accent2-active active:scale-[0.98] ' +
     'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring';
@@ -114,7 +114,7 @@ const PANEL_NEW_BUTTON_CLASS =
 /** 会话卡：surface 底浮在 app 底上（三主题自动适配），hover 泛 accent 微光 + 浮起阴影。
  *  选中视觉不再改卡片本身，由卡内 .session-active-pill 独立层承担（globals.css）。 */
 const SESSION_CARD_CLASS =
-    'session-card group relative px-3 py-2 rounded-[14px] cursor-pointer border border-hairline ' +
+    'session-card group relative px-3 py-2 rounded-md cursor-pointer border border-hairline ' +
     'bg-surfacev2 shadow-e1 transition-interactive duration-fast ' +
     'hover:shadow-raised hover:border-accent2-ring';
 
@@ -125,7 +125,7 @@ function PanelHeader({ label, count, onCollapse, onBack }: { label: string; coun
             <div className="flex items-center gap-2 min-w-0">
                 {onBack && (
                     <button type="button" onClick={onBack} aria-label="返回"
-                        className="panel-control min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-t2 hover:bg-hover2 transition-colors duration-fast">
+                        className="panel-control min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md text-t2 hover:bg-hover2 transition-colors duration-fast">
                         <ChevronLeft className="w-5 h-5" aria-hidden="true" />
                     </button>
                 )}
@@ -138,7 +138,7 @@ function PanelHeader({ label, count, onCollapse, onBack }: { label: string; coun
                     onClick={onCollapse}
                     aria-label="收起整个对话列表"
                     title="收起整个对话列表"
-                    className="panel-control inline-flex items-center gap-1.5 shrink-0 rounded-[10px] px-2 py-1 text-[13px] text-t2
+                    className="panel-control inline-flex items-center gap-1.5 shrink-0 rounded-sm px-2 py-1 text-13 text-t2
                         hover:bg-hover2 hover:text-t1 focus-visible:outline-none
                         focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
                 >
@@ -150,7 +150,7 @@ function PanelHeader({ label, count, onCollapse, onBack }: { label: string; coun
     );
 }
 
-/** §7.5 面板搜索框：bg-sunken2 + shadow-well + rounded-xl；
+/** §7.5 面板搜索框：bg-sunken2 + shadow-well + rounded-md；
  *  右侧 ⌘K Kbd 为装饰性提示（aria-hidden），输入时切换为清除钮。 */
 function PanelSearchBox({ value, onChange, placeholder, ariaLabel }: {
     value: string;
@@ -167,7 +167,7 @@ function PanelSearchBox({ value, onChange, placeholder, ariaLabel }: {
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
                 aria-label={ariaLabel}
-                className="w-full h-8 pl-8 pr-8 rounded-xl bg-sunken2 shadow-well border border-transparent
+                className="w-full h-8 pl-8 pr-8 rounded-md bg-sunken2 shadow-well border border-transparent
                     text-sm text-t1 placeholder:text-t4 transition-surface duration-fast
                     focus:outline-none focus:ring-[3px] focus:ring-accent2-ring"
             />
@@ -175,7 +175,7 @@ function PanelSearchBox({ value, onChange, placeholder, ariaLabel }: {
                 <button
                     onClick={() => onChange('')}
                     aria-label="清除搜索"
-                    className="panel-control absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded-md
+                    className="panel-control absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded-xs
                         text-t3 hover:bg-hover2 hover:text-t1 transition-interactive duration-fast"
                 >
                     <X className="w-3.5 h-3.5" />
@@ -340,7 +340,7 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
         >
             {!isDrawerMode && <GlassMaterial interactive />}
             {isDrawerMode ? (
-                /* §7.5 移动端抽屉 = 文字列表：图标 + 文字 + badge，38px 行高、rounded-xl、
+                /* §7.5 移动端抽屉 = 文字列表：图标 + 文字 + badge，38px 行高、rounded-md、
                    active = accent2-soft 底 + accent 字 + 600 字重；选中后自动关闭抽屉 */
                 <nav aria-label="主导航" className="flex-1 overflow-y-auto flex flex-col gap-1 p-3">
                     {tabs.map((tab) => {
@@ -352,7 +352,7 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
                                 title={tab.label}
                                 aria-current={isActive ? 'page' : undefined}
                                 onClick={() => handleDrawerTabSelect(tab.id)}
-                                className={`panel-control flex items-center gap-3 min-h-11 shrink-0 px-3 rounded-xl text-sm
+                                className={`panel-control flex items-center gap-3 min-h-11 shrink-0 px-3 rounded-md text-sm
                                     transition-interactive duration-fast ${
                                     isActive
                                         ? 'bg-surfacev2 text-accent2-ink font-semibold shadow-raised'
@@ -363,7 +363,7 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
                                 <span className="flex-1 text-left truncate">{tab.label}</span>
                                 {badge !== null && (
                                     <span className="min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center
-                                        rounded-full bg-accent2-soft text-accent2-ink text-[13px] font-semibold tabular-nums">
+                                        rounded-full bg-accent2-soft text-accent2-ink text-13 font-semibold tabular-nums">
                                         {badge}
                                     </span>
                                 )}
@@ -375,7 +375,7 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
                         <button
                             onClick={handleOpenInNewWindow}
                             title="在新窗口中打开侧边栏"
-                            className="panel-control flex items-center gap-3 min-h-11 shrink-0 px-3 rounded-xl text-sm
+                            className="panel-control flex items-center gap-3 min-h-11 shrink-0 px-3 rounded-md text-sm
                                 text-t3 hover:bg-hover2 hover:text-t1 transition-interactive duration-fast"
                         >
                             <ExternalLink className="w-4 h-4 shrink-0" />
@@ -407,7 +407,7 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
                             <button
                                 type="button"
                                 onClick={() => setActiveTab('sessions')}
-                                className="panel-control inline-flex min-h-9 items-center gap-1 rounded-[10px] px-2 text-[13px] text-t2
+                                className="panel-control inline-flex min-h-9 items-center gap-1 rounded-sm px-2 text-13 text-t2
                                     hover:bg-hover2 hover:text-t1 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
                             >
                                 <ChevronLeft className="w-4 h-4" aria-hidden="true" />
@@ -430,7 +430,7 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
                             aria-label="外观主题"
                             value={normalizeThemeMode(themeMode)}
                             onChange={event => setTheme({ mode: normalizeThemeMode(event.target.value) })}
-                            className="panel-control min-h-11 min-w-0 flex-1 rounded-[10px] border border-hairline bg-surfacev2 px-3 text-sm text-t1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent2-ring"
+                            className="panel-control min-h-11 min-w-0 flex-1 rounded-sm border border-hairline bg-surfacev2 px-3 text-sm text-t1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent2-ring"
                         >
                             <option value="light">浅色</option>
                             <option value="dark">深色</option>
@@ -962,13 +962,13 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                     aria-expanded={expanded}
                                     aria-label={`${expanded ? '收起' : '展开'}文件夹 ${group.directory || group.name}`}
                                     title={group.directory || group.name}
-                                    className="panel-control w-full flex items-center gap-2 px-2 py-1.5 rounded-[10px] text-t2 hover:bg-hover2
+                                    className="panel-control w-full flex items-center gap-2 px-2 py-1.5 rounded-sm text-t2 hover:bg-hover2
                                         focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
                                 >
                                     {expanded ? <ChevronDown className="w-3.5 h-3.5 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 shrink-0" />}
                                     <Folder className="w-4 h-4 shrink-0" />
                                     <span className="min-w-0 flex-1 truncate text-left text-sm font-medium text-t1">{group.name}</span>
-                                    <span className="text-[13px] tabular-nums">{group.sessions.length}</span>
+                                    <span className="text-13 tabular-nums">{group.sessions.length}</span>
                                 </button>
                                 {expanded && <div className="mt-1.5 space-y-2">
                                     {group.sessions.map(session => {
@@ -1010,7 +1010,7 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                                             {displayTitle}
                                                         </div>
                                                         {simpleMode && (
-                                                            <div className={`mt-1 flex items-center gap-1.5 text-[13px] ${isActive ? 'text-t2' : 'text-t3'}`} title={session.workingDirectory}>
+                                                            <div className={`mt-1 flex items-center gap-1.5 text-13 ${isActive ? 'text-t2' : 'text-t3'}`} title={session.workingDirectory}>
                                                                 {folder && <span className="truncate">文件夹：{folder}</span>}
                                                                 {folder && <span aria-hidden="true">·</span>}
                                                                 <span className="inline-flex items-center gap-1 whitespace-nowrap tabular-nums">
@@ -1027,7 +1027,7 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                                             <div className="card-status flex items-center gap-1.5 transition-interactive duration-fast">
                                                                 {generating && (
                                                                     <span role="status"
-                                                                        className="inline-flex shrink-0 items-center gap-1 rounded-full border border-accent2-ring bg-accent2-soft px-2 py-0.5 text-[13px] font-medium leading-5 text-accent2-ink">
+                                                                        className="inline-flex shrink-0 items-center gap-1 rounded-full border border-accent2-ring bg-accent2-soft px-2 py-0.5 text-13 font-medium leading-5 text-accent2-ink">
                                                                         <Loader2 aria-hidden="true" className="h-3 w-3 animate-spin" />
                                                                         运行中
                                                                     </span>
@@ -1080,7 +1080,7 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                     <button
                         disabled={listPending}
                         onClick={() => fetchSessions(nextCursor)}
-                        className="panel-control w-full py-2 text-[13px] text-t2 hover:text-t1 transition-interactive duration-fast"
+                        className="panel-control w-full py-2 text-13 text-t2 hover:text-t1 transition-interactive duration-fast"
                     >
                         加载更多...
                     </button>
@@ -1097,7 +1097,7 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                     <div
                         role="dialog"
                         aria-label={simpleMode ? '重命名任务' : '重命名会话'}
-                        className="fixed z-50 rounded-[14px] border border-hairline bg-surfacev2 p-3 shadow-raised"
+                        className="fixed z-50 rounded-md border border-hairline bg-surfacev2 p-3 shadow-raised"
                         style={anchoredPopoverStyle(renaming.rect, 176)}
                         onClick={(e) => e.stopPropagation()}
                     >
@@ -1118,16 +1118,16 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                             }}
                             placeholder="留空则恢复为默认名称"
                             aria-label={simpleMode ? '任务名称' : '会话名称'}
-                            className="mt-2 h-8 w-full rounded-[10px] border border-transparent bg-sunken2 px-2.5 text-sm text-t1 shadow-well
+                            className="mt-2 h-8 w-full rounded-sm border border-transparent bg-sunken2 px-2.5 text-sm text-t1 shadow-well
                                 placeholder:text-t4 focus:outline-none focus:ring-[3px] focus:ring-accent2-ring"
                         />
-                        {renameError && <p className="mt-1 text-[13px] text-err">{renameError}</p>}
+                        {renameError && <p className="mt-1 text-13 text-err">{renameError}</p>}
                         <div className="mt-3 flex justify-end gap-2">
                             <button
                                 type="button"
                                 disabled={renameSubmitting}
                                 onClick={(e) => { e.stopPropagation(); setRenaming(null); }}
-                                className="panel-control rounded-[10px] px-3 py-1.5 text-[13px] text-t2
+                                className="panel-control rounded-sm px-3 py-1.5 text-13 text-t2
                                     transition-interactive duration-fast hover:bg-hover2 hover:text-t1 disabled:opacity-40"
                             >
                                 取消
@@ -1136,7 +1136,7 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                 type="button"
                                 disabled={renameSubmitting}
                                 onClick={(e) => { e.stopPropagation(); void executeRenameSession(renaming.sessionId, renaming.value); }}
-                                className="panel-control rounded-[10px] bg-accent2 px-3 py-1.5 text-[13px] font-medium text-white shadow-e1
+                                className="panel-control rounded-sm bg-accent2 px-3 py-1.5 text-13 font-medium text-white shadow-e1
                                     transition-interactive duration-fast disabled:opacity-40"
                             >
                                 保存
@@ -1156,12 +1156,12 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                     <div
                         role="dialog"
                         aria-label={simpleMode ? '确认删除任务' : '确认删除会话'}
-                        className="fixed z-50 rounded-[14px] border border-hairline bg-surfacev2 p-3 shadow-raised"
+                        className="fixed z-50 rounded-md border border-hairline bg-surfacev2 p-3 shadow-raised"
                         style={deletePopoverStyle(confirmingDelete.rect, deleteConfirmRequired)}
                         onClick={(e) => e.stopPropagation()}
                     >
                         <p className="text-sm font-medium text-t1">{simpleMode ? '确定删除该任务？' : '确定删除该会话？'}</p>
-                        <p className="mt-1 text-[13px] text-t3">删除后不可恢复</p>
+                        <p className="mt-1 text-13 text-t3">删除后不可恢复</p>
                         {deleteConfirmRequired && (
                             <div className="mt-2">
                                 <input
@@ -1177,10 +1177,10 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                     }}
                                     placeholder="请输入验证码"
                                     aria-label="删除验证码"
-                                    className="h-8 w-full rounded-[10px] border border-transparent bg-sunken2 px-2.5 text-sm text-t1 shadow-well
+                                    className="h-8 w-full rounded-sm border border-transparent bg-sunken2 px-2.5 text-sm text-t1 shadow-well
                                         placeholder:text-t4 focus:outline-none focus:ring-[3px] focus:ring-accent2-ring"
                                 />
-                                {deleteCodeError && <p className="mt-1 text-[13px] text-err">{deleteCodeError}</p>}
+                                {deleteCodeError && <p className="mt-1 text-13 text-err">{deleteCodeError}</p>}
                             </div>
                         )}
                         <div className="mt-3 flex justify-end gap-2">
@@ -1188,7 +1188,7 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                 type="button"
                                 disabled={deleteSubmitting}
                                 onClick={(e) => { e.stopPropagation(); setConfirmingDelete(null); }}
-                                className="panel-control rounded-[10px] px-3 py-1.5 text-[13px] text-t2
+                                className="panel-control rounded-sm px-3 py-1.5 text-13 text-t2
                                     transition-interactive duration-fast hover:bg-hover2 hover:text-t1 disabled:opacity-40"
                             >
                                 取消
@@ -1197,7 +1197,7 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                 type="button"
                                 disabled={deleteSubmitting || (deleteConfirmRequired && !deleteCode)}
                                 onClick={(e) => { e.stopPropagation(); void executeDeleteSession(confirmingDelete.sessionId, deleteCode); }}
-                                className="panel-control rounded-[10px] bg-err px-3 py-1.5 text-[13px] font-medium text-white shadow-e1
+                                className="panel-control rounded-sm bg-err px-3 py-1.5 text-13 font-medium text-white shadow-e1
                                     transition-interactive duration-fast dark:text-app2 disabled:opacity-40"
                             >
                                 确认删除
@@ -1310,7 +1310,7 @@ function SimpleTaskList({ onCollapse, onSessionActivated, onBack }: { onCollapse
             {groups.map(group => {
                 if (group.tasks.length === 0) return null;
                 const collapsedGroup = collapsed.has(group.status); const GroupIcon = iconFor(group.status);
-                return <section key={group.status} className="mb-3"><button onClick={() => setCollapsed(previous => { const next = new Set(previous); next.has(group.status) ? next.delete(group.status) : next.add(group.status); return next; })} className="panel-control flex w-full items-center gap-2 px-2 py-1.5 text-[13px] font-medium text-t2"><span>{collapsedGroup ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}</span><GroupIcon className={`h-3.5 w-3.5 ${toneFor(group.status)} ${group.status === 'RUNNING' ? 'animate-spin' : ''}`} />{group.label}<span className="ml-auto text-t2 tabular-nums whitespace-nowrap shrink-0">{group.tasks.length}</span></button>
+                return <section key={group.status} className="mb-3"><button onClick={() => setCollapsed(previous => { const next = new Set(previous); next.has(group.status) ? next.delete(group.status) : next.add(group.status); return next; })} className="panel-control flex w-full items-center gap-2 px-2 py-1.5 text-13 font-medium text-t2"><span>{collapsedGroup ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}</span><GroupIcon className={`h-3.5 w-3.5 ${toneFor(group.status)} ${group.status === 'RUNNING' ? 'animate-spin' : ''}`} />{group.label}<span className="ml-auto text-t2 tabular-nums whitespace-nowrap shrink-0">{group.tasks.length}</span></button>
                     {!collapsedGroup && <div className="space-y-2">{group.tasks.map(task => {
                         const isActive = task.sessionId === currentSessionId;
                         return (
@@ -1332,7 +1332,7 @@ function SimpleTaskList({ onCollapse, onSessionActivated, onBack }: { onCollapse
                             <div className="relative flex items-start gap-2">
                                 <div className="min-w-0 flex-1">
                                     <p className={`truncate text-sm ${isActive ? 'font-semibold' : 'font-medium'} text-t1`}>{task.title}</p>
-                                    <p className={`mt-1 flex items-center gap-1.5 text-[13px] ${isActive ? 'text-t2' : 'text-t3'}`}>
+                                    <p className={`mt-1 flex items-center gap-1.5 text-13 ${isActive ? 'text-t2' : 'text-t3'}`}>
                                         <span className="truncate">{task.folderName}{task.hint ? ` · ${task.hint}` : ''}</span>
                                         <span aria-hidden="true">·</span>
                                         <span className="inline-flex items-center gap-1 whitespace-nowrap tabular-nums">
@@ -1399,7 +1399,7 @@ function TaskPanel({ tasks, onClear }: { tasks: Map<string, TaskState>; onClear:
                     <Chip variant="accent" className="tabular-nums">{tasks.size}</Chip>
                     <button
                         onClick={onClear}
-                        className="panel-control p-1.5 rounded-[10px] hover:bg-hover2 text-t3 hover:text-t1
+                        className="panel-control p-1.5 rounded-sm hover:bg-hover2 text-t3 hover:text-t1
                             transition-interactive duration-fast"
                         title="清除已完成任务"
                     >
@@ -1413,7 +1413,7 @@ function TaskPanel({ tasks, onClear }: { tasks: Map<string, TaskState>; onClear:
                 <div key={taskId} className="mb-1">
                     <button
                         onClick={() => toggleTask(taskId)}
-                        className="panel-control w-full px-3 py-2 rounded-xl hover:bg-hover2 flex items-center gap-2
+                        className="panel-control w-full px-3 py-2 rounded-md hover:bg-hover2 flex items-center gap-2
                             transition-interactive duration-fast"
                     >
                         {expandedTasks.has(taskId) ? (
@@ -1438,7 +1438,7 @@ function TaskPanel({ tasks, onClear }: { tasks: Map<string, TaskState>; onClear:
                                 </div>
                             )}
                             {task.result !== undefined && task.result !== null && (
-                                <div className="text-[13px] text-t2 p-2 bg-sunken2 rounded-[10px]">
+                                <div className="text-13 text-t2 p-2 bg-sunken2 rounded-sm">
                                     {typeof task.result === 'string' ? task.result : JSON.stringify(task.result).slice(0, 100)}
                                 </div>
                             )}

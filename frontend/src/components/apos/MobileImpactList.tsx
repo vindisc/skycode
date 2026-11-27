@@ -33,7 +33,7 @@ export function MobileImpactList({ onViewAll }: MobileImpactListProps) {
   if (top5.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[44px] px-3">
-        <span className="text-[13px] text-t3">暂无变更影响数据</span>
+        <span className="text-13 text-t3">暂无变更影响数据</span>
       </div>
     );
   }
@@ -43,18 +43,18 @@ export function MobileImpactList({ onViewAll }: MobileImpactListProps) {
       {top5.map((file) => (
         <div
           key={file.filePath}
-          className="flex items-center gap-2 min-h-[44px] rounded-[10px] bg-surface2 px-3 py-2"
+          className="flex items-center gap-2 min-h-[44px] rounded-sm bg-surface2 px-3 py-2"
         >
           {/* 风险色标 */}
           <span
             className={`flex-shrink-0 w-2.5 h-2.5 rounded-full ${RISK_COLORS[file.riskLevel] ?? RISK_COLORS.safe}`}
           />
           {/* 文件名 */}
-          <span className="flex-1 text-[13px] text-t1 truncate font-mono">
+          <span className="flex-1 text-13 text-t1 truncate font-mono">
             {file.filePath.split('/').pop() ?? file.filePath}
           </span>
           {/* touchCount */}
-          <span className="flex-shrink-0 text-[13px] text-t3 tabular-nums">
+          <span className="flex-shrink-0 text-13 text-t3 tabular-nums">
             ×{file.touchCount}
           </span>
         </div>
@@ -64,7 +64,7 @@ export function MobileImpactList({ onViewAll }: MobileImpactListProps) {
       {aggregatedChanges.length > 5 && onViewAll && (
         <button
           onClick={onViewAll}
-          className="panel-control flex items-center justify-center min-h-[44px] min-w-[44px] rounded-[10px] text-[13px] text-accent2-ink hover:bg-accent2-soft active:bg-accent2-soft transition-colors duration-fast"
+          className="panel-control flex items-center justify-center min-h-[44px] min-w-[44px] rounded-sm text-13 text-accent2-ink hover:bg-accent2-soft active:bg-accent2-soft transition-colors duration-fast"
         >
           查看全部 ({aggregatedChanges.length})
         </button>

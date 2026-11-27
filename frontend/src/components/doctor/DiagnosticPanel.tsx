@@ -70,7 +70,7 @@ export const DiagnosticPanel: React.FC<{
     };
 
     return (
-        <div className="rounded-[14px] border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] p-4 space-y-4">
+        <div className="rounded-md border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] p-4 space-y-4">
             {/* Header + Summary + Actions */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -79,18 +79,18 @@ export const DiagnosticPanel: React.FC<{
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                     <div className={`flex items-center gap-3 px-3 py-1 rounded-full border ${statusColor}`}>
-                        <span className="text-[13px]">✅ {summary.ok}</span>
-                        {summary.warn > 0 && <span className="text-[13px]">⚠️ {summary.warn}</span>}
-                        {summary.error > 0 && <span className="text-[13px]">❌ {summary.error}</span>}
+                        <span className="text-13">✅ {summary.ok}</span>
+                        {summary.warn > 0 && <span className="text-13">⚠️ {summary.warn}</span>}
+                        {summary.error > 0 && <span className="text-13">❌ {summary.error}</span>}
                     </div>
                     {onRecheck && (
                         <button onClick={onRecheck}
-                            className="panel-control flex items-center gap-1 px-2 py-1 rounded text-[13px] bg-accent2-strong hover:bg-accent2-strong text-white">
+                            className="panel-control flex items-center gap-1 px-2 py-1 rounded text-13 bg-accent2-strong hover:bg-accent2-strong text-white">
                             <RefreshCw size={12} /> 重新检查
                         </button>
                     )}
                     <button onClick={handleExport} disabled={exporting}
-                        className="panel-control flex items-center gap-1 px-2 py-1 rounded text-[13px] bg-[var(--bg-tertiary)] hover:bg-[var(--v2-bg-surface)] text-[var(--v2-text-2)]">
+                        className="panel-control flex items-center gap-1 px-2 py-1 rounded text-13 bg-[var(--bg-tertiary)] hover:bg-[var(--v2-bg-surface)] text-[var(--v2-text-2)]">
                         <Download size={12} /> 导出报告
                     </button>
                 </div>
@@ -100,28 +100,28 @@ export const DiagnosticPanel: React.FC<{
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {Object.entries(grouped).map(([category, items]) => (
                     <div key={category} className="space-y-1">
-                        <div className="text-[13px] font-medium text-[var(--v2-text-2)] mb-1.5">
+                        <div className="text-13 font-medium text-[var(--v2-text-2)] mb-1.5">
                             {CATEGORY_LABELS[category] ?? category}
                         </div>
                         <div className="space-y-1">
                             {items.map((check) => (
                                 <div key={check.name}
-                                     className="flex items-center justify-between px-3 py-1.5 rounded-md bg-[var(--bg-tertiary)]">
+                                     className="flex items-center justify-between px-3 py-1.5 rounded-xs bg-[var(--bg-tertiary)]">
                                     <div className="flex items-center gap-2">
                                         <StatusIcon status={check.status} />
                                         <span className="text-sm text-[var(--v2-text-1)]">{check.name}</span>
                                     </div>
                                     <div className="text-right flex items-center gap-2">
                                         <div>
-                                            <span className="text-[13px] text-[var(--v2-text-2)]">{check.value}</span>
+                                            <span className="text-13 text-[var(--v2-text-2)]">{check.value}</span>
                                             {check.hint && (
-                                                <div className="text-[13px] text-[var(--v2-text-2)] italic">{check.hint}</div>
+                                                <div className="text-13 text-[var(--v2-text-2)] italic">{check.hint}</div>
                                             )}
                                         </div>
                                         {check.actions && Object.entries(check.actions).map(([label, action]) => (
                                             <button key={label}
                                                 onClick={() => onAction?.(label, action)}
-                                                className="panel-control text-[13px] text-accent2-ink hover:text-accent2-ink underline">
+                                                className="panel-control text-13 text-accent2-ink hover:text-accent2-ink underline">
                                                 {label}
                                             </button>
                                         ))}

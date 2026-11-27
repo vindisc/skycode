@@ -53,7 +53,7 @@ interface StepItemProps {
 function StepItem({ step, isCurrent, onToggleChecked }: StepItemProps) {
     return (
         <div
-            className={`group flex items-start gap-2 px-3 py-2 rounded-[10px] transition-colors
+            className={`group flex items-start gap-2 px-3 py-2 rounded-sm transition-colors
                 ${isCurrent ? 'bg-accent2-soft border border-accent2' : 'hover:bg-[var(--v2-bg-hover)]'}`}
         >
             {/* 拖拽把手占位 */}
@@ -85,20 +85,20 @@ function StepItem({ step, isCurrent, onToggleChecked }: StepItemProps) {
                     {step.title}
                 </div>
                 {step.description && (
-                    <div className="text-[13px] text-[var(--v2-text-2)] mt-0.5 line-clamp-2">
+                    <div className="text-13 text-[var(--v2-text-2)] mt-0.5 line-clamp-2">
                         {step.description}
                     </div>
                 )}
                 {/* 元信息 */}
                 <div className="flex items-center gap-3 mt-1">
                     {step.estimatedMinutes != null && (
-                        <span className="flex items-center gap-1 text-[13px] text-[var(--v2-text-2)]">
+                        <span className="flex items-center gap-1 text-13 text-[var(--v2-text-2)]">
                             <Clock className="w-3 h-3" />
                             {step.estimatedMinutes}min
                         </span>
                     )}
                     {step.files && step.files.length > 0 && (
-                        <span className="flex items-center gap-1 text-[13px] text-[var(--v2-text-2)]">
+                        <span className="flex items-center gap-1 text-13 text-[var(--v2-text-2)]">
                             <FileText className="w-3 h-3" />
                             {step.files.length} 文件
                         </span>
@@ -122,7 +122,7 @@ function ProgressBar({ steps }: { steps: PlanStep[] }) {
 
     return (
         <div className="px-3 py-2">
-            <div className="flex items-center justify-between text-[13px] text-[var(--v2-text-2)] mb-1">
+            <div className="flex items-center justify-between text-13 text-[var(--v2-text-2)] mb-1">
                 <span>进度</span>
                 <span>{completed}/{total} ({pct}%)</span>
             </div>
@@ -144,20 +144,20 @@ function SnapshotHistory() {
     return (
         <div className="border-t border-[var(--v2-border-hairline)] px-3 py-2">
             <div className="flex items-center justify-between mb-2">
-                <span className="flex items-center gap-1 text-[13px] font-medium text-[var(--v2-text-2)]">
+                <span className="flex items-center gap-1 text-13 font-medium text-[var(--v2-text-2)]">
                     <History className="w-3.5 h-3.5" />
                     版本快照
                 </span>
                 <button
                     onClick={saveSnapshot}
-                    className="panel-control text-[13px] px-2 py-0.5 rounded bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)]
+                    className="panel-control text-13 px-2 py-0.5 rounded bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)]
                         hover:text-[var(--v2-text-1)] transition-colors"
                 >
                     保存
                 </button>
             </div>
             {history.length === 0 ? (
-                <div className="text-[13px] text-[var(--v2-text-2)] text-center py-2">
+                <div className="text-13 text-[var(--v2-text-2)] text-center py-2">
                     暂无快照
                 </div>
             ) : (
@@ -166,7 +166,7 @@ function SnapshotHistory() {
                         <button
                             key={snap.id}
                             onClick={() => restoreSnapshot(snap.id)}
-                            className="panel-control w-full text-left px-2 py-1.5 rounded text-[13px]
+                            className="panel-control w-full text-left px-2 py-1.5 rounded text-13
                                 hover:bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)] transition-colors"
                         >
                             <div className="truncate font-medium">{snap.planName}</div>
@@ -194,7 +194,7 @@ function PlanPanelContent() {
                     {planName || '执行计划'}
                 </h2>
                 {planOverview && (
-                    <p className="text-[13px] text-[var(--v2-text-2)] mt-1 line-clamp-3">
+                    <p className="text-13 text-[var(--v2-text-2)] mt-1 line-clamp-3">
                         {planOverview}
                     </p>
                 )}
@@ -308,13 +308,13 @@ function MobileDrawer() {
                 onClick={() => setOpen(true)}
                 className="panel-control fixed bottom-14 left-0 right-0 z-30 mx-4
                     flex items-center justify-between px-4 py-2
-                    bg-[var(--v2-bg-sunken)] border border-[var(--v2-border-hairline)] rounded-xl shadow-e3
+                    bg-[var(--v2-bg-sunken)] border border-[var(--v2-border-hairline)] rounded-md shadow-e3
                     text-sm text-[var(--v2-text-1)]"
             >
                 <span className="font-medium truncate">
                     📋 {usePlanStore.getState().planName || '执行计划'}
                 </span>
-                <span className="text-[13px] text-[var(--v2-text-2)] ml-2 shrink-0">
+                <span className="text-13 text-[var(--v2-text-2)] ml-2 shrink-0">
                     {completedCount}/{steps.length}
                 </span>
             </button>
@@ -333,7 +333,7 @@ function MobileDrawer() {
                 aria-modal="true"
                 aria-label="计划面板"
                 className={`fixed bottom-0 left-0 right-0 z-50
-                    bg-[var(--v2-bg-surface)] rounded-t-2xl shadow-2xl
+                    bg-[var(--v2-bg-surface)] rounded-t-md shadow-2xl
                     transition-transform duration-base ease-out
                     ${open ? 'translate-y-0' : 'translate-y-full'}`}
                 style={{ maxHeight: '75vh' }}

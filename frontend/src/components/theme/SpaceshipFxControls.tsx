@@ -23,7 +23,7 @@ export function SpaceshipFxControls({ className, compact = false }: { className?
 
     return (
         <div className={className}>
-            <div className={cn('font-medium text-t2', compact ? 'mb-2 text-[13px]' : 'mb-3 text-sm')}>星舰特效</div>
+            <div className={cn('font-medium text-t2', compact ? 'mb-2 text-13' : 'mb-3 text-sm')}>星舰特效</div>
             <div className="space-y-3">
                 <div className="flex items-center justify-between gap-4">
                     <div>

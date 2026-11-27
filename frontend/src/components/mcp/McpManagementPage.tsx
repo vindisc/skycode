@@ -67,7 +67,7 @@ export function McpManagementPage({ onClose }: McpManagementPageProps) {
               低频或高风险 MCP 默认关闭；你可以随时决定哪些服务向模型开放工具。
             </p>
           </div>
-          <button onClick={onClose} className="dialog-control rounded-[10px] p-2 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)]" aria-label="关闭 MCP 管理">
+          <button onClick={onClose} className="dialog-control rounded-sm p-2 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)]" aria-label="关闭 MCP 管理">
             <X className="h-5 w-5" />
           </button>
         </header>
@@ -77,7 +77,7 @@ export function McpManagementPage({ onClose }: McpManagementPageProps) {
             <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-sm text-[var(--v2-text-2)]">
               <span>{total} 个服务</span>
               <span className="text-ok">{enabledCount} 个已启用</span>
-              <span className="flex items-center gap-1 text-[13px] text-[var(--v2-text-2)]">
+              <span className="flex items-center gap-1 text-13 text-[var(--v2-text-2)]">
                 <ShieldCheck className="h-4 w-4" /> 状态保存在本机
               </span>
             </div>
@@ -88,15 +88,15 @@ export function McpManagementPage({ onClose }: McpManagementPageProps) {
                   value={query}
                   onChange={event => setQuery(event.target.value)}
                   placeholder="搜索服务或工具"
-                  className="w-full max-md:min-h-11 rounded-[10px] border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] py-2 pl-9 pr-3 text-sm text-[var(--v2-text-1)] outline-none focus:ring-2 focus:ring-accent2-ring"
+                  className="w-full max-md:min-h-11 rounded-sm border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] py-2 pl-9 pr-3 text-sm text-[var(--v2-text-1)] outline-none focus:ring-2 focus:ring-accent2-ring"
                 />
               </label>
-              <button onClick={() => void loadServices()} disabled={loading} className="dialog-control rounded-[10px] border border-[var(--v2-border-hairline)] p-2 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)] disabled:opacity-50" aria-label="刷新 MCP 服务">
+              <button onClick={() => void loadServices()} disabled={loading} className="dialog-control rounded-sm border border-[var(--v2-border-hairline)] p-2 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)] disabled:opacity-50" aria-label="刷新 MCP 服务">
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               </button>
             </div>
           </div>
-          {error && <p className="mt-3 rounded-[10px] bg-errsoft px-3 py-2 text-sm text-err">加载或更新失败：{error}</p>}
+          {error && <p className="mt-3 rounded-sm bg-errsoft px-3 py-2 text-sm text-err">加载或更新失败：{error}</p>}
         </div>
 
         <main className="flex-1 overflow-y-auto px-4 md:px-6 py-4">
@@ -138,7 +138,7 @@ function ServiceCard({ service, busy, expanded, onExpand, onToggle }: {
       : 'bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)]';
 
   return (
-    <article className={`rounded-[14px] border p-4 transition-colors ${service.enabled ? 'border-accent2-ring bg-accent2-soft' : 'border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]'}`}>
+    <article className={`rounded-md border p-4 transition-colors ${service.enabled ? 'border-accent2-ring bg-accent2-soft' : 'border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]'}`}>
       <div className="flex items-start gap-3">
         <button onClick={onExpand} disabled={service.tools.length === 0} className="dialog-control mt-0.5 rounded p-1 text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)] disabled:opacity-30" aria-label={`${expanded ? '收起' : '展开'} ${service.displayName} 工具`}>
           {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -146,11 +146,11 @@ function ServiceCard({ service, busy, expanded, onExpand, onToggle }: {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-[var(--v2-text-1)] text-base font-semibold">{service.displayName}</h3>
-            <span className="rounded bg-[var(--v2-bg-hover)] px-2 py-0.5 text-[13px] text-[var(--v2-text-2)]">{DOMAIN_LABELS[service.domain] ?? service.domain}</span>
-            <span className={`rounded px-2 py-0.5 text-[13px] ${statusTone}`}>{STATUS_LABELS[service.status] ?? service.status}</span>
+            <span className="rounded bg-[var(--v2-bg-hover)] px-2 py-0.5 text-13 text-[var(--v2-text-2)]">{DOMAIN_LABELS[service.domain] ?? service.domain}</span>
+            <span className={`rounded px-2 py-0.5 text-13 ${statusTone}`}>{STATUS_LABELS[service.status] ?? service.status}</span>
           </div>
-          <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-[var(--v2-text-2)]">{service.description}</p>
-          <p className="mt-2 text-[13px] text-[var(--v2-text-2)]">
+          <p className="mt-1 line-clamp-2 text-13 leading-relaxed text-[var(--v2-text-2)]">{service.description}</p>
+          <p className="mt-2 text-13 text-[var(--v2-text-2)]">
             {service.source === 'registry' ? `${service.toolCount} 个白名单工具` : service.toolCount > 0 ? `${service.toolCount} 个已发现工具` : '工具将在连接后发现'}
             {' · '}{service.transportType}
           </p>
@@ -172,10 +172,10 @@ function ServiceCard({ service, busy, expanded, onExpand, onToggle }: {
         <div className="mt-3 border-t border-[var(--v2-border-hairline)] pt-3">
           <ul className="space-y-2">
             {service.tools.map(tool => (
-              <li key={tool.id} className="flex items-start justify-between gap-3 text-[13px]">
+              <li key={tool.id} className="flex items-start justify-between gap-3 text-13">
                 <div className="min-w-0">
                   <span className="text-[var(--v2-text-2)]">{tool.name}</span>
-                  <span className="ml-2 font-mono text-[13px] text-[var(--v2-text-2)]">{tool.toolName}</span>
+                  <span className="ml-2 font-mono text-13 text-[var(--v2-text-2)]">{tool.toolName}</span>
                 </div>
                 {!tool.allowlisted && <span className="shrink-0 text-warnstrong dark:text-warn">未授权</span>}
               </li>

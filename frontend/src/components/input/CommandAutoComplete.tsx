@@ -48,7 +48,7 @@ export const CommandAutoComplete: React.FC<CommandAutoCompleteProps> = ({
 
     return (
         <div className="absolute bottom-full mb-1 left-0 z-50 bg-surfacev2
-            border rounded-[10px] shadow-e4 max-h-64 overflow-y-auto w-72">
+            border rounded-sm shadow-e4 max-h-64 overflow-y-auto w-72">
             {filtered.map((cmd, i) => (
                 <button key={cmd.name}
                     className={`panel-control w-full text-left px-3 py-2 flex flex-col
@@ -57,14 +57,14 @@ export const CommandAutoComplete: React.FC<CommandAutoCompleteProps> = ({
                     onMouseEnter={() => setSelectedIndex(i)}>
                     <div className="flex items-center gap-2">
                         <span className="font-mono font-semibold">/{cmd.name}</span>
-                        <span className={`text-[13px] px-1 rounded
+                        <span className={`text-13 px-1 rounded
                             ${cmd.category === 'builtin' ? 'bg-accent2-soft text-accent2-ink dark:text-accent2-ink'
                             : cmd.category === 'skill' ? 'bg-oksoft text-ok dark:text-ok'
                             : 'bg-surface2 text-t2'}`}>
                             {cmd.category}
                         </span>
                     </div>
-                    <span className={`text-[13px] mt-0.5 ${i === selectedIndex ? 'text-accent2-ink' : 'text-t2'}`}>
+                    <span className={`text-13 mt-0.5 ${i === selectedIndex ? 'text-accent2-ink' : 'text-t2'}`}>
                         {cmd.description}
                     </span>
                 </button>

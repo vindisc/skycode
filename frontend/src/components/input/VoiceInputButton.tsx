@@ -65,7 +65,7 @@ const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({ onTranscript, disab
             <button
                 onClick={handleClick}
                 disabled={buttonDisabled}
-                className={`panel-control ${compact ? 'h-11 w-11 flex items-center justify-center' : 'h-10 w-10 flex items-center justify-center'} shrink-0 p-2 rounded-[10px] transition-interactive duration-fast
+                className={`panel-control ${compact ? 'h-11 w-11 flex items-center justify-center' : 'h-10 w-10 flex items-center justify-center'} shrink-0 p-2 rounded-sm transition-interactive duration-fast
                     focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
                     ${buttonDisabled
                         ? 'text-t4 cursor-not-allowed opacity-50'
@@ -86,7 +86,7 @@ const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({ onTranscript, disab
                     <Mic size={18} />
                 )}
             </button>
-            <div className={compact ? 'absolute bottom-full right-0 z-30 mb-2 flex max-w-[240px] items-center gap-1 rounded-[10px] bg-surfacev2 shadow-e2' : 'flex items-center gap-1'}>
+            <div className={compact ? 'absolute bottom-full right-0 z-30 mb-2 flex max-w-[240px] items-center gap-1 rounded-sm bg-surfacev2 shadow-e2' : 'flex items-center gap-1'}>
             {isRecording && (
                 <span className="flex items-center gap-0.5 h-4" aria-hidden="true">
                     {soundwaveBars.map((bar, i) => (
@@ -99,12 +99,12 @@ const VoiceInputButton: React.FC<VoiceInputButtonProps> = ({ onTranscript, disab
                 </span>
             )}
             {isRecording && (
-                <span className="text-[13px] text-t3 font-mono tabular-nums select-none">
+                <span className="text-13 text-t3 font-mono tabular-nums select-none">
                     {formatTime(elapsedSeconds)}
                 </span>
             )}
             {isError && error && (
-                <span className="text-[13px] text-err select-none whitespace-normal break-words">{error}</span>
+                <span className="text-13 text-err select-none whitespace-normal break-words">{error}</span>
             )}
             </div>
         </div>

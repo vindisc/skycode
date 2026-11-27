@@ -2,7 +2,7 @@
  * EvidenceBundleView — RV-4 证据包详情展示
  *
  * 设计风格对齐 JourneyVerifyPanel：
- * - 紧凑面板：border rounded-[10px] p-4
+ * - 紧凑面板：border rounded-sm p-4
  * - 状态色：verified=green / failed=red / inconclusive=amber / running=blue
  * - 按 EvidenceItem.type 分组展示，提供 tabs 切换
  *
@@ -86,7 +86,7 @@ const EvidenceBundleLoader: React.FC<EvidenceBundleViewProps> = ({ bundleId }) =
 
     if (state.status === 'loading') {
         return (
-            <div className="evidence-bundle-view border rounded-[14px] p-4 mt-2 text-[13px] text-t2">
+            <div className="evidence-bundle-view border rounded-md p-4 mt-2 text-13 text-t2">
                 Loading evidence bundle…
             </div>
         );
@@ -94,7 +94,7 @@ const EvidenceBundleLoader: React.FC<EvidenceBundleViewProps> = ({ bundleId }) =
 
     if (state.status === 'error') {
         return (
-            <div className="evidence-bundle-view border rounded-[14px] p-4 mt-2 text-[13px] text-err bg-errsoft">
+            <div className="evidence-bundle-view border rounded-md p-4 mt-2 text-13 text-err bg-errsoft">
                 Failed to load evidence bundle: {state.message}
             </div>
         );
@@ -105,11 +105,11 @@ const EvidenceBundleLoader: React.FC<EvidenceBundleViewProps> = ({ bundleId }) =
     const activeItems = activeTab ? grouped[activeTab] ?? [] : [];
 
     return (
-        <div className="evidence-bundle-view border rounded-[14px] p-4 mt-2">
+        <div className="evidence-bundle-view border rounded-md p-4 mt-2">
             <Header bundle={currentBundle} />
 
             {groupKeys.length === 0 ? (
-                <div className="mt-3 text-[13px] text-t2">No evidence items.</div>
+                <div className="mt-3 text-13 text-t2">No evidence items.</div>
             ) : (
                 <>
                     <div className="flex flex-wrap gap-1 mt-3 border-b pb-2">
@@ -119,7 +119,7 @@ const EvidenceBundleLoader: React.FC<EvidenceBundleViewProps> = ({ bundleId }) =
                                 type="button"
                                 onClick={() => setSelectedTab(key)}
                                 className={
-                                    'px-2 py-0.5 text-[13px] rounded transition-colors ' +
+                                    'px-2 py-0.5 text-13 rounded transition-colors ' +
                                     (activeTab === key
                                         ? 'bg-accent2-soft text-accent2-ink font-medium'
                                         : 'text-t2 hover:bg-surface2')
@@ -152,18 +152,18 @@ const Header: React.FC<{ bundle: EvidenceBundle }> = ({ bundle }) => (
                     <h3 className="truncate text-base font-semibold">
                         {bundle.claim || `Evidence Bundle ${shortId(bundle.bundleId)}`}
                     </h3>
-                    <span className="px-1.5 py-0.5 text-[13px] rounded bg-surface2 text-t2 uppercase">
+                    <span className="px-1.5 py-0.5 text-13 rounded bg-surface2 text-t2 uppercase">
                         {bundle.kind}
                     </span>
                 </div>
-                <div className="text-[13px] text-t2 mt-0.5 font-mono truncate">
+                <div className="text-13 text-t2 mt-0.5 font-mono truncate">
                     {shortId(bundle.bundleId)} · {formatTimestamp(bundle.createdAt)}
                 </div>
             </div>
             <VerdictBadge verdict={bundle.verdict} />
         </div>
         {scopeNote(bundle) && (
-            <p className="mt-2 text-[13px] text-t2">{scopeNote(bundle)}</p>
+            <p className="mt-2 text-13 text-t2">{scopeNote(bundle)}</p>
         )}
     </div>
 );
@@ -185,25 +185,25 @@ function scopeNote(bundle: EvidenceBundle): string | null {
 const VerdictBadge: React.FC<{ verdict: string }> = ({ verdict }) => {
     const v = (verdict || '').toLowerCase();
     if (v === 'verified' || v === 'passed') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-oksoft text-ok">Verified</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-oksoft text-ok">Verified</span>;
     }
     if (v === 'failed') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-errsoft text-err">Failed</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-errsoft text-err">Failed</span>;
     }
     if (v === 'inconclusive') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-warnsoft text-warn">Inconclusive</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-warnsoft text-warn">Inconclusive</span>;
     }
     if (v === 'unavailable') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-warnsoft text-warn">Unavailable</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-warnsoft text-warn">Unavailable</span>;
     }
-    return <span className="px-2 py-0.5 text-[13px] rounded bg-accent2-soft text-accent2-ink">Unknown</span>;
+    return <span className="px-2 py-0.5 text-13 rounded bg-accent2-soft text-accent2-ink">Unknown</span>;
 };
 
 // ==================== Item Group Renderer ====================
 
 const ItemGroupRenderer: React.FC<{ type: string; items: EvidenceItem[] }> = ({ type, items }) => {
     if (items.length === 0) {
-        return <div className="text-[13px] text-t2">No items.</div>;
+        return <div className="text-13 text-t2">No items.</div>;
     }
     switch (type) {
         case 'screenshot':
@@ -247,11 +247,11 @@ const ScreenshotCard: React.FC<{ item: EvidenceItem }> = ({ item }) => {
                     onError={() => setFailedSrc(src)}
                 />
             ) : (
-                <div className="w-full min-h-24 p-2 flex items-center justify-center text-[13px] text-t2">
+                <div className="w-full min-h-24 p-2 flex items-center justify-center text-13 text-t2">
                     {unreadable ? '截图不可读取：文件缺失、损坏或加载失败' : '无截图预览'}
                 </div>
             )}
-            <div className="px-1.5 py-1 text-[13px] text-t2 break-words">
+            <div className="px-1.5 py-1 text-13 text-t2 break-words">
                 {item.summary ?? shortId(item.id)}
             </div>
             <StepEvidenceDetails item={item} missingScreenshot={!src} unreadableScreenshot={unreadable} />
@@ -280,7 +280,7 @@ const StepEvidenceDetails: React.FC<{
     if (!method && !warning && !isInteraction && !missing && !status) return null;
 
     return (
-        <div className="px-2 py-1 space-y-1 text-[13px] text-t2 break-words">
+        <div className="px-2 py-1 space-y-1 text-13 text-t2 break-words">
             {(method || isInteraction) && <p>{method ? `执行方式：${method}` : '执行方式未记录'}</p>}
             {warning && <p className="text-warn">{warning}</p>}
             {method === 'js_fallback' && (
@@ -304,12 +304,12 @@ const CommandList: React.FC<{ items: EvidenceItem[] }> = ({ items }) => (
             const stdout = (item.meta?.stdout as string | undefined) ?? '';
             return (
                 <div key={item.id} className="border rounded">
-                    <div className="flex items-center justify-between px-2 py-1 bg-surface2 border-b text-[13px]">
+                    <div className="flex items-center justify-between px-2 py-1 bg-surface2 border-b text-13">
                         <span className="font-mono truncate">{cmd || shortId(item.id)}</span>
                         {exitCode !== null && (
                             <span
                                 className={
-                                    'ml-2 px-1.5 py-0.5 text-[13px] rounded ' +
+                                    'ml-2 px-1.5 py-0.5 text-13 rounded ' +
                                     (exitCode === 0
                                         ? 'bg-oksoft text-ok'
                                         : 'bg-errsoft text-err')
@@ -320,7 +320,7 @@ const CommandList: React.FC<{ items: EvidenceItem[] }> = ({ items }) => (
                         )}
                     </div>
                     {stdout && (
-                        <pre className="p-2 text-[13px] font-mono bg-surface2 max-h-32 overflow-auto whitespace-pre-wrap">
+                        <pre className="p-2 text-13 font-mono bg-surface2 max-h-32 overflow-auto whitespace-pre-wrap">
                             {stdout}
                         </pre>
                     )}
@@ -341,11 +341,11 @@ const ConsoleList: React.FC<{ items: EvidenceItem[] }> = ({ items }) => (
                 <div
                     key={item.id}
                     className={
-                        'flex items-start gap-2 px-2 py-1 rounded text-[13px] ' +
+                        'flex items-start gap-2 px-2 py-1 rounded text-13 ' +
                         (isError ? 'bg-errsoft text-err' : 'bg-warnsoft text-warn')
                     }
                 >
-                    <span className="font-mono uppercase text-[13px] shrink-0 mt-0.5">{level}</span>
+                    <span className="font-mono uppercase text-13 shrink-0 mt-0.5">{level}</span>
                     <span className="font-mono break-all">
                         {item.summary ?? JSON.stringify(item.meta)}
                     </span>
@@ -363,7 +363,7 @@ const TestList: React.FC<{ items: EvidenceItem[] }> = ({ items }) => (
             const ok = passed === true;
             const fail = passed === false;
             return (
-                <div key={item.id} className="flex items-center gap-2 text-[13px]">
+                <div key={item.id} className="flex items-center gap-2 text-13">
                     <span
                         className={ok ? 'text-ok' : fail ? 'text-err' : 'text-t2'}
                     >
@@ -387,7 +387,7 @@ const VideoList: React.FC<{ items: EvidenceItem[] }> = ({ items }) => (
         {items.map((item) => {
             const url = (item.meta?.url as string | undefined) ?? pickBlobHref(item);
             return (
-                <div key={item.id} className="border rounded p-2 text-[13px]">
+                <div key={item.id} className="border rounded p-2 text-13">
                     <div className="text-t2 mb-1 truncate">
                         {item.summary ?? shortId(item.id)}
                     </div>
@@ -405,7 +405,7 @@ const VideoList: React.FC<{ items: EvidenceItem[] }> = ({ items }) => (
 // ---- har ----
 const HarTable: React.FC<{ items: EvidenceItem[] }> = ({ items }) => (
     <div className="overflow-x-auto">
-        <table className="min-w-full text-[13px]">
+        <table className="min-w-full text-13">
             <thead>
                 <tr className="text-t2 border-b">
                     <th className="text-left px-2 py-1 font-medium">Method</th>
@@ -451,11 +451,11 @@ const DiffList: React.FC<{ items: EvidenceItem[] }> = ({ items }) => (
             return (
                 <div key={item.id} className="border rounded">
                     {item.meta?.path ? (
-                        <div className="px-2 py-1 bg-surface2 border-b text-[13px] font-mono truncate">
+                        <div className="px-2 py-1 bg-surface2 border-b text-13 font-mono truncate">
                             {String(item.meta.path)}
                         </div>
                     ) : null}
-                    <pre className="p-2 text-[13px] font-mono bg-surface2 max-h-48 overflow-auto whitespace-pre">
+                    <pre className="p-2 text-13 font-mono bg-surface2 max-h-48 overflow-auto whitespace-pre">
                         {renderDiffWithColor(patch)}
                     </pre>
                 </div>
@@ -481,12 +481,12 @@ const renderDiffWithColor = (patch: string): React.ReactNode =>
 const GenericList: React.FC<{ items: EvidenceItem[] }> = ({ items }) => (
     <div className="space-y-1">
         {items.map((item) => (
-            <div key={item.id} className="text-[13px] border rounded px-2 py-1">
+            <div key={item.id} className="text-13 border rounded px-2 py-1">
                 <div className="font-mono text-t1 truncate">
                     {item.summary ?? shortId(item.id)}
                 </div>
                 {Object.keys(item.meta ?? {}).length > 0 && (
-                    <pre className="mt-1 text-[13px] text-t2 font-mono whitespace-pre-wrap break-all">
+                    <pre className="mt-1 text-13 text-t2 font-mono whitespace-pre-wrap break-all">
                         {safeJsonStringify(item.meta)}
                     </pre>
                 )}

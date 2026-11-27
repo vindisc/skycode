@@ -321,7 +321,7 @@ test.describe('APOS Phase 2 - Mobile Responsive (TC-APOS2-029~037)', () => {
     await expect(sheet).toBeVisible({ timeout: 5000 });
 
     // 验证 MobileImpactList 渲染了文件列表项
-    const fileItems = page.locator('.flex.items-center.gap-2.rounded-lg');
+    const fileItems = page.locator('.flex.items-center.gap-2.rounded-sm');
     await expect(fileItems.first()).toBeVisible({ timeout: 5000 });
 
     // 验证文件路径使用截断（truncate class，只显示文件名最后一级）
@@ -331,7 +331,7 @@ test.describe('APOS Phase 2 - Mobile Responsive (TC-APOS2-029~037)', () => {
     expect(firstFileName).not.toContain('/');
 
     // 验证 Top 5 限制（注入了 6 个文件，应只显示 5 个）
-    const listItems = page.locator('.flex.flex-col.gap-2 > .flex.items-center.gap-2.rounded-lg');
+    const listItems = page.locator('.flex.flex-col.gap-2 > .flex.items-center.gap-2.rounded-sm');
     await expect(listItems).toHaveCount(5, { timeout: 3000 });
 
     // 验证 "查看全部" 按钮可见（因有 6 个文件 > 5）

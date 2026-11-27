@@ -46,7 +46,7 @@ export const PromptAttachmentBar: React.FC<PromptAttachmentBarProps> = ({
                 {imageCount > 0 && maxImages > 0 && (
                     <div className="flex items-center gap-1 mb-1.5">
                         <span
-                            className={`text-[13px] px-1.5 py-0.5 rounded border
+                            className={`text-13 px-1.5 py-0.5 rounded border
                                 ${imageCount >= maxImages
                                     ? 'text-warnstrong border-warn bg-warnsoft'
                                     : 'text-t3 border-hairline bg-sunken2'}`}
@@ -86,7 +86,7 @@ export const PromptAttachmentBar: React.FC<PromptAttachmentBarProps> = ({
                     ) : (
                         <span
                             key={a.id}
-                            className="flex items-center gap-1 px-2 py-1 bg-surfacev2 rounded text-[13px] text-t2
+                            className="flex items-center gap-1 px-2 py-1 bg-surfacev2 rounded text-13 text-t2
                                        border border-hairline"
                         >
                             📎 {a.name}
@@ -114,7 +114,7 @@ export const PromptAttachmentBar: React.FC<PromptAttachmentBarProps> = ({
                     <span
                         key={file.path}
                         title={`${file.path}\n该路径会发送给模型服务商；选择路径不授予读取权限。`}
-                        className="flex max-w-full items-center gap-1 rounded border border-warn bg-warnsoft px-2 py-1 text-[13px] text-warnstrong"
+                        className="flex max-w-full items-center gap-1 rounded border border-warn bg-warnsoft px-2 py-1 text-13 text-warnstrong"
                     >
                         <FileSymlink size={13} className="shrink-0" />
                         <span className="truncate">{file.name}</span>
@@ -130,7 +130,7 @@ export const PromptAttachmentBar: React.FC<PromptAttachmentBarProps> = ({
                         </button>
                     </span>
                 ))}
-                <span className="self-center text-[13px] text-t3">
+                <span className="self-center text-13 text-t3">
                     路径会发送给模型服务商；读取项目外文件仍需授权
                 </span>
             </div>
@@ -142,7 +142,7 @@ export const PromptAttachmentBar: React.FC<PromptAttachmentBarProps> = ({
                     <span
                         key={`${file.sha256}\0${file.name}`}
                         title={`${file.url}\n文件已上传为永久公开 OSS 对象；移除引用不会删除对象。`}
-                        className="flex max-w-full items-center gap-1 rounded border border-accent2-ring bg-accent2-soft px-2 py-1 text-[13px] text-accent2-ink"
+                        className="flex max-w-full items-center gap-1 rounded border border-accent2-ring bg-accent2-soft px-2 py-1 text-13 text-accent2-ink"
                     >
                         <CloudUpload size={13} className="shrink-0" />
                         <span className="truncate">{file.name}</span>
@@ -161,7 +161,7 @@ export const PromptAttachmentBar: React.FC<PromptAttachmentBarProps> = ({
                         </button>
                     </span>
                 ))}
-                <span className="self-center text-[13px] text-t3">
+                <span className="self-center text-13 text-t3">
                     已上传为永久公开 OSS 对象；移除引用不会删除文件
                 </span>
             </div>
@@ -230,7 +230,7 @@ export const PromptToolbar: React.FC<PromptToolbarProps> = ({
                 aria-label={fileReferenceCapability?.mode === 'oss_upload'
                     ? '上传本地文件到 OSS' : '引用本地文件路径'}
                 title={fileReferenceTitle}
-                className="panel-control flex h-10 w-10 items-center justify-center shrink-0 rounded-[10px] text-t2 transition-interactive duration-fast hover:bg-hover2 hover:text-t1 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring disabled:opacity-50"
+                className="panel-control flex h-10 w-10 items-center justify-center shrink-0 rounded-sm text-t2 transition-interactive duration-fast hover:bg-hover2 hover:text-t1 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring disabled:opacity-50"
             >
                 {fileReferenceBusy
                     ? <Loader2 size={18} className="animate-spin" />

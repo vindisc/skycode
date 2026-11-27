@@ -59,11 +59,11 @@ export function SkillManagementPage({ onClose }: { onClose: () => void }) {
             <p id={descriptionId} className="mt-2 text-sm leading-relaxed text-t2">
               关闭后立即阻止新的技能调用；下一条消息使用更新后的配置，无需重启。
             </p>
-            <p className="mt-1 text-[13px] leading-relaxed text-t2">
+            <p className="mt-1 text-13 leading-relaxed text-t2">
               当前回答继续，历史中的技能内容仍可能影响模型；新聊天可获得干净上下文。
             </p>
           </div>
-          <button type="button" onClick={onClose} aria-label="关闭 Skill 管理" className={`dialog-control flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-t2 hover:bg-hover2 ${focusRing}`}>
+          <button type="button" onClick={onClose} aria-label="关闭 Skill 管理" className={`dialog-control flex h-11 w-11 shrink-0 items-center justify-center rounded-sm text-t2 hover:bg-hover2 ${focusRing}`}>
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
         </header>
@@ -75,7 +75,7 @@ export function SkillManagementPage({ onClose }: { onClose: () => void }) {
                 <span>{skills.length} 个 Skill</span>
                 <span className="text-ok">{enabledCount} 个已启用</span>
               </div>
-              <p className="mt-1 flex items-start gap-1 text-[13px] leading-relaxed">
+              <p className="mt-1 flex items-start gap-1 text-13 leading-relaxed">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                 设置保存在服务端，所有设备和会话共享。
               </p>
@@ -88,16 +88,16 @@ export function SkillManagementPage({ onClose }: { onClose: () => void }) {
                   onChange={event => setQuery(event.target.value)}
                   aria-label="搜索 Skill"
                   placeholder="搜索名称、描述或来源"
-                  className={`min-h-11 w-full rounded-[10px] border border-hairline bg-sunken2 py-2 pl-9 pr-3 text-sm text-t1 ${focusRing}`}
+                  className={`min-h-11 w-full rounded-sm border border-hairline bg-sunken2 py-2 pl-9 pr-3 text-sm text-t1 ${focusRing}`}
                 />
               </label>
-              <button type="button" onClick={() => void refresh()} disabled={loading} aria-label="刷新 Skill 列表" className={`dialog-control flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] border border-hairline text-t2 hover:bg-hover2 disabled:opacity-50 ${focusRing}`}>
+              <button type="button" onClick={() => void refresh()} disabled={loading} aria-label="刷新 Skill 列表" className={`dialog-control flex h-11 w-11 shrink-0 items-center justify-center rounded-sm border border-hairline text-t2 hover:bg-hover2 disabled:opacity-50 ${focusRing}`}>
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
               </button>
             </div>
           </div>
-          {error && <p role="alert" className="mt-3 break-words rounded-[10px] bg-errsoft px-3 py-2 text-sm text-err">加载或更新失败：{error}</p>}
-          {stateError && <p role="alert" className="mt-3 break-words rounded-[10px] bg-errsoft px-3 py-2 text-sm text-err">技能设置暂不可用：{stateError} 所有技能已关闭，暂时无法修改开关。修复设置并重启服务后请刷新。</p>}
+          {error && <p role="alert" className="mt-3 break-words rounded-sm bg-errsoft px-3 py-2 text-sm text-err">加载或更新失败：{error}</p>}
+          {stateError && <p role="alert" className="mt-3 break-words rounded-sm bg-errsoft px-3 py-2 text-sm text-err">技能设置暂不可用：{stateError} 所有技能已关闭，暂时无法修改开关。修复设置并重启服务后请刷新。</p>}
         </div>
 
         <main className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-6">
@@ -155,37 +155,37 @@ function SkillCard({ skill, busy, blocked, detailVersion, onToggle }: {
   }, [expanded, skill.id, detailVersion, retry]);
 
   return (
-    <article className={`min-w-0 rounded-[14px] border p-3 transition-colors md:p-4 ${skill.enabled ? 'border-accent2-ring bg-accent2-soft' : 'border-hairline bg-sunken2'}`}>
+    <article className={`min-w-0 rounded-md border p-3 transition-colors md:p-4 ${skill.enabled ? 'border-accent2-ring bg-accent2-soft' : 'border-hairline bg-sunken2'}`}>
       <div className="flex items-start gap-2">
-        <button type="button" onClick={() => setExpanded(value => !value)} aria-label={`${expanded ? '收起' : '展开'} ${skill.name} 详情`} aria-expanded={expanded} aria-controls={detailId} className={`dialog-control flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-t2 hover:bg-hover2 ${focusRing}`}>
+        <button type="button" onClick={() => setExpanded(value => !value)} aria-label={`${expanded ? '收起' : '展开'} ${skill.name} 详情`} aria-expanded={expanded} aria-controls={detailId} className={`dialog-control flex h-11 w-11 shrink-0 items-center justify-center rounded-sm text-t2 hover:bg-hover2 ${focusRing}`}>
           {expanded ? <ChevronDown className="h-4 w-4" aria-hidden="true" /> : <ChevronRight className="h-4 w-4" aria-hidden="true" />}
         </button>
         <div className="min-w-0 flex-1 pt-2">
           <h3 className="break-words text-base font-semibold text-t1 [overflow-wrap:anywhere]">{skill.name}</h3>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-[13px]">
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-13">
             <span className="rounded bg-hover2 px-2 py-0.5 text-t2">{SOURCE_LABELS[skill.source] ?? skill.source}</span>
             <span className={`rounded px-2 py-0.5 ${skill.enabled ? 'bg-oksoft text-ok' : 'bg-hover2 text-t2'}`}>{skill.enabled ? '已启用' : '已关闭'}</span>
           </div>
-          <p className="mt-2 line-clamp-3 break-words text-[13px] leading-relaxed text-t2 [overflow-wrap:anywhere]">{skill.description}</p>
+          <p className="mt-2 line-clamp-3 break-words text-13 leading-relaxed text-t2 [overflow-wrap:anywhere]">{skill.description}</p>
         </div>
-        <button type="button" role="switch" aria-checked={skill.enabled} aria-label={`${skill.enabled ? '关闭' : '启用'} ${skill.name}`} disabled={busy || blocked} onClick={onToggle} className={`panel-control flex h-11 w-11 shrink-0 items-center rounded-[10px] disabled:opacity-50 ${busy ? 'cursor-wait' : blocked ? 'cursor-not-allowed' : ''} ${focusRing}`}>
+        <button type="button" role="switch" aria-checked={skill.enabled} aria-label={`${skill.enabled ? '关闭' : '启用'} ${skill.name}`} disabled={busy || blocked} onClick={onToggle} className={`panel-control flex h-11 w-11 shrink-0 items-center rounded-sm disabled:opacity-50 ${busy ? 'cursor-wait' : blocked ? 'cursor-not-allowed' : ''} ${focusRing}`}>
           <span aria-hidden="true" className={`inline-flex h-6 w-11 items-center rounded-full transition-colors ${skill.enabled ? 'bg-accent2-strong' : 'bg-t3'}`}>
             <span className={`inline-block h-4 w-4 rounded-full transition-transform ${skill.enabled ? 'translate-x-6 bg-white' : 'translate-x-1 bg-surfacev2'}`} />
           </span>
         </button>
       </div>
       {expanded && (
-        <div id={detailId} className="mt-3 min-w-0 border-t border-hairline pt-3 text-[13px] text-t2">
+        <div id={detailId} className="mt-3 min-w-0 border-t border-hairline pt-3 text-13 text-t2">
           {loading ? <p role="status" className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />正在读取详情…</p> : error ? (
             <div>
               <p role="alert" className="break-words text-err">读取详情失败：{error}</p>
-              <button type="button" onClick={() => setRetry(value => value + 1)} className={`mt-2 min-h-11 rounded-[10px] border border-hairline px-3 text-t1 hover:bg-hover2 ${focusRing}`}>重试读取详情</button>
+              <button type="button" onClick={() => setRetry(value => value + 1)} className={`mt-2 min-h-11 rounded-sm border border-hairline px-3 text-t1 hover:bg-hover2 ${focusRing}`}>重试读取详情</button>
             </div>
           ) : detail && (
             <div className="space-y-3">
               <p className="break-words leading-relaxed [overflow-wrap:anywhere]">{skill.description}</p>
               <p className="break-all"><span className="font-medium">文件：</span>{detail.filePath || '内置 Skill'}</p>
-              <pre className="max-h-80 overflow-y-auto whitespace-pre-wrap break-words rounded-[10px] bg-surfacev2 p-3 font-mono leading-relaxed [overflow-wrap:anywhere]">{detail.content || '暂无内容'}</pre>
+              <pre className="max-h-80 overflow-y-auto whitespace-pre-wrap break-words rounded-sm bg-surfacev2 p-3 font-mono leading-relaxed [overflow-wrap:anywhere]">{detail.content || '暂无内容'}</pre>
             </div>
           )}
         </div>

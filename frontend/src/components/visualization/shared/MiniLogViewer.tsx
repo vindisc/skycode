@@ -38,7 +38,7 @@ const MiniLogViewer: React.FC<MiniLogViewerProps> = ({ logs, defaultCollapsed = 
         <div className="mt-1">
             <button
                 onClick={toggle}
-                className="panel-control flex items-center gap-1 text-[13px] text-t2 hover:text-t2 transition-colors"
+                className="panel-control flex items-center gap-1 text-13 text-t2 hover:text-t2 transition-colors"
             >
                 <ChevronRight
                     size={10}
@@ -53,7 +53,7 @@ const MiniLogViewer: React.FC<MiniLogViewerProps> = ({ logs, defaultCollapsed = 
                     className="mt-1 max-h-[150px] overflow-y-auto rounded bg-sunken2 dark:bg-sunken2 border border-hairline p-1.5"
                 >
                     {logs.map((log, i) => (
-                        <div key={i} className="font-mono text-[13px] leading-4 text-t2">
+                        <div key={i} className="font-mono text-13 leading-4 text-t2">
                             <span className="text-t2 mr-1.5">{formatTimestamp(logs.length - 1 - i)}</span>
                             {log}
                         </div>

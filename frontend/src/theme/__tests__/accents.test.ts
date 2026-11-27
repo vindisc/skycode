@@ -23,10 +23,12 @@ describe('ACCENT_PRESETS 色板构成', () => {
         expect(ACCENT_PRESETS[0].hex).toBe(DEFAULT_ACCENT_HEX);
     });
 
-    it('每色三档齐全；dark/glass 档 strong 复用 light 值（结构上只存三项）', () => {
+    it('每色四档齐全；glass 是浅底，strong 沿用 light 值', () => {
         for (const p of ACCENT_PRESETS) {
             expect(p.light.strong).toMatch(/^#/);
-            expect(p.dark.accent).toMatch(/^#/);
+            expect(p.dark.strong).toMatch(/^#/);
+            expect(p.dark.soft).toMatch(/^rgba\(/);
+            expect(p.glass.strong).toBe(p.light.strong);
             expect(p.glass.accent).toMatch(/^#/);
         }
     });
@@ -73,12 +75,12 @@ describe('applyAccent 三主题分档', () => {
         });
     });
 
-    it('dark 档：accent 取亮变体，strong 复用 light', () => {
+    it('dark 档：accent 取亮变体，strong 是同色相的深一档（不再复用 light 的墨绿）', () => {
         applyAccent('#12967F', 'dark');
         const t = readTokens();
         expect(t['--v2-accent']).toBe('#7FD4E8');
-        expect(t['--v2-accent-strong']).toBe('#0C7563');
-        expect(t['--v2-accent-soft']).toBe('rgba(18,150,127,.16)');
+        expect(t['--v2-accent-strong']).toBe('#1A7C93');
+        expect(t['--v2-accent-soft']).toBe('rgba(127,212,232,.14)');
     });
 
     it('glass 档：accent 取清透变体（≠ light），strong 复用 light', () => {
@@ -121,7 +123,7 @@ describe('applyAccent 三主题分档', () => {
         expect(readTokens()['--v2-accent-strong']).toBe('#1A6E84');
         applyAccent('#7FD4E8', 'dark');
         expect(readTokens()['--v2-accent']).toBe('#7FD4E8');
-        expect(readTokens()['--v2-accent-soft']).toBe('rgba(127,212,232,.16)');
+        expect(readTokens()['--v2-accent-soft']).toBe('rgba(127,212,232,.14)');
         applyAccent('#7FD4E8', 'glass');
         expect(readTokens()['--v2-accent']).toBe('#259AB5');
     });
@@ -148,5 +150,42 @@ describe('applyAccent 三主题分档', () => {
         expect(document.documentElement.style.getPropertyValue('--v2-accent-ink').trim()).toBe('#7FD4E8');
         applyAccent('#12967F', 'glass');
         expect(document.documentElement.style.getPropertyValue('--v2-accent-ink').trim()).toContain('#0C7563');
+    });
+});
+
+describe('深色档主按钮的可辨识度（防回归）', () => {
+    // WCAG 相对亮度与对比度
+    const channel = (v: number) => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+    const luminance = (hex: string) => {
+        const [r, g, b] = [1, 3, 5].map(i => channel(parseInt(hex.slice(i, i + 2), 16)));
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const contrast = (a: string, b: string) => {
+        const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+        return (hi + 0.05) / (lo + 0.05);
+    };
+    const DARK_SURFACE = '#1E2430'; // --v2-bg-surface 深色值
+
+    it('每色的深色按钮：白字 ≥4.5:1，对深色面 ≥3:1', () => {
+        for (const p of ACCENT_PRESETS) {
+            expect(contrast('#FFFFFF', p.dark.strong), p.label).toBeGreaterThanOrEqual(4.5);
+            expect(contrast(p.dark.strong, DARK_SURFACE), p.label).toBeGreaterThanOrEqual(3);
+        }
+    });
+
+    it('深色按钮与深色高亮文字同色相（色相差 ≤ 12°）', () => {
+        const hue = (hex: string) => {
+            const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255);
+            const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+            if (d === 0) return 0;
+            const h = max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+            return h * 60;
+        };
+        const gap = (a: number, b: number) => Math.min(Math.abs(a - b), 360 - Math.abs(a - b));
+        for (const p of ACCENT_PRESETS) {
+            // 石墨饱和度低，色相没有意义，不参与
+            if (p.label === '石墨') continue;
+            expect(gap(hue(p.dark.accent), hue(p.dark.strong)), p.label).toBeLessThanOrEqual(12);
+        }
     });
 });

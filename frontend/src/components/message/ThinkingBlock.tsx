@@ -49,7 +49,7 @@ const ThinkingBlock: React.FC<ThinkingBlockProps> = ({
     }, [durationMs, redacted, preview]);
 
     return (
-        <div className="thinking-block my-2 rounded-[14px] border border-hairline bg-surface2 overflow-hidden">
+        <div className="thinking-block my-2 rounded-md border border-hairline bg-surface2 overflow-hidden">
             {/* Header — always visible */}
             <button
                 onClick={toggle}
@@ -74,7 +74,7 @@ const ThinkingBlock: React.FC<ThinkingBlockProps> = ({
                 <div className="px-4 py-3 border-t border-hairline text-sm text-t2 whitespace-pre-wrap leading-[1.75] max-h-96 overflow-y-auto">
                     {content || 'Thinking...'}
                     {streaming && (
-                        <span className="inline-block w-1.5 h-3 ml-0.5 bg-accent2 animate-pulse rounded-sm" />
+                        <span className="inline-block w-1.5 h-3 ml-0.5 bg-accent2 animate-pulse rounded" />
                     )}
                 </div>
             )}

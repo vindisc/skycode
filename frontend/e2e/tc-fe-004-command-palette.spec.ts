@@ -37,7 +37,7 @@ test.describe('TC-FE-004 命令面板与 Skill 触发', () => {
     await page.waitForTimeout(1500);
     await screenshot(page, 'tc-fe-004a-after-slash');
 
-    // CommandPalette 渲染为 bg-gray-900 border border-gray-700 rounded-xl
+    // CommandPalette 渲染为 bg-gray-900 border border-gray-700 rounded-md
     // 包含 font-mono 的命令项和底部提示（容器为 rounded-panel）
     const commandPalette = page.locator('div.rounded-panel:has(button .font-mono)').first();
     // 降级检测：查找底部提示条

@@ -83,7 +83,7 @@ export const AnomalyAlertPanel: React.FC = () => {
                     Anomaly Alerts
                 </h2>
                 {activeAnomalies.length > 0 && (
-                    <span className="inline-flex items-center justify-center px-2 py-0.5 text-[13px] font-bold rounded-full bg-err text-white dark:text-app2">
+                    <span className="inline-flex items-center justify-center px-2 py-0.5 text-13 font-bold rounded-full bg-err text-white dark:text-app2">
                         {activeAnomalies.length}
                     </span>
                 )}
@@ -94,14 +94,14 @@ export const AnomalyAlertPanel: React.FC = () => {
                 <div className="flex flex-col items-center justify-center py-12 text-t2">
                     <span className="text-4xl mb-3">✅</span>
                     <p className="text-sm font-medium">运行正常</p>
-                    <p className="text-[13px] mt-1">No anomalies detected</p>
+                    <p className="text-13 mt-1">No anomalies detected</p>
                 </div>
             ) : (
                 <div className="space-y-3">
                     {activeAnomalies.map((anomaly) => (
                         <div
                             key={anomaly.id}
-                            className={`rounded-[10px] border p-4 ${getSeverityBg(anomaly.severity)}`}
+                            className={`rounded-sm border p-4 ${getSeverityBg(anomaly.severity)}`}
                         >
                             {/* Top row: icon + worker name + severity */}
                             <div className="flex items-center gap-2 mb-2">
@@ -109,7 +109,7 @@ export const AnomalyAlertPanel: React.FC = () => {
                                 <span className={`font-semibold text-sm ${getSeverityColor(anomaly.severity)}`}>
                                     {anomaly.workerName}
                                 </span>
-                                <span className={`text-[13px] px-1.5 py-0.5 rounded font-medium ${
+                                <span className={`text-13 px-1.5 py-0.5 rounded font-medium ${
                                     anomaly.severity === 'critical'
                                         ? 'bg-errsoft text-err dark:text-err'
                                         : 'bg-warnsoft text-warn dark:text-warn'
@@ -128,13 +128,13 @@ export const AnomalyAlertPanel: React.FC = () => {
                                 <button
                                     onClick={() => handleAbort(anomaly)}
                                     disabled={abortingIds.has(anomaly.id)}
-                                    className="panel-control px-3 py-1.5 text-[13px] font-medium rounded-md bg-errstrong text-white hover:bg-errstrong disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="panel-control px-3 py-1.5 text-13 font-medium rounded-xs bg-errstrong text-white hover:bg-errstrong disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
                                     {abortingIds.has(anomaly.id) ? '中止中...' : '中止 Worker'}
                                 </button>
                                 <button
                                     onClick={() => handleDismiss(anomaly.id)}
-                                    className="panel-control px-3 py-1.5 text-[13px] font-medium rounded-md bg-sunken2 text-t1 hover:bg-sunken2 dark:text-t2 transition-colors"
+                                    className="panel-control px-3 py-1.5 text-13 font-medium rounded-xs bg-sunken2 text-t1 hover:bg-sunken2 dark:text-t2 transition-colors"
                                 >
                                     忽略
                                 </button>

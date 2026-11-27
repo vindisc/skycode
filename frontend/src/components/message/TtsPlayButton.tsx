@@ -49,7 +49,7 @@ const TtsPlayButton: React.FC<TtsPlayButtonProps> = ({ messageId, text }) => {
         <button
             onClick={handleClick}
             disabled={disabled}
-            className={`message-action-button shrink-0 flex items-center justify-center rounded-[10px] transition-colors ${stateClasses}`}
+            className={`message-action-button shrink-0 flex items-center justify-center rounded-sm transition-colors ${stateClasses}`}
             title={titleText}
             type="button"
             aria-label={titleText}

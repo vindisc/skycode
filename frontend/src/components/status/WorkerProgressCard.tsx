@@ -31,7 +31,7 @@ export const WorkerProgressCard: React.FC<WorkerProgressCardProps> = ({ worker }
     };
 
     return (
-        <div className={`rounded-[14px] border border-hairline p-3 ${cfg.bg} transition-[width] duration-base`}>
+        <div className={`rounded-md border border-hairline p-3 ${cfg.bg} transition-[width] duration-base`}>
             {/* Header Row */}
             <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-1.5">
@@ -40,24 +40,24 @@ export const WorkerProgressCard: React.FC<WorkerProgressCardProps> = ({ worker }
                         worker.status === 'STARTING' ? 'bg-warn animate-pulse' :
                         worker.status === 'IDLE' ? 'bg-accent2' : 'bg-t3'
                     }`} />
-                    <span className="text-[13px] font-mono font-medium text-t1">
+                    <span className="text-13 font-mono font-medium text-t1">
                         Worker #{shortId}
                     </span>
                 </div>
-                <span className={`text-[13px] font-medium px-1.5 py-0.5 rounded ${cfg.color} ${cfg.bg}`}>
+                <span className={`text-13 font-medium px-1.5 py-0.5 rounded ${cfg.color} ${cfg.bg}`}>
                     {cfg.label}
                 </span>
             </div>
 
             {/* Task Description */}
             {worker.currentTask && worker.currentTask !== 'idle' && worker.currentTask !== 'terminated' && (
-                <div className="text-[13px] text-t2 mb-2 line-clamp-2 leading-relaxed">
+                <div className="text-13 text-t2 mb-2 line-clamp-2 leading-relaxed">
                     {worker.currentTask}
                 </div>
             )}
 
             {/* Stats Row */}
-            <div className="flex items-center gap-3 text-[13px] text-t3">
+            <div className="flex items-center gap-3 text-13 text-t3">
                 <div className="flex items-center gap-0.5" title="工具调用次数">
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -79,7 +79,7 @@ export const WorkerProgressCard: React.FC<WorkerProgressCardProps> = ({ worker }
                     {worker.recentToolCalls.slice(-3).map((tool, i) => (
                         <span
                             key={`${tool}-${i}`}
-                            className="text-[13px] px-1.5 py-0.5 rounded-full bg-sunken2 text-t2 font-mono"
+                            className="text-13 px-1.5 py-0.5 rounded-full bg-sunken2 text-t2 font-mono"
                         >
                             {tool}
                         </span>

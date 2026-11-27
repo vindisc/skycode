@@ -21,7 +21,7 @@ export const AgentPipelineView: React.FC = () => {
                 <div className="flex flex-col items-center justify-center py-12 text-t2">
                     <span className="text-4xl mb-3">🔗</span>
                     <p className="text-sm">No active Swarm</p>
-                    <p className="text-[13px] mt-1">Pipeline will appear when a Swarm is running</p>
+                    <p className="text-13 mt-1">Pipeline will appear when a Swarm is running</p>
                 </div>
             </div>
         );

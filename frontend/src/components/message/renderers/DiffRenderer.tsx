@@ -53,18 +53,18 @@ export const DiffRenderer: React.FC<{ content: string; filePath?: string; trunca
     const removeCount = diffLines.filter(l => l.type === 'remove').length;
 
     return (
-        <div className="rounded-[14px] border border-hairline overflow-hidden bg-sunken2">
+        <div className="rounded-md border border-hairline overflow-hidden bg-sunken2">
             {filePath && (
                 <div className="bg-surface2 px-3 py-1.5 text-sm flex justify-between border-b border-hairline">
-                    <span className="min-w-0 flex-1 truncate text-t2 font-mono text-[13px]" title={filePath}>{filePath}</span>
-                    <span className="flex shrink-0 items-center gap-1 text-[13px]">
+                    <span className="min-w-0 flex-1 truncate text-t2 font-mono text-13" title={filePath}>{filePath}</span>
+                    <span className="flex shrink-0 items-center gap-1 text-13">
                         <span className="rounded bg-oksoft px-1.5 py-0.5 font-medium tabular-nums text-ok">+{addCount}</span>
                         <span className="rounded bg-errsoft px-1.5 py-0.5 font-medium tabular-nums text-err">−{removeCount}</span>
                         {truncated && <span className="text-t3">（已展示部分）</span>}
                     </span>
                 </div>
             )}
-            {truncated && <p className="px-3 py-2 text-[13px] text-warn">差异过大，仅展示部分内容；请核对完整文件变更。</p>}
+            {truncated && <p className="px-3 py-2 text-13 text-warn">差异过大，仅展示部分内容；请核对完整文件变更。</p>}
             <div className="font-mono panel-code max-h-96 overflow-auto">
                 {diffLines.map((line, i) => (
                     <div key={i} data-galaxy-diff={filePath ? line.type : undefined} data-galaxy-path={filePath} data-galaxy-line={line.newLine ?? line.oldLine} className={`flex

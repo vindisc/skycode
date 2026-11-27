@@ -384,7 +384,7 @@ const EmptyState: React.FC = () => (
         <div className="text-center">
             <div className="text-4xl mb-3">💬</div>
             <div className="text-sm">Start a conversation</div>
-            <div className="text-[13px] text-t2 mt-1">
+            <div className="text-13 text-t2 mt-1">
                 Type a message or use / for commands
             </div>
         </div>

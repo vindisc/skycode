@@ -14,14 +14,14 @@ export const CompactResultPanel: React.FC<{ data: CompactResultData; displayText
     const savedPct = data.beforeTokens > 0 ? Math.round((data.savedTokens / data.beforeTokens) * 100) : 0;
 
     return (
-        <div className="rounded-[14px] border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] p-4 space-y-3">
+        <div className="rounded-md border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] p-4 space-y-3">
             <div className="flex items-center gap-2">
                 <span className="text-lg">🗜️</span>
                 <span className="font-semibold text-[var(--v2-text-1)]">Context Compacted</span>
             </div>
             {/* Token 对比条 */}
             <div className="space-y-1">
-                <div className="flex justify-between text-[13px] text-[var(--v2-text-2)]">
+                <div className="flex justify-between text-13 text-[var(--v2-text-2)]">
                     <span>压缩前: {data.beforeTokens.toLocaleString()} tokens</span>
                     <span>压缩后: {data.afterTokens.toLocaleString()} tokens</span>
                 </div>
@@ -32,23 +32,23 @@ export const CompactResultPanel: React.FC<{ data: CompactResultData; displayText
             </div>
             {/* 统计卡片 */}
             <div className="grid grid-cols-3 gap-2">
-                <div className="bg-[var(--bg-tertiary)] rounded-md p-2 text-center">
+                <div className="bg-[var(--bg-tertiary)] rounded-xs p-2 text-center">
                     <div className="text-lg font-bold text-ok">{data.savedTokens.toLocaleString()}</div>
-                    <div className="text-[13px] text-[var(--v2-text-2)]">tokens 释放</div>
+                    <div className="text-13 text-[var(--v2-text-2)]">tokens 释放</div>
                 </div>
-                <div className="bg-[var(--bg-tertiary)] rounded-md p-2 text-center">
+                <div className="bg-[var(--bg-tertiary)] rounded-xs p-2 text-center">
                     <div className="text-lg font-bold text-accent2-ink">{savedPct}%</div>
-                    <div className="text-[13px] text-[var(--v2-text-2)]">压缩率</div>
+                    <div className="text-13 text-[var(--v2-text-2)]">压缩率</div>
                 </div>
-                <div className="bg-[var(--bg-tertiary)] rounded-md p-2 text-center">
+                <div className="bg-[var(--bg-tertiary)] rounded-xs p-2 text-center">
                     <div className="text-lg font-bold text-[var(--v2-text-1)]">
                         {data.compactedMessageCount}/{data.originalMessageCount}
                     </div>
-                    <div className="text-[13px] text-[var(--v2-text-2)]">消息数</div>
+                    <div className="text-13 text-[var(--v2-text-2)]">消息数</div>
                 </div>
             </div>
             {data.instruction && (
-                <div className="text-[13px] text-[var(--v2-text-2)] italic">🎯 Focus: {data.instruction}</div>
+                <div className="text-13 text-[var(--v2-text-2)] italic">🎯 Focus: {data.instruction}</div>
             )}
         </div>
     );

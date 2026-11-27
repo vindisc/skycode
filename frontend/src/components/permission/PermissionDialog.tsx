@@ -194,17 +194,17 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({ request, onDecision
                         <div id="permission-title" className="font-semibold text-xl text-t1 flex items-center gap-2">
                             {request.toolName}
                             {(request.actorType === 'descendant' || request.source === 'descendant' || request.source === 'subagent') && (
-                                <span className="inline-block text-[13px] px-1.5 py-0.5 rounded bg-accent2-soft text-accent2-ink dark:text-accent2-ink">
+                                <span className="inline-block text-13 px-1.5 py-0.5 rounded bg-accent2-soft text-accent2-ink dark:text-accent2-ink">
                                     Sub-Agent
                                 </span>
                             )}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                            <span className={`inline-block text-[13px] px-1.5 py-0.5 rounded ${risk.badge}`}>
+                            <span className={`inline-block text-13 px-1.5 py-0.5 rounded ${risk.badge}`}>
                                 {risk.label}
                             </span>
                             {(request.actorType === 'descendant' || request.source === 'descendant' || request.source === 'subagent') && request.actorRunId && (
-                                <span className="text-[13px] text-t3">
+                                <span className="text-13 text-t3">
                                     Agent run: {request.actorRunId.length > 12
                                         ? `${request.actorRunId.slice(0, 12)}…`
                                         : request.actorRunId}
@@ -241,12 +241,12 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({ request, onDecision
                 {/* Countdown progress bar */}
                 <div className="px-4 md:px-6 pt-3">
                     <div className="flex items-center justify-between mb-1.5">
-                        <span className={`text-[13px] ${
+                        <span className={`text-13 ${
                             timerUrgent ? 'text-err font-bold' : 'text-t3'
                         } ${timerCritical ? 'animate-pulse' : ''}`}>
                             {deadlineConfirmed ? `${remainingSeconds}s remaining` : 'Waiting for delivery confirmation'}
                         </span>
-                        <span className="text-[13px] text-t4">
+                        <span className="text-13 text-t4">
                             {expired ? 'Waiting for server status' : 'Server decision deadline'}
                         </span>
                     </div>
@@ -265,14 +265,14 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({ request, onDecision
                 {/* Actions */}
                 <div className="px-4 md:px-6 py-3 border-t border-hairline space-y-3">
                     {submissionError && (
-                        <div role="alert" className="text-[13px] text-err">
+                        <div role="alert" className="text-13 text-err">
                             {submissionError}. You can retry while the request is pending.
                         </div>
                     )}
                     {/* Remember option */}
                     {canRemember && (
                         <div className="space-y-1.5">
-                            <label className="flex items-center gap-2 text-[13px] text-t3">
+                            <label className="flex items-center gap-2 text-13 text-t3">
                                 <input
                                     type="checkbox"
                                     disabled={!deadlineConfirmed || expired || decided}
@@ -286,7 +286,7 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({ request, onDecision
                                         value={scope}
                                         disabled={!deadlineConfirmed || expired || decided}
                                         onChange={e => setScope(e.target.value as typeof scope)}
-                                        className="panel-control ml-2 text-[13px] rounded border border-hairline bg-sunken2
+                                        className="panel-control ml-2 text-13 rounded border border-hairline bg-sunken2
                                                    text-t2 px-1.5 py-0.5 transition-surface duration-fast
                                                    focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
                                                    disabled:opacity-50"
@@ -298,7 +298,7 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({ request, onDecision
                                 )}
                             </label>
                             {request.rememberScopeDescription && (
-                                <p className="pl-6 text-[13px] leading-relaxed text-t3">
+                                <p className="pl-6 text-13 leading-relaxed text-t3">
                                     {request.rememberScopeDescription}
                                 </p>
                             )}
@@ -310,7 +310,7 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({ request, onDecision
                         <button
                             onClick={handleDeny}
                             disabled={!deadlineConfirmed || expired || decided}
-                            className="dialog-control px-4 py-2 rounded-[14px] text-sm border border-hairline
+                            className="dialog-control px-4 py-2 rounded-md text-sm border border-hairline
                                        text-t2 hover:bg-hover2 transition-interactive duration-fast
                                        focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
                                        active:scale-[.98] disabled:opacity-50 disabled:pointer-events-none"
@@ -320,7 +320,7 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({ request, onDecision
                         <button
                             onClick={handleAllow}
                             disabled={!deadlineConfirmed || expired || decided}
-                            className={`dialog-control px-4 py-2 rounded-[14px] text-sm text-white transition-interactive duration-fast
+                            className={`dialog-control px-4 py-2 rounded-md text-sm text-white transition-interactive duration-fast
                                 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
                                 active:scale-[.98] disabled:opacity-50 disabled:pointer-events-none
                                 ${risk.btnClass}`}

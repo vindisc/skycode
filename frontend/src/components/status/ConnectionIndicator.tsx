@@ -21,7 +21,7 @@ export const ConnectionIndicator: React.FC = () => {
     const label = status === 'reconnecting' ? `重连中 #${attempt}` : cfg.label;
 
     return (
-        <div className="flex items-center gap-1.5 text-[13px] text-t2">
+        <div className="flex items-center gap-1.5 text-13 text-t2">
             <span className={`w-2 h-2 rounded-full ${cfg.color} ${cfg.pulse ? 'animate-pulse' : ''}`} />
             <span>{label}</span>
         </div>

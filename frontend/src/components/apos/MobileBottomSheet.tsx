@@ -213,7 +213,7 @@ export function MobileBottomSheet({
     <div className="flex items-center gap-2 px-4 py-2 border-t border-hairline pb-[max(env(safe-area-inset-bottom),8px)]">
       <ActivityDecisionStatus id={activity.id} />
       {activity.decision ? (
-        <span className={`inline-flex items-center gap-1 px-4 min-h-[44px] text-[13px] font-medium rounded-xl ${
+        <span className={`inline-flex items-center gap-1 px-4 min-h-[44px] text-13 font-medium rounded-md ${
           activity.decision === 'approved'
             ? 'bg-oksoft text-okstrong'
             : 'bg-errsoft text-errstrong'
@@ -225,7 +225,7 @@ export function MobileBottomSheet({
           )}
         </span>
       ) : activity.insight?.signal === 'auto_approve' ? (
-        <span className="inline-flex items-center gap-1 px-4 min-h-[44px] text-[13px] font-medium rounded-xl bg-sunken2 text-t3">
+        <span className="inline-flex items-center gap-1 px-4 min-h-[44px] text-13 font-medium rounded-md bg-sunken2 text-t3">
           <Check size={14} /> 已自动放行
         </span>
       ) : (
@@ -233,14 +233,14 @@ export function MobileBottomSheet({
           <button
             disabled={decisionPending}
             onClick={() => onApprove?.(activity.id)}
-            className="panel-control inline-flex items-center gap-1 px-4 min-h-[44px] text-[13px] font-medium rounded-xl bg-oksoft text-okstrong active:scale-[.97] transition-interactive duration-fast"
+            className="panel-control inline-flex items-center gap-1 px-4 min-h-[44px] text-13 font-medium rounded-md bg-oksoft text-okstrong active:scale-[.97] transition-interactive duration-fast"
           >
             <Check size={14} /> 批准
           </button>
           <button
             disabled={decisionPending}
             onClick={() => onReject?.(activity.id)}
-            className="panel-control inline-flex items-center gap-1 px-4 min-h-[44px] text-[13px] font-medium rounded-xl bg-errsoft text-errstrong active:scale-[.97] transition-interactive duration-fast"
+            className="panel-control inline-flex items-center gap-1 px-4 min-h-[44px] text-13 font-medium rounded-md bg-errsoft text-errstrong active:scale-[.97] transition-interactive duration-fast"
           >
             <X size={14} /> 拒绝
           </button>
@@ -248,7 +248,7 @@ export function MobileBottomSheet({
       )}
       <button
         onClick={() => onViewDetails?.(activity.id)}
-        className="panel-control inline-flex items-center gap-1 px-4 min-h-[44px] text-[13px] font-medium rounded-xl bg-sunken2 text-t2 active:scale-[.97] transition-interactive duration-fast ml-auto"
+        className="panel-control inline-flex items-center gap-1 px-4 min-h-[44px] text-13 font-medium rounded-md bg-sunken2 text-t2 active:scale-[.97] transition-interactive duration-fast ml-auto"
       >
         详情 <ArrowRight size={14} />
       </button>
@@ -267,12 +267,12 @@ export function MobileBottomSheet({
         {/* Deterministic Verification Results */}
         {assessment && (
           <div className="space-y-2">
-            <h4 className="text-[13px] font-semibold text-t3 uppercase tracking-wide">
+            <h4 className="text-13 font-semibold text-t3 uppercase tracking-wide">
               确定性验证（执行状态）
             </h4>
             <div className="grid grid-cols-3 gap-2">
               {/* TypeScript Check */}
-              <div className="flex items-center gap-1.5 text-[13px]">
+              <div className="flex items-center gap-1.5 text-13">
                 <VerificationIcon
                   status={assessment.deterministic.typeCheck.passed ? 'all_pass' : 'has_error'}
                   size={14}
@@ -289,7 +289,7 @@ export function MobileBottomSheet({
               </div>
 
               {/* ESLint Check */}
-              <div className="flex items-center gap-1.5 text-[13px]">
+              <div className="flex items-center gap-1.5 text-13">
                 <VerificationIcon
                   status={
                     assessment.deterministic.lint.errorCount > 0
@@ -313,7 +313,7 @@ export function MobileBottomSheet({
               </div>
 
               {/* Test Check */}
-              <div className="flex items-center gap-1.5 text-[13px]">
+              <div className="flex items-center gap-1.5 text-13">
                 <VerificationIcon
                   status={
                     assessment.deterministic.tests.failedCount > 0
@@ -336,10 +336,10 @@ export function MobileBottomSheet({
         {/* Heuristic Analysis */}
         {assessment && (
           <div className="space-y-1.5">
-            <h4 className="text-[13px] font-semibold text-t3 uppercase tracking-wide">
+            <h4 className="text-13 font-semibold text-t3 uppercase tracking-wide">
               启发式分析
             </h4>
-            <div className="flex gap-4 text-[13px] text-t3">
+            <div className="flex gap-4 text-13 text-t3">
               <span>影响 API: <strong className="text-t1">{assessment.heuristic.affectedApiCount}</strong></span>
               <span>间接文件: <strong className="text-t1">{assessment.heuristic.indirectImpactCount}</strong></span>
               <span>置信度: <strong className={assessment.heuristic.hasHighConfidenceImpact ? 'text-warn' : 'text-t1'}>
@@ -352,22 +352,22 @@ export function MobileBottomSheet({
         {/* Affected Files */}
         {activity && (
           <div className="space-y-1.5">
-            <h4 className="text-[13px] font-semibold text-t3 uppercase tracking-wide">
+            <h4 className="text-13 font-semibold text-t3 uppercase tracking-wide">
               受影响文件
             </h4>
             <div className="space-y-1">
               {activity.changedFiles.slice(0, 5).map((file) => (
-                <div key={file.filePath} className="flex items-center gap-2 text-[13px]">
+                <div key={file.filePath} className="flex items-center gap-2 text-13">
                   <span className="text-t2 truncate flex-1 font-mono">
                     {file.filePath}
                   </span>
-                  <span className={`px-1.5 py-0.5 rounded text-[13px] font-medium ${IMPACT_BADGE_COLORS[file.changeType === 'added' ? 'direct' : file.changeType === 'modified' ? 'direct' : 'potential'] ?? IMPACT_BADGE_COLORS.direct}`}>
+                  <span className={`px-1.5 py-0.5 rounded text-13 font-medium ${IMPACT_BADGE_COLORS[file.changeType === 'added' ? 'direct' : file.changeType === 'modified' ? 'direct' : 'potential'] ?? IMPACT_BADGE_COLORS.direct}`}>
                     {file.changeType ?? 'modified'}
                   </span>
                 </div>
               ))}
               {activity.changedFiles.length > 5 && (
-                <p className="text-[13px] text-t3">
+                <p className="text-13 text-t3">
                   +{activity.changedFiles.length - 5} 个文件...
                 </p>
               )}
@@ -377,7 +377,7 @@ export function MobileBottomSheet({
 
         {/* 高风险文件 — 状态细条详情（§8.5 点击展开内容） */}
         <div className="space-y-1.5">
-          <h4 className="text-[13px] font-semibold text-t3 uppercase tracking-wide">
+          <h4 className="text-13 font-semibold text-t3 uppercase tracking-wide">
             高风险文件
           </h4>
           <div className="-mx-1">

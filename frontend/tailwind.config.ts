@@ -57,7 +57,13 @@ export default {
                 warnsoft: 'var(--v2-warn-soft)',
                 warnstrong: 'var(--v2-warn-strong)',
             },
+            /* 圆角阶梯一律取 v2 令牌（就近归并：8/10→sm，12/14/16→md），不要再写 rounded-[Npx]。
+               实际在用：rounded(4) / xs(6) / sm(10) / md(14) / panel(22) / full */
             borderRadius: {
+                xs: 'var(--v2-r-xs)',
+                sm: 'var(--v2-r-sm)',
+                md: 'var(--v2-r-md)',
+                lg: 'var(--v2-r-lg)',
                 panel: 'var(--v2-r-panel)',
             },
             boxShadow: {
@@ -86,6 +92,12 @@ export default {
             transitionTimingFunction: {
                 soft: 'cubic-bezier(.2,.8,.2,1)',
                 spring: 'cubic-bezier(.34,1.56,.64,1)',
+            },
+            /* 字号阶梯（只设 font-size，不带动 line-height）：
+               xs 12 · 13 稠密界面文字 · sm 14 正文 · 15 阅读正文 · base 16 · lg 18 · xl 20 · 2xl 24 */
+            fontSize: {
+                '13': '13px',
+                '15': '15px',
             },
             fontFamily: {
                 sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'sans-serif'],

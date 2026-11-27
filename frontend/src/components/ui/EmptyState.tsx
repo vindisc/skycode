@@ -45,13 +45,13 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
                     {...props}
                 >
                     {icon !== undefined && (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-sunken2 text-t2 [&_svg]:h-5 [&_svg]:w-5">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-sunken2 text-t2 [&_svg]:h-5 [&_svg]:w-5">
                             {icon}
                         </div>
                     )}
                     <p className="text-sm font-medium text-t1">{title}</p>
                     {description !== undefined && (
-                        <p className="max-w-[320px] text-[13px] leading-normal text-t2">{description}</p>
+                        <p className="max-w-[320px] text-13 leading-normal text-t2">{description}</p>
                     )}
                     {actions !== undefined && (
                         <div className="mt-1 flex items-center gap-2">{actions}</div>

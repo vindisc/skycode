@@ -52,7 +52,7 @@ export const ThemePicker: React.FC = () => {
                                 aria-pressed={selected}
                                 onClick={() => setTheme({ mode: value })}
                                 className={cn(
-                                    'flex-1 flex flex-col items-center gap-1 p-3 rounded-[10px] border transition-interactive duration-fast',
+                                    'flex-1 flex flex-col items-center gap-1 p-3 rounded-sm border transition-interactive duration-fast',
                                     selected
                                         ? 'border-accent2 bg-accent2-soft'
                                         : 'border-hairline text-t1 hover:border-accent2-ring hover:bg-hover2'
@@ -60,7 +60,7 @@ export const ThemePicker: React.FC = () => {
                             >
                                 {/* 选中态：accent 经边/soft 底/图标编码，文字保 t1（§10.1 对比度） */}
                                 <Icon className={cn('w-5 h-5', selected ? 'text-accent2-ink' : 'text-t2')} />
-                                <span className="text-[13px] text-t1">{label}</span>
+                                <span className="text-13 text-t1">{label}</span>
                             </button>
                         );
                     })}
@@ -70,7 +70,7 @@ export const ThemePicker: React.FC = () => {
             {/* 强调色 */}
             <div>
                 <h4 className="text-sm font-medium text-t2 mb-3">强调色</h4>
-                {fixedAccentMode && <p className="mb-3 text-[13px] text-t3">{theme.mode === 'galaxy' ? '本主题使用专属星蓝、紫罗兰与玫红配色' : theme.mode === 'spider' ? '本主题使用专属青色、洋红与紫色配色' : '本主题使用专属配色'}</p>}
+                {fixedAccentMode && <p className="mb-3 text-13 text-t3">{theme.mode === 'galaxy' ? '本主题使用专属星蓝、紫罗兰与玫红配色' : theme.mode === 'spider' ? '本主题使用专属青色、洋红与紫色配色' : '本主题使用专属配色'}</p>}
                 <div className="flex gap-2 flex-wrap" role="group" aria-label="强调色">
                     {accentColors.map(({ value, label }) => {
                         const selected = !fixedAccentMode && normalizeAccentHex(theme.accentColor) === value;
@@ -111,7 +111,7 @@ export const ThemePicker: React.FC = () => {
                             key={value}
                             onClick={() => setTheme({ fontSize: value })}
                             className={cn(
-                                'flex-1 py-2 rounded-[10px] border text-sm transition-interactive duration-fast',
+                                'flex-1 py-2 rounded-sm border text-sm transition-interactive duration-fast',
                                 theme.fontSize === value
                                     ? 'border-accent2 bg-accent2-soft text-t1'
                                     : 'border-hairline text-t1 hover:border-accent2-ring hover:bg-hover2'

@@ -63,7 +63,7 @@ export function PromptArgsForm({ arguments: argDefs, onSubmit, executing }: Prom
         <button
           type="submit"
           disabled={executing}
-          className="panel-control px-4 py-2 text-sm font-medium rounded-xl bg-accent2-strong text-white
+          className="panel-control px-4 py-2 text-sm font-medium rounded-md bg-accent2-strong text-white
                      hover:bg-accent2-hover disabled:opacity-50 disabled:cursor-not-allowed
                      transition-interactive duration-fast active:scale-[.98]
                      focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
@@ -78,25 +78,25 @@ export function PromptArgsForm({ arguments: argDefs, onSubmit, executing }: Prom
     <form onSubmit={handleSubmit} className="space-y-3">
       {argDefs.map((arg) => (
         <div key={arg.name}>
-          <label className="block text-[13px] font-medium text-t2 mb-1">
+          <label className="block text-13 font-medium text-t2 mb-1">
             {arg.name}
             {arg.required && <span className="text-err ml-0.5">*</span>}
           </label>
           {arg.description && (
-            <p className="text-[13px] text-t3 mb-1">{arg.description}</p>
+            <p className="text-13 text-t3 mb-1">{arg.description}</p>
           )}
           <input
             type="text"
             value={values[arg.name] || ''}
             onChange={(e) => handleChange(arg.name, e.target.value)}
             placeholder={arg.required ? `Required: ${arg.name}` : `Optional: ${arg.name}`}
-            className={`w-full p-2 text-sm border rounded-xl bg-sunken2 shadow-well text-t1
+            className={`w-full p-2 text-sm border rounded-md bg-sunken2 shadow-well text-t1
               placeholder:text-t4 transition-surface duration-fast
               focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
               ${errors[arg.name] ? 'border-err' : 'border-hairline'}`}
           />
           {errors[arg.name] && (
-            <p className="text-[13px] text-err mt-1">{errors[arg.name]}</p>
+            <p className="text-13 text-err mt-1">{errors[arg.name]}</p>
           )}
         </div>
       ))}
@@ -104,7 +104,7 @@ export function PromptArgsForm({ arguments: argDefs, onSubmit, executing }: Prom
       <button
         type="submit"
         disabled={executing}
-        className="panel-control mt-2 px-4 py-2 text-sm font-medium rounded-xl bg-accent2-strong text-white
+        className="panel-control mt-2 px-4 py-2 text-sm font-medium rounded-md bg-accent2-strong text-white
                    hover:bg-accent2-hover disabled:opacity-50 disabled:cursor-not-allowed
                    transition-interactive duration-fast active:scale-[.98]
                    focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring"

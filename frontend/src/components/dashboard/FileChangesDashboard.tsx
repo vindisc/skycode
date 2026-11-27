@@ -73,7 +73,7 @@ export const FileChangesDashboard: React.FC<{ sessionId: string }> = ({ sessionI
                     <button
                         key={path}
                         onClick={() => snaps[0] && loadDiffStats(path, snaps[0].messageId)}
-                        className={`panel-control w-full text-left px-3 py-2 text-[13px] flex items-center gap-2
+                        className={`panel-control w-full text-left px-3 py-2 text-13 flex items-center gap-2
                             hover:bg-[var(--bg-tertiary)] transition-colors
                             ${selectedFile === path ? 'bg-accent2-soft text-accent2-ink' : 'text-[var(--v2-text-2)]'}`}
                     >
@@ -95,31 +95,31 @@ export const FileChangesDashboard: React.FC<{ sessionId: string }> = ({ sessionI
                         {selectedFile} 变更统计
                     </h4>
                     <div className="grid grid-cols-3 gap-2">
-                        <div className="bg-oksoft rounded-[10px] p-2 text-center">
+                        <div className="bg-oksoft rounded-sm p-2 text-center">
                             <div className="text-lg font-bold text-ok">{diffStats.filesAdded}</div>
-                            <div className="text-[13px] text-[var(--v2-text-2)]">新增</div>
+                            <div className="text-13 text-[var(--v2-text-2)]">新增</div>
                         </div>
-                        <div className="bg-warnsoft rounded-[10px] p-2 text-center">
+                        <div className="bg-warnsoft rounded-sm p-2 text-center">
                             <div className="text-lg font-bold text-warn">{diffStats.filesModified}</div>
-                            <div className="text-[13px] text-[var(--v2-text-2)]">修改</div>
+                            <div className="text-13 text-[var(--v2-text-2)]">修改</div>
                         </div>
-                        <div className="bg-errsoft rounded-[10px] p-2 text-center">
+                        <div className="bg-errsoft rounded-sm p-2 text-center">
                             <div className="text-lg font-bold text-err">{diffStats.filesDeleted}</div>
-                            <div className="text-[13px] text-[var(--v2-text-2)]">删除</div>
+                            <div className="text-13 text-[var(--v2-text-2)]">删除</div>
                         </div>
                     </div>
                     {diffStats.changedFiles.length > 0 && (
                         <div className="space-y-1">
-                            <h5 className="text-[13px] font-medium text-[var(--v2-text-2)]">变更文件列表</h5>
+                            <h5 className="text-13 font-medium text-[var(--v2-text-2)]">变更文件列表</h5>
                             {diffStats.changedFiles.map((f) => (
-                                <div key={f} className="text-[13px] font-mono text-[var(--v2-text-2)] flex items-center gap-1.5 py-0.5">
+                                <div key={f} className="text-13 font-mono text-[var(--v2-text-2)] flex items-center gap-1.5 py-0.5">
                                     <Clock size={12} />
                                     {f}
                                 </div>
                             ))}
                         </div>
                     )}
-                    <p className="text-[13px] text-[var(--v2-text-2)]">
+                    <p className="text-13 text-[var(--v2-text-2)]">
                         注意: 当前 API 仅返回变更统计。行级 diff 内容展示需后续新增专用端点。
                     </p>
                 </div>
@@ -137,12 +137,12 @@ export const FileChangesDashboard: React.FC<{ sessionId: string }> = ({ sessionI
             <div className="flex flex-col h-full">
                 <div className="flex border-b border-[var(--v2-border-hairline)]">
                     <button onClick={() => setActiveTab('files')}
-                            className={`panel-control flex-1 py-2 text-[13px] font-medium text-center
+                            className={`panel-control flex-1 py-2 text-13 font-medium text-center
                                 ${activeTab === 'files' ? 'text-accent2-ink border-b-2 border-accent2' : 'text-[var(--v2-text-2)]'}`}>
                         文件列表
                     </button>
                     <button onClick={() => setActiveTab('diff')}
-                            className={`panel-control flex-1 py-2 text-[13px] font-medium text-center
+                            className={`panel-control flex-1 py-2 text-13 font-medium text-center
                                 ${activeTab === 'diff' ? 'text-accent2-ink border-b-2 border-accent2' : 'text-[var(--v2-text-2)]'}`}>
                         Diff 视图
                     </button>

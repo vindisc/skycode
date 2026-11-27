@@ -35,7 +35,7 @@ export const SearchResultRenderer: React.FC<{ content: string; query?: string }>
 
     return (
         <div className="text-sm">
-            <div className="text-[13px] text-t3 mb-2">
+            <div className="text-13 text-t3 mb-2">
                 {grouped.size} 个文件中找到 {totalMatches} 个匹配
             </div>
             {Array.from(grouped).map(([file, matches]) => (
@@ -43,8 +43,8 @@ export const SearchResultRenderer: React.FC<{ content: string; query?: string }>
                     <span className="text-accent2-ink text-sm font-mono">
                         {file}
                     </span>
-                    <span className="text-t4 text-[13px] ml-2 tabular-nums">({matches.length} 匹配)</span>
-                    <div className="mt-1 bg-sunken2 border border-hairline rounded-[14px] overflow-hidden">
+                    <span className="text-t4 text-13 ml-2 tabular-nums">({matches.length} 匹配)</span>
+                    <div className="mt-1 bg-sunken2 border border-hairline rounded-md overflow-hidden">
                         {matches.map((m, i) => (
                             <div key={i} className="flex hover:bg-hover2">
                                 <span className="w-12 text-right text-t4 px-2 flex-shrink-0 tabular-nums"

@@ -7,8 +7,8 @@ import { useModelStore } from '@/store/modelStore';
 import { activateSessionCandidate, getPendingSessionActivation } from '@/services/sessionActivation';
 import { isSessionGenerating, type SessionSummary } from '@/utils/sessionGroups';
 
-const field = 'w-full rounded-[10px] border border-hairline bg-surfacev2 p-2 text-t1';
-const button = 'rounded-[10px] border border-hairline px-3 py-2 text-sm text-t1 hover:bg-hover2 disabled:opacity-40';
+const field = 'w-full rounded-sm border border-hairline bg-surfacev2 p-2 text-t1';
+const button = 'rounded-sm border border-hairline px-3 py-2 text-sm text-t1 hover:bg-hover2 disabled:opacity-40';
 const sessionName = (session: SessionSummary) => session.title || taskTitle(null, [], session.workingDirectory, session.goalPreview);
 const stages: Record<string, string> = { snapshotting: '复制并封存来源', extracting: '整理详细交接', aggregating: '生成有界概览', validating: '校验交接资料', publishing: '创建新会话', recovering: '恢复合并进度', snapshot: '整理过程与复制产物', summarizing: '生成交接摘要', committing: '创建新会话', completed: '合并完成', failed: '合并失败', interrupted: '合并已中断' };
 
@@ -119,11 +119,11 @@ export function SessionMergePanel() {
     };
 
     const recoveryMessages = <>
-        {recoveryNotice && <div role="alert" className="rounded-[10px] border border-hairline bg-surfacev2 p-3 text-sm text-t1">
+        {recoveryNotice && <div role="alert" className="rounded-sm border border-hairline bg-surfacev2 p-3 text-sm text-t1">
             <p>{recoveryNotice}</p>
             <button className={button} onClick={() => useSessionMergeStore.setState({ recoveryNotice: null })}>关闭合并恢复提示</button>
         </div>}
-        {storageWarning && <div role="alert" className="rounded-[10px] border border-hairline bg-surfacev2 p-3 text-sm text-t1">
+        {storageWarning && <div role="alert" className="rounded-sm border border-hairline bg-surfacev2 p-3 text-sm text-t1">
             <p>{storageWarning}</p>
             <button className={button} aria-label="关闭恢复提示" onClick={() => useSessionMergeStore.setState({ storageWarning: null })}>关闭提示</button>
         </div>}
@@ -131,7 +131,7 @@ export function SessionMergePanel() {
     return <>
         {!open && (storageWarning || recoveryNotice || error) && <div className="fixed bottom-36 right-4 z-40 max-w-sm space-y-2 shadow-e4">
             {recoveryMessages}
-            {error && <div role="alert" className="rounded-[10px] border border-hairline bg-surfacev2 p-3 text-sm text-t1">
+            {error && <div role="alert" className="rounded-sm border border-hairline bg-surfacev2 p-3 text-sm text-t1">
                 <p>{busy ? '进度同步失败：' : ''}{error}</p>
                 {busy
                     ? <button className={button} disabled={submitting} onClick={() => void refresh()}>重试查询</button>
@@ -174,7 +174,7 @@ export function SessionMergePanel() {
                     <label className="block">主会话（使用其工程目录）<select className={field} value={primary} onChange={e => {
                         setPrimary(e.target.value); setModel(selected.find(s => s.id === e.target.value)!.model);
                     }}>{selected.map(s => <option key={s.id} value={s.id}>{sessionName(s)}</option>)}</select></label>
-                    <div role="group" aria-label="新会话目录与权限" className="rounded-[10px] border border-hairline bg-surfacev2 p-3 space-y-2">
+                    <div role="group" aria-label="新会话目录与权限" className="rounded-sm border border-hairline bg-surfacev2 p-3 space-y-2">
                         <p className="break-all"><strong>新会话的主工作目录：</strong>{primarySource?.workingDirectory}</p>
                         {externalDirectories.map(directory => <p key={directory} className="break-all"><strong>外部引用目录：</strong>{directory}</p>)}
                         {externalDirectories.length > 0 && <p>外部引用目录不会成为新会话的额外工作目录。</p>}

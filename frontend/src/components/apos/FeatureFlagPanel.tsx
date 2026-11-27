@@ -43,16 +43,16 @@ export function FeatureFlagPanel() {
   const flagKeys = Object.keys(APOS_FLAG_DEFAULTS) as (keyof APOSFeatureFlags)[];
 
   return (
-    <div className="mx-3 my-3 rounded-[14px] border border-hairline bg-surfacev2 overflow-hidden">
+    <div className="mx-3 my-3 rounded-md border border-hairline bg-surfacev2 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-hairline bg-surface2">
         <div className="flex items-center gap-2">
           <Settings2 className="w-3.5 h-3.5 text-t2" />
-          <span className="text-[13px] font-medium text-t2">Feature Flags</span>
+          <span className="text-13 font-medium text-t2">Feature Flags</span>
         </div>
         <button
           onClick={resetToDefaults}
-          className="panel-control text-[13px] px-2 py-0.5 rounded text-t2 hover:text-t2 hover:bg-sunken2 transition-colors"
+          className="panel-control text-13 px-2 py-0.5 rounded text-t2 hover:text-t2 hover:bg-sunken2 transition-colors"
         >
           重置
         </button>
@@ -73,14 +73,14 @@ export function FeatureFlagPanel() {
               }`}
             >
               <div className="flex-1 min-w-0 mr-3">
-                <div className="text-[13px] font-medium text-t2 truncate">
+                <div className="text-13 font-medium text-t2 truncate">
                   {FLAG_LABELS[key]}
                 </div>
-                <div className="text-[13px] text-t2 mt-0.5 truncate">
+                <div className="text-13 text-t2 mt-0.5 truncate">
                   {FLAG_DESCRIPTIONS[key]}
                 </div>
                 {isBlocked && (
-                  <div className="text-[13px] text-warn mt-0.5">
+                  <div className="text-13 text-warn mt-0.5">
                     需要先启用: {missing.join(', ')}
                   </div>
                 )}

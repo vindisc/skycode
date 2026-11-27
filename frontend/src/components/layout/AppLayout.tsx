@@ -74,7 +74,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 <Sidebar className="flex-1" isDrawerMode={false} defaultTab={detachedTab} />
                 {!isConnected && (
                     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 
-                        px-4 py-2 bg-err text-white dark:text-app2 text-sm rounded-[10px] shadow-e3
+                        px-4 py-2 bg-err text-white dark:text-app2 text-sm rounded-sm shadow-e3
                         flex items-center gap-2 z-50">
                         <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
                         连接断开，正在重连...
@@ -109,7 +109,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                                     <button
                                         onClick={() => setMobileNavTab(null)}
                                         aria-label="返回"
-                                        className="panel-control min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl
+                                        className="panel-control min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md
                                             text-t2 hover:bg-hover2 transition-colors duration-fast"
                                     >
                                         <ChevronLeft className="w-5 h-5" />
@@ -138,7 +138,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             {/* Connection Status Toast */}
             {!isConnected && (
                 <div className="fixed bottom-12 left-1/2 -translate-x-1/2 
-                    px-4 py-2 bg-err text-white dark:text-app2 text-sm rounded-[10px] shadow-e3
+                    px-4 py-2 bg-err text-white dark:text-app2 text-sm rounded-sm shadow-e3
                     flex items-center gap-2 z-50">
                     <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
                     连接断开，正在重连...

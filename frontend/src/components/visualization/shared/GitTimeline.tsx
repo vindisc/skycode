@@ -133,11 +133,11 @@ export function GitTimeline({ repoPath = '.' }: GitTimelineProps) {
                 <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]">
                     <button
                         onClick={() => setBlameTarget(null)}
-                        className="panel-control text-[13px] px-2 py-1 rounded bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)] hover:text-[var(--v2-text-1)] transition-colors"
+                        className="panel-control text-13 px-2 py-1 rounded bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)] hover:text-[var(--v2-text-1)] transition-colors"
                     >
                         ← 返回时间线
                     </button>
-                    <span className="text-[13px] text-[var(--v2-text-2)] truncate">
+                    <span className="text-13 text-[var(--v2-text-2)] truncate">
                         {blameTarget.filePath}
                     </span>
                 </div>
@@ -178,7 +178,7 @@ export function GitTimeline({ repoPath = '.' }: GitTimelineProps) {
                 <p className="text-sm text-center">{gitError}</p>
                 <button
                     onClick={() => fetchGitLog(repoPath, 20)}
-                    className="panel-control text-[13px] px-3 py-1.5 rounded bg-[var(--v2-bg-hover)] hover:bg-[var(--v2-bg-surface)] transition-colors"
+                    className="panel-control text-13 px-3 py-1.5 rounded bg-[var(--v2-bg-hover)] hover:bg-[var(--v2-bg-surface)] transition-colors"
                 >
                     重试
                 </button>
@@ -192,7 +192,7 @@ export function GitTimeline({ repoPath = '.' }: GitTimelineProps) {
             <div className="p-8 flex flex-col items-center gap-3 text-[var(--v2-text-2)]">
                 <GitCommitHorizontal className="w-10 h-10 opacity-40" />
                 <p className="text-sm">暂无 commit 记录</p>
-                <p className="text-[13px]">请确认仓库路径是否正确</p>
+                <p className="text-13">请确认仓库路径是否正确</p>
             </div>
         );
     }
@@ -217,7 +217,7 @@ export function GitTimeline({ repoPath = '.' }: GitTimelineProps) {
 
                                 {/* Commit 卡片 */}
                                 <div
-                                    className={`rounded-[10px] border border-l-2 ${color.border} bg-[var(--v2-bg-sunken)] hover:bg-[var(--v2-bg-hover)] transition-colors cursor-pointer`}
+                                    className={`rounded-sm border border-l-2 ${color.border} bg-[var(--v2-bg-sunken)] hover:bg-[var(--v2-bg-hover)] transition-colors cursor-pointer`}
                                     onClick={() => handleToggleCommit(commit.sha)}
                                 >
                                     <div className="p-2.5">
@@ -225,7 +225,7 @@ export function GitTimeline({ repoPath = '.' }: GitTimelineProps) {
                                         <div className="flex items-center gap-1.5 mb-1">
                                             <button
                                                 onClick={(e) => handleCopySha(commit.sha, e)}
-                                                className="panel-control flex items-center gap-1 text-[13px] font-mono text-[var(--v2-text-2)] hover:text-[var(--v2-text-1)] transition-colors"
+                                                className="panel-control flex items-center gap-1 text-13 font-mono text-[var(--v2-text-2)] hover:text-[var(--v2-text-1)] transition-colors"
                                                 title="复制 SHA"
                                             >
                                                 {copiedSha === commit.sha
@@ -236,7 +236,7 @@ export function GitTimeline({ repoPath = '.' }: GitTimelineProps) {
                                             </button>
                                             <button
                                                 onClick={(e) => handleViewDiff(commit, e)}
-                                                className={`panel-control ml-auto text-[13px] px-1.5 py-0.5 rounded transition-colors ${
+                                                className={`panel-control ml-auto text-13 px-1.5 py-0.5 rounded transition-colors ${
                                                     isDiffActive
                                                         ? 'bg-accent2-soft text-accent2-ink'
                                                         : 'text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-surface)]'
@@ -253,7 +253,7 @@ export function GitTimeline({ repoPath = '.' }: GitTimelineProps) {
                                         </p>
 
                                         {/* Author + time + file count */}
-                                        <div className="flex items-center gap-2 mt-1.5 text-[13px] text-[var(--v2-text-2)]">
+                                        <div className="flex items-center gap-2 mt-1.5 text-13 text-[var(--v2-text-2)]">
                                             <span className="truncate max-w-[100px]">{commit.author}</span>
                                             <span>·</span>
                                             <span>{relativeTime(commit.date)}</span>
@@ -270,7 +270,7 @@ export function GitTimeline({ repoPath = '.' }: GitTimelineProps) {
 
                                         {/* 展开图标 */}
                                         {commit.files && commit.files.length > 0 && (
-                                            <div className="flex items-center gap-1 mt-1 text-[13px] text-[var(--v2-text-2)]">
+                                            <div className="flex items-center gap-1 mt-1 text-13 text-[var(--v2-text-2)]">
                                                 {isExpanded
                                                     ? <ChevronDown className="w-3 h-3" />
                                                     : <ChevronRight className="w-3 h-3" />
@@ -286,7 +286,7 @@ export function GitTimeline({ repoPath = '.' }: GitTimelineProps) {
                                             {commit.files.map((filePath) => (
                                                 <div
                                                     key={filePath}
-                                                    className="flex items-center gap-2 px-3 py-1.5 text-[13px] hover:bg-[var(--v2-bg-hover)] transition-colors"
+                                                    className="flex items-center gap-2 px-3 py-1.5 text-13 hover:bg-[var(--v2-bg-hover)] transition-colors"
                                                 >
                                                     <FileText className="w-3 h-3 text-[var(--v2-text-2)] shrink-0" />
                                                     <span className="font-mono text-[var(--v2-text-2)] truncate flex-1">
@@ -313,7 +313,7 @@ export function GitTimeline({ repoPath = '.' }: GitTimelineProps) {
                                                 </div>
                                             ) : activeDiff ? (
                                                 <div className="max-h-60 overflow-auto">
-                                                    <pre className="px-3 py-2 text-[13px] font-mono text-[var(--v2-text-2)] whitespace-pre-wrap break-all">
+                                                    <pre className="px-3 py-2 text-13 font-mono text-[var(--v2-text-2)] whitespace-pre-wrap break-all">
                                                         {activeDiff.summary}
                                                     </pre>
                                                     {activeDiff.detailed && (
@@ -321,7 +321,7 @@ export function GitTimeline({ repoPath = '.' }: GitTimelineProps) {
                                                             {activeDiff.detailed.split('\n').map((line, i) => (
                                                                 <div
                                                                     key={i}
-                                                                    className={`px-3 py-0.5 text-[13px] font-mono whitespace-pre ${
+                                                                    className={`px-3 py-0.5 text-13 font-mono whitespace-pre ${
                                                                         line.startsWith('+') && !line.startsWith('+++')
                                                                             ? 'bg-oksoft text-ok'
                                                                             : line.startsWith('-') && !line.startsWith('---')
@@ -352,7 +352,7 @@ export function GitTimeline({ repoPath = '.' }: GitTimelineProps) {
                         <button
                             onClick={handleLoadMore}
                             disabled={gitLoading}
-                            className="panel-control flex items-center gap-1.5 text-[13px] px-4 py-2 rounded-[10px]
+                            className="panel-control flex items-center gap-1.5 text-13 px-4 py-2 rounded-sm
                                 bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)] hover:text-[var(--v2-text-1)]
                                 hover:bg-[var(--v2-bg-surface)] transition-colors disabled:opacity-50"
                         >

@@ -80,7 +80,7 @@ export function TaskMilestoneStrip({ current }: { current: CurrentWorkbenchView 
 
     return (
         <section aria-label="任务里程碑" className="min-w-0">
-            <p className="mb-2 text-[13px] font-semibold uppercase tracking-wider text-t3">
+            <p className="mb-2 text-13 font-semibold uppercase tracking-wider text-t3">
                 任务进度{currentStage ? ` · ${currentStage.value}` : ''}
             </p>
             <div className="flex items-center overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -101,7 +101,7 @@ export function TaskMilestoneStrip({ current }: { current: CurrentWorkbenchView 
                             )}
                             <span
                                 title={stage.value}
-                                className={`flex items-center gap-1 whitespace-nowrap rounded-full px-3 py-1 text-[13px] font-medium ${PILL_CLASS[state]}`}
+                                className={`flex items-center gap-1 whitespace-nowrap rounded-full px-3 py-1 text-13 font-medium ${PILL_CLASS[state]}`}
                             >
                                 {state === 'done' && <Check size={12} aria-hidden="true" />}
                                 {stage.label}

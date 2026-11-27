@@ -117,7 +117,7 @@ export function ActivityStream() {
       {changeImpactEnabled && (
         <div className="border-b border-[var(--v2-border-hairline)] flex-shrink-0 max-h-[120px] overflow-y-auto">
           <details className="group">
-            <summary className="px-3 py-2 text-[13px] font-medium text-[var(--v2-text-2)] cursor-pointer hover:bg-[var(--v2-bg-hover)] select-none flex items-center gap-1">
+            <summary className="px-3 py-2 text-13 font-medium text-[var(--v2-text-2)] cursor-pointer hover:bg-[var(--v2-bg-hover)] select-none flex items-center gap-1">
               <span className="transition-transform group-open:rotate-90">▶</span>
               变更影响全景
             </summary>
@@ -130,7 +130,7 @@ export function ActivityStream() {
       {agentPipelineEnabled && (
         <div className="border-b border-[var(--v2-border-hairline)] flex-shrink-0">
           <details className="group">
-            <summary className="px-3 py-2 text-[13px] font-medium text-[var(--v2-text-2)] cursor-pointer hover:bg-[var(--v2-bg-hover)] select-none flex items-center gap-1">
+            <summary className="px-3 py-2 text-13 font-medium text-[var(--v2-text-2)] cursor-pointer hover:bg-[var(--v2-bg-hover)] select-none flex items-center gap-1">
               <span className="transition-transform group-open:rotate-90">▶</span>
               Agent Pipeline
             </summary>
@@ -146,7 +146,7 @@ export function ActivityStream() {
           <button
             key={f.value}
             onClick={() => handleFilterChange(f.value)}
-            className={`panel-control px-2.5 py-1 text-[13px] rounded-full transition-colors ${
+            className={`panel-control px-2.5 py-1 text-13 rounded-full transition-colors ${
               activeFilterValue === f.value
                 ? 'bg-[color:color-mix(in_srgb,var(--v2-accent-strong)_30%,transparent)] text-accent2-ink dark:text-accent2-ink font-medium'
                 : 'text-[var(--v2-text-2)] hover:text-[var(--v2-text-1)] hover:bg-[var(--v2-bg-hover)]'

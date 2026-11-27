@@ -43,7 +43,7 @@ export const MobileApprovalSheet: React.FC = () => {
     };
 
     const pendingBadge = (
-        <span className="px-2 py-0.5 text-[13px] rounded bg-warnsoft text-warnstrong">
+        <span className="px-2 py-0.5 text-13 rounded bg-warnsoft text-warnstrong">
             {attentions.length} pending
         </span>
     );
@@ -108,34 +108,34 @@ interface AttentionCardProps {
 }
 
 const AttentionCard: React.FC<AttentionCardProps> = ({ attention, onApprove, onReject, expanded, onToggleDetail }) => (
-    <div className="border border-hairline rounded-[14px] p-3">
+    <div className="border border-hairline rounded-md p-3">
         <div className="flex items-center justify-between gap-2 mb-1">
             <VerdictBadge verdict={attention.verdict} />
-            <span className="text-[13px] text-t3">
+            <span className="text-13 text-t3">
                 {formatRelative(attention.timestamp)}
             </span>
         </div>
 
         {attention.claim && (
-            <div className="text-[13px] font-medium text-t1 truncate">{attention.claim}</div>
+            <div className="text-13 font-medium text-t1 truncate">{attention.claim}</div>
         )}
 
         {attention.summary && (
-            <div className="text-[13px] text-t2 mt-1 line-clamp-3">{attention.summary}</div>
+            <div className="text-13 text-t2 mt-1 line-clamp-3">{attention.summary}</div>
         )}
 
         {attentionScopeNote(attention.verdict) && (
-            <div className="text-[13px] text-t3 mt-1">{attentionScopeNote(attention.verdict)}</div>
+            <div className="text-13 text-t3 mt-1">{attentionScopeNote(attention.verdict)}</div>
         )}
 
-        <div className="text-[13px] text-t3 mt-1 font-mono truncate">
+        <div className="text-13 text-t3 mt-1 font-mono truncate">
             bundle: {attention.bundleId}
         </div>
 
         <button
             type="button"
             onClick={onToggleDetail}
-            className="panel-control mt-1.5 inline-flex items-center min-h-[44px] text-[13px] text-accent2-ink hover:underline"
+            className="panel-control mt-1.5 inline-flex items-center min-h-[44px] text-13 text-accent2-ink hover:underline"
         >
             {expanded ? '收起详情' : '查看详情'}
         </button>
@@ -150,14 +150,14 @@ const AttentionCard: React.FC<AttentionCardProps> = ({ attention, onApprove, onR
                 <button
                     type="button"
                     onClick={onApprove}
-                    className="panel-control flex-1 px-3 min-h-[44px] text-[13px] rounded-xl bg-okstrong text-white dark:text-app2 hover:brightness-110 active:scale-[.97] transition-interactive duration-fast"
+                    className="panel-control flex-1 px-3 min-h-[44px] text-13 rounded-md bg-okstrong text-white dark:text-app2 hover:brightness-110 active:scale-[.97] transition-interactive duration-fast"
                 >
                     Approve
                 </button>
                 <button
                     type="button"
                     onClick={onReject}
-                    className="panel-control flex-1 px-3 min-h-[44px] text-[13px] rounded-xl bg-err text-white dark:text-app2 active:scale-[.97] transition-interactive duration-fast"
+                    className="panel-control flex-1 px-3 min-h-[44px] text-13 rounded-md bg-err text-white dark:text-app2 active:scale-[.97] transition-interactive duration-fast"
                 >
                     Reject
                 </button>
@@ -169,18 +169,18 @@ const AttentionCard: React.FC<AttentionCardProps> = ({ attention, onApprove, onR
 const VerdictBadge: React.FC<{ verdict: string }> = ({ verdict }) => {
     const v = (verdict || '').toLowerCase();
     if (v === 'verified' || v === 'passed') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-oksoft text-okstrong">Verified</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-oksoft text-okstrong">Verified</span>;
     }
     if (v === 'failed') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-errsoft text-errstrong">Failed</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-errsoft text-errstrong">Failed</span>;
     }
     if (v === 'inconclusive') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-warnsoft text-warnstrong">Inconclusive</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-warnsoft text-warnstrong">Inconclusive</span>;
     }
     if (v === 'unavailable') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-warnsoft text-warnstrong">Unavailable</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-warnsoft text-warnstrong">Unavailable</span>;
     }
-    return <span className="px-2 py-0.5 text-[13px] rounded bg-accent2-soft text-accent2-ink">范围未知</span>;
+    return <span className="px-2 py-0.5 text-13 rounded bg-accent2-soft text-accent2-ink">范围未知</span>;
 };
 
 /** 与 Workbench/Evidence Viewer 相同的有限范围口径；未知值安全兜底。 */

@@ -106,10 +106,10 @@ export function BlameView({ repoPath, filePath, gitRef }: BlameViewProps) {
         <div className="flex flex-col h-full">
             {/* 文件路径栏 */}
             <div className="flex items-center px-3 py-1.5 border-b border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]">
-                <span className="text-[13px] font-mono text-[var(--v2-text-2)] truncate">
+                <span className="text-13 font-mono text-[var(--v2-text-2)] truncate">
                     {activeBlame.file_path}
                 </span>
-                <span className="ml-auto text-[13px] text-[var(--v2-text-2)]">
+                <span className="ml-auto text-13 text-[var(--v2-text-2)]">
                     {activeBlame.total_lines} 行
                 </span>
             </div>
@@ -129,7 +129,7 @@ export function BlameView({ repoPath, filePath, gitRef }: BlameViewProps) {
                         return (
                             <div
                                 key={line.line_no}
-                                className={`flex items-center h-[24px] px-2 text-[13px] leading-[24px] ${bgColor} border-b border-[var(--v2-border-hairline)]/30`}
+                                className={`flex items-center h-[24px] px-2 text-13 leading-[24px] ${bgColor} border-b border-[var(--v2-border-hairline)]/30`}
                             >
                                 {showInfo ? (
                                     <>
@@ -166,10 +166,10 @@ export function BlameView({ repoPath, filePath, gitRef }: BlameViewProps) {
                         return (
                             <div
                                 key={line.line_no}
-                                className={`flex h-[24px] leading-[24px] font-mono text-[13px] ${bgColor} border-b border-[var(--v2-border-hairline)]/30`}
+                                className={`flex h-[24px] leading-[24px] font-mono text-13 ${bgColor} border-b border-[var(--v2-border-hairline)]/30`}
                             >
                                 {/* 行号 */}
-                                <span className="w-[40px] shrink-0 text-right pr-3 text-[var(--v2-text-2)] select-none text-[13px]">
+                                <span className="w-[40px] shrink-0 text-right pr-3 text-[var(--v2-text-2)] select-none text-13">
                                     {line.line_no}
                                 </span>
                                 {/* 代码 */}

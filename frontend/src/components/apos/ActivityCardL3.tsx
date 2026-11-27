@@ -37,7 +37,7 @@ function ToolSection({ title, passed, details, defaultOpen = false }: ToolSectio
     <div className="border border-[var(--v2-border-hairline)] rounded">
       <button
         onClick={() => setOpen(!open)}
-        className="panel-control w-full flex items-center gap-2 px-3 py-2 text-[13px] hover:bg-[var(--v2-bg-hover)] transition-colors"
+        className="panel-control w-full flex items-center gap-2 px-3 py-2 text-13 hover:bg-[var(--v2-bg-hover)] transition-colors"
       >
         {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         <VerificationIcon status={passed ? 'all_pass' : 'has_error'} size={14} />
@@ -45,7 +45,7 @@ function ToolSection({ title, passed, details, defaultOpen = false }: ToolSectio
       </button>
       {open && (
         <div className="px-3 pb-2">
-          <pre className="panel-code text-[13px] text-[var(--v2-text-2)] whitespace-pre-wrap font-mono bg-[var(--code-bg)] rounded p-2 max-h-[120px] overflow-y-auto">
+          <pre className="panel-code text-13 text-[var(--v2-text-2)] whitespace-pre-wrap font-mono bg-[var(--code-bg)] rounded p-2 max-h-[120px] overflow-y-auto">
             {details || 'No details available'}
           </pre>
         </div>
@@ -58,14 +58,14 @@ function DiffFallback({ original, modified }: { original: string; modified: stri
   return (
     <div className="grid grid-cols-2 gap-2">
       <div>
-        <p className="text-[13px] text-[var(--v2-text-2)] mb-1">Original</p>
-        <pre className="panel-code text-[13px] text-[var(--v2-text-1)] font-mono bg-[var(--code-bg)] rounded p-2 max-h-[300px] overflow-auto whitespace-pre-wrap">
+        <p className="text-13 text-[var(--v2-text-2)] mb-1">Original</p>
+        <pre className="panel-code text-13 text-[var(--v2-text-1)] font-mono bg-[var(--code-bg)] rounded p-2 max-h-[300px] overflow-auto whitespace-pre-wrap">
           {original || '(empty)'}
         </pre>
       </div>
       <div>
-        <p className="text-[13px] text-[var(--v2-text-2)] mb-1">Modified</p>
-        <pre className="panel-code text-[13px] text-[var(--v2-text-1)] font-mono bg-[var(--code-bg)] rounded p-2 max-h-[300px] overflow-auto whitespace-pre-wrap">
+        <p className="text-13 text-[var(--v2-text-2)] mb-1">Modified</p>
+        <pre className="panel-code text-13 text-[var(--v2-text-1)] font-mono bg-[var(--code-bg)] rounded p-2 max-h-[300px] overflow-auto whitespace-pre-wrap">
           {modified || '(empty)'}
         </pre>
       </div>
@@ -77,7 +77,7 @@ function DiffFallback({ original, modified }: { original: string; modified: stri
 function FileDiffPreview({ file }: { file: FileChange }) {
   if (!file.diffContent) {
     return (
-      <div className="px-3 py-2 text-[13px] text-[var(--v2-text-2)] italic">
+      <div className="px-3 py-2 text-13 text-[var(--v2-text-2)] italic">
         无预览内容
       </div>
     );
@@ -92,7 +92,7 @@ function FileDiffPreview({ file }: { file: FileChange }) {
   return (
     <div className="panel-diff bg-[var(--code-bg)] rounded border border-[var(--v2-border-hairline)] mt-1 overflow-hidden">
       <div className="max-h-[280px] overflow-y-auto overflow-x-auto">
-        <pre className="panel-code text-[13px] font-mono leading-[1.6] p-2 m-0">
+        <pre className="panel-code text-13 font-mono leading-[1.6] p-2 m-0">
           {displayLines.map((line, i) => {
             let lineClass = 'text-[var(--v2-text-2)]';
             if (line.startsWith('+ ')) lineClass = 'text-ok bg-oksoft';
@@ -109,7 +109,7 @@ function FileDiffPreview({ file }: { file: FileChange }) {
         </pre>
       </div>
       {truncated && (
-        <div className="px-3 py-1 text-[13px] text-[var(--v2-text-2)] border-t border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]">
+        <div className="px-3 py-1 text-13 text-[var(--v2-text-2)] border-t border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]">
           … 剩余 {lines.length - maxLines} 行未显示
         </div>
       )}
@@ -133,21 +133,21 @@ function CommandOutputViewer({ output, isError, command, metadata }: CommandOutp
   const exitCode = metadata?.exitCode as number | undefined;
 
   return (
-    <div className="rounded-[14px] overflow-hidden border border-hairline">
+    <div className="rounded-md overflow-hidden border border-hairline">
       {/* 终端标题栏 */}
       <div className="flex items-center gap-2 px-3 py-2 bg-sunken2 border-b border-hairline">
         {command && (
-          <span className="text-[13px] font-mono text-[var(--v2-text-2)] ml-2 truncate max-w-[60%]">
+          <span className="text-13 font-mono text-[var(--v2-text-2)] ml-2 truncate max-w-[60%]">
             $ {command}
           </span>
         )}
         {isError ? (
-          <span className="ml-auto text-[13px] text-err font-medium flex items-center gap-1">
+          <span className="ml-auto text-13 text-err font-medium flex items-center gap-1">
             <Terminal size={12} />
             {exitCode !== undefined ? `EXIT ${exitCode}` : 'EXIT ERROR'}
           </span>
         ) : (
-          <span className="ml-auto text-[13px] text-ok font-medium flex items-center gap-1">
+          <span className="ml-auto text-13 text-ok font-medium flex items-center gap-1">
             <Terminal size={12} />
             {exitCode !== undefined ? `EXIT ${exitCode}` : 'EXIT 0'}
           </span>
@@ -155,7 +155,7 @@ function CommandOutputViewer({ output, isError, command, metadata }: CommandOutp
       </div>
       {/* 终端内容区 */}
       <div className="bg-sunken2 p-3 overflow-x-auto max-h-[400px] overflow-y-auto">
-        <pre className="panel-code text-[13px] font-mono leading-5 whitespace-pre-wrap m-0">
+        <pre className="panel-code text-13 font-mono leading-5 whitespace-pre-wrap m-0">
           {displayLines.map((line, i) => (
             <div key={i} className={isError ? 'text-err' : 'text-t1'}>
               {line || '\u00A0'}
@@ -163,7 +163,7 @@ function CommandOutputViewer({ output, isError, command, metadata }: CommandOutp
           ))}
         </pre>
         {truncated && (
-          <div className="text-[13px] text-warnstrong dark:text-warn mt-2 pt-2 border-t border-hairline">
+          <div className="text-13 text-warnstrong dark:text-warn mt-2 pt-2 border-t border-hairline">
             ... 输出已截断（共 {lines.length} 行，仅显示前 {maxLines} 行）
           </div>
         )}
@@ -185,7 +185,7 @@ function FileListWithDiff({ files }: { files: FileChange[] }) {
           <div key={file.filePath}>
             <div
               onClick={() => setExpandedFile(isExpanded ? null : file.filePath)}
-              className={`flex items-center gap-2 px-2 py-1.5 rounded text-[13px] cursor-pointer transition-colors ${
+              className={`flex items-center gap-2 px-2 py-1.5 rounded text-13 cursor-pointer transition-colors ${
                 isExpanded ? 'bg-[var(--v2-bg-hover)]' : 'hover:bg-[var(--v2-bg-hover)]'
               }`}
             >
@@ -201,7 +201,7 @@ function FileListWithDiff({ files }: { files: FileChange[] }) {
               </span>
               <span className="text-ok">+{file.additions}</span>
               <span className="text-err">-{file.deletions}</span>
-              <span className={`px-1.5 py-0.5 rounded text-[13px] font-medium ${
+              <span className={`px-1.5 py-0.5 rounded text-13 font-medium ${
                 file.changeType === 'added' ? 'bg-oksoft text-ok' :
                 file.changeType === 'deleted' ? 'bg-errsoft text-err' :
                 'bg-accent2-soft text-accent2-ink'
@@ -254,7 +254,7 @@ export function ActivityCardL3({
       />
 
       {/* Panel */}
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={activity.summary} tabIndex={-1} className="relative z-40 w-full max-w-[900px] max-h-[calc(100dvh-32px)] bg-[var(--v2-bg-surface)] rounded-[22px] border border-[var(--v2-border-hairline)] shadow-2xl flex flex-col mx-4">
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={activity.summary} tabIndex={-1} className="relative z-40 w-full max-w-[900px] max-h-[calc(100dvh-32px)] bg-[var(--v2-bg-surface)] rounded-panel border border-[var(--v2-border-hairline)] shadow-2xl flex flex-col mx-4">
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--v2-border-hairline)] flex-shrink-0">
           <OperationIcon type={activity.operationType} size={20} />
@@ -393,7 +393,7 @@ export function ActivityCardL3({
         <div className="flex items-center gap-2 px-5 py-3 border-t border-[var(--v2-border-hairline)] flex-shrink-0">
           <ActivityDecisionStatus id={activity.id} />
           {activity.decision ? (
-            <span className={`inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium rounded ${
+            <span className={`inline-flex items-center gap-1.5 px-4 py-2 text-13 font-medium rounded ${
               activity.decision === 'approved'
                 ? 'bg-oksoft text-ok'
                 : 'bg-errsoft text-err'
@@ -420,7 +420,7 @@ export function ActivityCardL3({
                   <button
                     onClick={onApprove}
                     disabled={isDisabled}
-                    className={`panel-control inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium rounded bg-oksoft text-ok hover:bg-[color:color-mix(in_srgb,var(--v2-ok)_22%,transparent)] transition-colors ${disabledClass}`}
+                    className={`panel-control inline-flex items-center gap-1.5 px-4 py-2 text-13 font-medium rounded bg-oksoft text-ok hover:bg-[color:color-mix(in_srgb,var(--v2-ok)_22%,transparent)] transition-colors ${disabledClass}`}
                     title={isDisabled ? '等待文件变更数据或验证完成' : '批准此操作'}
                   >
                     <Check size={14} /> 批准
@@ -428,7 +428,7 @@ export function ActivityCardL3({
                   <button
                     onClick={onReject}
                     disabled={isDisabled}
-                    className={`panel-control inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium rounded bg-errsoft text-err hover:bg-errsoft transition-colors ${disabledClass}`}
+                    className={`panel-control inline-flex items-center gap-1.5 px-4 py-2 text-13 font-medium rounded bg-errsoft text-err hover:bg-errsoft transition-colors ${disabledClass}`}
                     title={isDisabled ? '等待文件变更数据或验证完成' : '拒绝此操作'}
                   >
                     <X size={14} /> 拒绝
@@ -436,7 +436,7 @@ export function ActivityCardL3({
                   <button
                     disabled
                     title="Phase 2 功能"
-                    className="panel-control px-3 py-1.5 text-[13px] rounded bg-sunken2 text-t3 cursor-not-allowed opacity-50"
+                    className="panel-control px-3 py-1.5 text-13 rounded bg-sunken2 text-t3 cursor-not-allowed opacity-50"
                   >
                     应用建议
                   </button>
@@ -447,7 +447,7 @@ export function ActivityCardL3({
           <button
             onClick={onClose}
             aria-label="关闭详情"
-            className="panel-control ml-auto inline-flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium rounded bg-sunken2 text-[var(--v2-text-2)] hover:bg-sunken2 transition-colors"
+            className="panel-control ml-auto inline-flex items-center gap-1.5 px-4 py-2 text-13 font-medium rounded bg-sunken2 text-[var(--v2-text-2)] hover:bg-sunken2 transition-colors"
           >
             关闭
           </button>

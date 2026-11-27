@@ -228,7 +228,7 @@ const CustomTreemapTooltip: React.FC<CustomTooltipProps> = ({ active, payload })
 
   return (
     <div
-      className="z-50 px-3 py-2.5 rounded-[14px] shadow-e4\n        border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-surface)]"
+      className="z-50 px-3 py-2.5 rounded-md shadow-e4\n        border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-surface)]"
       style={{ maxWidth: 280 }}
     >
       <div className="flex items-center gap-1.5 mb-1.5">
@@ -237,20 +237,20 @@ const CustomTreemapTooltip: React.FC<CustomTooltipProps> = ({ active, payload })
         ) : (
           <FileCode size={13} className="text-[var(--v2-text-2)]" />
         )}
-        <span className="text-[13px] font-medium text-[var(--v2-text-1)] truncate">
+        <span className="text-13 font-medium text-[var(--v2-text-1)] truncate">
           {node.name}
         </span>
         <span
-          className="ml-auto px-1.5 py-0.5 rounded text-[13px] font-bold text-white dark:text-app2"
+          className="ml-auto px-1.5 py-0.5 rounded text-13 font-bold text-white dark:text-app2"
           style={{ backgroundColor: RISK_COLORS[node.risk_level] }}
         >
           {node.risk_level}
         </span>
       </div>
       {node.file_path && (
-        <p className="text-[13px] text-[var(--v2-text-2)] mb-1.5 truncate">{node.file_path}</p>
+        <p className="text-13 text-[var(--v2-text-2)] mb-1.5 truncate">{node.file_path}</p>
       )}
-      <div className="grid grid-cols-3 gap-x-3 gap-y-1 text-[13px]">
+      <div className="grid grid-cols-3 gap-x-3 gap-y-1 text-13">
         <div>
           <span className="text-[var(--v2-text-2)]">LOC</span>
           <p className="font-medium text-[var(--v2-text-1)]">{node.loc.toLocaleString()}</p>
@@ -265,7 +265,7 @@ const CustomTreemapTooltip: React.FC<CustomTooltipProps> = ({ active, payload })
         </div>
       </div>
       {node.language && (
-        <p className="text-[13px] text-[var(--v2-text-2)] mt-1">
+        <p className="text-13 text-[var(--v2-text-2)] mt-1">
           语言: <span className="text-[var(--v2-text-2)]">{node.language}</span>
         </p>
       )}
@@ -295,14 +295,14 @@ const RiskFilterDropdown: React.FC<{
       <button
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
-        className="panel-control relative z-20 w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[13px]
+        className="panel-control relative z-20 w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-xs text-13
           border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-surface)]
           hover:bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)] transition-colors"
       >
         <AlertTriangle size={13} />
         <span>风险等级</span>
         {selected.length > 0 && (
-          <span className="px-1.5 py-0.5 rounded-full bg-warnsoft text-warn text-[13px] font-medium">
+          <span className="px-1.5 py-0.5 rounded-full bg-warnsoft text-warn text-13 font-medium">
             {selected.length}
           </span>
         )}
@@ -312,11 +312,11 @@ const RiskFilterDropdown: React.FC<{
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div className="absolute top-full left-0 mt-1 z-20 min-w-[160px]
-            rounded-[10px] border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-surface)] shadow-e3">
+            rounded-sm border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-surface)] shadow-e3">
             <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--v2-border-hairline)]">
-              <span className="text-[13px] text-[var(--v2-text-2)]">选择风险等级</span>
+              <span className="text-13 text-[var(--v2-text-2)]">选择风险等级</span>
               {selected.length > 0 && (
-                <button onClick={() => onChange([])} className="panel-control text-[13px] text-accent2-ink hover:underline">
+                <button onClick={() => onChange([])} className="panel-control text-13 text-accent2-ink hover:underline">
                   清除
                 </button>
               )}
@@ -325,7 +325,7 @@ const RiskFilterDropdown: React.FC<{
               <label
                 key={level}
                 className="flex items-center gap-2 px-3 py-1.5 hover:bg-[var(--v2-bg-hover)]
-                  max-md:min-h-11 cursor-pointer text-[13px] text-[var(--v2-text-1)]"
+                  max-md:min-h-11 cursor-pointer text-13 text-[var(--v2-text-1)]"
               >
                 <input
                   type="checkbox"
@@ -361,7 +361,7 @@ const LanguageFilterDropdown: React.FC<{
       <button
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
-        className="panel-control relative z-20 w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[13px]
+        className="panel-control relative z-20 w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded-xs text-13
           border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-surface)]
           hover:bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)] transition-colors"
       >
@@ -373,10 +373,10 @@ const LanguageFilterDropdown: React.FC<{
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div className="absolute top-full left-0 mt-1 z-20 min-w-[140px]
-            rounded-[10px] border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-surface)] shadow-e3">
+            rounded-sm border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-surface)] shadow-e3">
             <button
               onClick={() => { onChange(null); setOpen(false); }}
-              className={`panel-control w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--v2-bg-hover)]
+              className={`panel-control w-full text-left px-3 py-1.5 text-13 hover:bg-[var(--v2-bg-hover)]
                 ${!selected ? 'text-accent2-ink font-medium' : 'text-[var(--v2-text-1)]'}`}
             >
               所有语言
@@ -385,7 +385,7 @@ const LanguageFilterDropdown: React.FC<{
               <button
                 key={lang}
                 onClick={() => { onChange(lang); setOpen(false); }}
-                className={`panel-control w-full text-left px-3 py-1.5 text-[13px] hover:bg-[var(--v2-bg-hover)]
+                className={`panel-control w-full text-left px-3 py-1.5 text-13 hover:bg-[var(--v2-bg-hover)]
                   ${selected === lang ? 'text-accent2-ink font-medium' : 'text-[var(--v2-text-1)]'}`}
               >
                 {lang}
@@ -402,25 +402,25 @@ const LanguageFilterDropdown: React.FC<{
 
 const StatsCards: React.FC<{ stats: { total_files: number; avg_cc: number; high_risk_count: number; analysis_time_ms: number }; cached: boolean }> = ({ stats, cached }) => (
   <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-    <div className="flex items-center gap-1.5 text-[13px] text-[var(--v2-text-2)]">
+    <div className="flex items-center gap-1.5 text-13 text-[var(--v2-text-2)]">
       <Layers size={12} className="text-[var(--v2-text-2)]" />
       <span>{stats.total_files} 文件</span>
     </div>
-    <div className="flex items-center gap-1.5 text-[13px] text-[var(--v2-text-2)]">
+    <div className="flex items-center gap-1.5 text-13 text-[var(--v2-text-2)]">
       <BarChart3 size={12} className="text-[var(--v2-text-2)]" />
       <span>CC {stats.avg_cc.toFixed(1)}</span>
     </div>
-    <div className="flex items-center gap-1.5 text-[13px]">
+    <div className="flex items-center gap-1.5 text-13">
       <FileWarning size={12} className={stats.high_risk_count > 0 ? 'text-warn' : 'text-[var(--v2-text-2)]'} />
       <span className={stats.high_risk_count > 0 ? 'text-warn font-medium' : 'text-[var(--v2-text-2)]'}>
         {stats.high_risk_count} 高风险
       </span>
     </div>
-    <div className="flex items-center gap-1.5 text-[13px] text-[var(--v2-text-2)]">
+    <div className="flex items-center gap-1.5 text-13 text-[var(--v2-text-2)]">
       <Clock size={12} />
       <span>{stats.analysis_time_ms}ms</span>
       {cached && (
-        <span className="px-1 py-0.5 rounded bg-accent2-soft text-accent2-ink text-[13px]">缓存</span>
+        <span className="px-1 py-0.5 rounded bg-accent2-soft text-accent2-ink text-13">缓存</span>
       )}
     </div>
   </div>
@@ -525,10 +525,10 @@ export const CodeComplexityTreemap: React.FC = () => {
       <div className="flex flex-col items-center justify-center h-full p-6 text-center">
         <AlertTriangle className="w-10 h-10 text-err mb-3" />
         <p className="text-sm text-[var(--v2-text-1)] font-medium mb-1">分析失败</p>
-        <p className="text-[13px] text-[var(--v2-text-2)] mb-4 max-w-xs">{error}</p>
+        <p className="text-13 text-[var(--v2-text-2)] mb-4 max-w-xs">{error}</p>
         <button
           onClick={handleRetry}
-          className="panel-control flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px]
+          className="panel-control flex items-center gap-1.5 px-3 py-1.5 rounded-xs text-13
             bg-accent2-strong text-white hover:bg-accent2-hover transition-colors"
         >
           <RefreshCw size={12} />
@@ -558,7 +558,7 @@ export const CodeComplexityTreemap: React.FC = () => {
       <div className="flex flex-col items-center justify-center h-full p-6 text-center">
         <BarChart3 className="w-10 h-10 text-[var(--v2-text-2)] mb-3 opacity-40" />
         <p className="text-sm text-[var(--v2-text-2)]">暂无复杂度数据</p>
-        <p className="text-[13px] text-[var(--v2-text-2)] mt-1">
+        <p className="text-13 text-[var(--v2-text-2)] mt-1">
           请先选择项目路径进行代码复杂度分析
         </p>
       </div>
@@ -570,7 +570,7 @@ export const CodeComplexityTreemap: React.FC = () => {
       {/* 顶部工具栏 */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--v2-border-hairline)] shrink-0 flex-wrap">
         {/* 面包屑导航 */}
-        <nav className="flex items-center gap-0.5 text-[13px] mr-auto min-w-0 overflow-hidden">
+        <nav className="flex items-center gap-0.5 text-13 mr-auto min-w-0 overflow-hidden">
           {currentDrillPath.map((pathNode, idx) => (
             <React.Fragment key={`${pathNode.name}-${idx}`}>
               {idx > 0 && <ChevronRight size={12} className="text-[var(--v2-text-2)] shrink-0" />}
@@ -634,7 +634,7 @@ export const CodeComplexityTreemap: React.FC = () => {
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <X className="w-8 h-8 text-[var(--v2-text-2)] mb-2 opacity-40" />
-            <p className="text-[13px] text-[var(--v2-text-2)]">
+            <p className="text-13 text-[var(--v2-text-2)]">
               {(languageFilter || (riskLevelFilter && riskLevelFilter.length > 0))
                 ? '当前过滤条件下无匹配文件'
                 : '该节点无子项'}
@@ -645,14 +645,14 @@ export const CodeComplexityTreemap: React.FC = () => {
 
       {/* 底部图例 */}
       <div className="flex flex-wrap items-center gap-3 px-3 py-2 border-t border-[var(--v2-border-hairline)] shrink-0">
-        <span className="text-[13px] text-[var(--v2-text-2)] uppercase tracking-wider">风险等级</span>
+        <span className="text-13 text-[var(--v2-text-2)] uppercase tracking-wider">风险等级</span>
         {Object.entries(RISK_COLORS).map(([level, color]) => (
           <div key={level} className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: color }} />
-            <span className="text-[13px] text-[var(--v2-text-2)]">{level}</span>
+            <span className="w-2.5 h-2.5 rounded" style={{ backgroundColor: color }} />
+            <span className="text-13 text-[var(--v2-text-2)]">{level}</span>
           </div>
         ))}
-        <span className="ml-auto text-[13px] text-[var(--v2-text-2)]">
+        <span className="ml-auto text-13 text-[var(--v2-text-2)]">
           面积 = 代码行数 (LOC) · 颜色 = 风险等级
         </span>
       </div>

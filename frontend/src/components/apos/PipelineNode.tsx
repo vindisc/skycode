@@ -57,7 +57,7 @@ export const PipelineNode: React.FC<PipelineNodeProps> = ({ worker, swarmId: _sw
     const borderColor = getStatusBorderColor(worker);
 
     return (
-        <div className={`rounded-[10px] border-2 ${borderColor} bg-surfacev2 p-4 shadow-e1 transition-[width]`}>
+        <div className={`rounded-sm border-2 ${borderColor} bg-surfacev2 p-4 shadow-e1 transition-[width]`}>
             {/* Header: Name + Status */}
             <div className="flex items-center justify-between mb-2">
                 <span className="font-semibold text-sm text-t1 truncate">
@@ -78,10 +78,10 @@ export const PipelineNode: React.FC<PipelineNodeProps> = ({ worker, swarmId: _sw
                         />
                     </div>
                     <div className="flex justify-between mt-1">
-                        <span className="text-[13px] text-t2">
+                        <span className="text-13 text-t2">
                             {worker.completedSteps ?? 0}/{worker.totalSteps ?? '?'} steps
                         </span>
-                        <span className="text-[13px] text-t2">
+                        <span className="text-13 text-t2">
                             {worker.progressPercent}%
                         </span>
                     </div>
@@ -90,14 +90,14 @@ export const PipelineNode: React.FC<PipelineNodeProps> = ({ worker, swarmId: _sw
 
             {/* Current step description */}
             {worker.currentStepDescription && (
-                <p className="text-[13px] text-t2 dark:text-t2 mb-1 truncate" title={worker.currentStepDescription}>
+                <p className="text-13 text-t2 dark:text-t2 mb-1 truncate" title={worker.currentStepDescription}>
                     {worker.currentStepDescription}
                 </p>
             )}
 
             {/* Error message */}
             {worker.errorMessage && (
-                <p className="text-[13px] text-err mt-1 truncate" title={worker.errorMessage}>
+                <p className="text-13 text-err mt-1 truncate" title={worker.errorMessage}>
                     ⚠️ {worker.errorMessage}
                 </p>
             )}

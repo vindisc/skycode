@@ -12,7 +12,7 @@ import { Chip, Kbd } from '@/components/ui';
 import { useState } from 'react';
 
 /** 面板标题与辅助说明使用统一字号。 */
-const PANEL_LABEL_CLASS = 'text-[13px] font-semibold text-t2';
+const PANEL_LABEL_CLASS = 'text-13 font-semibold text-t2';
 
 // ── react-arborist 数据格式 ──
 
@@ -56,7 +56,7 @@ function FileIcon({ icon }: { icon: string }) {
     const isTextIcon = icon === 'TS' || icon === 'JS' || icon === '{}';
     if (isTextIcon) {
         return (
-            <span className="inline-flex items-center justify-center w-4 h-4 text-[13px] font-bold rounded shrink-0"
+            <span className="inline-flex items-center justify-center w-4 h-4 text-13 font-bold rounded shrink-0"
                 style={{
                     color: icon === 'TS' ? 'var(--v2-chart-5)' : icon === 'JS' ? 'var(--v2-chart-3)' : 'var(--v2-text-3)',
                     backgroundColor: icon === 'TS' ? '#3178c620' : icon === 'JS' ? '#f7df1e20' : 'transparent',
@@ -135,7 +135,7 @@ function FileNode({ node, style, dragHandle }: NodeRendererProps<ArboristNode>) 
             style={style}
             ref={dragHandle}
             onClick={handleClick}
-            className={`group flex items-center gap-1.5 px-2 cursor-pointer rounded-md
+            className={`group flex items-center gap-1.5 px-2 cursor-pointer rounded-xs
                 transition-interactive duration-fast
                 ${isSelected
                     ? 'bg-accent2-soft text-t1'
@@ -143,7 +143,7 @@ function FileNode({ node, style, dragHandle }: NodeRendererProps<ArboristNode>) 
         >
             {/* 展开/折叠指示器（目录） */}
             {!node.isLeaf && (
-                <span className="text-[13px] text-t3 w-3 shrink-0">
+                <span className="text-13 text-t3 w-3 shrink-0">
                     {node.isOpen ? '▾' : '▸'}
                 </span>
             )}
@@ -247,7 +247,7 @@ export function FileTreePanel({ sidebarWidth = 256 }: { sidebarWidth?: number })
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="搜索文件..."
                         aria-label="搜索文件"
-                        className="w-full h-8 pl-8 pr-8 rounded-xl bg-sunken2 shadow-well
+                        className="w-full h-8 pl-8 pr-8 rounded-md bg-sunken2 shadow-well
                             border border-transparent text-sm text-t1 placeholder:text-t4
                             transition-surface duration-fast
                             focus:outline-none focus:ring-[3px] focus:ring-accent2-ring"
@@ -256,7 +256,7 @@ export function FileTreePanel({ sidebarWidth = 256 }: { sidebarWidth?: number })
                         <button
                             onClick={handleClearSearch}
                             aria-label="清除搜索"
-                            className="panel-control absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded-md
+                            className="panel-control absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded-xs
                                 text-t3 hover:bg-hover2 hover:text-t1 transition-interactive duration-fast"
                         >
                             <X className="w-3.5 h-3.5" />
@@ -268,7 +268,7 @@ export function FileTreePanel({ sidebarWidth = 256 }: { sidebarWidth?: number })
                 <button
                     onClick={handleRefresh}
                     disabled={loading}
-                    className="panel-control p-1.5 rounded-[10px] hover:bg-hover2 text-t3 hover:text-t1
+                    className="panel-control p-1.5 rounded-sm hover:bg-hover2 text-t3 hover:text-t1
                         disabled:opacity-50 transition-interactive duration-fast shrink-0"
                     title="刷新文件树"
                 >
@@ -286,10 +286,10 @@ export function FileTreePanel({ sidebarWidth = 256 }: { sidebarWidth?: number })
 
                 {error && (
                     <div className="p-4 text-center">
-                        <p className="text-[13px] text-err mb-2">{error}</p>
+                        <p className="text-13 text-err mb-2">{error}</p>
                         <button
                             onClick={handleRefresh}
-                            className="panel-control text-[13px] text-accent2-ink hover:underline"
+                            className="panel-control text-13 text-accent2-ink hover:underline"
                         >
                             重试
                         </button>
@@ -297,7 +297,7 @@ export function FileTreePanel({ sidebarWidth = 256 }: { sidebarWidth?: number })
                 )}
 
                 {treeData && arboristData.length === 0 && searchQuery && (
-                    <div className="p-4 text-center text-t2 text-[13px]">
+                    <div className="p-4 text-center text-t2 text-13">
                         未找到匹配 "{searchQuery}" 的文件
                     </div>
                 )}

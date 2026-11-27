@@ -335,35 +335,35 @@ function NodeDetailPanel({
       </div>
       <div className="p-3 space-y-3 [overflow-wrap:anywhere]">
         <div>
-          <label className="text-[13px] uppercase font-semibold text-t2">Agent</label>
+          <label className="text-13 uppercase font-semibold text-t2">Agent</label>
           <p className="text-sm font-medium text-t1">{nodeData.agentName}</p>
         </div>
         <div>
-          <label className="text-[13px] uppercase font-semibold text-t2">类型</label>
-          <p className="text-[13px] text-t2">{nodeData.agentType}</p>
+          <label className="text-13 uppercase font-semibold text-t2">类型</label>
+          <p className="text-13 text-t2">{nodeData.agentType}</p>
         </div>
         <div>
-          <label className="text-[13px] uppercase font-semibold text-t2">状态</label>
-          <p className="text-[13px] text-t2">{nodeData.status}</p>
+          <label className="text-13 uppercase font-semibold text-t2">状态</label>
+          <p className="text-13 text-t2">{nodeData.status}</p>
         </div>
         <div>
-          <label className="text-[13px] uppercase font-semibold text-t2">描述</label>
-          <p className="text-[13px] text-t2 whitespace-pre-wrap break-all">
+          <label className="text-13 uppercase font-semibold text-t2">描述</label>
+          <p className="text-13 text-t2 whitespace-pre-wrap break-all">
             {nodeData.description}
           </p>
         </div>
         {nodeData.progress && (
           <div>
-            <label className="text-[13px] uppercase font-semibold text-t2">进度</label>
-            <p className="text-[13px] text-t2 whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
+            <label className="text-13 uppercase font-semibold text-t2">进度</label>
+            <p className="text-13 text-t2 whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
               {nodeData.progress}
             </p>
           </div>
         )}
         {nodeData.result && (
           <div>
-            <label className="text-[13px] uppercase font-semibold text-t2">结果</label>
-            <p className="text-[13px] text-t2 whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
+            <label className="text-13 uppercase font-semibold text-t2">结果</label>
+            <p className="text-13 text-t2 whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
               {nodeData.result}
             </p>
           </div>
@@ -459,7 +459,7 @@ function AgentDAGChartInner({ liveSessionId }: { liveSessionId?: string }) {
         <p className="text-sm text-t2 font-medium">
           暂无 Agent 任务
         </p>
-        <p className="text-[13px] text-t2 mt-1">
+        <p className="text-13 text-t2 mt-1">
           当 Agent 协作任务开始时，DAG 将自动显示
         </p>
       </div>
@@ -469,7 +469,7 @@ function AgentDAGChartInner({ liveSessionId }: { liveSessionId?: string }) {
   return (
     <div ref={containerRef} className="agent-dag relative w-full h-full bg-surfacev2">
       {/* 工具栏 */}
-      <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-surfacev2 backdrop-blur-sm rounded-[10px] shadow-e1 border border-border-hairline p-1">
+      <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-surfacev2 backdrop-blur-sm rounded-sm shadow-e1 border border-border-hairline p-1">
         <button
           onClick={() => setDirection(direction === 'TB' ? 'LR' : 'TB')}
           className="panel-control p-1.5 rounded hover:bg-hover2 transition-colors"

@@ -46,8 +46,8 @@ const VisualizationMessage: React.FC<VisualizationMessageProps> = ({ message }) 
 
     return (
         <div className="px-4 py-2 my-1">
-            <div className="rounded-[14px] border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]/30 overflow-hidden">
-                <div className="px-3 py-1.5 bg-[var(--v2-bg-sunken)] border-b border-[var(--v2-border-hairline)] text-[13px] text-[var(--v2-text-2)] font-mono flex items-center gap-2">
+            <div className="rounded-md border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]/30 overflow-hidden">
+                <div className="px-3 py-1.5 bg-[var(--v2-bg-sunken)] border-b border-[var(--v2-border-hairline)] text-13 text-[var(--v2-text-2)] font-mono flex items-center gap-2">
                     <span className="opacity-60">visualization</span>
                     <span className="opacity-40">·</span>
                     <span>{viewType}</span>
@@ -156,7 +156,7 @@ function renderByViewType(
         default:
             return (
                 <div>
-                    <div className="flex items-center gap-1.5 text-[13px] text-warn dark:text-warn mb-2">
+                    <div className="flex items-center gap-1.5 text-13 text-warn dark:text-warn mb-2">
                         <AlertTriangle size={12} />
                         <span>未识别的 viewType &quot;{viewType}&quot;，降级为 JSON 视图</span>
                     </div>
@@ -228,9 +228,9 @@ const HintCard: React.FC<HintCardProps> = ({ title, description, targetTab, view
         <div className="flex items-start gap-3 p-2 rounded border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-surface)]/60">
             <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium text-[var(--v2-text-1)]">{title}</div>
-                <div className="text-[13px] text-[var(--v2-text-2)] mt-0.5">{description}</div>
+                <div className="text-13 text-[var(--v2-text-2)] mt-0.5">{description}</div>
                 {summary && (
-                    <div className="text-[13px] text-[var(--v2-text-2)] mt-1 font-mono truncate">
+                    <div className="text-13 text-[var(--v2-text-2)] mt-1 font-mono truncate">
                         {summary}
                     </div>
                 )}
@@ -238,7 +238,7 @@ const HintCard: React.FC<HintCardProps> = ({ title, description, targetTab, view
             <button
                 type="button"
                 onClick={handleOpen}
-                className="panel-control flex items-center gap-1 text-[13px] px-2 py-1 rounded bg-accent2-soft hover:bg-accent2-soft text-accent2-ink border border-accent2 transition-colors flex-shrink-0"
+                className="panel-control flex items-center gap-1 text-13 px-2 py-1 rounded bg-accent2-soft hover:bg-accent2-soft text-accent2-ink border border-accent2 transition-colors flex-shrink-0"
             >
                 <ExternalLink size={12} />
                 <span>在可视化面板查看</span>
@@ -273,7 +273,7 @@ const JsonView: React.FC<{ props: Record<string, unknown> }> = ({ props }) => {
         );
     }
     return (
-        <pre className="text-[13px] text-[var(--v2-text-2)] font-mono overflow-x-auto whitespace-pre">
+        <pre className="text-13 text-[var(--v2-text-2)] font-mono overflow-x-auto whitespace-pre">
             {safeStringify(props)}
         </pre>
     );
@@ -294,7 +294,7 @@ const LoadingSkeleton: React.FC = () => (
 );
 
 const EmptyHint: React.FC<{ what: string }> = ({ what }) => (
-    <div className="text-[13px] text-[var(--v2-text-2)] italic">（空 {what}）</div>
+    <div className="text-13 text-[var(--v2-text-2)] italic">（空 {what}）</div>
 );
 
 export default React.memo(VisualizationMessage);

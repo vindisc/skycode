@@ -152,7 +152,7 @@ const MessageActions: React.FC<MessageActionsProps> = ({ message, isStreaming = 
                     data-testid="message-copy-all-button"
                 >
                     {copyAllState === 'copied' ? <Check className="h-[18px] w-[18px]" /> : <CopyPlus className="h-[18px] w-[18px]" />}
-                    <span className="text-[13px] font-medium leading-none">
+                    <span className="text-13 font-medium leading-none">
                         {copyAllState === 'copied' ? '已复制' : copyAllState === 'failed' ? '复制失败' : '复制全部'}
                     </span>
                 </button>
@@ -161,7 +161,7 @@ const MessageActions: React.FC<MessageActionsProps> = ({ message, isStreaming = 
                 <button
                     type="button"
                     onClick={handleCopy}
-                    className="message-action-button inline-flex shrink-0 items-center justify-center rounded-[10px] text-t4 transition-colors duration-fast group-hover:text-t2 hover:bg-hover2 hover:!text-t1"
+                    className="message-action-button inline-flex shrink-0 items-center justify-center rounded-sm text-t4 transition-colors duration-fast group-hover:text-t2 hover:bg-hover2 hover:!text-t1"
                     title={copied ? '已复制' : '复制'}
                     aria-label={copied ? '已复制' : '复制'}
                     data-testid="message-copy-button"
@@ -174,7 +174,7 @@ const MessageActions: React.FC<MessageActionsProps> = ({ message, isStreaming = 
                     type="button"
                     onClick={() => { void handleRecall(); }}
                     disabled={recalling}
-                    className="message-action-button inline-flex shrink-0 items-center justify-center rounded-[10px] text-t4 transition-colors duration-fast group-hover:text-t2 hover:bg-hover2 hover:!text-err disabled:opacity-40"
+                    className="message-action-button inline-flex shrink-0 items-center justify-center rounded-sm text-t4 transition-colors duration-fast group-hover:text-t2 hover:bg-hover2 hover:!text-err disabled:opacity-40"
                     title="撤回这条消息"
                     aria-label="撤回这条消息"
                     data-testid="message-recall-button"
@@ -183,7 +183,7 @@ const MessageActions: React.FC<MessageActionsProps> = ({ message, isStreaming = 
                 </button>
             )}
             <span
-                className="message-timestamp text-[13px] text-t4 tabular-nums select-none transition-colors duration-fast group-hover:text-t3"
+                className="message-timestamp text-13 text-t4 tabular-nums select-none transition-colors duration-fast group-hover:text-t3"
                 data-testid="message-timestamp"
             >
                 {formatMessageTime(message.timestamp)}

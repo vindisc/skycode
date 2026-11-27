@@ -30,12 +30,12 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
 
     return (
         <div className="relative group">
-            <div className={`font-mono panel-code p-3 rounded-xl overflow-x-auto
+            <div className={`font-mono panel-code p-3 rounded-md overflow-x-auto
                 ${isError || (exitCode !== undefined && exitCode !== 0)
                     ? 'bg-errsoft border border-err text-err'
                     : 'bg-sunken2 border border-hairline text-t1'}`}>
                 {exitCode !== undefined && (
-                    <span className={`absolute top-2 right-2 text-[13px] px-1.5 py-0.5 rounded tabular-nums
+                    <span className={`absolute top-2 right-2 text-13 px-1.5 py-0.5 rounded tabular-nums
                         ${exitCode === 0 ? 'bg-oksoft text-ok' : 'bg-errsoft text-err'}`}>
                         exit {exitCode}
                     </span>
@@ -43,13 +43,13 @@ export const TerminalRenderer: React.FC<TerminalRendererProps> = ({
                 <pre className="whitespace-pre-wrap">{displayContent}</pre>
             </div>
             {shouldCollapse && (
-                <button className="panel-control text-[13px] text-accent2-ink mt-1 hover:underline"
+                <button className="panel-control text-13 text-accent2-ink mt-1 hover:underline"
                     onClick={() => setExpanded(!expanded)}>
                     {expanded ? '收起' : `展开全部 (${lines.length} 行)`}
                 </button>
             )}
             <button className="panel-control absolute top-2 right-10 opacity-0 group-hover:opacity-100
-                text-[13px] text-t4 hover:text-t1 transition"
+                text-13 text-t4 hover:text-t1 transition"
                 onClick={handleCopy}>
                 复制
             </button>

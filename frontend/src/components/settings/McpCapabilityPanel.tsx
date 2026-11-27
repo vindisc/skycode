@@ -47,7 +47,7 @@ export function McpCapabilityPanel() {
 
       <div className="flex flex-wrap gap-2">
         <button
-          className={`panel-control px-3 py-1 text-[13px] rounded-full border transition-interactive duration-fast
+          className={`panel-control px-3 py-1 text-13 rounded-full border transition-interactive duration-fast
             focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring active:scale-[.98]
             ${activeDomain === null
               ? 'bg-accent2-strong text-white border-accent2-strong'
@@ -56,7 +56,7 @@ export function McpCapabilityPanel() {
         >全部</button>
         {domains.map((d) => (
           <button key={d}
-            className={`panel-control px-3 py-1 text-[13px] rounded-full border transition-interactive duration-fast
+            className={`panel-control px-3 py-1 text-13 rounded-full border transition-interactive duration-fast
               focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring active:scale-[.98]
               ${activeDomain === d
                 ? 'bg-accent2-strong text-white border-accent2-strong'
@@ -95,7 +95,7 @@ function CapabilityCard({
   onEdit: () => void;
 }) {
   return (
-    <div className={`p-4 rounded-2xl border transition-surface duration-fast
+    <div className={`p-4 rounded-md border transition-surface duration-fast
       ${cap.enabled
         ? 'border-accent2 bg-accent2-soft'
         : 'border-hairline'}`}>
@@ -103,12 +103,12 @@ function CapabilityCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-medium text-sm">{cap.name}</span>
-            <span className="text-[13px] px-2 py-0.5 rounded bg-surface2 text-t3">
+            <span className="text-13 px-2 py-0.5 rounded bg-surface2 text-t3">
               {DOMAIN_LABELS[cap.domain] ?? cap.domain}
             </span>
           </div>
-          <p className="text-[13px] text-t3 mt-1 line-clamp-2">{cap.briefDescription}</p>
-          <div className="flex items-center gap-3 mt-2 text-[13px] text-t3">
+          <p className="text-13 text-t3 mt-1 line-clamp-2">{cap.briefDescription}</p>
+          <div className="flex items-center gap-3 mt-2 text-13 text-t3">
             <span>超时: {(cap.timeoutMs / 1000).toFixed(0)}s</span>
             <span>SSE</span>
             <span className="font-mono">{cap.toolName}</span>
@@ -124,17 +124,17 @@ function CapabilityCard({
       </div>
       <div className="flex items-center gap-2 mt-3">
         <button onClick={onEdit}
-          className="panel-control text-[13px] px-2 py-1 rounded-xl border border-hairline
+          className="panel-control text-13 px-2 py-1 rounded-md border border-hairline
                      hover:bg-hover2 transition-interactive duration-fast
                      focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
                      active:scale-[.98]">编辑</button>
         <button onClick={() => onTest(cap.id)}
-          className="panel-control text-[13px] px-2 py-1 rounded-xl border border-hairline
+          className="panel-control text-13 px-2 py-1 rounded-md border border-hairline
                      hover:bg-hover2 transition-interactive duration-fast
                      focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
                      active:scale-[.98]">测试</button>
         {testResult && (
-          <span className={`text-[13px] ${testResult.status === 'reachable' ? 'text-ok' : 'text-err'}`}>
+          <span className={`text-13 ${testResult.status === 'reachable' ? 'text-ok' : 'text-err'}`}>
             {testResult.status === 'reachable' ? '可达' : testResult.status}
           </span>
         )}
@@ -172,12 +172,12 @@ function EditDialog({ capabilityId, onClose }: { capabilityId: string; onClose: 
         </div>
         <div className="flex justify-end gap-2 mt-6">
           <button onClick={onClose}
-            className="panel-control px-4 py-2 text-sm rounded-xl border border-hairline text-t2
+            className="panel-control px-4 py-2 text-sm rounded-md border border-hairline text-t2
                        hover:bg-hover2 transition-interactive duration-fast
                        focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
                        active:scale-[.98]">取消</button>
           <button onClick={handleSave}
-            className="panel-control px-4 py-2 text-sm rounded-xl bg-accent2-strong text-white
+            className="panel-control px-4 py-2 text-sm rounded-md bg-accent2-strong text-white
                        hover:bg-accent2-hover transition-interactive duration-fast
                        focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
                        active:scale-[.98]">保存</button>
@@ -192,15 +192,15 @@ function Field({ label, value, onChange, multiline }: {
 }) {
   return (
     <div>
-      <label className="block text-[13px] font-medium text-t3 mb-1">{label}</label>
+      <label className="block text-13 font-medium text-t3 mb-1">{label}</label>
       {multiline ? (
         <textarea value={value} onChange={(e) => onChange(e.target.value)}
-          className="w-full p-2 text-sm border border-hairline rounded-xl bg-sunken2 shadow-well text-t1 h-20
+          className="w-full p-2 text-sm border border-hairline rounded-md bg-sunken2 shadow-well text-t1 h-20
                      transition-surface duration-fast
                      focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring" />
       ) : (
         <input type="text" value={value} onChange={(e) => onChange(e.target.value)}
-          className="w-full p-2 text-sm border border-hairline rounded-xl bg-sunken2 shadow-well text-t1
+          className="w-full p-2 text-sm border border-hairline rounded-md bg-sunken2 shadow-well text-t1
                      transition-surface duration-fast
                      focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring" />
       )}

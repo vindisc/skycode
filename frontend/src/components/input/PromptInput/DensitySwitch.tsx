@@ -50,7 +50,7 @@ export const DensitySwitch: React.FC = () => {
                         title={`显示方式：${option.label}`}
                         onClick={() => handleSelect(option.value)}
                         className={cn(
-                            'h-6 rounded-full px-2.5 text-[13px] font-medium',
+                            'h-6 rounded-full px-2.5 text-13 font-medium',
                             'transition-interactive duration-fast',
                             'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring',
                             selected
@@ -71,11 +71,11 @@ export const DensitySwitch: React.FC = () => {
 
 /** 快捷条 chip 配方（与 MobilePromptBar CHIP_CLASS 一致） */
 const MOBILE_CHIP_CLASS = `flex h-11 shrink-0 items-center gap-1.5 rounded-full border border-hairline
-    bg-surfacev2 px-2 text-[13px] text-t2 shadow-e1 transition-interactive duration-fast
+    bg-surfacev2 px-2 text-13 text-t2 shadow-e1 transition-interactive duration-fast
     active:scale-95`;
 
 /** 菜单项（触控命中 ≥44px，与 MobilePromptBar MENU_ITEM_CLASS 一致） */
-const MOBILE_MENU_ITEM_CLASS = `flex h-11 w-full items-center gap-2 px-3.5 text-left text-[13px] text-t2
+const MOBILE_MENU_ITEM_CLASS = `flex h-11 w-full items-center gap-2 px-3.5 text-left text-13 text-t2
     transition-interactive duration-fast hover:bg-hover2 active:scale-[.98]`;
 
 export const MobileDensitySwitch: React.FC = () => {
@@ -114,9 +114,9 @@ export const MobileDensitySwitch: React.FC = () => {
                     {DENSITY_OPTIONS.map(option => (
                         <button key={option.value} type="button" aria-pressed={option.value === density}
                             onClick={() => handlePick(option.value)}
-                            className={cn(MOBILE_MENU_ITEM_CLASS, 'min-h-14 rounded-xl', option.value === density && 'bg-accent2-soft text-accent2-ink')}>
+                            className={cn(MOBILE_MENU_ITEM_CLASS, 'min-h-14 rounded-md', option.value === density && 'bg-accent2-soft text-accent2-ink')}>
                             <span className="flex flex-1 flex-col items-start gap-0.5"><span className="font-medium">{option.label}</span>
-                                <span className="text-[13px] text-t3">{option.value === 'compact' ? '问题、过程与回复默认折叠' : option.value === 'balanced' ? '按任务查看执行摘要' : '查看完整过程与任务导航'}</span>
+                                <span className="text-13 text-t3">{option.value === 'compact' ? '问题、过程与回复默认折叠' : option.value === 'balanced' ? '按任务查看执行摘要' : '查看完整过程与任务导航'}</span>
                             </span>
                             {option.value === density && <Check size={18} aria-hidden="true" />}
                         </button>

@@ -35,11 +35,11 @@ const McpServerItem: React.FC<{ state: McpHealthState }> = ({ state }) => {
                 <span
                     className={`w-2 h-2 rounded-full ${cfg.color} ${cfg.pulse ? 'animate-pulse' : ''}`}
                 />
-                <span className="text-[13px] font-medium text-t1 truncate max-w-[120px]">
+                <span className="text-13 font-medium text-t1 truncate max-w-[120px]">
                     {state.serverName}
                 </span>
             </div>
-            <div className="flex items-center gap-2 text-[13px] text-t2">
+            <div className="flex items-center gap-2 text-13 text-t2">
                 {state.consecutiveFailures > 0 && (
                     <span className="text-err" title="连续失败次数">
                         ×{state.consecutiveFailures}
@@ -64,7 +64,7 @@ export const McpConnectionIndicator: React.FC = () => {
 
     return (
         <div className="flex flex-col gap-0.5 px-2 py-1">
-            <div className="text-[13px] font-semibold text-t2 uppercase tracking-wider mb-0.5">
+            <div className="text-13 font-semibold text-t2 uppercase tracking-wider mb-0.5">
                 MCP 服务器
             </div>
             {entries.map(state => (

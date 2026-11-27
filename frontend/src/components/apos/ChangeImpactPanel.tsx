@@ -20,7 +20,7 @@ export function ChangeImpactPanel() {
             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
         <p className="text-sm">暂无变更影响数据</p>
-        <p className="text-[13px] mt-1 opacity-70">当会话产生代码变更后，此处将展示聚合分析</p>
+        <p className="text-13 mt-1 opacity-70">当会话产生代码变更后，此处将展示聚合分析</p>
       </div>
     );
   }
@@ -66,9 +66,9 @@ const VARIANT_STYLES: Record<SummaryCardProps['variant'], string> = {
 
 function SummaryCard({ label, value, variant }: SummaryCardProps) {
   return (
-    <div className={`rounded-md border px-3 py-2 bg-[var(--bg-card)] ${VARIANT_STYLES[variant]}`}>
+    <div className={`rounded-xs border px-3 py-2 bg-[var(--bg-card)] ${VARIANT_STYLES[variant]}`}>
       <p className="text-lg font-semibold leading-tight">{value}</p>
-      <p className="text-[13px] text-[var(--v2-text-2)] mt-0.5">{label}</p>
+      <p className="text-13 text-[var(--v2-text-2)] mt-0.5">{label}</p>
     </div>
   );
 }

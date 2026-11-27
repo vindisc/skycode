@@ -8,7 +8,7 @@
  * - ToolCallBlock (工具调用卡片)
  * - ImageBlock (图片内容块)
  *
- * §7.2 AI 消息（Demo-A 卡式）：渐变 accent 方块头像（30px rounded-[10px]）+
+ * §7.2 AI 消息（Demo-A 卡式）：渐变 accent 方块头像（30px rounded-sm）+
  * Card 容器（bg-surfacev2 + border-hairline + rounded-panel + shadow-e2，
  * padding 18×20，行高 1.75）。
  * 运行状态（§7.2/§10.2）：呼吸点 animate-accent-pulse + 文本 + tabular-nums 计时，
@@ -58,7 +58,7 @@ const AssistantMessage: React.FC<AssistantMessageProps> = ({
 
             {/* Card 容器（§7.2：surface + hairline + rounded-panel + shadow-e2，px-18/py-20） */}
             <div className={embedded ? "min-w-0" : "flex-1 min-w-0 rounded-panel border border-hairline bg-surfacev2 shadow-e1 px-[18px] py-5"}>
-                {!embedded && <div className="flex items-center gap-1.5 mb-2 text-[13px] text-t3 font-medium">
+                {!embedded && <div className="flex items-center gap-1.5 mb-2 text-13 text-t3 font-medium">
                     <span>SkyCode</span>
                 </div>}
 

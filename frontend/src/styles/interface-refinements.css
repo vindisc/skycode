@@ -7,6 +7,31 @@
     --color-text-muted: var(--v2-text-3);
     --bg-primary: var(--v2-bg-app);
     --bg-secondary: var(--v2-bg-surface);
+    /* 旧调色板余项同样改指 v2：bg-surface / border-border / text-muted / text-success 等类名仍有引用，
+       值若留在旧色板（深色下 #0F172A 偏蓝）就会和周围的 v2 面色差一档。指向 v2 变量后随主题自动切换。 */
+    --color-surface: var(--v2-bg-surface);
+    --color-surface-elevated: var(--v2-bg-surface-2);
+    --color-surface-sunken: var(--v2-bg-sunken);
+    --color-border: var(--v2-border-strong);
+    --color-code-border: var(--v2-border-strong);
+    --color-text: var(--v2-text-1);
+    --color-text-secondary: var(--v2-text-2);
+    --color-muted: var(--v2-text-3);
+    --border: var(--v2-border-strong);
+    --bg-hover: var(--v2-bg-hover);
+    --code-bg: var(--v2-code-bg);
+    --color-code-bg: var(--v2-code-bg);
+    --diff-add: var(--v2-diff-add-bg);
+    --diff-remove: var(--v2-diff-remove-bg);
+    --color-success: var(--v2-ok);
+    --color-success-bg: var(--v2-ok-soft);
+    --color-warning: var(--v2-warn);
+    --color-warning-bg: var(--v2-warn-soft);
+    --color-danger: var(--v2-err);
+    --color-danger-bg: var(--v2-err-soft);
+    --color-overlay: var(--v2-overlay);
+    /* 阅读列宽：消息列与输入区共用，宽屏下居中 */
+    --thread-max-width: 920px;
 }
 :root.dark, :root.glass {
     --text-primary: var(--v2-text-1);
@@ -135,10 +160,12 @@
 }
 
 /* Explicitly opted-in controls use one radius; pills keep their silhouette. */
-.panel-control:not(.rounded-full) { border-radius: 10px; }
+.panel-control:not(.rounded-full) { border-radius: var(--v2-r-sm); }
 
-/* Reading widths are applied to content, never to the virtual scroll viewport. */
-.turn-card { width: 100%; max-width: 1200px; margin-inline: auto; }
+/* Reading widths are applied to content, never to the virtual scroll viewport.
+   消息列与输入区共用一个阅读列宽（--thread-max-width），宽屏下两者居中对齐。 */
+.turn-card { width: 100%; max-width: var(--thread-max-width); margin-inline: auto; }
+.chat-composer-surface { max-width: var(--thread-max-width); margin-inline: auto; }
 .text-block > :is(p, ul, ol, blockquote) { max-width: 860px; }
 .panel-control > .lucide, .dialog-control > .lucide, .workbench-control > .lucide {
     width: 18px; height: 18px; flex-shrink: 0;

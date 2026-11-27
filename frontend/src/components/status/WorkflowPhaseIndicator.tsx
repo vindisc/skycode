@@ -81,11 +81,11 @@ const PhaseStep: React.FC<PhaseStepProps> = ({ phase, isLast }) => {
                         <span className="text-base">{phaseIcons[phase.name]}</span>
                     )}
                 </div>
-                <span className={`mt-1.5 text-[13px] leading-tight text-center ${statusStyles.label}`}>
+                <span className={`mt-1.5 text-13 leading-tight text-center ${statusStyles.label}`}>
                     {phaseLabels[phase.name]}
                 </span>
                 {elapsed && (
-                    <span className="text-[13px] text-t2 mt-0.5">
+                    <span className="text-13 text-t2 mt-0.5">
                         {elapsed}
                     </span>
                 )}
@@ -129,25 +129,25 @@ export const WorkflowPhaseIndicator: React.FC = () => {
     if (!workflow) return null;
 
     return (
-        <div className="px-4 py-3 bg-surfacev2 backdrop-blur-sm border border-border-hairline rounded-[14px] shadow-e1">
+        <div className="px-4 py-3 bg-surfacev2 backdrop-blur-sm border border-border-hairline rounded-md shadow-e1">
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-t1">
                         Coordinator 工作流
                     </span>
-                    <span className={`text-[13px] px-2 py-0.5 rounded-full bg-sunken2 ${statusColor}`}>
+                    <span className={`text-13 px-2 py-0.5 rounded-full bg-sunken2 ${statusColor}`}>
                         {statusLabel}
                     </span>
                 </div>
-                <span className="text-[13px] text-t2 font-mono">
+                <span className="text-13 text-t2 font-mono">
                     {workflow.workflowId}
                 </span>
             </div>
 
             {/* Objective */}
             {workflow.objective && (
-                <p className="text-[13px] text-t2 mb-3 truncate" title={workflow.objective}>
+                <p className="text-13 text-t2 mb-3 truncate" title={workflow.objective}>
                     目标: {workflow.objective}
                 </p>
             )}

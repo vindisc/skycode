@@ -48,7 +48,7 @@ export function SignalBadge({ signal, size = 'sm', showTooltip = true, reason }:
         className={isLoading ? 'animate-spin' : ''}
       />
       {size === 'md' && (
-        <span className="text-[13px] font-medium">{config.label}</span>
+        <span className="text-13 font-medium">{config.label}</span>
       )}
     </span>
   );

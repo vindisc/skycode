@@ -46,7 +46,7 @@ export function MobilePipelineSummary({ workers }: MobilePipelineSummaryProps) {
       </div>
 
       {/* 进度文本 */}
-      <span className="text-[13px] text-t2 whitespace-nowrap">
+      <span className="text-13 text-t2 whitespace-nowrap">
         {completed}/{workers.length} 完成
       </span>
     </div>

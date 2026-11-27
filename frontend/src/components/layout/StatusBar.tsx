@@ -65,7 +65,7 @@ export function StatusBar() {
             {/* 瞬态项存在时才渲染底栏，避免空条 */}
             {hasTransient && (
                 <footer className="app-status h-[34px] border-t border-hairline bg-surface2
-                    flex items-center px-4 text-[13px] shrink-0">
+                    flex items-center px-4 text-13 shrink-0">
                     <div className="flex items-center gap-4">
                         {pendingPermissions.length > 0 && (
                             <div className="flex items-center gap-1.5 text-warnstrong">

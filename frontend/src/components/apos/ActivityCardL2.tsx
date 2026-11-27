@@ -36,10 +36,10 @@ export function ActivityCardL2({
             {/* Loading state when verification in progress */}
             {!assessment && activity.insight?.verificationStatus === 'pending' && (
               <div className="space-y-2">
-                <h4 className="text-[13px] font-semibold text-[var(--v2-text-2)] uppercase tracking-wide">
+                <h4 className="text-13 font-semibold text-[var(--v2-text-2)] uppercase tracking-wide">
                   确定性验证
                 </h4>
-                <div className="flex items-center gap-2 text-[13px] text-[var(--v2-text-2)]">
+                <div className="flex items-center gap-2 text-13 text-[var(--v2-text-2)]">
                   <Loader2 size={14} className="animate-spin text-accent2-ink dark:text-accent2-ink" />
                   <span>验证进行中...</span>
                 </div>
@@ -49,12 +49,12 @@ export function ActivityCardL2({
             {/* Deterministic Verification Results */}
             {assessment && (
               <div className="space-y-2">
-                <h4 className="text-[13px] font-semibold text-[var(--v2-text-2)] uppercase tracking-wide">
+                <h4 className="text-13 font-semibold text-[var(--v2-text-2)] uppercase tracking-wide">
                   确定性验证
                 </h4>
                 <div className="grid grid-cols-3 gap-2">
                   {/* TypeScript Check */}
-                  <div className="flex items-center gap-1.5 text-[13px]">
+                  <div className="flex items-center gap-1.5 text-13">
                     <VerificationIcon
                       status={assessment.deterministic.typeCheck.passed ? 'all_pass' : 'has_error'}
                       size={14}
@@ -71,7 +71,7 @@ export function ActivityCardL2({
                   </div>
 
                   {/* ESLint Check */}
-                  <div className="flex items-center gap-1.5 text-[13px]">
+                  <div className="flex items-center gap-1.5 text-13">
                     <VerificationIcon
                       status={
                         assessment.deterministic.lint.errorCount > 0
@@ -95,7 +95,7 @@ export function ActivityCardL2({
                   </div>
 
                   {/* Test Check */}
-                  <div className="flex items-center gap-1.5 text-[13px]">
+                  <div className="flex items-center gap-1.5 text-13">
                     <VerificationIcon
                       status={
                         assessment.deterministic.tests.failedCount > 0
@@ -118,10 +118,10 @@ export function ActivityCardL2({
             {/* Heuristic Analysis */}
             {assessment && (
               <div className="space-y-1.5">
-                <h4 className="text-[13px] font-semibold text-[var(--v2-text-2)] uppercase tracking-wide">
+                <h4 className="text-13 font-semibold text-[var(--v2-text-2)] uppercase tracking-wide">
                   启发式分析
                 </h4>
-                <div className="flex gap-4 text-[13px] text-[var(--v2-text-2)]">
+                <div className="flex gap-4 text-13 text-[var(--v2-text-2)]">
                   <span>影响 API: <strong className="text-[var(--v2-text-1)]">{assessment.heuristic.affectedApiCount}</strong></span>
                   <span>间接文件: <strong className="text-[var(--v2-text-1)]">{assessment.heuristic.indirectImpactCount}</strong></span>
                   <span>置信度: <strong className={assessment.heuristic.hasHighConfidenceImpact ? 'text-warnstrong dark:text-warn' : 'text-[var(--v2-text-1)]'}>
@@ -133,22 +133,22 @@ export function ActivityCardL2({
 
             {/* Affected Files (first 3) */}
             <div className="space-y-1.5">
-              <h4 className="text-[13px] font-semibold text-[var(--v2-text-2)] uppercase tracking-wide">
+              <h4 className="text-13 font-semibold text-[var(--v2-text-2)] uppercase tracking-wide">
                 受影响文件
               </h4>
               <div className="space-y-1">
                 {activity.changedFiles.slice(0, 3).map((file) => (
-                  <div key={file.filePath} className="flex items-center gap-2 text-[13px]">
+                  <div key={file.filePath} className="flex items-center gap-2 text-13">
                     <span className="text-[var(--v2-text-1)] truncate flex-1 font-mono">
                       {file.filePath}
                     </span>
-                    <span className={`px-1.5 py-0.5 rounded text-[13px] font-medium ${IMPACT_BADGE_COLORS[file.changeType === 'added' ? 'direct' : file.changeType === 'modified' ? 'direct' : 'potential'] ?? IMPACT_BADGE_COLORS.direct}`}>
+                    <span className={`px-1.5 py-0.5 rounded text-13 font-medium ${IMPACT_BADGE_COLORS[file.changeType === 'added' ? 'direct' : file.changeType === 'modified' ? 'direct' : 'potential'] ?? IMPACT_BADGE_COLORS.direct}`}>
                       {file.changeType ?? 'modified'}
                     </span>
                   </div>
                 ))}
                 {activity.changedFiles.length > 3 && (
-                  <p className="text-[13px] text-[var(--v2-text-2)]">
+                  <p className="text-13 text-[var(--v2-text-2)]">
                     +{activity.changedFiles.length - 3} 个文件...
                   </p>
                 )}
@@ -159,7 +159,7 @@ export function ActivityCardL2({
             <div className="flex items-center gap-2 pt-1">
               <ActivityDecisionStatus id={activity.id} />
           {activity.decision ? (
-                <span className={`inline-flex items-center gap-1 px-3 py-1.5 text-[13px] font-medium rounded ${
+                <span className={`inline-flex items-center gap-1 px-3 py-1.5 text-13 font-medium rounded ${
                   activity.decision === 'approved'
                     ? 'bg-oksoft text-ok'
                     : 'bg-errsoft text-err'
@@ -171,7 +171,7 @@ export function ActivityCardL2({
                   )}
                 </span>
               ) : activity.insight?.signal === 'auto_approve' ? (
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 text-[13px] font-medium rounded bg-sunken2 text-t2">
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 text-13 font-medium rounded bg-sunken2 text-t2">
                   <Check size={12} /> 已自动放行
                 </span>
               ) : (
@@ -187,7 +187,7 @@ export function ActivityCardL2({
                         <button
                           onClick={(e) => { e.stopPropagation(); onApprove(); }}
                           disabled={isDisabled}
-                          className={`panel-control inline-flex items-center gap-1 px-3 py-1.5 text-[13px] font-medium rounded bg-oksoft text-ok hover:bg-hover2 transition-colors ${disabledClass}`}
+                          className={`panel-control inline-flex items-center gap-1 px-3 py-1.5 text-13 font-medium rounded bg-oksoft text-ok hover:bg-hover2 transition-colors ${disabledClass}`}
                           title={isDisabled ? '等待文件变更数据或验证完成' : '批准此操作'}
                         >
                           <Check size={12} /> 批准
@@ -195,7 +195,7 @@ export function ActivityCardL2({
                         <button
                           onClick={(e) => { e.stopPropagation(); onReject(); }}
                           disabled={isDisabled}
-                          className={`panel-control inline-flex items-center gap-1 px-3 py-1.5 text-[13px] font-medium rounded bg-errsoft text-err hover:bg-hover2 transition-colors ${disabledClass}`}
+                          className={`panel-control inline-flex items-center gap-1 px-3 py-1.5 text-13 font-medium rounded bg-errsoft text-err hover:bg-hover2 transition-colors ${disabledClass}`}
                           title={isDisabled ? '等待文件变更数据或验证完成' : '拒绝此操作'}
                         >
                           <X size={12} /> 拒绝
@@ -207,7 +207,7 @@ export function ActivityCardL2({
               )}
               <button
                 onClick={(e) => { e.stopPropagation(); onViewDetails(); }}
-                className="panel-control inline-flex items-center gap-1 px-3 py-1.5 text-[13px] font-medium rounded bg-sunken2 text-[var(--v2-text-2)] hover:bg-hover2 transition-colors ml-auto"
+                className="panel-control inline-flex items-center gap-1 px-3 py-1.5 text-13 font-medium rounded bg-sunken2 text-[var(--v2-text-2)] hover:bg-hover2 transition-colors ml-auto"
               >
                 详情 <ArrowRight size={12} />
               </button>

@@ -34,7 +34,7 @@ const MobilePromptBar: React.FC<MobilePromptBarProps> = ({ state: s, runActive, 
 
 
     return (
-        <div data-testid="mobile-prompt-bar" className="flex min-h-0 min-w-0 flex-col rounded-[14px] border border-hairline bg-surfacev2 shadow-e2" style={{ minHeight: 'var(--mobile-composer-min-height, 0px)', maxHeight: 'calc(var(--viewport-height, 100dvh) * 0.382 - 2px)' }}>
+        <div data-testid="mobile-prompt-bar" className="flex min-h-0 min-w-0 flex-col rounded-md border border-hairline bg-surfacev2 shadow-e2" style={{ minHeight: 'var(--mobile-composer-min-height, 0px)', maxHeight: 'calc(var(--viewport-height, 100dvh) * 0.382 - 2px)' }}>
             <input ref={imageInputRef} data-mobile-image-input type="file" accept="image/*" multiple className="hidden" disabled={attachmentDisabled}
                 onChange={event => {
                     const files = Array.from(event.currentTarget.files ?? []);
@@ -66,7 +66,7 @@ const MobilePromptBar: React.FC<MobilePromptBarProps> = ({ state: s, runActive, 
                 <button type="button" aria-label={fileReferenceCapability?.mode === 'oss_upload' ? '上传本地文件' : '文件引用'} title="文件" disabled={attachmentDisabled} className={iconClass} onClick={pickFile}><Paperclip size={20} /></button>
                 <button type="button" aria-label="图片附件" title="图片" disabled={attachmentDisabled} className={iconClass} onClick={pickImages}><ImagePlus size={20} /></button>
                 <button type="button" aria-label="拍照" title="拍照" disabled={attachmentDisabled} className={iconClass} onClick={() => cameraInputRef.current?.click()}><Camera size={20} /></button>
-                <button type="button" aria-label="命令" title="命令" disabled={busy} className="flex h-11 shrink-0 items-center gap-1 rounded-[10px] px-2 text-sm text-t2 hover:bg-hover2 focus-visible:ring-2 focus-visible:ring-accent2 disabled:opacity-50"
+                <button type="button" aria-label="命令" title="命令" disabled={busy} className="flex h-11 shrink-0 items-center gap-1 rounded-sm px-2 text-sm text-t2 hover:bg-hover2 focus-visible:ring-2 focus-visible:ring-accent2 disabled:opacity-50"
                     onClick={() => { s.setInput('/'); s.setShowCommands(true); requestAnimationFrame(() => s.textareaRef.current?.focus()); }}><span aria-hidden="true">/</span>命令</button>
                 <VoiceInputButton compact onTranscript={s.handleVoiceTranscript} disabled={!s.asrAvailable || busy}
                     disabledReason={!s.asrAvailable ? '语音输入（服务暂不可用）' : undefined} />

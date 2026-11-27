@@ -47,14 +47,14 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ groups, total }) => {
     };
 
     return (
-        <div className="rounded-[14px] border border-hairline bg-sunken2 overflow-hidden max-w-2xl">
+        <div className="rounded-md border border-hairline bg-sunken2 overflow-hidden max-w-2xl">
             {/* Header */}
             <div className="px-4 py-3 border-b border-hairline flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <HelpCircle size={16} className="text-accent2-ink" />
                     <span className="text-sm font-medium text-t2">可用命令</span>
                 </div>
-                <span className="text-[13px] text-t2">
+                <span className="text-13 text-t2">
                     共 {total} 个命令 · 输入 <code className="px-1.5 py-0.5 bg-sunken2 rounded text-t2 font-mono">/help &lt;命令名&gt;</code> 查看详情
                 </span>
             </div>
@@ -76,10 +76,10 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ groups, total }) => {
                                     ? <ChevronDown size={14} className="text-t2" />
                                     : <ChevronRight size={14} className="text-t2" />
                                 }
-                                <span className={`text-[13px] font-medium px-2 py-0.5 rounded ${color.badge} ${color.badgeText}`}>
+                                <span className={`text-13 font-medium px-2 py-0.5 rounded ${color.badge} ${color.badgeText}`}>
                                     {group.titleZh}
                                 </span>
-                                <span className="text-[13px] text-t2">
+                                <span className="text-13 text-t2">
                                     {group.commands.length} 个命令
                                 </span>
                             </button>
@@ -87,8 +87,8 @@ export const HelpPanel: React.FC<HelpPanelProps> = ({ groups, total }) => {
                             {/* Command list */}
                             {isExpanded && (
                                 <div className="px-4 pb-2">
-                                    <div className={`rounded-md border ${color.border} overflow-hidden`}>
-                                        <table className="w-full text-[13px]">
+                                    <div className={`rounded-xs border ${color.border} overflow-hidden`}>
+                                        <table className="w-full text-13">
                                             <tbody>
                                                 {group.commands.map(cmd => (
                                                     <tr key={cmd.name} className="border-b border-hairline last:border-b-0 hover:bg-sunken2 transition-colors">

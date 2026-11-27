@@ -102,7 +102,7 @@ const BrowserReplayTimeline: React.FC<BrowserReplayTimelineProps> = ({
                     <span className="text-sm font-semibold text-[var(--v2-text-1)]">
                         浏览器快照时间线
                     </span>
-                    <span className="text-[13px] text-[var(--v2-text-2)]">
+                    <span className="text-13 text-[var(--v2-text-2)]">
                         session: {sessionId.slice(0, 12)}… · {snapshots.length} 帧
                     </span>
                 </div>
@@ -129,14 +129,14 @@ const BrowserReplayTimeline: React.FC<BrowserReplayTimelineProps> = ({
             </div>
 
             {error && (
-                <div className="px-4 py-2 text-[13px] text-err bg-errsoft border-b border-err">
+                <div className="px-4 py-2 text-13 text-err bg-errsoft border-b border-err">
                     {error}
                 </div>
             )}
 
             <div className="flex-1 overflow-y-auto">
                 {snapshots.length === 0 && !loading && !error && (
-                    <div className="p-6 text-center text-[13px] text-[var(--v2-text-2)]">
+                    <div className="p-6 text-center text-13 text-[var(--v2-text-2)]">
                         暂无快照。可在对话中输入
                         <code className="mx-1 px-1 bg-[var(--v2-bg-sunken)] rounded">/browser-snapshot</code>
                         触发一次采集。
@@ -187,7 +187,7 @@ const SnapshotRow: React.FC<SnapshotRowProps> = ({ snapshot, expanded, onToggle 
                     {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                 </div>
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 text-[13px] text-[var(--v2-text-2)] mb-1">
+                    <div className="flex items-center gap-2 text-13 text-[var(--v2-text-2)] mb-1">
                         <span className="font-mono">{ts}</span>
                         <span className="opacity-60">·</span>
                         <span>
@@ -203,7 +203,7 @@ const SnapshotRow: React.FC<SnapshotRowProps> = ({ snapshot, expanded, onToggle 
                         {snapshot.title || snapshot.url || '(untitled)'}
                     </div>
                     {snapshot.url && (
-                        <div className="text-[13px] text-[var(--v2-text-2)] truncate font-mono">
+                        <div className="text-13 text-[var(--v2-text-2)] truncate font-mono">
                             {snapshot.url}
                         </div>
                     )}
@@ -229,15 +229,15 @@ interface InteractiveListProps {
 const InteractiveList: React.FC<InteractiveListProps> = ({ interactive }) => {
     if (!interactive || interactive.length === 0) {
         return (
-            <div className="text-[13px] text-[var(--v2-text-2)]">未抽取到交互元素。</div>
+            <div className="text-13 text-[var(--v2-text-2)]">未抽取到交互元素。</div>
         );
     }
     return (
         <div>
-            <div className="text-[13px] font-semibold text-[var(--v2-text-2)] mb-2">
+            <div className="text-13 font-semibold text-[var(--v2-text-2)] mb-2">
                 交互元素 ({interactive.length})
             </div>
-            <ul className="space-y-1 text-[13px] font-mono">
+            <ul className="space-y-1 text-13 font-mono">
                 {interactive.slice(0, 50).map((it, idx) => (
                     <li key={idx} className="flex gap-2">
                         <span className="text-accent2-ink min-w-[64px]">{it.role}</span>

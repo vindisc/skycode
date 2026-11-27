@@ -141,7 +141,7 @@ const PromptTextarea: React.FC<PromptTextareaProps> = ({
                     ? `w-full flex-none resize-none bg-transparent py-0.5 text-sm text-t1
                        placeholder-t4 focus:outline-none
                        disabled:opacity-50${collapsed ? ' overflow-y-hidden' : ''}`
-                    : `flex-1 resize-none rounded-xl bg-sunken2 shadow-well
+                    : `flex-1 resize-none rounded-md bg-sunken2 shadow-well
                        px-3 py-2 text-sm text-t1 placeholder-t4
                        transition-surface duration-fast
                        focus:outline-none focus:ring-[3px] focus:ring-accent2-ring

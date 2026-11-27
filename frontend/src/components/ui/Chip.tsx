@@ -9,7 +9,7 @@ import { cn } from './cn';
  * 注：accent 文字档取 strong 以满足 §10.1 对比度（soft 底上基准档不足 4.5:1）。
  */
 const chipVariants = cva(
-    'inline-flex items-center gap-1 rounded-full h-6 px-2.5 text-[13px] font-medium whitespace-nowrap select-none border border-hairline shadow-e1',
+    'inline-flex items-center gap-1 rounded-full h-6 px-2.5 text-13 font-medium whitespace-nowrap select-none border border-hairline shadow-e1',
     {
         variants: {
             variant: {

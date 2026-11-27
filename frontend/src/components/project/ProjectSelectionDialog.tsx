@@ -227,11 +227,11 @@ export function ProjectSelectionDialog() {
             title="选择文件夹授权"
         >
             <div className="space-y-4">
-                <div className="rounded-[10px] border border-warn bg-warnsoft p-3 text-sm text-[var(--v2-text-2)]">
+                <div className="rounded-sm border border-warn bg-warnsoft p-3 text-sm text-[var(--v2-text-2)]">
                     <p>
                         Project 会把所选服务端目录持久注册为 Session 的默认相对路径根和信任范围；在 DEFAULT 模式下，目录内普通读写无需重复确认。
                     </p>
-                    <p className="mt-1 text-[13px] text-[var(--v2-text-2)]">
+                    <p className="mt-1 text-13 text-[var(--v2-text-2)]">
                         目录外的普通文件操作会请求授权，并可按本次运行或会话记住；敏感文件和高风险操作每次都需确认。取消本次选择不会撤销已有授权。
                     </p>
                 </div>
@@ -247,7 +247,7 @@ export function ProjectSelectionDialog() {
                         type="button"
                         onClick={cancelSelection}
                         disabled={busy}
-                        className="dialog-control rounded-[10px] px-4 py-2 text-sm hover:bg-[var(--v2-bg-hover)] disabled:opacity-50"
+                        className="dialog-control rounded-sm px-4 py-2 text-sm hover:bg-[var(--v2-bg-hover)] disabled:opacity-50"
                     >
                         取消本次选择
                     </button>
@@ -256,7 +256,7 @@ export function ProjectSelectionDialog() {
                         onClick={() => selected
                             && confirmSelection(selected)}
                         disabled={!selected || busy}
-                        className="dialog-control rounded-[10px] bg-accent2-strong px-4 py-2 text-sm text-white disabled:opacity-50"
+                        className="dialog-control rounded-sm bg-accent2-strong px-4 py-2 text-sm text-white disabled:opacity-50"
                     >
                         使用所选授权
                     </button>
@@ -284,7 +284,7 @@ export function ProjectSelectionDialog() {
                         ) : projects.map(project => (
                             <div
                                 key={project.id}
-                                className={`flex items-center gap-2 rounded-[10px] border p-3 ${
+                                className={`flex items-center gap-2 rounded-sm border p-3 ${
                                     selectedId === project.id
                                         ? 'border-accent2 bg-accent2-soft'
                                         : 'border-[var(--v2-border-hairline)]'
@@ -306,7 +306,7 @@ export function ProjectSelectionDialog() {
                                     <div className="text-sm font-medium text-[var(--v2-text-1)]">
                                         {project.name}
                                     </div>
-                                    <div className="mt-1 truncate text-[13px] text-[var(--v2-text-2)]">
+                                    <div className="mt-1 truncate text-13 text-[var(--v2-text-2)]">
                                         {project.workspaceRoot}
                                     </div>
                                 </label>
@@ -333,14 +333,14 @@ export function ProjectSelectionDialog() {
                     aria-label="授权当前所选文件夹"
                     className="border-t border-[var(--v2-border-hairline)] pt-4"
                 >
-                    <label className="block text-[13px] text-[var(--v2-text-2)]">
+                    <label className="block text-13 text-[var(--v2-text-2)]">
                         授权名称
                         <input
                             value={name}
                             onChange={event => setName(event.target.value)}
                             placeholder="用于识别此持久授权"
                             disabled={busy}
-                            className="mt-1 w-full max-md:min-h-11 rounded-[10px] border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] px-3 py-2 text-sm text-[var(--v2-text-1)]"
+                            className="mt-1 w-full max-md:min-h-11 rounded-sm border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] px-3 py-2 text-sm text-[var(--v2-text-1)]"
                         />
                     </label>
 
@@ -351,7 +351,7 @@ export function ProjectSelectionDialog() {
                             || nativePickerLoading
                             || !name.trim() || !workspaceRoot.trim()
                             || Boolean(existingForPath)}
-                        className="dialog-control mt-3 rounded-[10px] border border-[var(--v2-border-hairline)] px-3 py-2 text-sm hover:bg-[var(--v2-bg-hover)] disabled:opacity-50"
+                        className="dialog-control mt-3 rounded-sm border border-[var(--v2-border-hairline)] px-3 py-2 text-sm hover:bg-[var(--v2-bg-hover)] disabled:opacity-50"
                     >
                         {requesting
                             ? '授权中…'
@@ -367,7 +367,7 @@ export function ProjectSelectionDialog() {
                         onClick={() => void handleNativePicker()}
                         disabled={busy || directoryLoading
                             || nativePickerLoading}
-                        className="dialog-control flex w-full items-center justify-center gap-2 rounded-[10px] border border-[var(--v2-border-hairline)] px-3 py-2 text-sm hover:bg-[var(--v2-bg-hover)] disabled:opacity-50"
+                        className="dialog-control flex w-full items-center justify-center gap-2 rounded-sm border border-[var(--v2-border-hairline)] px-3 py-2 text-sm hover:bg-[var(--v2-bg-hover)] disabled:opacity-50"
                     >
                         {nativePickerLoading ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -396,7 +396,7 @@ export function ProjectSelectionDialog() {
                     >
                         浏览服务端目录
                     </div>
-                    <p className="mt-1 text-[13px] text-[var(--v2-text-2)]">
+                    <p className="mt-1 text-13 text-[var(--v2-text-2)]">
                         这里浏览的是运行 SkyCode 的服务器目录，不会上传浏览器本地文件。
                     </p>
 
@@ -409,7 +409,7 @@ export function ProjectSelectionDialog() {
                                     onClick={() => void loadDirectory(root)}
                                     disabled={busy || directoryLoading
                                         || nativePickerLoading}
-                                    className="dialog-control rounded border border-[var(--v2-border-hairline)] px-2 py-1 text-[13px] hover:bg-[var(--v2-bg-hover)] disabled:opacity-50"
+                                    className="dialog-control rounded border border-[var(--v2-border-hairline)] px-2 py-1 text-13 hover:bg-[var(--v2-bg-hover)] disabled:opacity-50"
                                 >
                                     {root}
                                 </button>
@@ -417,10 +417,10 @@ export function ProjectSelectionDialog() {
                         </div>
                     ) : null}
 
-                    <div className="mt-3 rounded-[10px] border border-[var(--v2-border-hairline)]">
+                    <div className="mt-3 rounded-sm border border-[var(--v2-border-hairline)]">
                         <div className="flex items-center gap-2 border-b border-[var(--v2-border-hairline)] px-3 py-2">
                             <Folder className="h-4 w-4 shrink-0 text-accent2-ink" />
-                            <span className="min-w-0 flex-1 truncate font-mono text-[13px]">
+                            <span className="min-w-0 flex-1 truncate font-mono text-13">
                                 {directoryListing?.current
                                     || '正在加载可授权目录…'}
                             </span>
@@ -464,7 +464,7 @@ export function ProjectSelectionDialog() {
                                     </button>
                                 ))
                             ) : (
-                                <div className="px-2 py-4 text-center text-[13px] text-[var(--v2-text-2)]">
+                                <div className="px-2 py-4 text-center text-13 text-[var(--v2-text-2)]">
                                     当前目录没有可浏览的子目录
                                 </div>
                             )}
@@ -476,7 +476,7 @@ export function ProjectSelectionDialog() {
                             高级：手动输入服务端绝对路径
                         </summary>
                         <div className="mt-2 space-y-2">
-                            <label className="block text-[13px] text-[var(--v2-text-2)]">
+                            <label className="block text-13 text-[var(--v2-text-2)]">
                                 服务端绝对路径
                                 <input
                                     value={workspaceRoot}
@@ -492,7 +492,7 @@ export function ProjectSelectionDialog() {
                                     }}
                                     placeholder="例如 /srv/projects/demo"
                                     disabled={busy || nativePickerLoading}
-                                    className="mt-1 w-full max-md:min-h-11 rounded-[10px] border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] px-3 py-2 text-sm text-[var(--v2-text-1)]"
+                                    className="mt-1 w-full max-md:min-h-11 rounded-sm border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] px-3 py-2 text-sm text-[var(--v2-text-1)]"
                                 />
                             </label>
                         </div>

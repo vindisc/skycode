@@ -214,7 +214,7 @@ function ImpactNodeComponent({ data }: NodeProps) {
 
   return (
     <div
-      className="w-[220px] min-h-[100px] rounded-[14px] px-3 py-2.5 bg-surfacev2 transition-shadow"
+      className="w-[220px] min-h-[100px] rounded-md px-3 py-2.5 bg-surfacev2 transition-shadow"
       style={{
         border: isSource ? '2px solid var(--v2-err)' : borderStyle,
         boxShadow: isSource ? '0 2px 8px rgba(0,0,0,0.08)' : impact.shadow,
@@ -230,7 +230,7 @@ function ImpactNodeComponent({ data }: NodeProps) {
           <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: config.color }} />
         )}
         <span
-          className="text-[13px] px-1.5 py-0.5 rounded font-medium"
+          className="text-13 px-1.5 py-0.5 rounded font-medium"
           style={{
             backgroundColor: 'var(--v2-bg-sunken)',
             color: 'var(--v2-text-2)',
@@ -247,7 +247,7 @@ function ImpactNodeComponent({ data }: NodeProps) {
 
       {/* Confidence badge */}
       {!isSource && (
-        <span className={`text-[13px] px-1.5 py-0.5 rounded ${badge.bg} ${badge.text}`}>
+        <span className={`text-13 px-1.5 py-0.5 rounded ${badge.bg} ${badge.text}`}>
           置信度：{badge.label}
         </span>
       )}
@@ -282,17 +282,17 @@ function SummaryBar({
           <span className="text-sm font-medium text-t1 truncate">
             {changedFile}
           </span>
-          <span className="text-[13px] text-t2 flex-shrink-0">
+          <span className="text-13 text-t2 flex-shrink-0">
             L{changedLines[0]}–{changedLines[changedLines.length - 1]}
           </span>
         </div>
         {elapsedMs != null && (
-          <span className="text-[13px] text-t2 flex-shrink-0 font-mono">
+          <span className="text-13 text-t2 flex-shrink-0 font-mono">
             {elapsedMs}ms
           </span>
         )}
       </div>
-      <div className="flex items-center gap-x-4 gap-y-2 flex-wrap text-[13px]">
+      <div className="flex items-center gap-x-4 gap-y-2 flex-wrap text-13">
         <span className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-err inline-block" />
           <span className="text-t2">直接影响: {summary.direct_count}</span>
@@ -346,48 +346,48 @@ function NodeDetailPanel({
       </div>
       <div className="p-3 space-y-3 [overflow-wrap:anywhere]">
         <div>
-          <label className="text-[13px] uppercase font-semibold text-t2">名称</label>
+          <label className="text-13 uppercase font-semibold text-t2">名称</label>
           <p className="text-sm font-medium text-t1">{node.name}</p>
         </div>
         <div>
-          <label className="text-[13px] uppercase font-semibold text-t2">类型</label>
+          <label className="text-13 uppercase font-semibold text-t2">类型</label>
           <div className="flex items-center gap-1.5 mt-0.5">
             <Icon className="w-3.5 h-3.5" style={{ color: config.color }} />
-            <span className="text-[13px] text-t2">{config.label}</span>
+            <span className="text-13 text-t2">{config.label}</span>
           </div>
         </div>
         <div>
-          <label className="text-[13px] uppercase font-semibold text-t2">文件</label>
-          <p className="text-[13px] text-t2 break-all">{node.file_path}</p>
+          <label className="text-13 uppercase font-semibold text-t2">文件</label>
+          <p className="text-13 text-t2 break-all">{node.file_path}</p>
         </div>
         {node.line_range.length >= 2 && (
           <div>
-            <label className="text-[13px] uppercase font-semibold text-t2">行范围</label>
-            <p className="text-[13px] text-t2 font-mono">
+            <label className="text-13 uppercase font-semibold text-t2">行范围</label>
+            <p className="text-13 text-t2 font-mono">
               L{node.line_range[0]}–{node.line_range[1]}
             </p>
           </div>
         )}
         <div>
-          <label className="text-[13px] uppercase font-semibold text-t2">影响层级</label>
+          <label className="text-13 uppercase font-semibold text-t2">影响层级</label>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span
               className="w-2 h-2 rounded-full inline-block"
               style={{ backgroundColor: impactLevelStyles[node.impact_level]?.border || 'var(--v2-text-3)' }}
             />
-            <span className="text-[13px] text-t2 capitalize">{node.impact_level}</span>
+            <span className="text-13 text-t2 capitalize">{node.impact_level}</span>
           </div>
         </div>
         <div>
-          <label className="text-[13px] uppercase font-semibold text-t2">置信度</label>
-          <span className={`text-[13px] px-1.5 py-0.5 rounded ${badge.bg} ${badge.text}`}>
+          <label className="text-13 uppercase font-semibold text-t2">置信度</label>
+          <span className={`text-13 px-1.5 py-0.5 rounded ${badge.bg} ${badge.text}`}>
             置信度：{badge.label}
           </span>
         </div>
         {node.language && (
           <div>
-            <label className="text-[13px] uppercase font-semibold text-t2">语言</label>
-            <p className="text-[13px] text-t2">{node.language}</p>
+            <label className="text-13 uppercase font-semibold text-t2">语言</label>
+            <p className="text-13 text-t2">{node.language}</p>
           </div>
         )}
       </div>
@@ -497,10 +497,10 @@ function ChangeImpactGraphInner() {
       <div className="flex flex-col items-center justify-center h-full text-center p-6">
         <AlertTriangle className="w-10 h-10 text-err mb-3" />
         <p className="text-sm text-t1 mb-1">分析失败</p>
-        <p className="text-[13px] text-t2 mb-3">{error}</p>
+        <p className="text-13 text-t2 mb-3">{error}</p>
         <button
           onClick={() => useChangeImpactStore.getState().reset()}
-          className="panel-control flex items-center gap-1.5 px-3 py-1.5 text-[13px] rounded-md bg-accent2-soft text-accent2-ink hover:bg-hover2 transition-colors"
+          className="panel-control flex items-center gap-1.5 px-3 py-1.5 text-13 rounded-xs bg-accent2-soft text-accent2-ink hover:bg-hover2 transition-colors"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           清除错误
@@ -515,7 +515,7 @@ function ChangeImpactGraphInner() {
       <div className="flex flex-col items-center justify-center h-full text-center p-6">
         <Network className="w-12 h-12 text-t3 mb-3" />
         <p className="text-sm text-t2 font-medium">暂无影响分析数据</p>
-        <p className="text-[13px] text-t2 mt-1">
+        <p className="text-13 text-t2 mt-1">
           选择文件变更后，影响链路将自动显示
         </p>
       </div>
@@ -528,7 +528,7 @@ function ChangeImpactGraphInner() {
       <div className="flex flex-col items-center justify-center h-full text-center p-6">
         <Network className="w-12 h-12 text-ok mb-3" />
         <p className="text-sm text-t2 font-medium">无影响</p>
-        <p className="text-[13px] text-t2 mt-1">
+        <p className="text-13 text-t2 mt-1">
           该变更未检测到受影响的依赖方
         </p>
       </div>

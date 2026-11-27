@@ -27,7 +27,7 @@ import { DriftSyncBadge } from '@/components/theme/DriftSyncBadge';
 
 /** §7.4 头部按钮共性：hover/active/焦点环（ring-accent2-ring） */
 const HEADER_BUTTON_CLASS =
-    'px-2 h-7 items-center justify-center max-md:min-h-11 max-md:min-w-11 rounded-[10px] hover:bg-hover2 hover:text-t1 active:scale-95 active:shadow-pressed transition-interactive duration-fast text-t2 ' +
+    'px-2 h-7 items-center justify-center max-md:min-h-11 max-md:min-w-11 rounded-sm hover:bg-hover2 hover:text-t1 active:scale-95 active:shadow-pressed transition-interactive duration-fast text-t2 ' +
     'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring';
 
 /** 会话状态展示规则（颜色/脉冲/旋转/文案/胶囊语气）已抽取至
@@ -102,13 +102,13 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
         <header className="app-header glass-surface relative h-14 border-b border-hairline bg-surface2 flex items-center px-2 md:px-4 shrink-0">
             <GlassMaterial interactive />
             <div className="flex md:hidden min-w-0 w-full items-center gap-3 px-1" aria-label="当前会话信息">
-                <button type="button" onClick={onMenuClick} aria-label="打开会话列表" title="打开会话列表" className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-[10px] text-t2 hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink"><Menu size={20} /></button>
+                <button type="button" onClick={onMenuClick} aria-label="打开会话列表" title="打开会话列表" className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-sm text-t2 hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink"><Menu size={20} /></button>
                 <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium text-t1" title={sessionTitle}>{sessionTitle}</div>
                     <div className="mt-0.5 flex min-w-0 items-center gap-2">
-                        <span className="truncate text-[13px] text-t2" title={currentModelName}>{compactModelName || '模型加载中'}</span>
+                        <span className="truncate text-13 text-t2" title={currentModelName}>{compactModelName || '模型加载中'}</span>
                         {mobileStatus && (
-                            <span role="status" className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-[13px] font-medium leading-5 ${mobileStatusTone}`}>
+                            <span role="status" className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2 py-0.5 text-13 font-medium leading-5 ${mobileStatusTone}`}>
                                 {streaming
                                     ? <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
                                     : <span className="h-1.5 w-1.5 rounded-full bg-current motion-safe:animate-pulse" aria-hidden="true" />}
@@ -118,7 +118,7 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     </div>
                 </div>
                 <button type="button" onClick={clearSessionSelection} aria-label="返回首页" title="返回首页"
-                    className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-[10px] hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink">
+                    className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-sm hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink">
                     <BrandLogo className="h-8 w-8" />
                 </button>
             </div>
@@ -134,7 +134,7 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     </button>
                 )}
                 <button type="button" onClick={clearSessionSelection} aria-label="返回首页" title="返回首页"
-                    className="hidden md:flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-[10px] hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink">
+                    className="hidden md:flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-sm hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink">
                     <BrandLogo />
                     <span className="font-semibold text-t1 hidden lg:block">
                         SkyCode
@@ -145,7 +145,7 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
             {/* Right: SessionStatus + Metrics + Theme + New Session + MCP + Shortcuts */}
             <div className="hidden md:flex items-center gap-2 ml-auto">
                 {/* 会话状态 + 用量指标（自底部状态栏右簇上移；指标细节 ≥lg 展示，空间不足时让位） */}
-                <div className="flex items-center gap-2.5 pr-1 text-[13px] font-mono tabular-nums text-t3">
+                <div className="flex items-center gap-2.5 pr-1 text-13 font-mono tabular-nums text-t3">
                     <SessionStatusCapsule />
                     {/* 星舰 HUD 事件特效：streaming 时呈现 DRIFT SYNCED 徽章（内部三重门控，其他主题返回 null） */}
                     <DriftSyncBadge />

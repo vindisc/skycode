@@ -63,8 +63,8 @@ export const FileListRenderer: React.FC<{ content: string }> = ({ content }) => 
 
     return (
         <div className="text-sm">
-            <div className="text-[13px] text-t3 mb-2 tabular-nums">{paths.length} 个文件</div>
-            <div className="bg-sunken2 border border-hairline rounded-[14px] p-2">
+            <div className="text-13 text-t3 mb-2 tabular-nums">{paths.length} 个文件</div>
+            <div className="bg-sunken2 border border-hairline rounded-md p-2">
                 {tree.map(node => <TreeNode key={node.path} node={node} depth={0} />)}
             </div>
         </div>

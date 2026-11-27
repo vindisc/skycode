@@ -33,23 +33,23 @@ export function UsageStatCard({ usageStatus }: { usageStatus?: string } = {}) {
     const totalTokens = usage.inputTokens + usage.outputTokens;
     const statusNote = usageStatusNote(usageStatus);
     return (
-        <section className="rounded-[14px] border border-hairline bg-surfacev2 p-4 md:p-6 shadow-e2">
-            <p className="text-[13px] font-semibold uppercase tracking-wider text-t3">已观测用量与成本</p>
+        <section className="rounded-md border border-hairline bg-surfacev2 p-4 md:p-6 shadow-e2">
+            <p className="text-13 font-semibold uppercase tracking-wider text-t3">已观测用量与成本</p>
             <div className="mt-3 grid grid-cols-2 gap-4">
                 <div>
                     <p className="text-[32px] font-[650] leading-none tracking-[-0.02em] tabular-nums text-t1">
                         {totalTokens.toLocaleString()}
                     </p>
-                    <p className="mt-1.5 text-[13px] tabular-nums text-t3">
+                    <p className="mt-1.5 text-13 tabular-nums text-t3">
                         Tokens · ↑ {usage.inputTokens.toLocaleString()} ↓ {usage.outputTokens.toLocaleString()}
                     </p>
-                    {statusNote && <p className="mt-1 text-[12px] text-t3">{statusNote}</p>}
+                    {statusNote && <p className="mt-1 text-xs text-t3">{statusNote}</p>}
                 </div>
                 <div>
                     <p className="text-[32px] font-[650] leading-none tracking-[-0.02em] tabular-nums text-t1">
                         ${sessionCost.toFixed(3)}
                     </p>
-                    <p className="mt-1.5 text-[13px] tabular-nums text-t3">
+                    <p className="mt-1.5 text-13 tabular-nums text-t3">
                         本次会话成本 · 累计 ${totalCost.toFixed(3)}
                     </p>
                 </div>

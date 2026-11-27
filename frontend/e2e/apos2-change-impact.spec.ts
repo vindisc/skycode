@@ -117,8 +117,8 @@ test.describe('APOS Phase 2 - ChangeImpactPanel', () => {
     const state = createChangeImpactState(5, { withHighRisk: true });
     await injectChangeImpactData(page, state);
 
-    // 获取所有文件卡片（FileChangeItem 使用 border + rounded-md + px-3 py-2）
-    const fileItems = page.locator('.flex.flex-col.gap-1\\.5 > div.rounded-md.border');
+    // 获取所有文件卡片（FileChangeItem 使用 border + rounded-xs + px-3 py-2）
+    const fileItems = page.locator('.flex.flex-col.gap-1\\.5 > div.rounded-xs.border');
     await expect(fileItems.first()).toBeVisible({ timeout: 5000 });
 
     const itemCount = await fileItems.count();
@@ -194,7 +194,7 @@ test.describe('APOS Phase 2 - ChangeImpactPanel', () => {
       selectedFilePath: null,
     });
 
-    const fileItems = page.locator('.flex.flex-col.gap-1\\.5 > div.rounded-md.border');
+    const fileItems = page.locator('.flex.flex-col.gap-1\\.5 > div.rounded-xs.border');
     await expect(fileItems.first()).toBeVisible({ timeout: 5000 });
 
     // danger: bg-red-500/10 border-red-500/30
@@ -296,7 +296,7 @@ test.describe('APOS Phase 2 - ChangeImpactPanel', () => {
     await expect(firstLabel).toHaveClass(/text-red-300/);
 
     // 验证无 testCoverageGap 的文件不显示标签
-    const fileItems = page.locator('.flex.flex-col.gap-1\\.5 > div.rounded-md.border');
+    const fileItems = page.locator('.flex.flex-col.gap-1\\.5 > div.rounded-xs.border');
     const lastItem = fileItems.nth(4); // 第5个文件无 testCoverageGap
     const lastItemLabel = lastItem.locator('span').filter({ hasText: '缺少测试覆盖' });
     await expect(lastItemLabel).toHaveCount(0);

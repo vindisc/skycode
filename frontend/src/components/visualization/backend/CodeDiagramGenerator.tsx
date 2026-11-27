@@ -48,7 +48,7 @@ const DepthSelector: React.FC<{ value: number; onChange: (v: number) => void }> 
         onClick={() => onChange(d)}
         aria-label={`追踪深度 ${d}`}
         aria-pressed={d === value}
-        className={`panel-control w-7 h-7 rounded text-[13px] font-medium transition-colors
+        className={`panel-control w-7 h-7 rounded text-13 font-medium transition-colors
           ${d === value
             ? 'bg-accent2 text-white'
             : 'bg-[var(--v2-bg-surface)] text-[var(--v2-text-2)] border border-[var(--v2-border-hairline)] hover:bg-[var(--v2-bg-hover)]'
@@ -67,11 +67,11 @@ const WarningList: React.FC<{ warnings: string[] }> = ({ warnings }) => {
   if (warnings.length === 0) return null;
 
   return (
-    <div className="border border-[color:color-mix(in_srgb,var(--v2-warn)_30%,transparent)] rounded-md bg-warnsoft">
+    <div className="border border-[color:color-mix(in_srgb,var(--v2-warn)_30%,transparent)] rounded-xs bg-warnsoft">
       <button
         onClick={() => setExpanded(e => !e)}
         aria-expanded={expanded}
-        className="panel-control w-full flex items-center gap-2 px-3 py-1.5 text-[13px] text-warn"
+        className="panel-control w-full flex items-center gap-2 px-3 py-1.5 text-13 text-warn"
       >
         <AlertTriangle size={13} />
         <span>{warnings.length} 个警告</span>
@@ -80,7 +80,7 @@ const WarningList: React.FC<{ warnings: string[] }> = ({ warnings }) => {
       {expanded && (
         <div className="px-3 pb-2 space-y-1">
           {warnings.map((w, i) => (
-            <div key={i} className="text-[13px] text-warn pl-5">
+            <div key={i} className="text-13 text-warn pl-5">
               • {w}
             </div>
           ))}
@@ -95,7 +95,7 @@ const WarningList: React.FC<{ warnings: string[] }> = ({ warnings }) => {
 const MetadataBar: React.FC<{
   metadata: { nodesCount: number; edgesCount: number; languagesAnalyzed: string[]; analysisTimeMs: number };
 }> = ({ metadata }) => (
-  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-[var(--v2-text-2)]">
+  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-13 text-[var(--v2-text-2)]">
     <span>节点: {metadata.nodesCount}</span>
     <span>边: {metadata.edgesCount}</span>
     <span>语言: {metadata.languagesAnalyzed.join(', ')}</span>
@@ -208,7 +208,7 @@ export const CodeDiagramGenerator: React.FC = () => {
             key={t}
             onClick={() => setDiagramType(t)}
             aria-pressed={diagramType === t}
-            className={`panel-control px-3 py-1 rounded text-[13px] font-medium transition-colors
+            className={`panel-control px-3 py-1 rounded text-13 font-medium transition-colors
               ${diagramType === t
                 ? 'bg-accent2 text-white'
                 : 'bg-[var(--v2-bg-surface)] text-[var(--v2-text-2)] border border-[var(--v2-border-hairline)] hover:bg-[var(--v2-bg-hover)]'
@@ -231,7 +231,7 @@ export const CodeDiagramGenerator: React.FC = () => {
       {/* 输入区 */}
       <div className="px-3 py-2 border-b border-[var(--v2-border-hairline)] space-y-2 shrink-0">
         <div>
-          <label className="text-[13px] uppercase tracking-wider text-[var(--v2-text-2)] mb-1 block">
+          <label className="text-13 uppercase tracking-wider text-[var(--v2-text-2)] mb-1 block">
             {diagramType === 'sequence' ? 'API 路径' : '方法签名'}
           </label>
           <input
@@ -240,13 +240,13 @@ export const CodeDiagramGenerator: React.FC = () => {
             value={target}
             onChange={e => setTarget(e.target.value)}
             placeholder={placeholder}
-            className="panel-control w-full px-2.5 py-1.5 text-sm rounded-md border border-[var(--v2-border-hairline)]
+            className="panel-control w-full px-2.5 py-1.5 text-sm rounded-xs border border-[var(--v2-border-hairline)]
               bg-[var(--v2-bg-surface)] text-[var(--v2-text-1)]
               placeholder:text-[var(--v2-text-2)] focus:outline-none focus:ring-1 focus:ring-accent2"
           />
         </div>
         <div>
-          <label className="text-[13px] uppercase tracking-wider text-[var(--v2-text-2)] mb-1 block">
+          <label className="text-13 uppercase tracking-wider text-[var(--v2-text-2)] mb-1 block">
             项目路径
           </label>
           <input
@@ -255,14 +255,14 @@ export const CodeDiagramGenerator: React.FC = () => {
             value={projectRoot}
             onChange={e => setProjectRoot(e.target.value)}
             placeholder="."
-            className="panel-control w-full px-2.5 py-1.5 text-sm rounded-md border border-[var(--v2-border-hairline)]
+            className="panel-control w-full px-2.5 py-1.5 text-sm rounded-xs border border-[var(--v2-border-hairline)]
               bg-[var(--v2-bg-surface)] text-[var(--v2-text-1)]
               placeholder:text-[var(--v2-text-2)] focus:outline-none focus:ring-1 focus:ring-accent2"
           />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <label className="text-[13px] uppercase tracking-wider text-[var(--v2-text-2)] mb-1 block">
+            <label className="text-13 uppercase tracking-wider text-[var(--v2-text-2)] mb-1 block">
               追踪深度
             </label>
             <DepthSelector value={depth} onChange={setDepth} />
@@ -270,7 +270,7 @@ export const CodeDiagramGenerator: React.FC = () => {
           <button
             onClick={handleGenerate}
             disabled={loading || !target.trim()}
-            className="panel-control flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium
+            className="panel-control flex items-center gap-1.5 px-4 py-2 rounded-xs text-sm font-medium
               bg-accent2-strong text-white hover:bg-accent2-hover
               disabled:opacity-50 disabled:cursor-not-allowed transition-colors mt-3"
           >
@@ -286,7 +286,7 @@ export const CodeDiagramGenerator: React.FC = () => {
 
       {/* 错误提示 */}
       {error && (
-        <div className="mx-3 mt-2 px-3 py-2 rounded-md border border-[color:color-mix(in_srgb,var(--v2-err)_30%,transparent)] bg-errsoft text-[13px] text-err flex items-center gap-2">
+        <div className="mx-3 mt-2 px-3 py-2 rounded-xs border border-[color:color-mix(in_srgb,var(--v2-err)_30%,transparent)] bg-errsoft text-13 text-err flex items-center gap-2">
           <AlertTriangle size={13} />
           {error}
         </div>
@@ -298,7 +298,7 @@ export const CodeDiagramGenerator: React.FC = () => {
           <div className="flex-1 min-h-0 flex flex-col lg:flex-row max-lg:min-h-fit">
             {/* Monaco Editor */}
             <div className="flex-1 min-w-0 min-h-[240px] flex flex-col max-lg:h-[260px] max-lg:flex-none border-b lg:border-b-0 lg:border-r border-[var(--v2-border-hairline)]">
-              <div className="px-3 py-1 border-b border-[var(--v2-border-hairline)] text-[13px] uppercase tracking-wider text-[var(--v2-text-2)]">
+              <div className="px-3 py-1 border-b border-[var(--v2-border-hairline)] text-13 uppercase tracking-wider text-[var(--v2-text-2)]">
                 Mermaid 源码
               </div>
               <div className="flex-1 min-h-0">
@@ -325,7 +325,7 @@ export const CodeDiagramGenerator: React.FC = () => {
 
             {/* Mermaid Preview */}
             <div className="flex-1 min-w-0 min-h-[240px] overflow-auto max-lg:max-h-[480px] max-lg:flex-none">
-              <div className="px-3 py-1 border-b border-[var(--v2-border-hairline)] text-[13px] uppercase tracking-wider text-[var(--v2-text-2)]">
+              <div className="px-3 py-1 border-b border-[var(--v2-border-hairline)] text-13 uppercase tracking-wider text-[var(--v2-text-2)]">
                 图表预览
               </div>
               <div ref={previewRef} className="p-3 diagram-preview-container">
@@ -346,7 +346,7 @@ export const CodeDiagramGenerator: React.FC = () => {
             <div className="flex items-center gap-3">
               {confidenceColor && (
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <span className={`text-[13px] font-medium ${confidenceColor.text}`}>
+                  <span className={`text-13 font-medium ${confidenceColor.text}`}>
                     置信度: {Math.round(result.confidenceScore * 100)}%
                   </span>
                   <div className="flex-1 h-1.5 rounded-full bg-[var(--v2-bg-surface)] overflow-hidden max-w-[120px]">
@@ -360,7 +360,7 @@ export const CodeDiagramGenerator: React.FC = () => {
               <div className="flex items-center gap-1 shrink-0">
                 <button
                   onClick={handleCopySvg}
-                  className="panel-control flex items-center gap-1 px-2 py-1 rounded text-[13px] border border-[var(--v2-border-hairline)]
+                  className="panel-control flex items-center gap-1 px-2 py-1 rounded text-13 border border-[var(--v2-border-hairline)]
                     hover:bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)] transition-colors"
                   title="复制 SVG"
                 >
@@ -369,7 +369,7 @@ export const CodeDiagramGenerator: React.FC = () => {
                 </button>
                 <button
                   onClick={handleDownloadPng}
-                  className="panel-control flex items-center gap-1 px-2 py-1 rounded text-[13px] border border-[var(--v2-border-hairline)]
+                  className="panel-control flex items-center gap-1 px-2 py-1 rounded text-13 border border-[var(--v2-border-hairline)]
                     hover:bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)] transition-colors"
                   title="下载 PNG"
                 >
@@ -393,7 +393,7 @@ export const CodeDiagramGenerator: React.FC = () => {
         <div className="flex-1 flex flex-col items-center justify-center py-12 px-4 text-center">
           <Info className="w-10 h-10 text-[var(--v2-text-2)] mb-3 opacity-40" />
           <p className="text-sm text-[var(--v2-text-2)]">输入目标并点击生成图表</p>
-          <p className="text-[13px] text-[var(--v2-text-2)] mt-1">
+          <p className="text-13 text-[var(--v2-text-2)] mt-1">
             {diagramType === 'sequence'
               ? '输入 API 路径（如 /api/sessions/create）生成调用时序图'
               : '输入方法签名（如 SessionService.createSession）生成流程图'}

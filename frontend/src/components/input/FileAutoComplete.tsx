@@ -102,8 +102,8 @@ export const FileAutoComplete: React.FC<FileAutoCompleteProps> = ({
 
     return (
         <div className="absolute bottom-full mb-1 left-0 z-50 bg-surfacev2
-            border rounded-[10px] shadow-e4 max-h-64 overflow-y-auto w-80">
-            {loading && <div className="p-2 text-[13px] text-t2">搜索中...</div>}
+            border rounded-sm shadow-e4 max-h-64 overflow-y-auto w-80">
+            {loading && <div className="p-2 text-13 text-t2">搜索中...</div>}
             {results.map((r, i) => (
                 <button key={r.path}
                     className={`panel-control w-full text-left px-3 py-1.5 flex items-center gap-2 text-sm

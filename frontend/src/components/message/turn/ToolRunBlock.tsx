@@ -109,7 +109,7 @@ const ToolRunBlock: React.FC<ToolRunBlockProps> = ({ blocks, activeToolCalls }) 
 
     return (
         <div
-            className="tool-run-block my-2 overflow-hidden rounded-[14px] border border-hairline bg-surface2"
+            className="tool-run-block my-2 overflow-hidden rounded-md border border-hairline bg-surface2"
             data-testid="tool-run-block"
         >
             {/* L1 摘要行 */}
@@ -146,22 +146,22 @@ const ToolRunBlock: React.FC<ToolRunBlockProps> = ({ blocks, activeToolCalls }) 
                         <span data-spider-anchor="tool" className="shrink-0 text-sm font-semibold text-t1">
                             {total} 次工具调用
                         </span>
-                        <span data-spider-anchor="tool" className="min-w-0 truncate text-[13px] text-t3">
+                        <span data-spider-anchor="tool" className="min-w-0 truncate text-13 text-t3">
                             {summary.topNames.map(([name, count]) => `${name}×${count}`).join(' · ')}
                         </span>
                     </>
                 )}
                 <span className="ml-auto flex shrink-0 items-center gap-1.5">
                     {summary.totalDurationMs > 0 && (
-                        <span className="text-[13px] tabular-nums text-t4">
+                        <span className="text-13 tabular-nums text-t4">
                             {formatToolDuration(summary.totalDurationMs)}
                         </span>
                     )}
                     {summary.errorCount > 0 && (
-                        <span className="text-[13px] tabular-nums text-err">{summary.errorCount} 失败</span>
+                        <span className="text-13 tabular-nums text-err">{summary.errorCount} 失败</span>
                     )}
                     {summary.cancelledCount > 0 && (
-                        <span className="text-[13px] tabular-nums text-warn">{summary.cancelledCount} 取消</span>
+                        <span className="text-13 tabular-nums text-warn">{summary.cancelledCount} 取消</span>
                     )}
                     {!hasActive && summary.errorCount === 0 && summary.cancelledCount === 0 && (
                         <span role="img" aria-label="全部成功" className="inline-flex">
@@ -213,7 +213,7 @@ const ToolRunBlock: React.FC<ToolRunBlockProps> = ({ blocks, activeToolCalls }) 
                                     {target && (
                                         <span
                                             data-spider-anchor="tool"
-                                            className="min-w-0 truncate rounded bg-sunken2 px-1.5 py-0.5 font-mono text-[13px] text-t2"
+                                            className="min-w-0 truncate rounded bg-sunken2 px-1.5 py-0.5 font-mono text-13 text-t2"
                                             style={target.isPath ? { direction: 'rtl', textAlign: 'left' } : undefined}
                                             title={target.target}
                                         >
@@ -221,7 +221,7 @@ const ToolRunBlock: React.FC<ToolRunBlockProps> = ({ blocks, activeToolCalls }) 
                                         </span>
                                     )}
                                     {typeof tc.duration === 'number' && (
-                                        <span className="ml-auto shrink-0 text-[13px] tabular-nums text-t4">
+                                        <span className="ml-auto shrink-0 text-13 tabular-nums text-t4">
                                             {formatToolDuration(tc.duration)}
                                         </span>
                                     )}
@@ -243,7 +243,7 @@ const ToolRunBlock: React.FC<ToolRunBlockProps> = ({ blocks, activeToolCalls }) 
                         <button
                             type="button"
                             onClick={handleShowAll}
-                            className="panel-control flex w-full items-center gap-1.5 py-1.5 pl-9 pr-3 text-[13px] text-t4 transition-colors duration-fast hover:text-t2"
+                            className="panel-control flex w-full items-center gap-1.5 py-1.5 pl-9 pr-3 text-13 text-t4 transition-colors duration-fast hover:text-t2"
                         >
                             <ChevronRight size={12} className="rotate-90" />
                             显示全部 {total} 个

@@ -96,7 +96,7 @@ function ModelPicker() {
         aria-label="Model Selection"
         value={model}
         onChange={(e) => setModel(e.target.value)}
-        className="panel-control w-full p-2 border border-hairline rounded-xl bg-sunken2 shadow-well text-t1
+        className="panel-control w-full p-2 border border-hairline rounded-md bg-sunken2 shadow-well text-t1
                    transition-surface duration-fast
                    focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
       >
@@ -124,7 +124,7 @@ function PermissionModePicker() {
       {modes.map((m) => (
         <label
           key={m.id}
-          className={`flex items-center p-3 rounded-xl border cursor-pointer transition-interactive duration-fast
+          className={`flex items-center p-3 rounded-md border cursor-pointer transition-interactive duration-fast
             ${permissionMode === m.id
               ? 'border-accent2 bg-accent2-soft'
               : 'border-hairline hover:bg-hover2'
@@ -183,11 +183,11 @@ function KeybindingsEditor() {
               className="border-b border-hairline"
             >
               <td className="py-2 pr-4">
-                <kbd className="px-2 py-1 bg-sunken2 border border-hairline rounded text-[13px] font-mono">
+                <kbd className="px-2 py-1 bg-sunken2 border border-hairline rounded text-13 font-mono">
                   {binding.key}
                 </kbd>
               </td>
-              <td className="py-2 pr-4 font-mono text-[13px]">{binding.action}</td>
+              <td className="py-2 pr-4 font-mono text-13">{binding.action}</td>
               <td className="py-2 text-t3">{binding.context}</td>
             </tr>
           ))}

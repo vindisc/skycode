@@ -31,9 +31,9 @@ export const McpToolProgressIndicator: React.FC<Props> = ({ progress, onCancel }
         : (progress.message || '执行中…');
 
     return (
-        <div className="flex items-center gap-2 p-2 bg-surface2 rounded-md text-sm">
+        <div className="flex items-center gap-2 p-2 bg-surface2 rounded-xs text-sm">
             <div className="flex-1 min-w-0">
-                <div className="flex justify-between text-[13px] text-t2 mb-1">
+                <div className="flex justify-between text-13 text-t2 mb-1">
                     <span className="truncate" title={`${progress.serverName}:${progress.toolName}`}>
                         {progress.serverName}: {progress.toolName}
                     </span>
@@ -46,7 +46,7 @@ export const McpToolProgressIndicator: React.FC<Props> = ({ progress, onCancel }
                     />
                 </div>
                 {progress.message && percentage > 0 && (
-                    <div className="text-[13px] text-t2 mt-1 truncate" title={progress.message}>
+                    <div className="text-13 text-t2 mt-1 truncate" title={progress.message}>
                         {progress.message}
                     </div>
                 )}
@@ -54,7 +54,7 @@ export const McpToolProgressIndicator: React.FC<Props> = ({ progress, onCancel }
             <button
                 type="button"
                 onClick={() => onCancel(progress.progressToken)}
-                className="panel-control text-[13px] text-err hover:text-err px-2 py-1 rounded hover:bg-errsoft"
+                className="panel-control text-13 text-err hover:text-err px-2 py-1 rounded hover:bg-errsoft"
                 title="取消"
             >
                 取消

@@ -31,12 +31,12 @@ export const TokenBudgetIndicator: React.FC = () => {
     const clampedPct = Math.min(pct, 100);
 
     return (
-        <div className="w-full bg-sunken2 rounded-[10px] px-3 py-2 transition-[width] duration-slow animate-in fade-in">
+        <div className="w-full bg-sunken2 rounded-sm px-3 py-2 transition-[width] duration-slow animate-in fade-in">
             <div className="flex items-center justify-between mb-1">
-                <span className="text-[13px] font-medium text-t1">
+                <span className="text-13 font-medium text-t1">
                     Token 预算
                 </span>
-                <span className={`text-[13px] font-mono ${getTextColor(pct)}`}>
+                <span className={`text-13 font-mono ${getTextColor(pct)}`}>
                     {currentTokens.toLocaleString()} / {budgetTokens.toLocaleString()} ({pct}%)
                 </span>
             </div>

@@ -71,7 +71,7 @@ interface TagGroup {
 // ── HTTP 方法 Badge ──
 
 const MethodBadge: React.FC<{ method: string }> = ({ method }) => (
-    <span className={`shrink-0 inline-flex items-center justify-center w-16 px-1.5 py-0.5 rounded text-[13px] font-bold uppercase ${METHOD_COLORS[method] ?? 'bg-sunken2 text-t1'}`}>
+    <span className={`shrink-0 inline-flex items-center justify-center w-16 px-1.5 py-0.5 rounded text-13 font-bold uppercase ${METHOD_COLORS[method] ?? 'bg-sunken2 text-t1'}`}>
         {method}
     </span>
 );
@@ -96,9 +96,9 @@ const ParametersTable: React.FC<{ parameters: ParameterObject[] }> = ({ paramete
     if (parameters.length === 0) return null;
     return (
         <div>
-            <h4 className="text-[13px] font-semibold text-[var(--v2-text-1)] mb-2">Parameters</h4>
-            <div className="overflow-x-auto rounded-[14px] border border-[var(--v2-border-hairline)]">
-                <table className="w-full text-[13px]">
+            <h4 className="text-13 font-semibold text-[var(--v2-text-1)] mb-2">Parameters</h4>
+            <div className="overflow-x-auto rounded-md border border-[var(--v2-border-hairline)]">
+                <table className="w-full text-13">
                     <thead>
                         <tr className="bg-[var(--v2-bg-sunken)]">
                             <th className="text-left px-3 py-1.5 text-[var(--v2-text-2)] font-medium">Name</th>
@@ -148,7 +148,7 @@ const EndpointDetailPanel: React.FC<{
                     <MethodBadge method={method} />
                     <span className="font-mono text-sm font-semibold text-[var(--v2-text-1)] break-all">{path}</span>
                     {detail.deprecated && (
-                        <span className="px-1.5 py-0.5 rounded bg-warnsoft text-warn text-[13px] font-medium">
+                        <span className="px-1.5 py-0.5 rounded bg-warnsoft text-warn text-13 font-medium">
                             Deprecated
                         </span>
                     )}
@@ -157,7 +157,7 @@ const EndpointDetailPanel: React.FC<{
                     <p className="text-sm text-[var(--v2-text-2)] mt-1">{detail.summary}</p>
                 )}
                 {detail.description && detail.description !== detail.summary && (
-                    <p className="text-[13px] text-[var(--v2-text-2)] mt-1">{detail.description}</p>
+                    <p className="text-13 text-[var(--v2-text-2)] mt-1">{detail.description}</p>
                 )}
             </div>
 
@@ -169,14 +169,14 @@ const EndpointDetailPanel: React.FC<{
             {/* Request Body */}
             {requestSchema && (
                 <div>
-                    <h4 className="text-[13px] font-semibold text-[var(--v2-text-1)] mb-2">
+                    <h4 className="text-13 font-semibold text-[var(--v2-text-1)] mb-2">
                         Request Body
                         {detail.requestBody?.required && <span className="text-err ml-1">*</span>}
                     </h4>
                     {detail.requestBody?.description && (
-                        <p className="text-[13px] text-[var(--v2-text-2)] mb-1">{detail.requestBody.description}</p>
+                        <p className="text-13 text-[var(--v2-text-2)] mb-1">{detail.requestBody.description}</p>
                     )}
-                    <div className="rounded-[14px] border border-[var(--v2-border-hairline)] p-3 bg-[var(--v2-bg-sunken)]">
+                    <div className="rounded-md border border-[var(--v2-border-hairline)] p-3 bg-[var(--v2-bg-sunken)]">
                         <SchemaViewer schema={requestSchema} allSchemas={allSchemas} />
                     </div>
                 </div>
@@ -185,19 +185,19 @@ const EndpointDetailPanel: React.FC<{
             {/* Responses */}
             {detail.responses && Object.keys(detail.responses).length > 0 && (
                 <div>
-                    <h4 className="text-[13px] font-semibold text-[var(--v2-text-1)] mb-2">Responses</h4>
+                    <h4 className="text-13 font-semibold text-[var(--v2-text-1)] mb-2">Responses</h4>
                     <div className="space-y-2">
                         {Object.entries(detail.responses).map(([code, resp]) => {
                             const respSchema = resp.content?.['application/json']?.schema
                                 ?? (resp.content ? Object.values(resp.content)[0]?.schema : null);
                             return (
-                                <div key={code} className="rounded-[14px] border border-[var(--v2-border-hairline)] overflow-hidden">
+                                <div key={code} className="rounded-md border border-[var(--v2-border-hairline)] overflow-hidden">
                                     <div className={`flex items-center gap-2 px-3 py-1.5 bg-[var(--v2-bg-sunken)] border-b border-[var(--v2-border-hairline)]`}>
-                                        <span className={`font-mono text-[13px] font-bold ${code.startsWith('2') ? 'text-ok' : code.startsWith('4') ? 'text-warn' : code.startsWith('5') ? 'text-err' : 'text-[var(--v2-text-2)]'}`}>
+                                        <span className={`font-mono text-13 font-bold ${code.startsWith('2') ? 'text-ok' : code.startsWith('4') ? 'text-warn' : code.startsWith('5') ? 'text-err' : 'text-[var(--v2-text-2)]'}`}>
                                             {code}
                                         </span>
                                         {resp.description && (
-                                            <span className="text-[13px] text-[var(--v2-text-2)]">{resp.description}</span>
+                                            <span className="text-13 text-[var(--v2-text-2)]">{resp.description}</span>
                                         )}
                                     </div>
                                     {respSchema && (
@@ -235,10 +235,10 @@ const TagGroupPanel: React.FC<{
                 className="panel-control w-full flex items-center gap-2 px-3 py-2 hover:bg-[var(--v2-bg-hover)] transition-colors"
             >
                 {expanded ? <ChevronDown size={14} className="text-[var(--v2-text-2)]" /> : <ChevronRight size={14} className="text-[var(--v2-text-2)]" />}
-                <span className="text-[13px] font-semibold text-[var(--v2-text-1)]">{group.tag}</span>
-                <span className="text-[13px] text-[var(--v2-text-2)]">({group.endpoints.length})</span>
+                <span className="text-13 font-semibold text-[var(--v2-text-1)]">{group.tag}</span>
+                <span className="text-13 text-[var(--v2-text-2)]">({group.endpoints.length})</span>
                 {group.description && (
-                    <span className="text-[13px] text-[var(--v2-text-2)] truncate ml-1 hidden md:inline">— {group.description}</span>
+                    <span className="text-13 text-[var(--v2-text-2)] truncate ml-1 hidden md:inline">— {group.description}</span>
                 )}
             </button>
 
@@ -255,9 +255,9 @@ const TagGroupPanel: React.FC<{
                                         ${isSelected ? 'bg-accent2-soft border-l-2 border-l-accent2' : 'border-l-2 border-l-transparent'}`}
                                 >
                                     <MethodBadge method={ep.method} />
-                                    <span className="font-mono text-[13px] text-[var(--v2-text-1)] truncate">{ep.path}</span>
+                                    <span className="font-mono text-13 text-[var(--v2-text-1)] truncate">{ep.path}</span>
                                     {ep.detail.summary && (
-                                        <span className="text-[13px] text-[var(--v2-text-2)] truncate ml-auto hidden md:inline">
+                                        <span className="text-13 text-[var(--v2-text-2)] truncate ml-auto hidden md:inline">
                                             {ep.detail.summary}
                                         </span>
                                     )}
@@ -387,7 +387,7 @@ export const APIContractViewer: React.FC<APIContractViewerProps> = ({ source: in
         <div className="flex flex-col h-full">
             {/* 警告横幅 */}
             {warnings.length > 0 && (
-                <div className="flex items-start gap-2 px-3 py-2 bg-warnsoft border-b border-warn text-[13px] text-warn">
+                <div className="flex items-start gap-2 px-3 py-2 bg-warnsoft border-b border-warn text-13 text-warn">
                     <AlertTriangle size={14} className="shrink-0 mt-0.5" />
                     <div className="space-y-0.5">
                         {warnings.map((w, i) => (
@@ -400,14 +400,14 @@ export const APIContractViewer: React.FC<APIContractViewerProps> = ({ source: in
             {/* 顶部工具栏 */}
             <div className="flex flex-wrap items-center gap-2 px-3 py-2 border-b border-[var(--v2-border-hairline)] shrink-0">
                 {/* 数据源 Tab */}
-                <div className="flex items-center rounded-[14px] border border-[var(--v2-border-hairline)] overflow-hidden">
+                <div className="flex items-center rounded-md border border-[var(--v2-border-hairline)] overflow-hidden">
                     {SOURCE_TABS.map(tab => (
                         <button
                             key={tab.key}
                             onClick={() => handleSourceChange(tab.key)}
                             aria-label={tab.label}
                             aria-pressed={source === tab.key}
-                            className={`panel-control flex items-center gap-1 px-2.5 py-1.5 text-[13px] transition-colors
+                            className={`panel-control flex items-center gap-1 px-2.5 py-1.5 text-13 transition-colors
                                 ${source === tab.key
                                     ? 'bg-accent2-soft text-accent2-ink font-medium'
                                     : 'text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)]'}`}
@@ -427,7 +427,7 @@ export const APIContractViewer: React.FC<APIContractViewerProps> = ({ source: in
                         onChange={e => setLocalSearch(e.target.value)}
                         aria-label="搜索 API 端点"
                         placeholder="搜索 API 端点..."
-                        className="w-full pl-8 pr-3 py-1.5 text-[13px] rounded-md border border-[var(--v2-border-hairline)]
+                        className="w-full pl-8 pr-3 py-1.5 text-13 rounded-xs border border-[var(--v2-border-hairline)]
                             bg-[var(--v2-bg-surface)] text-[var(--v2-text-1)]
                             placeholder:text-[var(--v2-text-2)] focus:outline-none focus:ring-1 focus:ring-accent2-ring"
                     />
@@ -437,7 +437,7 @@ export const APIContractViewer: React.FC<APIContractViewerProps> = ({ source: in
                 <button
                     onClick={handleRefresh}
                     disabled={isLoading}
-                    className="panel-control p-1.5 rounded-md border border-[var(--v2-border-hairline)]
+                    className="panel-control p-1.5 rounded-xs border border-[var(--v2-border-hairline)]
                         hover:bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)] transition-colors disabled:opacity-50"
                     title="刷新 API 文档"
                 >
@@ -445,7 +445,7 @@ export const APIContractViewer: React.FC<APIContractViewerProps> = ({ source: in
                 </button>
 
                 {/* 端点计数 */}
-                <span className="ml-auto text-[13px] text-[var(--v2-text-2)]">
+                <span className="ml-auto text-13 text-[var(--v2-text-2)]">
                     {totalEndpoints} 个端点
                 </span>
             </div>
@@ -458,10 +458,10 @@ export const APIContractViewer: React.FC<APIContractViewerProps> = ({ source: in
                 <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
                     <FileWarning className="w-10 h-10 text-err mb-3 opacity-60" />
                     <p className="text-sm text-[var(--v2-text-1)] font-medium mb-1">API 文档加载失败</p>
-                    <p className="text-[13px] text-[var(--v2-text-2)] mb-4 max-w-sm">{error}</p>
+                    <p className="text-13 text-[var(--v2-text-2)] mb-4 max-w-sm">{error}</p>
                     <button
                         onClick={handleRefresh}
-                        className="panel-control flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px]
+                        className="panel-control flex items-center gap-1.5 px-3 py-1.5 rounded-xs text-13
                             bg-accent2-soft text-accent2-ink hover:bg-accent2-soft transition-colors"
                     >
                         <RefreshCw size={12} />
@@ -473,7 +473,7 @@ export const APIContractViewer: React.FC<APIContractViewerProps> = ({ source: in
                 <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
                     <Globe className="w-10 h-10 text-[var(--v2-text-2)] mb-3 opacity-40" />
                     <p className="text-sm text-[var(--v2-text-2)]">未找到 API 端点</p>
-                    <p className="text-[13px] text-[var(--v2-text-2)] mt-1 opacity-60">
+                    <p className="text-13 text-[var(--v2-text-2)] mt-1 opacity-60">
                         {searchQuery ? '请调整搜索条件' : '当前来源没有 API 端点'}
                     </p>
                 </div>

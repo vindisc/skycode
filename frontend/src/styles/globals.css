@@ -241,12 +241,12 @@ body {
   --v2-shadow-sm:0 1px 2px rgba(20,40,34,.04),0 2px 8px rgba(20,40,34,.05);
   --v2-shadow-md:0 2px 6px rgba(20,40,34,.05),0 10px 28px rgba(20,40,34,.08);
   --v2-shadow-lg:0 4px 12px rgba(20,40,34,.07),0 20px 56px rgba(20,40,34,.14);
-  --v2-shadow-inset:inset 2px 2px 5px rgba(20,40,34,.12),inset -2px -2px 5px rgba(255,255,255,.7);
-  --v2-shadow-raised:-3px -3px 8px rgba(255,255,255,.85),3px 3px 8px rgba(20,40,34,.10);
-  --v2-shadow-raised-hover:-1.5px -1.5px 4px rgba(255,255,255,.85),1.5px 1.5px 4px rgba(20,40,34,.10);
-  --v2-shadow-pressed:inset 2px 2px 5px rgba(20,40,34,.12),inset -2px -2px 5px rgba(255,255,255,.7);
-  --v2-shadow-soft:-8px -8px 20px rgba(255,255,255,.85),8px 8px 20px rgba(20,40,34,.07);
-  --v2-shadow-soft-sm:-4px -4px 10px rgba(255,255,255,.8),4px 4px 10px rgba(20,40,34,.06);
+  --v2-shadow-inset:inset 0 1px 2px rgba(20,40,34,.04);
+  --v2-shadow-raised:0 1px 2px rgba(20,40,34,.06);
+  --v2-shadow-raised-hover:0 2px 6px rgba(20,40,34,.10);
+  --v2-shadow-pressed:inset 0 1px 2px rgba(20,40,34,.10);
+  --v2-shadow-soft:0 8px 24px rgba(20,40,34,.08);
+  --v2-shadow-soft-sm:0 4px 12px rgba(20,40,34,.06);
   --v2-r-xs:6px; --v2-r-sm:10px; --v2-r-md:14px; --v2-r-lg:16px; --v2-r-panel:22px; --v2-r-pill:999px;
   --v2-dur-fast:120ms; --v2-dur-base:180ms; --v2-dur-slow:240ms; --v2-dur-sheet:240ms;
   --v2-ease:cubic-bezier(.2,.8,.2,1); --v2-ease-in-out:cubic-bezier(.4,0,.2,1);
@@ -271,10 +271,10 @@ body {
   --v2-shadow-sm:0 1px 2px rgba(0,0,0,.4),0 2px 8px rgba(0,0,0,.35);
   --v2-shadow-md:0 2px 6px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.45);
   --v2-shadow-lg:0 4px 12px rgba(0,0,0,.5),0 20px 56px rgba(0,0,0,.55);
-  --v2-shadow-inset:inset 2px 2px 6px rgba(0,0,0,.5);
-  --v2-shadow-raised:inset 0 1px 0 rgba(255,255,255,.04),2px 3px 8px rgba(0,0,0,.45);
-  --v2-shadow-raised-hover:inset 0 1px 0 rgba(255,255,255,.04),1px 1.5px 4px rgba(0,0,0,.45);
-  --v2-shadow-pressed:inset 2px 2px 6px rgba(0,0,0,.5);
+  --v2-shadow-inset:inset 0 1px 2px rgba(0,0,0,.30);
+  --v2-shadow-raised:0 1px 2px rgba(0,0,0,.40);
+  --v2-shadow-raised-hover:0 2px 6px rgba(0,0,0,.45);
+  --v2-shadow-pressed:inset 0 1px 3px rgba(0,0,0,.45);
   --v2-shadow-soft:none; --v2-shadow-soft-sm:none;
   --v2-chart-1:#8A8FF0; --v2-chart-2:#5FC4B2; --v2-chart-3:#E0A94A; --v2-chart-4:#EF6B63;
   --v2-chart-5:#6DB4E6; --v2-chart-6:#B58CD6; --v2-chart-7:#A3C24E; --v2-chart-8:#8B99AD;
@@ -325,43 +325,19 @@ body {
   .expand-collapse[data-open="false"] { max-height: 0; }
 }
 
-/* ===== 会话卡选中 pill（荧光浮起，framer-motion layoutId 滑动载体） =====
-   选中视觉独立成层：accent 染色底 + 45% 边框 + 外发光 + 浮起阴影 + 左侧 4px 渐变光柱。
-   color-mix 基于 --v2-accent 局部定制（不动全局 token），accent 运行时切换自动跟随；
-   切换会话时 framer-motion 对同一 layoutId 元素做 FLIP 滑动（magic move）。 */
+/* ===== 会话行选中底：一层柔和的强调色染色，无描边、无外发光、无光柱。
+   它是 framer-motion layoutId 的滑动载体（切换会话时做 FLIP 平移），所以独立成层并 will-change: transform。
+   color-mix 基于 --v2-accent，accent 运行时切换自动跟随；浅色底上染色减弱。 */
 .session-active-pill {
   position: absolute;
   inset: 0;
-  border-radius: 14px;
+  border-radius: var(--v2-r-sm);
   pointer-events: none;
-  /* FLIP 滑动期间 pill 以 transform 移动：will-change 提示合成器独立成层，
-     避免大面积模糊阴影每帧重排重绘（迟滞感主因）。 */
   will-change: transform;
-  background: color-mix(in srgb, var(--v2-accent) 18%, transparent);
-  border: 1px solid color-mix(in srgb, var(--v2-accent) 45%, transparent);
-  /* 外发光收敛至 10px blur：动画元素上的大范围阴影模糊是重绘热点 */
-  box-shadow:
-    0 0 10px -2px color-mix(in srgb, var(--v2-accent) 26%, transparent),
-    var(--v2-shadow-raised);
+  background: color-mix(in srgb, var(--v2-accent) 16%, transparent);
 }
-/* 左侧渐变光柱：上下内缩 8px 避开卡片圆角，自身带微光 */
-.session-active-pill::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 8px;
-  bottom: 8px;
-  width: 4px;
-  border-radius: 4px;
-  background: linear-gradient(180deg, var(--v2-accent), var(--v2-accent-strong));
-  box-shadow: 0 0 6px color-mix(in srgb, var(--v2-accent) 50%, transparent);
-}
-/* 浅色：染色与光晕减弱（浅底发光显脏，主要靠染色+边框+光柱） */
 html.light .session-active-pill {
-  background: color-mix(in srgb, var(--v2-accent) 12%, transparent);
-  box-shadow:
-    0 0 8px -2px color-mix(in srgb, var(--v2-accent) 14%, transparent),
-    var(--v2-shadow-raised);
+  background: color-mix(in srgb, var(--v2-accent) 11%, transparent);
 }
 
 /* ===== 会话卡尾部：操作区 / 状态胶囊按指针能力切换 =====

@@ -86,8 +86,8 @@ export function OptimizePanel({ onClose }: { onClose: () => void }) {
         <Dialog open title="优化提示词" onClose={onClose} className="max-w-2xl border border-hairline max-h-[85vh] flex flex-col">
             <div className="px-5 pt-4 pb-5 overflow-y-auto min-h-0 flex-1 space-y-4">
                 <details>
-                    <summary className="cursor-pointer text-[13px] text-t3 hover:text-t2">查看原始提示词</summary>
-                    <pre className="mt-2 max-h-40 overflow-y-auto whitespace-pre-wrap break-words rounded-[10px] bg-sunken2 p-3 text-[13px] leading-relaxed text-t2">
+                    <summary className="cursor-pointer text-13 text-t3 hover:text-t2">查看原始提示词</summary>
+                    <pre className="mt-2 max-h-40 overflow-y-auto whitespace-pre-wrap break-words rounded-sm bg-sunken2 p-3 text-13 leading-relaxed text-t2">
                         {prompt}
                     </pre>
                 </details>
@@ -110,7 +110,7 @@ export function OptimizePanel({ onClose }: { onClose: () => void }) {
 
                 {phase === 'failed' && (
                     <div role="alert" className="space-y-3">
-                        <p className="rounded-[10px] border border-err bg-errsoft px-3 py-2 text-[13px] text-errstrong">{error}</p>
+                        <p className="rounded-sm border border-err bg-errsoft px-3 py-2 text-13 text-errstrong">{error}</p>
                         <div className="flex gap-2">
                             <Button variant="primary" onClick={() => setAttempt(value => value + 1)}>重试</Button>
                             <Button onClick={onClose}>关闭</Button>
@@ -120,7 +120,7 @@ export function OptimizePanel({ onClose }: { onClose: () => void }) {
 
                 {phase === 'done' && (
                     <>
-                        <p className="text-[13px] text-t3">
+                        <p className="text-13 text-t3">
                             由 {meta?.providerName} / {meta?.model} 生成，可以直接修改后再用。
                         </p>
                         <Textarea

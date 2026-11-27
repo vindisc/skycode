@@ -55,7 +55,7 @@ function ElapsedTimer({ startTime }: { startTime?: number }) {
   }, [startTime]);
 
   if (!Number.isFinite(startTime) || !startTime || startTime > Date.now() || !elapsed) return null;
-  return <span className="text-[13px] text-t2 font-mono">{elapsed}</span>;
+  return <span className="text-13 text-t2 font-mono">{elapsed}</span>;
 }
 
 function AgentDAGNodeComponent({ data }: NodeProps) {
@@ -66,7 +66,7 @@ function AgentDAGNodeComponent({ data }: NodeProps) {
 
   return (
     <div
-      className={`w-[220px] min-h-[128px] rounded-[14px] border-2 shadow-e2 px-3 py-2.5 ${borderClass} `}
+      className={`w-[220px] min-h-[128px] rounded-md border-2 shadow-e2 px-3 py-2.5 ${borderClass} `}
     >
       <Handle type="target" position={Position.Top} className="!bg-t3 !w-2 !h-2" />
 
@@ -79,12 +79,12 @@ function AgentDAGNodeComponent({ data }: NodeProps) {
       </div>
 
       {/* Agent type */}
-      <span className="inline-block text-[13px] px-1.5 py-0.5 rounded bg-sunken2 text-t2 mb-1">
+      <span className="inline-block text-13 px-1.5 py-0.5 rounded bg-sunken2 text-t2 mb-1">
         {agentType}
       </span>
 
       {/* Description */}
-      <p className="text-[13px] text-t2 truncate leading-tight">
+      <p className="text-13 text-t2 truncate leading-tight">
         {progress || description}
       </p>
 

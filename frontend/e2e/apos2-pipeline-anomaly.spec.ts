@@ -79,8 +79,8 @@ test.describe('APOS Phase 2 - Agent Pipeline (TC-APOS2-007~011)', () => {
     const gridContainer = page.locator('.grid.grid-cols-1');
     await expect(gridContainer).toBeVisible({ timeout: 5000 });
 
-    // 验证有 4 个 Worker 节点卡片（rounded-lg border-2）
-    const workerCards = page.locator('.rounded-lg.border-2');
+    // 验证有 4 个 Worker 节点卡片（rounded-sm border-2）
+    const workerCards = page.locator('.rounded-sm.border-2');
     await expect(workerCards).toHaveCount(4, { timeout: 5000 });
 
     // 验证每个节点显示 workerId
@@ -400,7 +400,7 @@ test.describe('APOS Phase 2 - Resource Consumption (TC-APOS2-016~018)', () => {
     // Worker 节点应展示 — 验证 WORKING Worker 的 toolCallCount（通过 Worker 日志 "N tools, M tokens"）
     // PipelineNode 组件本身不直接展示 toolCallCount，但 SwarmStore 的 logs 中记录了
     // 验证 Worker 节点卡片存在
-    const workerCards = page.locator('.rounded-lg.border-2');
+    const workerCards = page.locator('.rounded-sm.border-2');
     await expect(workerCards.first()).toBeVisible({ timeout: 5000 });
     const cardCount = await workerCards.count();
     expect(cardCount).toBe(3);
@@ -438,7 +438,7 @@ test.describe('APOS Phase 2 - Resource Consumption (TC-APOS2-016~018)', () => {
     await toggleDetailsPanel(page, 'Agent Pipeline');
 
     // 验证 Worker 节点展示且有进度信息
-    const workerCard = page.locator('.rounded-lg.border-2');
+    const workerCard = page.locator('.rounded-sm.border-2');
     await expect(workerCard).toBeVisible({ timeout: 5000 });
 
     // 验证进度条显示 80%
@@ -515,7 +515,7 @@ test.describe('APOS Phase 2 - Anomaly Detection (TC-APOS2-019~024)', () => {
     await expect(alertTitle).toBeVisible({ timeout: 5000 });
 
     // 验证 loop_detection 图标 🔄
-    const loopIcon = page.locator('.rounded-lg.border').locator('text=🔄');
+    const loopIcon = page.locator('.rounded-sm.border').locator('text=🔄');
     await expect(loopIcon).toBeVisible({ timeout: 5000 });
 
     // 验证 Worker 名称

@@ -45,7 +45,7 @@ const CollapsedReadSearchBlock: React.FC<CollapsedReadSearchBlockProps> = ({
     const preview = lines.slice(0, previewLines).join('\n');
 
     return (
-        <div className="collapsed-read-search rounded-[14px] border border-hairline bg-sunken2 overflow-hidden">
+        <div className="collapsed-read-search rounded-md border border-hairline bg-sunken2 overflow-hidden">
             {/* Header */}
             <button
                 onClick={toggle}
@@ -56,9 +56,9 @@ const CollapsedReadSearchBlock: React.FC<CollapsedReadSearchBlockProps> = ({
                     className={`text-t2 transition-transform duration-base ${expanded ? 'rotate-90' : ''}`}
                 />
                 <Icon size={14} className="text-t2" />
-                <span className="text-[13px] text-t2">{label}</span>
+                <span className="text-13 text-t2">{label}</span>
                 {!expanded && (
-                    <span className="text-[13px] text-t2 ml-auto">click to expand</span>
+                    <span className="text-13 text-t2 ml-auto">click to expand</span>
                 )}
             </button>
 

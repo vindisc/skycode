@@ -40,10 +40,10 @@ export const SwarmMessageLog: React.FC = () => {
                     <svg className="w-3.5 h-3.5 text-t3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                     </svg>
-                    <span className="text-[13px] font-medium text-t3">
+                    <span className="text-13 font-medium text-t3">
                         活动日志
                     </span>
-                    <span className="text-[13px] text-t3">({logs.length})</span>
+                    <span className="text-13 text-t3">({logs.length})</span>
                 </div>
             </div>
 
@@ -53,15 +53,15 @@ export const SwarmMessageLog: React.FC = () => {
                 className="max-h-48 overflow-y-auto px-3 py-2 space-y-1"
             >
                 {logs.length === 0 ? (
-                    <div className="text-center text-[13px] text-t3 py-4">
+                    <div className="text-center text-13 text-t3 py-4">
                         暂无活动日志
                     </div>
                 ) : (
                     logs.slice(-50).map((entry) => {
                         const cfg = typeIcons[entry.type] ?? typeIcons.message;
                         return (
-                            <div key={entry.id} className="flex items-start gap-2 text-[13px] leading-relaxed group">
-                                <span className="text-[13px] text-t3 font-mono tabular-nums shrink-0 mt-0.5">
+                            <div key={entry.id} className="flex items-start gap-2 text-13 leading-relaxed group">
+                                <span className="text-13 text-t3 font-mono tabular-nums shrink-0 mt-0.5">
                                     {formatTime(entry.timestamp)}
                                 </span>
                                 <span className={`shrink-0 mt-0.5 ${cfg.color}`}>

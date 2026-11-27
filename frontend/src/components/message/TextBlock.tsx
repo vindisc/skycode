@@ -106,10 +106,10 @@ const MarkdownImage: React.FC<{ src?: string; alt?: string }> = ({ src, alt }) =
     if (error || !sessionId) {
         const forbidden = error?.includes('403');
         return (
-            <span className="my-2 inline-flex items-center rounded-[10px] border border-warn bg-warnsoft px-3 py-2 text-sm text-warn">
+            <span className="my-2 inline-flex items-center rounded-sm border border-warn bg-warnsoft px-3 py-2 text-sm text-warn">
                 {forbidden ? '图片不在当前工作区范围内' : `图片加载失败 (${error ?? '无会话'})`}
                 {workspacePath && (
-                    <span className="ml-2 text-[13px] text-[var(--v2-text-2)]">{workspacePath}</span>
+                    <span className="ml-2 text-13 text-[var(--v2-text-2)]">{workspacePath}</span>
                 )}
             </span>
         );
@@ -117,7 +117,7 @@ const MarkdownImage: React.FC<{ src?: string; alt?: string }> = ({ src, alt }) =
 
     if (!objectUrl) {
         return (
-            <span className="my-2 inline-block h-32 w-48 animate-pulse rounded-[10px] border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]" />
+            <span className="my-2 inline-block h-32 w-48 animate-pulse rounded-sm border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]" />
         );
     }
 
@@ -165,7 +165,7 @@ const TextBlock: React.FC<TextBlockProps> = ({ text, streaming = false }) => {
             if (!match && !codeStr.includes('\n')) {
                 return (
                     <code
-                        className="markdown-inline-code px-1.5 py-0.5 rounded-md bg-sunken2 text-[13px] max-md:text-sm font-mono text-t1"
+                        className="markdown-inline-code px-1.5 py-0.5 rounded-xs bg-sunken2 text-13 max-md:text-sm font-mono text-t1"
                         {...props}
                     >
                         {children}
@@ -184,7 +184,7 @@ const TextBlock: React.FC<TextBlockProps> = ({ text, streaming = false }) => {
         // Headings（视觉换肤 §1.6 字阶：h1 22 / h2 18 / h3 15，全部 600）
         h1: ({ children }) => <h1 className="text-[22px] leading-snug font-semibold mt-6 mb-3">{children}</h1>,
         h2: ({ children }) => <h2 className="text-[18px] leading-snug font-semibold mt-6 mb-2">{children}</h2>,
-        h3: ({ children }) => <h3 className="markdown-muted-heading text-[15px] leading-snug font-semibold mt-4 mb-2 text-t2">{children}</h3>,
+        h3: ({ children }) => <h3 className="markdown-muted-heading text-15 leading-snug font-semibold mt-4 mb-2 text-t2">{children}</h3>,
         // Paragraphs：含图片的段落改用 <div> 输出，避免 MarkdownImage/ImageBlock
         // 的块级容器造成 p > div 非法嵌套（validateDOMNesting 告警）
         p: ({ node, children }) => {
@@ -262,10 +262,10 @@ const TextBlock: React.FC<TextBlockProps> = ({ text, streaming = false }) => {
     }), []);
 
     return (
-        <div data-galaxy-text="" data-galaxy-streaming={streaming ? "true" : undefined} data-spider-anchor={streaming ? undefined : 'text'} className="text-block max-w-none text-[15px] max-md:text-base max-md:leading-[1.6] text-t1 leading-[1.6]">
+        <div data-galaxy-text="" data-galaxy-streaming={streaming ? "true" : undefined} data-spider-anchor={streaming ? undefined : 'text'} className="text-block max-w-none text-15 max-md:text-base max-md:leading-[1.6] text-t1 leading-[1.6]">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={components} urlTransform={urlTransform}>{text}</ReactMarkdown>
             {streaming && (
-                <span className="inline-block w-2 h-4 ml-0.5 bg-accent2 animate-pulse rounded-sm" />
+                <span className="inline-block w-2 h-4 ml-0.5 bg-accent2 animate-pulse rounded" />
             )}
         </div>
     );

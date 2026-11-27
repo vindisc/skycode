@@ -93,7 +93,7 @@ export function EmptyHero() {
                             {chip.label}
                         </Button>
                     ))}
-                    <div className="mt-3 hidden basis-full flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[13px] text-t2 md:flex">
+                    <div className="mt-3 hidden basis-full flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-13 text-t2 md:flex">
                         <span className="flex items-center gap-1">
                             <Kbd>⌘</Kbd><Kbd>K</Kbd> 命令面板
                         </span>

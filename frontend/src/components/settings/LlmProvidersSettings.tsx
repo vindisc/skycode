@@ -287,7 +287,7 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                     <h3 className="text-base font-semibold text-t1">模型服务商</h3>
-                    <p className="mt-1 text-[13px] text-t3">列出的就是当前可用的服务商，保存后立即生效。</p>
+                    <p className="mt-1 text-13 text-t3">列出的就是当前可用的服务商，保存后立即生效。</p>
                 </div>
                 <div className="flex shrink-0 gap-2">
                     <Button size="sm" loading={isBusy('reload')} onClick={() => { void handleReload(); }}>
@@ -302,14 +302,14 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
             </div>
 
             {data && !data.apiKeyStorageReady && (
-                <p role="status" className="rounded-[10px] border border-warn bg-warnsoft px-3 py-2 text-[13px] text-warnstrong">
+                <p role="status" className="rounded-sm border border-warn bg-warnsoft px-3 py-2 text-13 text-warnstrong">
                     当前运行环境没有稳定的加密密钥，暂时不能保存 API Key。
                     请通过环境变量 SKYCODE_ENCRYPTION_KEY 提供密钥后重启服务；无密钥的服务商（例如本地模型）不受影响。
                 </p>
             )}
 
             {loadError && (
-                <div role="alert" className="flex flex-wrap items-center gap-3 rounded-[10px] border border-err bg-errsoft px-3 py-2 text-[13px] text-errstrong">
+                <div role="alert" className="flex flex-wrap items-center gap-3 rounded-sm border border-err bg-errsoft px-3 py-2 text-13 text-errstrong">
                     <span>{loadError}</span>
                     <Button size="sm" onClick={() => { void load(); }}>重试</Button>
                 </div>
@@ -401,7 +401,7 @@ export function LlmProvidersSettings({ onGoToScenes, onUnsavedChange }: LlmProvi
 function TestOutcome({ testResult }: { testResult?: LlmProviderTestResponse }) {
     if (!testResult) return null;
     return (
-        <p role="status" className="mt-3 flex flex-wrap items-center gap-2 text-[13px]">
+        <p role="status" className="mt-3 flex flex-wrap items-center gap-2 text-13">
             <Chip variant={testResult.ok ? 'ok' : 'err'}>{testResult.ok ? '连通' : '连接失败'}</Chip>
             <span className="text-t3">
                 {testResult.model}{testResult.ok ? ` · ${testResult.latencyMs} ms` : ''}
@@ -429,15 +429,15 @@ function ConfiguredProviderRow({ view, operation, anyBusy, testResult, onTest, o
             <div className="min-w-0 flex-1 basis-64">
                 <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-semibold text-t1">{view.displayName}</span>
-                    <span className="text-[13px] text-t4" title={`注册名 ${view.name}`}>{view.name}</span>
+                    <span className="text-13 text-t4" title={`注册名 ${view.name}`}>{view.name}</span>
                     <ConfiguredStatus view={view} />
                 </div>
-                <div className="mt-0.5 truncate text-[13px] text-t3" title={view.baseUrl}>
+                <div className="mt-0.5 truncate text-13 text-t3" title={view.baseUrl}>
                     {view.baseUrl} · {view.hasApiKey ? `密钥 ${view.apiKeyMasked}` : '还没有填写密钥'}
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-1" aria-label={`${view.displayName} 的模型`}>
                     {view.models.map(model => (
-                        <Chip key={model} variant={view.active ? 'accent' : 'neutral'} className="h-5 px-2 text-[12px]">{model}</Chip>
+                        <Chip key={model} variant={view.active ? 'accent' : 'neutral'} className="h-5 px-2 text-xs">{model}</Chip>
                     ))}
                 </div>
                 <TestOutcome testResult={testResult} />
@@ -445,7 +445,7 @@ function ConfiguredProviderRow({ view, operation, anyBusy, testResult, onTest, o
             <div className="flex shrink-0 items-center gap-1">
                 {/* 没有密钥的条目谈不上启停，给了开关只会让人以为打开就能用 */}
                 {view.hasApiKey && (
-                    <label className="mr-1 flex items-center gap-1.5 text-[13px] text-t2">
+                    <label className="mr-1 flex items-center gap-1.5 text-13 text-t2">
                         <Toggle
                             checked={view.enabled}
                             onCheckedChange={onToggle}
@@ -497,7 +497,7 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
                     <span className="text-sm font-semibold text-t1">{provider.name}</span>
                     <RoutingStatus routing={routing} enabled={provider.enabled} />
                 </div>
-                <div className="mt-0.5 truncate text-[13px] text-t3" title={provider.baseUrl}>
+                <div className="mt-0.5 truncate text-13 text-t3" title={provider.baseUrl}>
                     {provider.baseUrl} · 密钥 {provider.hasApiKey ? provider.apiKeyMasked : '未设置'}
                 </div>
 
@@ -509,7 +509,7 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
                             <Chip
                                 key={model}
                                 variant={!provider.enabled || !registered ? 'neutral' : skip ? 'warn' : 'accent'}
-                                className="h-5 px-2 text-[12px]"
+                                className="h-5 px-2 text-xs"
                                 title={!provider.enabled
                                     ? '服务商已停用'
                                     : skip?.reason ?? inferred?.basis}
@@ -521,12 +521,12 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
                 </div>
 
                 {registered && (
-                    <p className="mt-1.5 text-[13px] text-t3">
+                    <p className="mt-1.5 text-13 text-t3">
                         已注册为 {routing?.registeredAs}，默认模型 {routing?.defaultModel}
                     </p>
                 )}
                 {registered && (routing?.inferredModels?.length ?? 0) > 0 && (
-                    <div className="mt-1.5 text-[13px] text-t3" data-testid="inferred-models">
+                    <div className="mt-1.5 text-13 text-t3" data-testid="inferred-models">
                         <p>以下模型不在内置能力表里，按推算的参数登记：</p>
                         <ul className="mt-1 space-y-1">
                             {routing?.inferredModels?.map((inferred: InferredModel) => (
@@ -538,12 +538,12 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
                     </div>
                 )}
                 {!registered && routing?.skipReason && (
-                    <p role="status" className="mt-1.5 text-[13px] text-t3">未注册：{routing.skipReason}</p>
+                    <p role="status" className="mt-1.5 text-13 text-t3">未注册：{routing.skipReason}</p>
                 )}
                 {routing && routing.skippedModels.length > 0 && (
                     <ul className="mt-1.5 space-y-1" aria-label="未注册的模型">
                         {routing.skippedModels.map(skip => (
-                            <li key={skip.model} className="text-[13px] text-t3">
+                            <li key={skip.model} className="text-13 text-t3">
                                 <span className="text-t2">{skip.model}</span> — {skip.reason}
                             </li>
                         ))}
@@ -552,7 +552,7 @@ function ProviderRow({ provider, routing, operation, anyBusy, testResult, onTogg
                 <TestOutcome testResult={testResult} />
             </div>
             <div className="flex shrink-0 items-center gap-1">
-                <label className="mr-1 flex items-center gap-1.5 text-[13px] text-t2">
+                <label className="mr-1 flex items-center gap-1.5 text-13 text-t2">
                     <Toggle
                         checked={provider.enabled}
                         onCheckedChange={onToggle}

@@ -12,9 +12,9 @@ import { JellyFxControls } from '@/components/theme/JellyFxControls';
 import { ACCENT_PRESETS, normalizeAccentHex } from '@/theme/accents';
 import { useOptimizePrompt } from './useOptimizePrompt';
 
-const action = 'min-h-11 rounded-[10px] px-1.5 text-sm text-t2 hover:bg-hover2 active:bg-hover2 transition-interactive duration-fast focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink';
+const action = 'min-h-11 rounded-sm px-1.5 text-sm text-t2 hover:bg-hover2 active:bg-hover2 transition-interactive duration-fast focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink';
 
-const list = 'overflow-hidden rounded-[14px] border border-hairline bg-surface2 divide-y divide-[var(--v2-border-hairline)]';
+const list = 'overflow-hidden rounded-md border border-hairline bg-surface2 divide-y divide-[var(--v2-border-hairline)]';
 const actionRow = 'flex min-h-12 w-full items-center gap-3 px-3 py-3 text-left text-sm text-t1 hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent2-ink disabled:opacity-50';
 
 /** 「更多操作」面板里的一行入口 */
@@ -23,7 +23,7 @@ function ActionRow({ label, icon: Icon, run, disabled = false, hint }: { label: 
         <Icon size={20} className="text-t2" aria-hidden="true" />
         <span className="min-w-0 flex-1">
             <span className="block">{label}</span>
-            {hint && <span className="block text-[13px] text-t3">{hint}</span>}
+            {hint && <span className="block text-13 text-t3">{hint}</span>}
         </span>
         <ChevronRight size={16} className="text-t3" aria-hidden="true" />
     </button>;
@@ -65,11 +65,11 @@ export function MobileComposerNavigation({ optimize }: MobileComposerNavigationP
             <div className="space-y-4 p-4">
                 {panel === 'more' && <>
                     <section>
-                        <h3 className="mb-2 text-[13px] font-medium text-t2">外观</h3>
+                        <h3 className="mb-2 text-13 font-medium text-t2">外观</h3>
                         <div className="grid grid-cols-2 min-[380px]:grid-cols-4 gap-2">{(['light', 'dark', 'glass', 'spaceship', 'ink-havoc', 'ink-havoc-night', 'jelly', 'spider', 'galaxy'] as const).map((mode, i) => {
                             const Icon = [Sun, Moon, Sparkles, Rocket, Flower2, Landmark, Candy, Bug, Orbit][i];
                             const selected = theme.mode === mode;
-                            return <button key={mode} className={`flex min-h-[72px] flex-col items-center justify-center gap-2 rounded-[14px] border text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink ${selected ? 'border-accent2-ink bg-accent2-soft text-accent2-ink' : 'border-hairline bg-surface2 text-t2 hover:bg-hover2'}`} aria-pressed={selected} onClick={() => setTheme({ mode })}><Icon size={20} aria-hidden="true" /><span>{['浅色', '深色', '液态玻璃', '星舰', '花果晨', '灵霄夜', '果冻', '蜘蛛爬虫', '璀璨银河'][i]}</span></button>;
+                            return <button key={mode} className={`flex min-h-[72px] flex-col items-center justify-center gap-2 rounded-md border text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink ${selected ? 'border-accent2-ink bg-accent2-soft text-accent2-ink' : 'border-hairline bg-surface2 text-t2 hover:bg-hover2'}`} aria-pressed={selected} onClick={() => setTheme({ mode })}><Icon size={20} aria-hidden="true" /><span>{['浅色', '深色', '液态玻璃', '星舰', '花果晨', '灵霄夜', '果冻', '蜘蛛爬虫', '璀璨银河'][i]}</span></button>;
                         })}</div>
                     </section>
                     {/* 星舰特效：仅 spaceship 主题可见（紧凑形态，与桌面外观设置同一控件） */}
@@ -79,11 +79,11 @@ export function MobileComposerNavigation({ optimize }: MobileComposerNavigationP
                     {/* 果冻特效：仅 jelly 主题可见（紧凑形态，与桌面外观设置同一控件） */}
                     {theme.mode === 'jelly' && <section><JellyFxControls compact /></section>}
                     <section>
-                        <h3 className="mb-2 text-[13px] font-medium text-t2">强调色</h3>
+                        <h3 className="mb-2 text-13 font-medium text-t2">强调色</h3>
                         {/* 审查-移动端修复：ink 双模式 / jelly accent 写死主题色（同桌面 SettingsPanel 逻辑），
                             可选中却无效果还会覆盖其他主题偏好——禁用并说明 */}
                         {(theme.mode === 'ink-havoc' || theme.mode === 'ink-havoc-night' || theme.mode === 'jelly' || theme.mode === 'spider' || theme.mode === 'galaxy') ? (
-                            <div className="text-[13px] text-t3">{theme.mode === 'galaxy' ? '本主题使用专属星蓝、紫罗兰与玫红配色' : theme.mode === 'spider' ? '本主题使用专属青色、洋红与紫色配色' : theme.mode === 'jelly' ? '本主题使用专属法式配色' : '本主题使用专属重彩配色'}</div>
+                            <div className="text-13 text-t3">{theme.mode === 'galaxy' ? '本主题使用专属星蓝、紫罗兰与玫红配色' : theme.mode === 'spider' ? '本主题使用专属青色、洋红与紫色配色' : theme.mode === 'jelly' ? '本主题使用专属法式配色' : '本主题使用专属重彩配色'}</div>
                         ) : (
                         <div className="flex flex-wrap gap-2" role="group" aria-label="强调色">
                             {ACCENT_PRESETS.map(({ hex, label }) => {

@@ -32,7 +32,7 @@ export const DelegationWarningBanner: React.FC = () => {
             {visibleWarnings.map((warning) => (
                 <div
                     key={warning.id}
-                    className="flex items-start gap-3 px-4 py-2.5\n                               bg-warnsoft\n                               border border-warn\n                               rounded-[14px] shadow-e1\n                               animate-in slide-in-from-top-2 duration-slow"
+                    className="flex items-start gap-3 px-4 py-2.5\n                               bg-warnsoft\n                               border border-warn\n                               rounded-md shadow-e1\n                               animate-in slide-in-from-top-2 duration-slow"
                     role="alert"
                 >
                     {/* Warning icon */}
@@ -52,13 +52,13 @@ export const DelegationWarningBanner: React.FC = () => {
 
                     {/* Warning content */}
                     <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-medium text-warn dark:text-warn">
+                        <p className="text-13 font-medium text-warn dark:text-warn">
                             委派质量警告
                         </p>
-                        <p className="text-[13px] text-warn dark:text-warn mt-0.5 break-words">
+                        <p className="text-13 text-warn dark:text-warn mt-0.5 break-words">
                             {warning.message}
                         </p>
-                        <span className="text-[13px] text-warn dark:text-warn mt-1 block">
+                        <span className="text-13 text-warn dark:text-warn mt-1 block">
                             {new Date(warning.timestamp).toLocaleTimeString()}
                         </span>
                     </div>
@@ -85,7 +85,7 @@ export const DelegationWarningBanner: React.FC = () => {
                 <div className="flex justify-end">
                     <button
                         onClick={handleDismissAll}
-                        className="panel-control text-[13px] text-warn dark:text-warn
+                        className="panel-control text-13 text-warn dark:text-warn
                                    hover:text-warn dark:hover:text-warn
                                    transition-colors px-2 py-0.5"
                     >

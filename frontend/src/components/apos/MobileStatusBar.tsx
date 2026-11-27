@@ -108,14 +108,14 @@ export function MobileStatusBar({ onExpandDetails }: MobileStatusBarProps) {
             {activeSwarmId && workers.length > 0 ? (
               <MobilePipelineSummary workers={workers} />
             ) : (
-              <span className="text-[13px] text-t2">{pendingApproval || sessionStatus === 'waiting_permission' ? '待审批' : activityError || anomalyCount > 0 ? '有异常待查看' : sessionStatus === 'compacting' ? '压缩中' : sessionStatus === 'streaming' || activityRunning ? '运行中' : '任务详情'}</span>
+              <span className="text-13 text-t2">{pendingApproval || sessionStatus === 'waiting_permission' ? '待审批' : activityError || anomalyCount > 0 ? '有异常待查看' : sessionStatus === 'compacting' ? '压缩中' : sessionStatus === 'streaming' || activityRunning ? '运行中' : '任务详情'}</span>
             )}
           </div>
 
           {/* 右侧：异常计数徽章 + 展开箭头 */}
           <div className="flex items-center gap-2 flex-shrink-0">
             {anomalyCount > 0 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-errsoft text-errstrong text-[13px] font-medium">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-errsoft text-errstrong text-13 font-medium">
                 <AlertTriangle size={12} />
                 {anomalyCount}
               </span>

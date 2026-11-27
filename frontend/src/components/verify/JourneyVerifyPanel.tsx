@@ -22,16 +22,16 @@ export const JourneyVerifyPanel: React.FC = () => {
     if (status === 'idle') return null;
 
     return (
-        <div className="journey-verify-panel border rounded-[14px] p-4 mt-2">
+        <div className="journey-verify-panel border rounded-md p-4 mt-2">
             <div className="flex items-center justify-between mb-1">
                 <h3 className=" text-base font-semibold">Runtime Verification</h3>
                 <StatusBadge status={status} verdict={verdict} />
             </div>
-            <p className="mb-3 text-[13px] text-t2">范围有限：仅覆盖所列步骤在该次运行中的执行状态</p>
+            <p className="mb-3 text-13 text-t2">范围有限：仅覆盖所列步骤在该次运行中的执行状态</p>
 
             <div className="space-y-1">
                 {steps.map((step) => (
-                    <div key={step.stepIndex} className="flex items-center gap-2 text-[13px]">
+                    <div key={step.stepIndex} className="flex items-center gap-2 text-13">
                         <span className={step.ok ? 'text-ok' : 'text-err'}>
                             {step.ok ? '✓' : '✗'}
                         </span>
@@ -42,7 +42,7 @@ export const JourneyVerifyPanel: React.FC = () => {
             </div>
 
             {errorMessage && (
-                <div className="mt-2 text-[13px] text-err bg-errsoft rounded p-2">
+                <div className="mt-2 text-13 text-err bg-errsoft rounded p-2">
                     {errorMessage}
                 </div>
             )}
@@ -52,7 +52,7 @@ export const JourneyVerifyPanel: React.FC = () => {
                     <button
                         type="button"
                         onClick={() => setShowEvidence((v) => !v)}
-                        className="panel-control mt-2 text-[13px] text-accent2-ink hover:text-accent2-ink hover:underline cursor-pointer flex items-center gap-1"
+                        className="panel-control mt-2 text-13 text-accent2-ink hover:text-accent2-ink hover:underline cursor-pointer flex items-center gap-1"
                     >
                         <span>{showEvidence ? '▼' : '▶'}</span>
                         <span>Evidence: {bundleId.slice(0, 12)}…</span>
@@ -72,21 +72,21 @@ interface StatusBadgeProps {
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status, verdict }) => {
     const v = (verdict || '').toLowerCase();
     if (status === 'running') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-accent2-soft text-accent2-ink">Running...</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-accent2-soft text-accent2-ink">Running...</span>;
     }
     if (v === 'verified' || v === 'passed') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-oksoft text-ok">Passed</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-oksoft text-ok">Passed</span>;
     }
     if (v === 'unavailable') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-warnsoft text-warn">Unavailable</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-warnsoft text-warn">Unavailable</span>;
     }
     if (v === 'inconclusive') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-warnsoft text-warn">Inconclusive</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-warnsoft text-warn">Inconclusive</span>;
     }
     if (v === 'failed') {
-        return <span className="px-2 py-0.5 text-[13px] rounded bg-errsoft text-err">Failed</span>;
+        return <span className="px-2 py-0.5 text-13 rounded bg-errsoft text-err">Failed</span>;
     }
-    return <span className="px-2 py-0.5 text-[13px] rounded bg-accent2-soft text-accent2-ink">范围未知</span>;
+    return <span className="px-2 py-0.5 text-13 rounded bg-accent2-soft text-accent2-ink">范围未知</span>;
 };
 
 export default JourneyVerifyPanel;

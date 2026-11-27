@@ -43,7 +43,7 @@ const PromptSendButton: React.FC<PromptSendButtonProps> = ({
                        text-white shadow-raised transition-interactive
                        duration-fast active:scale-95 active:shadow-pressed focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink
                        disabled:opacity-[.38] disabled:shadow-none`
-                    : `flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-white
+                    : `flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-white
                        bg-accent2-strong shadow-raised transition-interactive duration-fast
                        hover:bg-accent2-hover hover:shadow-raised-hover active:scale-[.98] active:shadow-pressed active:bg-accent2-active
                        focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
@@ -59,12 +59,12 @@ const PromptSendButton: React.FC<PromptSendButtonProps> = ({
                     aria-label="停止当前任务"
                     title="停止当前任务"
                     className={isMobile
-                        ? `stop-btn-running flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px]
+                        ? `stop-btn-running flex h-11 w-11 shrink-0 items-center justify-center rounded-sm
                            bg-err text-white dark:text-app2 shadow-e1 transition-interactive
                            duration-fast active:scale-95
                            focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink
                            disabled:opacity-[.38] disabled:shadow-none`
-                        : `stop-btn-running flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] text-white dark:text-app2
+                        : `stop-btn-running flex h-10 w-10 shrink-0 items-center justify-center rounded-sm text-white dark:text-app2
                            bg-err shadow-e1 transition-interactive duration-fast
                            hover:opacity-90 active:scale-[.98]
                            focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring

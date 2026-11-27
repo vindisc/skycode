@@ -65,7 +65,7 @@ function applyTheme(theme: ThemeName) {
 function Section({ title, children }: { title: string; children: ReactNode }) {
     return (
         <section className="mb-10">
-            <h2 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.08em] text-t2">
+            <h2 className="mb-4 text-xs font-semibold uppercase tracking-[0.08em] text-t2">
                 {title}
             </h2>
             {children}
@@ -85,8 +85,8 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 function Swatch({ cls, name }: { cls: string; name: string }) {
     return (
         <div className="flex w-24 flex-col gap-1">
-            <div className={`h-10 rounded-[10px] border border-hairline ${cls}`} />
-            <span className="truncate font-mono text-[11px] text-t2">{name}</span>
+            <div className={`h-10 rounded-sm border border-hairline ${cls}`} />
+            <span className="truncate font-mono text-xs text-t2">{name}</span>
         </div>
     );
 }
@@ -109,21 +109,21 @@ export default function DesignGallery() {
             <header className="sticky top-0 z-10 border-b border-hairline bg-surfacev2">
                 <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-4 px-6 py-3">
                     <div className="flex items-center gap-2">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-accent2 text-white">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-xs bg-accent2 text-white">
                             <Zap className="h-3.5 w-3.5" aria-hidden="true" />
                         </span>
                         <span className="text-sm font-semibold">SkyCode /design 画廊</span>
                         <Chip variant="accent">P1a · DEV only</Chip>
                     </div>
                     <div className="ml-auto flex flex-wrap items-center gap-4">
-                        <div className="grid grid-cols-2 sm:grid-cols-4 items-center gap-1 rounded-2xl bg-sunken2 p-1 shadow-well">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 items-center gap-1 rounded-md bg-sunken2 p-1 shadow-well">
                             {THEMES.map((t) => (
                                 <button
                                     key={t.name}
                                     type="button"
                                     onClick={() => setTheme(t.name)}
                                     aria-pressed={theme === t.name}
-                                    className={`h-7 rounded-xl px-3 text-xs font-medium transition-interactive duration-fast focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring ${
+                                    className={`h-7 rounded-md px-3 text-xs font-medium transition-interactive duration-fast focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring ${
                                         theme === t.name
                                             ? 'bg-surfacev2 text-t1 shadow-e1'
                                             : 'text-t2 hover:text-t1'
@@ -195,17 +195,17 @@ export default function DesignGallery() {
                     <div className="flex flex-wrap gap-4">
                         {(['shadow-e1', 'shadow-e2', 'shadow-e3', 'shadow-e4', 'shadow-well', 'shadow-soft', 'shadow-soft-sm'] as const).map((s) => (
                             <div key={s} className="flex w-24 flex-col gap-1">
-                                <div className={`h-12 rounded-xl bg-surfacev2 ${s}`} />
-                                <span className="font-mono text-[11px] text-t2">{s}</span>
+                                <div className={`h-12 rounded-md bg-surfacev2 ${s}`} />
+                                <span className="font-mono text-xs text-t2">{s}</span>
                             </div>
                         ))}
                     </div>
                     <div className="mt-4 flex flex-wrap items-end gap-4">
-                        <div className="h-12 w-12 rounded-md bg-accent2-soft" title="rounded-md 6" />
-                        <div className="h-12 w-12 rounded-[10px] bg-accent2-soft" title="rounded-[10px] 8" />
-                        <div className="h-12 w-12 rounded-xl bg-accent2-soft" title="rounded-xl 12" />
-                        <div className="h-12 w-12 rounded-2xl bg-accent2-soft" title="rounded-2xl 16" />
-                        <div className="h-12 w-12 rounded-panel bg-accent2-soft" title="rounded-panel 20" />
+                        <div className="h-12 w-12 rounded bg-accent2-soft" title="rounded 4" />
+                        <div className="h-12 w-12 rounded-xs bg-accent2-soft" title="rounded-xs 6" />
+                        <div className="h-12 w-12 rounded-sm bg-accent2-soft" title="rounded-sm 10" />
+                        <div className="h-12 w-12 rounded-md bg-accent2-soft" title="rounded-md 14" />
+                        <div className="h-12 w-12 rounded-panel bg-accent2-soft" title="rounded-panel 22" />
                         <div className="h-12 w-20 rounded-full bg-accent2-soft" title="rounded-full" />
                     </div>
                     <div className="mt-6 space-y-2">
@@ -216,7 +216,7 @@ export default function DesignGallery() {
                         <p className="text-base font-semibold">Title-2 · 16px / 600</p>
                         <p className="text-sm leading-relaxed text-t2">Body · 14px / 1.6–1.75 正文样例</p>
                         <p className="text-xs text-t2">Aux · 12px 辅助说明（字号下限）</p>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-t2">
+                        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-t2">
                             Label · 11px 大写分区
                         </p>
                         <p className="text-[32px] font-semibold tabular-nums tracking-[-0.02em]">

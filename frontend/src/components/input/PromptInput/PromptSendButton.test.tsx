@@ -9,7 +9,7 @@ it('运行时桌面/平板与手机的停止按钮统一为实心红底圆角方
     const { unmount } = render(<PromptSendButton runActive {...base} />);
     const desktopStop = screen.getByRole('button', { name: '停止当前任务' });
     expect(desktopStop.className).toContain('bg-err');
-    expect(desktopStop.className).toContain('rounded-[10px]');
+    expect(desktopStop.className).toContain('rounded-sm');
     expect(desktopStop.className).toContain('stop-btn-running');
     unmount();
 
@@ -17,7 +17,7 @@ it('运行时桌面/平板与手机的停止按钮统一为实心红底圆角方
     render(<PromptSendButton variant="mobile" runActive {...base} />);
     const mobileStop = screen.getByRole('button', { name: '停止当前任务' });
     expect(mobileStop.className).toContain('bg-err');
-    expect(mobileStop.className).toContain('rounded-[10px]');
+    expect(mobileStop.className).toContain('rounded-sm');
     expect(mobileStop.className).toContain('stop-btn-running');
     expect(mobileStop.className).toContain('h-11');
 });

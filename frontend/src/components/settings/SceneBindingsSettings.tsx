@@ -91,7 +91,7 @@ export function SceneBindingsSettings({ onGoToProviders }: SceneBindingsSettings
 
     if (loadError) {
         return (
-            <div role="alert" className="flex flex-wrap items-center gap-3 rounded-[10px] border border-err bg-errsoft px-3 py-2 text-[13px] text-errstrong">
+            <div role="alert" className="flex flex-wrap items-center gap-3 rounded-sm border border-err bg-errsoft px-3 py-2 text-13 text-errstrong">
                 <span>{loadError}</span>
                 <Button size="sm" onClick={() => { void load(); }}>重试</Button>
             </div>
@@ -110,13 +110,13 @@ export function SceneBindingsSettings({ onGoToProviders }: SceneBindingsSettings
         <div className="space-y-4" data-testid="scene-bindings-settings">
             <div>
                 <h3 className="text-base font-semibold text-t1">场景分派</h3>
-                <p className="mt-1 text-[13px] text-t3">
+                <p className="mt-1 text-13 text-t3">
                     给每个场景指定用「模型服务商」里的哪个模型；没分派的用默认模型。
                 </p>
             </div>
 
             {providers.length === 0 && (
-                <div role="status" className="flex flex-wrap items-center gap-3 rounded-[10px] border border-warn bg-warnsoft px-3 py-2 text-[13px] text-warnstrong">
+                <div role="status" className="flex flex-wrap items-center gap-3 rounded-sm border border-warn bg-warnsoft px-3 py-2 text-13 text-warnstrong">
                     <span>还没有可用的服务商：到「模型服务商」里添加一个。</span>
                     {onGoToProviders && <Button size="sm" onClick={onGoToProviders}>去添加</Button>}
                 </div>
@@ -141,13 +141,13 @@ export function SceneBindingsSettings({ onGoToProviders }: SceneBindingsSettings
                                         <h4 className="text-sm font-medium text-t1">{scene.label}</h4>
                                         <BindingStatus scene={scene} />
                                     </div>
-                                    <p className="mt-0.5 truncate text-[13px] text-t3">
+                                    <p className="mt-0.5 truncate text-13 text-t3">
                                         {scene.binding
                                             ? `当前：${scene.providerName ?? '（服务商已不存在）'} / ${scene.binding.modelId}`
                                             : '用默认模型'}
                                     </p>
                                     {scene.binding && !scene.active && (
-                                        <p role="status" className="mt-0.5 text-[13px] text-warnstrong">
+                                        <p role="status" className="mt-0.5 text-13 text-warnstrong">
                                             这条分派已失效，目前使用默认值。
                                         </p>
                                     )}
@@ -226,7 +226,7 @@ export function SceneBindingsSettings({ onGoToProviders }: SceneBindingsSettings
                                     </Button>
                                 )}
                                 {saveErrors[scene.key] && (
-                                    <p role="alert" className="w-full rounded-[10px] border border-err bg-errsoft px-3 py-2 text-[13px] text-errstrong">
+                                    <p role="alert" className="w-full rounded-sm border border-err bg-errsoft px-3 py-2 text-13 text-errstrong">
                                         {saveErrors[scene.key]}
                                     </p>
                                 )}

@@ -46,7 +46,7 @@ interface LlmProviderFormProps {
 }
 
 const LABEL = 'block text-sm font-medium text-t2 mb-1.5';
-const HINT = 'mt-1.5 text-[13px] leading-relaxed text-t3';
+const HINT = 'mt-1.5 text-13 leading-relaxed text-t3';
 
 export function LlmProviderForm({
     initial,
@@ -114,7 +114,7 @@ export function LlmProviderForm({
     const error = localError ?? saveError;
 
     return (
-        <form onSubmit={handleSubmit} noValidate className="rounded-[14px] border border-hairline bg-surfacev2 p-4 space-y-4" data-testid="llm-provider-form">
+        <form onSubmit={handleSubmit} noValidate className="rounded-md border border-hairline bg-surfacev2 p-4 space-y-4" data-testid="llm-provider-form">
             <h3 className="text-base font-semibold text-t1">
                 {configured ? `编辑「${configured.displayName}」` : existing ? `编辑「${existing.name}」` : '添加服务商'}
             </h3>
@@ -177,7 +177,7 @@ export function LlmProviderForm({
                         <Button
                             size="sm"
                             variant="ghost"
-                            className="h-7 px-2 text-[13px]"
+                            className="h-7 px-2 text-13"
                             loading={discovering}
                             disabled={busy}
                             onClick={() => { void handleDiscover(); }}
@@ -232,7 +232,7 @@ export function LlmProviderForm({
             </div>
 
             {error && (
-                <p role="alert" className="rounded-[10px] border border-err bg-errsoft px-3 py-2 text-[13px] text-errstrong">
+                <p role="alert" className="rounded-sm border border-err bg-errsoft px-3 py-2 text-13 text-errstrong">
                     {error}
                 </p>
             )}

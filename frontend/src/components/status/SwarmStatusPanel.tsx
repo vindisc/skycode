@@ -61,7 +61,7 @@ export const SwarmStatusPanel: React.FC = () => {
                     <h3 className="text-t1 text-base font-semibold">
                         Swarm
                     </h3>
-                    <span className="text-[13px] text-t3">
+                    <span className="text-13 text-t3">
                         {phaseLabels[swarm.phase] ?? swarm.phase}
                     </span>
                 </div>
@@ -69,7 +69,7 @@ export const SwarmStatusPanel: React.FC = () => {
                     {(swarm.phase === 'RUNNING' || swarm.phase === 'IDLE') && (
                         <button
                             onClick={handleShutdown}
-                            className="panel-control text-[13px] px-2 py-1 rounded bg-errsoft text-err hover:bg-errsoft transition-colors"
+                            className="panel-control text-13 px-2 py-1 rounded bg-errsoft text-err hover:bg-errsoft transition-colors"
                             title="关闭 Swarm"
                         >
                             停止
@@ -92,15 +92,15 @@ export const SwarmStatusPanel: React.FC = () => {
                 <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
                         <div className="text-lg font-bold text-t1">{swarm.activeWorkers}</div>
-                        <div className="text-[13px] text-t3 uppercase tracking-wider">活跃</div>
+                        <div className="text-13 text-t3 uppercase tracking-wider">活跃</div>
                     </div>
                     <div>
                         <div className="text-lg font-bold text-t1">{swarm.completedTasks}/{swarm.totalTasks}</div>
-                        <div className="text-[13px] text-t3 uppercase tracking-wider">任务</div>
+                        <div className="text-13 text-t3 uppercase tracking-wider">任务</div>
                     </div>
                     <div>
                         <div className="text-lg font-bold text-t1">{swarm.totalWorkers}</div>
-                        <div className="text-[13px] text-t3 uppercase tracking-wider">Workers</div>
+                        <div className="text-13 text-t3 uppercase tracking-wider">Workers</div>
                     </div>
                 </div>
 
@@ -112,7 +112,7 @@ export const SwarmStatusPanel: React.FC = () => {
                             style={{ width: `${progressPct}%` }}
                         />
                     </div>
-                    <div className="text-[13px] text-t3 mt-0.5 text-right">{progressPct}%</div>
+                    <div className="text-13 text-t3 mt-0.5 text-right">{progressPct}%</div>
                 </div>
             </div>
 
@@ -135,7 +135,7 @@ export const SwarmStatusPanel: React.FC = () => {
 
             {/* Footer */}
             <div className="px-4 py-2 border-t border-hairline bg-surface2">
-                <div className="text-[13px] text-t3">
+                <div className="text-13 text-t3">
                     Swarm ID: {swarm.swarmId}
                 </div>
             </div>

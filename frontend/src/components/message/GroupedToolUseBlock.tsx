@@ -44,7 +44,7 @@ const GroupedToolUseBlock: React.FC<GroupedToolUseBlockProps> = ({
     const toolNames = [...new Set(entries.map(([, tc]) => tc.toolName))];
 
     return (
-        <div className="grouped-tool-use my-2 rounded-[14px] border border-hairline bg-sunken2 overflow-hidden">
+        <div className="grouped-tool-use my-2 rounded-md border border-hairline bg-sunken2 overflow-hidden">
             {/* Group Header */}
             <button
                 onClick={toggle}
@@ -58,10 +58,10 @@ const GroupedToolUseBlock: React.FC<GroupedToolUseBlockProps> = ({
                 <span className="text-sm text-t2 font-medium">
                     {entries.length} tool calls
                 </span>
-                <span className="text-[13px] text-t2">
+                <span className="text-13 text-t2">
                     ({toolNames.join(', ')})
                 </span>
-                <span className="ml-auto text-[13px] text-t2">
+                <span className="ml-auto text-13 text-t2">
                     {completedCount}/{entries.length} done
                     {runningCount > 0 && ` · ${runningCount} running`}
                 </span>

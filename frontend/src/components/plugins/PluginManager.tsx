@@ -77,18 +77,18 @@ export default function PluginManager() {
       ) : (
         <div className="space-y-3">
           {plugins.map(plugin => (
-            <div key={plugin.name} className="border border-border rounded-[14px] p-4 hover:shadow-e2 transition-shadow">
+            <div key={plugin.name} className="border border-border rounded-md p-4 hover:shadow-e2 transition-shadow">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="font-medium">{plugin.name}</span>
-                  <span className="ml-2 text-[13px] text-muted">v{plugin.version}</span>
+                  <span className="ml-2 text-13 text-muted">v{plugin.version}</span>
                   {plugin.isBuiltin && (
-                    <span className="ml-2 px-1.5 py-0.5 text-[13px] bg-surface-sunken text-muted rounded">
+                    <span className="ml-2 px-1.5 py-0.5 text-13 bg-surface-sunken text-muted rounded">
                       builtin
                     </span>
                   )}
                 </div>
-                <span className={`text-[13px] px-2 py-0.5 rounded ${
+                <span className={`text-13 px-2 py-0.5 rounded ${
                   plugin.enabled ? 'bg-success/10 text-success' : 'bg-surface-sunken text-muted'
                 }`}>
                   {plugin.enabled ? 'Enabled' : 'Disabled'}
@@ -97,7 +97,7 @@ export default function PluginManager() {
               {plugin.description && (
                 <p className="text-sm text-muted mt-1">{plugin.description}</p>
               )}
-              <div className="flex gap-4 mt-2 text-[13px] text-muted">
+              <div className="flex gap-4 mt-2 text-13 text-muted">
                 <span>{plugin.commandCount} commands</span>
                 <span>{plugin.toolCount} tools</span>
                 <span>{plugin.hookCount} hooks</span>

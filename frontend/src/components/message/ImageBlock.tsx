@@ -77,7 +77,7 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
 
     if (!imageSrc) {
         return (
-            <div className="flex items-center justify-center h-32 rounded-[14px] border border-hairline bg-surfacev2 text-t2 text-sm">
+            <div className="flex items-center justify-center h-32 rounded-md border border-hairline bg-surfacev2 text-t2 text-sm">
                 No image data
             </div>
         );
@@ -85,7 +85,7 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
 
     if (loadError) {
         return (
-            <div className="flex items-center justify-center h-32 rounded-[14px] border border-err bg-errsoft text-err text-sm">
+            <div className="flex items-center justify-center h-32 rounded-md border border-err bg-errsoft text-err text-sm">
                 Failed to load image
             </div>
         );
@@ -98,7 +98,7 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
                 <img
                     src={imageSrc}
                     alt={alt}
-                    className="max-w-full max-h-80 rounded-[10px] border border-hairline cursor-pointer"
+                    className="max-w-full max-h-80 rounded-sm border border-hairline cursor-pointer"
                     onClick={toggleZoom}
                     onError={() => setLoadError(true)}
                     loading="lazy"
@@ -162,7 +162,7 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
                     <img
                         src={imageSrc}
                         alt={alt}
-                        className="max-w-[90vw] max-h-[90vh] rounded-[10px]"
+                        className="max-w-[90vw] max-h-[90vh] rounded-sm"
                         onClick={(e) => e.stopPropagation()}
                     />
                 </div>,

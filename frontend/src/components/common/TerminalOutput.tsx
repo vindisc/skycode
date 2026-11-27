@@ -88,8 +88,8 @@ export function TerminalOutput({
   return (
     <pre
       ref={containerRef}
-      className={`terminal-output bg-sunken2 text-t1 p-3 rounded-md
-        font-mono text-[13px] leading-5 overflow-auto min-h-[100px] max-h-[500px]
+      className={`terminal-output bg-sunken2 text-t1 p-3 rounded-xs
+        font-mono text-13 leading-5 overflow-auto min-h-[100px] max-h-[500px]
         selection:bg-accent2-soft ${className}`}
       dangerouslySetInnerHTML={{ __html: html }}
     />

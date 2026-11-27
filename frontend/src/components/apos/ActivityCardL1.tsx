@@ -71,7 +71,7 @@ export function ActivityCardL1({
         <p className="text-sm text-[var(--v2-text-1)] truncate leading-tight">
           {activity.summary}
         </p>
-        <p className="text-[13px] text-[var(--v2-text-2)] truncate leading-tight">
+        <p className="text-13 text-[var(--v2-text-2)] truncate leading-tight">
           {activity.fileCount ?? activity.changedFiles.length} 文件
           {activity.duration ? ` · ${(activity.duration / 1000).toFixed(1)}s` : ''}
         </p>
@@ -84,7 +84,7 @@ export function ActivityCardL1({
           size="sm"
           reason={activity.insight?.summary}
         />
-        <span className="text-[13px] text-[var(--v2-text-2)] whitespace-nowrap shrink-0">
+        <span className="text-13 text-[var(--v2-text-2)] whitespace-nowrap shrink-0">
           {formatRelativeTime(activity.timestamp)}
         </span>
       </div>

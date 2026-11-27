@@ -169,7 +169,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                         Array.from(grouped.entries()).map(([group, cmds]) => (
                             <div key={group}>
                                 {grouped.size > 1 && (
-                                    <div className="px-3 py-1 text-[13px] text-t3 font-semibold uppercase tracking-[0.08em]">
+                                    <div className="px-3 py-1 text-13 text-t3 font-semibold uppercase tracking-[0.08em]">
                                         {group}
                                     </div>
                                 )}
@@ -187,8 +187,8 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                                             role="option"
                                             aria-selected={idx === selectedIndex}
                                         >
-                                            <span className="font-mono text-[13px]">/{cmd.name}</span>
-                                            <span className="text-[13px] text-t3 truncate ml-3 max-w-[60%]">
+                                            <span className="font-mono text-13">/{cmd.name}</span>
+                                            <span className="text-13 text-t3 truncate ml-3 max-w-[60%]">
                                                 {cmd.description}
                                             </span>
                                         </button>
@@ -200,7 +200,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                 </div>
 
                 {/* Footer hint */}
-                <div data-testid="command-palette-footer" className="px-3 py-1.5 border-t border-hairline text-[13px] text-t3 flex items-center gap-3">
+                <div data-testid="command-palette-footer" className="px-3 py-1.5 border-t border-hairline text-13 text-t3 flex items-center gap-3">
                     <span className="flex items-center gap-1"><Kbd>↑↓</Kbd> 选择</span>
                     <span className="flex items-center gap-1"><Kbd>↵</Kbd> 确认</span>
                     <span className="flex items-center gap-1"><Kbd>Esc</Kbd> 关闭</span>

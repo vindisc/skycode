@@ -25,13 +25,13 @@ import { SessionStatusIcon } from '@/components/status/SessionStatusIcon';
 /** 两个 chip 共用的胶囊壳（v2 令牌：hairline + surface2 + hover2 + accent2-ring） */
 const CHIP_SHELL =
     'relative inline-flex h-7 items-center gap-1.5 rounded-full border border-hairline ' +
-    'bg-surfacev2 px-2.5 text-[13px] text-t2 shadow-raised transition-interactive duration-fast ' +
+    'bg-surfacev2 px-2.5 text-13 text-t2 shadow-raised transition-interactive duration-fast ' +
     'hover:bg-hover2 hover:text-t1 hover:shadow-raised-hover active:shadow-pressed focus-within:ring-[3px] focus-within:ring-accent2-ring';
 
 /** chip 内嵌的透明原生 select（承担全部交互与键盘可达性） */
 const OVERLAY_SELECT =
     'absolute inset-0 w-full cursor-pointer opacity-0 disabled:cursor-not-allowed [appearance:base-select] ' +
-    '[&::picker(select)]:[appearance:base-select] [&::picker(select)]:rounded-xl [&::picker(select)]:border-hairline ' +
+    '[&::picker(select)]:[appearance:base-select] [&::picker(select)]:rounded-md [&::picker(select)]:border-hairline ' +
     '[&::picker(select)]:bg-surface2 [&::picker(select)]:p-1 [&::picker(select)]:text-t1 [&::picker(select)]:shadow-e4';
 
 /** 权限模式 chip：Shield + 当前模式名 + ChevronDown */
@@ -74,14 +74,14 @@ export const ModelChip: React.FC<{ mobile?: boolean; mobileRow?: boolean }> = ({
                 type="button"
                 onClick={() => void fetchModels()}
                 className={mobile
-                    ? 'flex min-h-11 w-full items-center gap-3 rounded-[14px] border border-hairline bg-surface2 px-3 py-3 text-left text-sm text-t2 hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink'
+                    ? 'flex min-h-11 w-full items-center gap-3 rounded-md border border-hairline bg-surface2 px-3 py-3 text-left text-sm text-t2 hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink'
                     : CHIP_SHELL}
                 aria-label="重新加载模型列表"
                 title="模型列表加载失败，点击重试"
             >
                 {mobile ? <Cpu size={20} className="shrink-0" aria-hidden="true" />
                     : <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: 'var(--v2-err)' }} aria-hidden="true" />}
-                {mobile ? <span><span className="block text-[13px]">模型列表加载失败</span><span className="mt-0.5 block font-medium text-t1">重新加载</span></span>
+                {mobile ? <span><span className="block text-13">模型列表加载失败</span><span className="mt-0.5 block font-medium text-t1">重新加载</span></span>
                     : '重新加载'}
             </button>
         );
@@ -110,7 +110,7 @@ export const ModelChip: React.FC<{ mobile?: boolean; mobileRow?: boolean }> = ({
                     </option>
                 )}
                 {availableModels.map(m => (
-                    <option key={m.id} value={m.id} className="rounded-lg px-3 py-1.5 checked:bg-accent2-soft focus:bg-hover2">{m.displayName}</option>
+                    <option key={m.id} value={m.id} className="rounded-sm px-3 py-1.5 checked:bg-accent2-soft focus:bg-hover2">{m.displayName}</option>
                 ))}
             </select>
         </span>
@@ -122,11 +122,11 @@ export function MobileChoice({ label, value, options, onChange, title, disabled 
     useEffect(() => { if (disabled) setOpen(false); }, [disabled]);
     const currentLabel = options.find(option => option.value === value)?.label ?? value;
     const content = row
-        ? <span className="flex w-full items-center gap-3 rounded-[14px] border border-hairline bg-surface2 px-3 py-3 text-left"><Cpu size={20} className="shrink-0 text-t2" /><span className="min-w-0 flex-1"><span className="block text-[13px] text-t2">模型</span><span className="mt-0.5 block truncate text-sm font-medium text-t1">{options.find(option => option.value === value)?.label ?? (disabled ? '模型暂不可用' : '选择模型')}</span></span><ChevronDown size={16} className="shrink-0" /></span>
+        ? <span className="flex w-full items-center gap-3 rounded-md border border-hairline bg-surface2 px-3 py-3 text-left"><Cpu size={20} className="shrink-0 text-t2" /><span className="min-w-0 flex-1"><span className="block text-13 text-t2">模型</span><span className="mt-0.5 block truncate text-sm font-medium text-t1">{options.find(option => option.value === value)?.label ?? (disabled ? '模型暂不可用' : '选择模型')}</span></span><ChevronDown size={16} className="shrink-0" /></span>
         : showCurrent ? <MobileSelectionLabel label={label} value={currentLabel} maxTextWidth={maxTextWidth} /> : <>{label}⌄</>;
-    return <><button type="button" aria-label={showCurrent ? `${label}：${currentLabel}，点击切换` : undefined} className="min-h-11 min-w-0 shrink-0 rounded-[10px] px-1.5 text-sm text-t2 transition-interactive duration-fast hover:bg-hover2 active:bg-hover2 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink" aria-haspopup="dialog" aria-expanded={open} disabled={disabled} title={title} onClick={() => setOpen(true)}>{leading ? <span className="inline-flex items-center gap-1.5">{leading}{content}</span> : content}</button>
+    return <><button type="button" aria-label={showCurrent ? `${label}：${currentLabel}，点击切换` : undefined} className="min-h-11 min-w-0 shrink-0 rounded-sm px-1.5 text-sm text-t2 transition-interactive duration-fast hover:bg-hover2 active:bg-hover2 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink" aria-haspopup="dialog" aria-expanded={open} disabled={disabled} title={title} onClick={() => setOpen(true)}>{leading ? <span className="inline-flex items-center gap-1.5">{leading}{content}</span> : content}</button>
         <SheetShell isOpen={open && !disabled} onClose={() => setOpen(false)} ariaLabel={`选择${label}`} header={<div className="flex items-center justify-between px-4"><h2 className="text-xl font-semibold">选择{label}</h2><button className="min-h-11 px-3" onClick={() => setOpen(false)}>完成</button></div>}>
-            <div className="p-4 space-y-1">{options.map(option => <button key={option.value} disabled={disabled} className="flex min-h-11 w-full items-center justify-between rounded-[10px] px-3 py-2 text-left text-sm text-t1 hover:bg-hover2" aria-pressed={option.value === value} onClick={() => { onChange(option.value); setOpen(false); }}><span><span className="block">{option.label}</span>{option.description && <span className="block mt-1 text-[13px] text-t2">{option.description}</span>}</span>{option.value === value && <span aria-hidden="true">✓</span>}</button>)}</div>
+            <div className="p-4 space-y-1">{options.map(option => <button key={option.value} disabled={disabled} className="flex min-h-11 w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm text-t1 hover:bg-hover2" aria-pressed={option.value === value} onClick={() => { onChange(option.value); setOpen(false); }}><span><span className="block">{option.label}</span>{option.description && <span className="block mt-1 text-13 text-t2">{option.description}</span>}</span>{option.value === value && <span aria-hidden="true">✓</span>}</button>)}</div>
         </SheetShell></>;
 }
 

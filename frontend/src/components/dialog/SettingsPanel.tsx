@@ -109,7 +109,7 @@ function AppearanceSettings() {
                         aria-pressed={theme.mode === mode}
                         onClick={() => setTheme({ mode })}
                         className={cn(
-                            'flex flex-col items-center gap-2 p-4 rounded-[10px] border text-sm text-t1 transition-interactive duration-fast',
+                            'flex flex-col items-center gap-2 p-4 rounded-sm border text-sm text-t1 transition-interactive duration-fast',
                             'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring',
                             theme.mode === mode
                                 ? 'border-accent2 bg-accent2-soft'
@@ -131,14 +131,14 @@ function AppearanceSettings() {
                 <div className="text-sm font-medium text-t2 mb-3">强调色</div>
                 {/* ink 双模式 / jelly accent 写死主题色（applyAccent 提前返回）：禁用预设并说明 */}
                 {inkHavocMode && (
-                    <div className="mb-3 text-[13px] text-t3">本主题使用专属重彩配色</div>
+                    <div className="mb-3 text-13 text-t3">本主题使用专属重彩配色</div>
                 )}
                 {jellyMode && (
-                    <div className="mb-3 text-[13px] text-t3">本主题使用专属法式配色</div>
+                    <div className="mb-3 text-13 text-t3">本主题使用专属法式配色</div>
                 )}
-                {theme.mode === 'galaxy' && <div className="mb-3 text-[13px] text-t3">本主题使用专属星蓝、紫罗兰与玫红配色</div>}
+                {theme.mode === 'galaxy' && <div className="mb-3 text-13 text-t3">本主题使用专属星蓝、紫罗兰与玫红配色</div>}
                 {spiderMode && (
-                    <div className="mb-3 text-[13px] text-t3">本主题使用专属青色、洋红与紫色配色</div>
+                    <div className="mb-3 text-13 text-t3">本主题使用专属青色、洋红与紫色配色</div>
                 )}
                 <div className="flex gap-2 flex-wrap" role="group" aria-label="强调色">
                     {ACCENT_PRESETS.map(({ hex, label }) => {

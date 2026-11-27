@@ -65,10 +65,10 @@ export const SkillDetailModal: React.FC<{
           <div className="flex items-center gap-2 min-w-0 flex-wrap">
             <Zap size={18} className="text-warn shrink-0" aria-hidden="true" />
             <h2 className="text-t1 text-base font-semibold break-all">{detail?.name ?? skillName}</h2>
-            {detail && <span className="text-[13px] px-1.5 py-0.5 rounded bg-sunken2 text-t2">{detail.source}</span>}
+            {detail && <span className="text-13 px-1.5 py-0.5 rounded bg-sunken2 text-t2">{detail.source}</span>}
           </div>
           <button type="button" onClick={onClose} aria-label="关闭技能详情"
-            className="dialog-control min-h-11 min-w-11 shrink-0 flex items-center justify-center hover:bg-hover2 rounded-[10px]">
+            className="dialog-control min-h-11 min-w-11 shrink-0 flex items-center justify-center hover:bg-hover2 rounded-sm">
             <X size={18} aria-hidden="true" />
           </button>
         </div>
@@ -78,21 +78,21 @@ export const SkillDetailModal: React.FC<{
           {enabled && !detail && !error && <p role="status" className="text-sm text-t2">正在加载技能详情…</p>}
           {detail && <>
             <p className="text-sm text-t2 break-words">{detail.description}</p>
-            <div className="text-[13px] text-t2 break-all">文件：{detail.filePath || '内置技能'}</div>
-            <pre className="text-[13px] font-mono bg-sunken2 p-3 rounded-[10px] whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-t2">
+            <div className="text-13 text-t2 break-all">文件：{detail.filePath || '内置技能'}</div>
+            <pre className="text-13 font-mono bg-sunken2 p-3 rounded-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-t2">
               {detail.content}
             </pre>
           </>}
         </div>
         <div className="px-4 pb-3">
-          <label htmlFor="skill-user-input" className="text-[13px] text-t2 mb-1 block">补充说明（可选）</label>
+          <label htmlFor="skill-user-input" className="text-13 text-t2 mb-1 block">补充说明（可选）</label>
           <textarea id="skill-user-input" value={userInput} onChange={event => setUserInput(event.target.value)}
             disabled={!enabled || submitting} placeholder="输入你希望 AI 处理的内容或补充说明…"
-            className="w-full h-20 text-sm bg-sunken2 border border-hairline rounded-[10px] p-2 text-t1 placeholder:text-t3 resize-none focus:outline-none focus:ring-1 focus:ring-accent2-ring disabled:opacity-50" />
+            className="w-full h-20 text-sm bg-sunken2 border border-hairline rounded-sm p-2 text-t1 placeholder:text-t3 resize-none focus:outline-none focus:ring-1 focus:ring-accent2-ring disabled:opacity-50" />
         </div>
         <div className="p-3 border-t border-hairline flex justify-end pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <button type="button" onClick={() => void execute()} disabled={!enabled || !detail || !!error || submitting}
-            className="dialog-control flex items-center gap-1 px-3 min-h-11 text-[13px] font-medium rounded-[10px] bg-accent2-strong hover:bg-accent2 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            className="dialog-control flex items-center gap-1 px-3 min-h-11 text-13 font-medium rounded-sm bg-accent2-strong hover:bg-accent2 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
             <Play size={14} aria-hidden="true" />{submitting ? '检查技能状态…' : '执行技能'}
           </button>
         </div>

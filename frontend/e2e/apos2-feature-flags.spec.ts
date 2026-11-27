@@ -65,7 +65,7 @@ const FLAG_DEFAULTS: Record<string, boolean> = {
  * 定位 FeatureFlagPanel 容器（通过 Header "Feature Flags" 文本所在的外层 div）
  */
 function getFeatureFlagPanel(page: import('@playwright/test').Page) {
-  return page.locator('span:text("Feature Flags")').locator('xpath=ancestor::div[contains(@class,"rounded-lg")]').first();
+  return page.locator('span:text("Feature Flags")').locator('xpath=ancestor::div[contains(@class,"rounded-sm")]').first();
 }
 
 /**

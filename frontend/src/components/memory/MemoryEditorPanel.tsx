@@ -34,13 +34,13 @@ export const MemoryEditorPanel: React.FC<MemoryEditorPanelProps> = ({
     }, [content, onChange]);
 
     return (
-        <div className="flex flex-col h-full border border-[var(--v2-border-hairline)] rounded-[14px] overflow-hidden">
+        <div className="flex flex-col h-full border border-[var(--v2-border-hairline)] rounded-md overflow-hidden">
             {/* Toolbar */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)]">
                 <div className="flex items-center gap-2">
                     <FileText size={14} className="text-[var(--v2-text-2)]" />
                     <span className="text-sm font-medium text-[var(--v2-text-1)]">{fileName}</span>
-                    {dirty && <span className="text-[13px] text-warn">● 未保存</span>}
+                    {dirty && <span className="text-13 text-warn">● 未保存</span>}
                 </div>
                 <div className="flex items-center gap-1">
                     <div className="relative">
@@ -49,11 +49,11 @@ export const MemoryEditorPanel: React.FC<MemoryEditorPanelProps> = ({
                             <Plus size={14} />
                         </button>
                         {showTemplateMenu && (
-                            <div className="absolute right-0 top-full mt-1 bg-[var(--v2-bg-surface)] border border-[var(--v2-border-hairline)] rounded-[10px] shadow-e3 z-10 min-w-[140px]">
+                            <div className="absolute right-0 top-full mt-1 bg-[var(--v2-bg-surface)] border border-[var(--v2-border-hairline)] rounded-sm shadow-e3 z-10 min-w-[140px]">
                                 {Object.entries(MEMORY_TEMPLATES).map(([name, tpl]) => (
                                     <button key={name}
                                         onClick={() => { insertTemplate(tpl); setShowTemplateMenu(false); }}
-                                        className="panel-control block w-full text-left px-3 py-2 min-h-10 text-[13px] hover:bg-[var(--bg-tertiary)]">
+                                        className="panel-control block w-full text-left px-3 py-2 min-h-10 text-13 hover:bg-[var(--bg-tertiary)]">
                                         {name}
                                     </button>
                                 ))}

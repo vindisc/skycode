@@ -49,7 +49,7 @@ test.describe('F. Feature Flag 面板', () => {
     await expect(page.locator('text=Feature Flags')).toBeVisible({ timeout: 10000 });
 
     // 找到 toggle 按钮 — 通过 FeatureFlagPanel 内的 toggle switch 类名定位
-    const flagPanel = page.locator('.rounded-lg.border.border-gray-700\\/50.bg-\\[\\#1e1e30\\]');
+    const flagPanel = page.locator('.rounded-sm.border.border-gray-700\\/50.bg-\\[\\#1e1e30\\]');
     const toggles = flagPanel.locator('button.relative.w-8');
     const toggleCount = await toggles.count();
     expect(toggleCount).toBeGreaterThan(0);
