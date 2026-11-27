@@ -9,6 +9,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { ZoomIn, X, Copy, Check, Trash2 } from 'lucide-react';
 import { copyImageToClipboard } from '@/utils/messageContent';
+import { cn } from '@/components/ui/cn';
 
 interface ImageBlockProps {
     /** base64 编码数据 (不含 data: 前缀) */
@@ -22,6 +23,8 @@ interface ImageBlockProps {
     onRemove?: () => void;
     /** 移除请求进行中 — 按钮转圈禁用 */
     removing?: boolean;
+    /** 缩略图形态：固定 96px 高的小图（宽按比例，过宽裁切），点击放大看原图。用户消息里的图用它 */
+    thumbnail?: boolean;
 }
 
 const ImageBlock: React.FC<ImageBlockProps> = ({
@@ -31,6 +34,7 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
     alt = 'Image',
     onRemove,
     removing = false,
+    thumbnail = false,
 }) => {
     const [zoomed, setZoomed] = useState(false);
     const [loadError, setLoadError] = useState(false);
@@ -98,7 +102,11 @@ const ImageBlock: React.FC<ImageBlockProps> = ({
                 <img
                     src={imageSrc}
                     alt={alt}
-                    className="max-w-full max-h-80 rounded-sm border border-hairline cursor-pointer"
+                    className={cn(
+                        'rounded-sm border border-hairline cursor-pointer',
+                        // 缩略图：固定 96px 高，宽按比例、上限 208px（社交类应用的「小图条」做法）；点击放大看原图
+                        thumbnail ? 'h-24 w-auto max-w-52 object-cover' : 'max-w-full max-h-80',
+                    )}
                     onClick={toggleZoom}
                     onError={() => setLoadError(true)}
                     loading="lazy"

@@ -66,6 +66,9 @@
 :root .chat-composer-surface textarea {
     line-height: 1.65;
 }
+/* 超过 200px 上限后仍可滚动，但不显示原生滚动条（滚轮 / 触摸 / 键盘照常） */
+:root .chat-composer-surface textarea { scrollbar-width: none; }
+:root .chat-composer-surface textarea::-webkit-scrollbar { display: none; }
 
 :root .chat-composer-surface textarea::placeholder {
     color: var(--v2-text-3);
