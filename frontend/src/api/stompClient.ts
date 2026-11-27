@@ -156,6 +156,59 @@ function connectionWaitAborted(): Error {
     return error;
 }
 
+// ───── 连接建立监听（首次连接与每次重连都触发）─────
+// stompjs 每次重连都会新建空订阅表（_subscriptions = {}），除 onConnect 里
+// 手动重建的 /user/queue/messages 外，所有 topic 订阅都会随断线失效。
+// 需要在重连后恢复自身订阅的模块（useStompSubscription 等）在这里注册。
+
+type StompConnectListener = () => void;
+const connectListeners = new Set<StompConnectListener>();
+
+type StompDisconnectListener = () => void;
+const disconnectListeners = new Set<StompDisconnectListener>();
+
+/**
+ * 注册连接建立回调（首次连接与每次重连各触发一次）。
+ * @returns 取消注册函数
+ */
+export function onStompConnect(listener: StompConnectListener): () => void {
+    connectListeners.add(listener);
+    return () => {
+        connectListeners.delete(listener);
+    };
+}
+
+/**
+ * 注册连接断开回调（真实 WebSocket 关闭时触发，重连中不重复触发）。
+ * @returns 取消注册函数
+ */
+export function onStompDisconnect(listener: StompDisconnectListener): () => void {
+    disconnectListeners.add(listener);
+    return () => {
+        disconnectListeners.delete(listener);
+    };
+}
+
+function notifyStompConnected(): void {
+    for (const listener of [...connectListeners]) {
+        try {
+            listener();
+        } catch (err) {
+            console.warn('[WS] connect listener failed:', err);
+        }
+    }
+}
+
+function notifyStompDisconnected(): void {
+    for (const listener of [...disconnectListeners]) {
+        try {
+            listener();
+        } catch (err) {
+            console.warn('[WS] disconnect listener failed:', err);
+        }
+    }
+}
+
 /**
  * Wait for the current or next STOMP connection without relying on a short
  * polling timeout. The caller owns cancellation so a newer user intent can
@@ -251,6 +304,9 @@ export function createStompClient(_sessionId: string, authToken: string): StompC
             // so an immediate bind cannot lose its session_restored response.
             resolveConnectionWaiters();
 
+            // 通知重连监听者在此重建各自的 topic 订阅
+            notifyStompConnected();
+
             // ★ 重连后立即重发 bind-session — 恢复后端 principal↔sessionId 映射
             // 确保正在执行的工具（如 Bash 权限请求）的 push() 能找到 principal
             // 注意: 不调用 markSessionBound — 保留 App.tsx handleSubmit 中
@@ -306,6 +362,9 @@ export function createStompClient(_sessionId: string, authToken: string): StompC
         // WebSocket 关闭回调
         onWebSocketClose: () => {
             stopApplicationPing();
+            // 真实断开：通知断线监听者（useWebSocket 由此翻转 isConnected，
+            // AppLayout 的断线横幅才显示得出来）
+            notifyStompDisconnected();
             if (reconnectStartTime === 0) {
                 reconnectStartTime = Date.now();
             }

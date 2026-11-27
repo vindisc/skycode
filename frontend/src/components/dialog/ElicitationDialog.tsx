@@ -33,8 +33,8 @@ interface ElicitationDialogProps {
         min?: number;
         max?: number;
     };
-    onSubmit: (requestId: string, response: string | string[]) => void;
-    onCancel: () => void;
+    onSubmit: (requestId: string, response: string | string[]) => void | Promise<void>;
+    onCancel: () => void | Promise<void>;
 }
 
 export const ElicitationDialog: React.FC<ElicitationDialogProps> = ({
@@ -66,6 +66,20 @@ export const ElicitationDialog: React.FC<ElicitationDialogProps> = ({
     const expiredRef = useRef(expired);
     useEffect(() => { expiredRef.current = expired; }, [expired]);
 
+    // 提交/取消可能走 REST 并失败（409、网络错误）。此前失败被上层吞掉，
+    // 用户点了没反应；现在回显到对话框的错误区，可重试。
+    // 注意：必须声明在下方焦点/倒计时 useEffect 之前——依赖数组在 render 时求值。
+    const runWithFeedback = useCallback((action: () => void | Promise<void>) => {
+        setError(null);
+        void Promise.resolve()
+            .then(action)
+            .catch((err: unknown) => {
+                setError(err instanceof Error && err.message
+                    ? `提交失败：${err.message}（请求未过期时可重试）`
+                    : '提交失败，请重试');
+            });
+    }, []);
+
     // Focus trap, escape handler, and server-deadline countdown
     useEffect(() => {
         dialogRef.current?.focus();
@@ -74,7 +88,7 @@ export const ElicitationDialog: React.FC<ElicitationDialogProps> = ({
         const handler = (e: KeyboardEvent) => {
             if (!isTopModal(dialogRef.current)) return;
             if (e.key === 'Escape' && !expiredRef.current) {
-                onCancel();
+                runWithFeedback(() => onCancel());
             }
         };
         window.addEventListener('keydown', handler);
@@ -90,7 +104,7 @@ export const ElicitationDialog: React.FC<ElicitationDialogProps> = ({
             window.removeEventListener('keydown', handler);
             clearInterval(timerRef.current);
         };
-    }, [onCancel, requestId, secondsUntilDeadline]);
+    }, [onCancel, requestId, secondsUntilDeadline, runWithFeedback]);
 
     const handleOptionToggle = useCallback((value: string) => {
         setSelectedOptions(prev => {
@@ -134,19 +148,20 @@ export const ElicitationDialog: React.FC<ElicitationDialogProps> = ({
 
         // Build response based on inputType
         if (inputType === 'confirm') {
-            onSubmit(requestId, selectedOptions[0] || 'yes');
+            runWithFeedback(() => onSubmit(requestId, selectedOptions[0] || 'yes'));
         } else if (inputType === 'multiselect') {
-            onSubmit(requestId, selectedOptions);
+            runWithFeedback(() => onSubmit(requestId, selectedOptions));
         } else if (options && options.length > 0) {
             if (selectedOptions.length > 0) {
-                onSubmit(requestId, selectedOptions.length === 1 ? selectedOptions[0] : selectedOptions);
+                runWithFeedback(() => onSubmit(requestId,
+                    selectedOptions.length === 1 ? selectedOptions[0] : selectedOptions));
             }
         } else if (allowFreeText && freeText.trim()) {
-            onSubmit(requestId, freeText.trim());
+            runWithFeedback(() => onSubmit(requestId, freeText.trim()));
         } else if (inputType === 'text' || inputType === 'number') {
-            onSubmit(requestId, freeText.trim());
+            runWithFeedback(() => onSubmit(requestId, freeText.trim()));
         }
-    }, [requestId, options, selectedOptions, freeText, allowFreeText, onSubmit, inputType, validation, expired]);
+    }, [requestId, options, selectedOptions, freeText, allowFreeText, onSubmit, inputType, validation, expired, runWithFeedback]);
 
     const canSubmit = (inputType === 'select' || inputType === 'multiselect')
         ? selectedOptions.length > 0
@@ -172,7 +187,7 @@ export const ElicitationDialog: React.FC<ElicitationDialogProps> = ({
             >
                 {/* Header */}
                 <div className="px-4 md:px-6 py-4 border-b border-[var(--v2-border-hairline)] flex items-center gap-3">
-                    <HelpCircle className="w-5 h-5 text-accent2-ink" />
+                    <HelpCircle className="w-5 h-5 text-accent2-ink" aria-hidden="true" />
                     <div className="flex-1">
                         <h3 className="text-[var(--v2-text-1)] text-base font-semibold">
                             AI 需要更多信息
@@ -186,11 +201,12 @@ export const ElicitationDialog: React.FC<ElicitationDialogProps> = ({
                         </p>
                     </div>
                     <button
-                        onClick={onCancel}
+                        onClick={() => runWithFeedback(() => onCancel())}
                         disabled={!canAct}
+                        aria-label="关闭"
                         className="dialog-control p-1 rounded hover:bg-[var(--v2-bg-hover)] text-[var(--v2-text-2)]"
                     >
-                        <X className="w-4 h-4" />
+                        <X className="w-4 h-4" aria-hidden="true" />
                     </button>
                 </div>
 
@@ -233,13 +249,13 @@ export const ElicitationDialog: React.FC<ElicitationDialogProps> = ({
                     {inputType === 'confirm' && (
                         <div className="flex gap-3">
                             <button
-                                onClick={() => { if (canAct) { setSelectedOptions(['yes']); onSubmit(requestId, 'yes'); } }}
+                                onClick={() => { if (canAct) { setSelectedOptions(['yes']); runWithFeedback(() => onSubmit(requestId, 'yes')); } }}
                                 disabled={!canAct}
                                 className="dialog-control flex-1 px-4 py-3 rounded-sm border border-ok bg-oksoft
                                     text-[var(--v2-text-1)] hover:bg-[var(--v2-ok-soft)] transition-colors"
                             >是</button>
                             <button
-                                onClick={() => { if (canAct) { setSelectedOptions(['no']); onSubmit(requestId, 'no'); } }}
+                                onClick={() => { if (canAct) { setSelectedOptions(['no']); runWithFeedback(() => onSubmit(requestId, 'no')); } }}
                                 disabled={!canAct}
                                 className="dialog-control flex-1 px-4 py-3 rounded-sm border border-err bg-errsoft
                                     text-[var(--v2-text-1)] hover:bg-[var(--v2-err-soft)] transition-colors"
@@ -285,7 +301,7 @@ export const ElicitationDialog: React.FC<ElicitationDialogProps> = ({
                 {inputType !== 'confirm' && (
                 <div className="px-4 md:px-6 py-4 border-t border-[var(--v2-border-hairline)] flex justify-end gap-2">
                     <button
-                        onClick={onCancel}
+                        onClick={() => runWithFeedback(() => onCancel())}
                         disabled={!canAct}
                         className="dialog-control px-4 py-2 rounded-sm text-sm border border-[var(--v2-border-hairline)]
                                     text-[var(--v2-text-2)] hover:bg-[var(--v2-bg-hover)] transition-colors"

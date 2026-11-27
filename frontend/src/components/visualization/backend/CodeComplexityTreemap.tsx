@@ -331,7 +331,7 @@ const RiskFilterDropdown: React.FC<{
                   type="checkbox"
                   checked={selected.includes(level)}
                   onChange={() => toggle(level)}
-                  className="rounded border-border-hairline text-accent2-ink focus:ring-accent2"
+                  className="rounded border-hairline text-accent2-ink focus:ring-accent2"
                 />
                 <span
                   className="w-2 h-2 rounded-full"

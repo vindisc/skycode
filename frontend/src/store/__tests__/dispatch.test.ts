@@ -22,7 +22,6 @@ beforeEach(() => {
         model: null,
         status: 'idle',
         turnCount: 0,
-        isAborted: false,
     });
     usePermissionStore.setState({
         pendingPermissions: [],

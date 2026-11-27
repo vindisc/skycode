@@ -6,8 +6,10 @@
  * - 升级项 C（§4.5 自动可视化）：visualization 走 /queue/messages 主通路，不依赖本 Hook
  *
  * 设计：
- * - 薄封装 stompClient.getStompClient()（v1.2 BLK-R2-1 校准：不修改 useWebSocket 返回字段）
- * - 连接未就绪时小间隔轮询，就绪后订阅
+ * - 薄封装 stompClient.getStompClient()
+ * - 挂载时连接未就绪则小间隔轮询；stompjs 每次重连都会清空订阅表，
+ *   所以通过 stompClient.onStompConnect 在「首次连接 + 每次重连」时重建订阅
+ *   （2026-11-27 审计修复：此前断线重连后订阅永久失效，事件流静默冻结）
  * - 卸载时自动取消订阅；topic 变化时自动重订阅
  * - handler 走 ref 转发，避免订阅因 handler 闭包变化而抖动
  *
@@ -16,22 +18,17 @@
  *       const event = JSON.parse(msg.body);
  *       // ...
  *   });
- *
- * 局限：
- * - STOMP 连接在断线重连后订阅会失效；当前依赖组件 unmount/remount 重新订阅。
- *   如需支持热重连自动恢复，后续可在 stompClient.ts 暴露 onConnect 监听器 API 扩展。
  */
 
 import { useEffect, useRef } from 'react';
 import type { IMessage, StompSubscription } from '@stomp/stompjs';
-import { getStompClient } from '@/api/stompClient';
+import { getStompClient, onStompConnect } from '@/api/stompClient';
 
 /** STOMP 订阅 handler 类型 */
 export type StompMessageHandler = (message: IMessage) => void;
 
-/** 轮询等待连接就绪：100ms × 50 = 最多等 5 秒 */
+/** 轮询等待连接就绪：100ms 间隔 */
 const CONNECT_WAIT_INTERVAL_MS = 100;
-const CONNECT_WAIT_MAX_ATTEMPTS = 50;
 
 /**
  * 订阅指定 STOMP topic。
@@ -53,39 +50,49 @@ export function useStompSubscription(
 
         let cancelled = false;
         let subscription: StompSubscription | null = null;
-        let attempts = 0;
         let timer: ReturnType<typeof setTimeout> | null = null;
 
-        const tryConnect = (): void => {
-            if (cancelled) return;
-            const client = getStompClient();
-            if (client && client.connected) {
-                try {
-                    subscription = client.subscribe(topic, (msg) => {
-                        // 经 ref 调用，保证 handler 始终为最新闭包
-                        handlerRef.current(msg);
-                    });
-                } catch (err) {
-                    console.warn(
-                        `[useStompSubscription] subscribe failed for topic="${topic}":`,
-                        err,
-                    );
-                }
-                return;
-            }
-            if (attempts++ >= CONNECT_WAIT_MAX_ATTEMPTS) {
+        const subscribe = (client: NonNullable<ReturnType<typeof getStompClient>>): void => {
+            try {
+                subscription = client.subscribe(topic, (msg) => {
+                    // 经 ref 调用，保证 handler 始终为最新闭包
+                    handlerRef.current(msg);
+                });
+            } catch (err) {
                 console.warn(
-                    `[useStompSubscription] gave up waiting for STOMP connection; topic="${topic}" never subscribed`,
+                    `[useStompSubscription] subscribe failed for topic="${topic}":`,
+                    err,
                 );
-                return;
             }
-            timer = setTimeout(tryConnect, CONNECT_WAIT_INTERVAL_MS);
         };
 
-        tryConnect();
+        const ensureSubscribed = (): void => {
+            if (cancelled || subscription) return;
+            const client = getStompClient();
+            if (client && client.connected) {
+                subscribe(client);
+                return;
+            }
+            timer = setTimeout(ensureSubscribed, CONNECT_WAIT_INTERVAL_MS);
+        };
+
+        // 连接每次建立（首次 + 每次重连）都会触发。旧订阅随旧连接一起消亡
+        // （broker 侧订阅表已随断线清空），直接丢弃引用重建即可；
+        // 不要对旧对象调 unsubscribe——它可能向新连接发多余的 UNSUBSCRIBE 帧。
+        const unsubscribeListener = onStompConnect(() => {
+            if (timer) {
+                clearTimeout(timer);
+                timer = null;
+            }
+            subscription = null;
+            ensureSubscribed();
+        });
+
+        ensureSubscribed();
 
         return () => {
             cancelled = true;
+            unsubscribeListener();
             if (timer) {
                 clearTimeout(timer);
                 timer = null;

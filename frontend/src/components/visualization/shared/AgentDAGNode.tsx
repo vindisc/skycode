@@ -20,7 +20,7 @@ export interface AgentDAGNodeData {
 }
 
 const statusStyles: Record<string, string> = {
-  pending: 'bg-surfacev2 border-border-hairline',
+  pending: 'bg-surfacev2 border-hairline',
   running: 'bg-surfacev2 border-accent2',
   completed: 'bg-surfacev2 border-ok',
   failed: 'bg-surfacev2 border-err',

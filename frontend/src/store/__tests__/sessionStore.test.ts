@@ -11,7 +11,6 @@ describe('SessionStore', () => {
             model: null,
             status: 'idle',
             turnCount: 0,
-            isAborted: false,
         });
     });
 
@@ -56,12 +55,11 @@ describe('SessionStore', () => {
         expect(useSessionStore.getState().status).toBe('streaming');
     });
 
-    it('abort sets isAborted and status to idle', () => {
+    it('abort sets status to idle', () => {
         useSessionStore.getState().setStatus('streaming');
         useSessionStore.getState().abort();
-        
+
         const state = useSessionStore.getState();
-        expect(state.isAborted).toBe(true);
         expect(state.status).toBe('idle');
     });
 
@@ -122,7 +120,6 @@ describe('SessionStore', () => {
             model: 'model-existing',
             status: 'waiting_permission',
             turnCount: 7,
-            isAborted: true,
         });
         vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
             ok: false,
@@ -138,7 +135,6 @@ describe('SessionStore', () => {
             model: 'model-existing',
             status: 'waiting_permission',
             turnCount: 7,
-            isAborted: true,
         });
         expect(window.sessionStorage.getItem(
             'skycode.activeSessionId')).toBe('session-existing');

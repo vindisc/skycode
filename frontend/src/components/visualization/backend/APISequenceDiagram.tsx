@@ -82,7 +82,7 @@ const ToolFilterDropdown: React.FC<{
                                     type="checkbox"
                                     checked={selected.includes(name)}
                                     onChange={() => toggle(name)}
-                                    className="rounded border-border-hairline text-accent2-ink focus:ring-accent2"
+                                    className="rounded border-hairline text-accent2-ink focus:ring-accent2"
                                 />
                                 {name}
                             </label>

@@ -60,7 +60,7 @@ export default {
                 warnstrong: 'var(--v2-warn-strong)',
             },
             /* 圆角阶梯一律取 v2 令牌（就近归并：8/10→sm，12/14/16→md），不要再写 rounded-[Npx]。
-               实际在用：rounded(4) / xs(6) / sm(10) / md(14) / panel(22) / full */
+               实际值（来源：src/styles/globals.css --v2-r-*，约 326 行）：rounded(Tailwind 默认4) / xs(6) / sm(8) / md(10) / lg(12) / panel(13) / full */
             borderRadius: {
                 xs: 'var(--v2-r-xs)',
                 sm: 'var(--v2-r-sm)',

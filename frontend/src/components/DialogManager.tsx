@@ -61,7 +61,17 @@ export const DialogManager: React.FC = () => {
     const handlePermissionDecision = React.useCallback(async (decision: { toolUseId: string; decision: 'allow' | 'deny'; remember?: boolean; scope?: string; optionId: string; operationHash: string; deliveryGeneration: number }) => {
         const request = usePermissionStore.getState().pendingPermissions
             .find(item => item.toolUseId === decision.toolUseId);
-        if (!request?.interactionId || request.version === undefined) return;
+        // 协议字段缺失时不能静默吞掉用户的决定——弹窗会看起来「点了没反应」
+        if (!request?.interactionId || request.version === undefined) {
+            useNotificationStore.getState().addNotification({
+                key: `permission-protocol-${decision.toolUseId}`,
+                level: 'warning',
+                message: '权限请求协议不完整（缺 interactionId/version），请刷新页面后重试。',
+                priority: 'high',
+                timeout: 0,
+            });
+            throw new Error('PERMISSION_PROTOCOL_INCOMPLETE');
+        }
         try {
             await submitDecision(request.interactionId, request.version, decision.decision,
                 undefined, decision.remember, decision.scope, decision.optionId, decision.operationHash,
@@ -100,24 +110,30 @@ export const DialogManager: React.FC = () => {
 
     const handleElicitationSubmit = React.useCallback(async (_requestId: string, response: string | string[]) => {
         const current = useAppUiStore.getState().elicitationDialog;
-        if (!current?.interactionId || current.version === undefined) return;
+        if (!current?.interactionId || current.version === undefined) {
+            // 抛给 ElicitationDialog 显示，而不是静默返回（用户点了确认没反应）
+            throw new Error('请求协议不完整（缺 interactionId/version）');
+        }
         try {
             await submitDecision(current.interactionId, current.version, 'answer', response);
         } catch (error) {
             console.error('[Interaction] Elicitation decision failed:', error);
-            return;
+            // 重新抛出：对话框把失败显示在错误区，请求未过期时可重试
+            throw error;
         }
         dismissElicitationDialog(current.interactionId);
         useSessionStore.getState().setStatus('streaming');
     }, [dismissElicitationDialog, submitDecision]);
 
     const handleElicitationCancel = React.useCallback(async () => {
-        if (!elicitationDialog?.interactionId || elicitationDialog.version === undefined) return;
+        if (!elicitationDialog?.interactionId || elicitationDialog.version === undefined) {
+            throw new Error('请求协议不完整（缺 interactionId/version）');
+        }
         try {
             await submitDecision(elicitationDialog.interactionId, elicitationDialog.version, 'cancel');
         } catch (error) {
             console.error('[Interaction] Elicitation cancel failed:', error);
-            return;
+            throw error;
         }
         dismissElicitationDialog(elicitationDialog.interactionId);
         useSessionStore.getState().setStatus('idle');

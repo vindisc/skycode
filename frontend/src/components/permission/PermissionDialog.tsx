@@ -105,30 +105,65 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({ request, onDecision
         }
     }, [onDecision]);
 
+    // 前置缺失时给出可见反馈而不是静默返回——此前按钮可点但点了没反应（审计 P2-4）。
+    // operationHash 的收窄留在各 handler 里做（TS 穿不透函数调用），这里只管时限类反馈。
+    const guardFailure = useCallback((reason: string): boolean => {
+        if (decided) return true;
+        if (remainingSeconds === null) {
+            setSubmissionError('等待服务端确认投递中…');
+            return true;
+        }
+        if (remainingSeconds <= 0) {
+            setSubmissionError('请求已到期，等待服务端确认');
+            return true;
+        }
+        if (reason) {
+            setSubmissionError(reason);
+            return true;
+        }
+        return false;
+    }, [decided, remainingSeconds]);
+
     const handleAllow = useCallback(() => {
-        if (decided || remainingSeconds === null || remainingSeconds <= 0 || !request.operationHash) return;
+        const operationHash = request.operationHash;
+        if (!operationHash) {
+            guardFailure('请求协议不完整（缺 operationHash），请刷新页面后重试');
+            return;
+        }
         const requestedScope = canRemember && remember ? scope : 'once';
         const selected = request.options?.find(option => option.decision === 'allow' && option.scope === requestedScope);
-        if (!selected) return;
+        if (!selected) {
+            guardFailure('服务端未提供匹配的 allow 选项，请刷新页面后重试');
+            return;
+        }
+        if (guardFailure('')) return;
         void submit({
             toolUseId: request.toolUseId,
             decision: 'allow',
             remember: canRemember && remember,
             ...(canRemember && remember ? { scope } : {}),
             optionId: selected.optionId,
-            operationHash: request.operationHash,
+            operationHash,
             deliveryGeneration: request.deliveryGeneration ?? -1,
         });
-    }, [canRemember, decided, request, remember, scope, remainingSeconds, submit]);
+    }, [canRemember, request, remember, scope, guardFailure, submit]);
 
     const handleDeny = useCallback(() => {
-        if (decided || remainingSeconds === null || remainingSeconds <= 0 || !request.operationHash) return;
+        const operationHash = request.operationHash;
+        if (!operationHash) {
+            guardFailure('请求协议不完整（缺 operationHash），请刷新页面后重试');
+            return;
+        }
         const selected = request.options?.find(option => option.decision === 'deny');
-        if (!selected) return;
+        if (!selected) {
+            guardFailure('服务端未提供 deny 选项，请刷新页面后重试');
+            return;
+        }
+        if (guardFailure('')) return;
         void submit({ toolUseId: request.toolUseId, decision: 'deny', remember: false,
-            optionId: selected.optionId, operationHash: request.operationHash,
+            optionId: selected.optionId, operationHash,
             deliveryGeneration: request.deliveryGeneration ?? -1 });
-    }, [decided, request, remainingSeconds, submit]);
+    }, [request, guardFailure, submit]);
 
     // Keyboard shortcuts: Y=allow, N=deny, Escape=deny
     useEffect(() => {
@@ -215,6 +250,7 @@ const PermissionDialog: React.FC<PermissionDialogProps> = ({ request, onDecision
                     <button
                         onClick={handleDeny}
                         disabled={!deadlineConfirmed || expired || decided}
+                        aria-label="关闭"
                         className="dialog-control p-1 rounded text-t3 hover:text-t1 transition-interactive duration-fast
                                    focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring
                                    disabled:opacity-50 disabled:pointer-events-none"

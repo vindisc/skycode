@@ -84,6 +84,9 @@ export const FileAutoComplete: React.FC<FileAutoCompleteProps> = ({
 
     // 键盘导航
     useEffect(() => {
+        // 下拉未渲染（无结果且不在加载中）时不挂监听，避免 ArrowUp/Down/Tab/Escape 被
+        // preventDefault 吞掉导致 Tab 无法移出焦点（渲染 null 的条件与此保持一致）
+        if (results.length === 0 && !loading) return;
         const handler = (e: KeyboardEvent) => {
             switch (e.key) {
                 case 'ArrowDown': e.preventDefault();
@@ -97,7 +100,7 @@ export const FileAutoComplete: React.FC<FileAutoCompleteProps> = ({
         };
         window.addEventListener('keydown', handler);
         return () => window.removeEventListener('keydown', handler);
-    }, [results, selectedIndex, onSelect, onClose]);
+    }, [results, selectedIndex, onSelect, onClose, loading]);
 
     if (!results.length && !loading) return null;
 

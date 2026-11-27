@@ -168,7 +168,7 @@ const MermaidBlock: React.FC<MermaidBlockProps> = ({ code }) => {
             >
                 {/* Export buttons */}
                 <div
-                    className="flex justify-end gap-1 p-2 border-b border-border-hairline"
+                    className="flex justify-end gap-1 p-2 border-b border-hairline"
                 >
                     <button
                         onClick={handleCopySvg}

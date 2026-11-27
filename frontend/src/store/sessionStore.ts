@@ -44,7 +44,6 @@ export interface SessionStoreState {
     model: string | null;
     status: 'idle' | 'streaming' | 'waiting_permission' | 'compacting';
     turnCount: number;
-    isAborted: boolean;
     /** 持久化的会话标题（侧栏改名）；null 表示未设置，界面回退为首条用户消息 */
     customTitle: string | null;
 
@@ -68,7 +67,6 @@ export const useSessionStore = create<SessionStoreState>()(
         model: null,
         status: 'idle' as const,
         turnCount: 0,
-        isAborted: false,
         customTitle: null,
 
         // Actions
@@ -123,6 +121,6 @@ export const useSessionStore = create<SessionStoreState>()(
         setCustomTitle: (title) => set(d => { d.customTitle = title; }),
         setStatus: (status) => set(d => { d.status = status; }),
         handleRateLimit: (_data) => set(d => { d.status = 'idle'; }),
-        abort: () => set(d => { d.isAborted = true; d.status = 'idle'; }),
+        abort: () => set(d => { d.status = 'idle'; }),
     })))
 );

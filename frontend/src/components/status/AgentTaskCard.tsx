@@ -105,7 +105,7 @@ const TaskCardItem: React.FC<TaskCardItemProps> = ({ task }) => {
 
             {/* Expanded details */}
             {expanded && (
-                <div className="mt-2 pt-2 border-t border-border-hairline">
+                <div className="mt-2 pt-2 border-t border-hairline">
                     {task.progress && (
                         <div className="mb-1.5">
                             <span className="text-13 font-semibold text-t2 uppercase">
@@ -141,7 +141,7 @@ export const AgentTaskCard: React.FC = () => {
     const completedCount = agentTasks.filter((t) => t.status === 'completed').length;
 
     return (
-        <div className="px-4 py-3 bg-surfacev2 backdrop-blur-sm border border-border-hairline rounded-md shadow-e1">
+        <div className="px-4 py-3 bg-surfacev2 backdrop-blur-sm border border-hairline rounded-md shadow-e1">
             {/* Header */}
             <div className="flex items-center justify-between mb-2.5">
                 <span className="text-sm font-semibold text-t1">

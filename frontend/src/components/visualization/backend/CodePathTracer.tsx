@@ -322,8 +322,8 @@ function NodeDetailPanel({
   const Icon = config.icon;
 
   return (
-    <div className="absolute right-0 top-0 bottom-0 w-72 max-w-full bg-surfacev2 border-l border-border-hairline shadow-e3 z-20 overflow-y-auto">
-      <div className="flex items-center justify-between p-3 border-b border-border-hairline">
+    <div className="absolute right-0 top-0 bottom-0 w-72 max-w-full bg-surfacev2 border-l border-hairline shadow-e3 z-20 overflow-y-auto">
+      <div className="flex items-center justify-between p-3 border-b border-hairline">
         <span className="text-sm font-semibold text-t1">节点详情</span>
         <button aria-label="关闭节点详情" onClick={onClose} className="panel-control p-1 rounded hover:bg-hover2">
           <X className="w-4 h-4 text-t2" />
@@ -620,7 +620,7 @@ function CodePathTracerInner() {
                   <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
                   <Controls
                     showInteractive={false}
-                    className="!bg-surfacev2 !border-border-hairline !shadow-e1"
+                    className="!bg-surfacev2 !border-hairline !shadow-e1"
                   />
                 </ReactFlow>
 

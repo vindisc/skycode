@@ -76,7 +76,6 @@ describe('TC-STORE-002: sessionStore 会话生命周期', () => {
             model: null,
             status: 'idle',
             turnCount: 0,
-            isAborted: false,
         });
     });
 
@@ -91,9 +90,8 @@ describe('TC-STORE-002: sessionStore 会话生命周期', () => {
         expect(useSessionStore.getState().sessionId).toBe('session-2');
     });
 
-    it('abort 设置 isAborted 状态', () => {
+    it('abort 设置 status 为 idle', () => {
         useSessionStore.getState().abort();
-        expect(useSessionStore.getState().isAborted).toBe(true);
         expect(useSessionStore.getState().status).toBe('idle');
     });
 });

@@ -641,6 +641,8 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
     const [deleteCodeError, setDeleteCodeError] = useState<string | null>(null);
     // 删除请求 in-flight 标记：防止「确认删除」双击/Enter 连发重复 DELETE
     const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+    // 同步防重：state 要到下一次渲染才更新，双击或 Enter 连发时 state 守卫挡不住同一帧内的重复触发
+    const deleteSubmittingRef = useRef(false);
 
     // ── 重命名气泡：点击铅笔在按钮附近弹出输入框，Enter 保存、Escape 取消 ──
     const [renaming, setRenaming] = useState<{ sessionId: string; rect: DOMRect; value: string } | null>(null);
@@ -850,8 +852,9 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
 
     // 删除会话（确认气泡中的「确认删除」/验证码 Enter 触发）
     const executeDeleteSession = useCallback(async (sessionId: string, code?: string) => {
-        if (deleteSubmitting) return; // in-flight：忽略重复触发
+        if (deleteSubmitting || deleteSubmittingRef.current) return; // in-flight：忽略重复触发
         setDeleteSubmitting(true);
+        deleteSubmittingRef.current = true;
         const closePopover = () => setConfirmingDelete(null);
         try {
             const response = await fetch(`/api/sessions/${sessionId}`, {
@@ -882,6 +885,7 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
             closePopover();
         } finally {
             // 无论成功/403/409/异常都恢复可点击状态（403 重试路径依赖此复位）
+            deleteSubmittingRef.current = false;
             setDeleteSubmitting(false);
         }
     }, [currentSessionId, deleteConfirmRequired, deleteSubmitting]);

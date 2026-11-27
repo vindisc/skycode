@@ -328,7 +328,15 @@ export function dispatch(data: ServerMessage & { ts?: number }): void {
 
     const handler = handlers[data.type];
     if (handler) {
-        handler(data as any);
+        // 单个 handler 抛错不能让它顺着调用栈炸回 stompjs 的消息回调——
+        // 会话恢复门的 finishBind 在 handler 尾部执行，中途抛错会让会话
+        // 卡在恢复队列直到 30s 超时兜底（后端 non_null 序列化下字段缺失
+        // 不是不可能，handler 必须逐条隔离）
+        try {
+            handler(data as any);
+        } catch (err) {
+            console.error(`[WS] handler failed for type=${data.type}:`, err);
+        }
     } else {
         console.warn(`[WS] Unknown message type: ${data.type}`);
     }

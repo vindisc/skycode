@@ -99,27 +99,27 @@ test.describe('APOS Phase 2 - Agent Pipeline (TC-APOS2-007~011)', () => {
 
     await toggleDetailsPanel(page, 'Agent Pipeline');
 
-    // 限定在 Pipeline 网格容器内查找，避免匹配到 Sidebar tab 按钮的 border-blue-500
+    // 限定在 Pipeline 网格容器内查找，避免匹配到页面其他 border-accent2 元素
     const pipelineGrid = page.locator('.grid.grid-cols-1');
     await expect(pipelineGrid).toBeVisible({ timeout: 5000 });
 
-    // Worker-001 = WORKING → 图标 lucide RefreshCw, 边框 border-blue-500
-    const workingCard = pipelineGrid.locator('.border-blue-500');
+    // Worker-001 = WORKING → 图标 lucide RefreshCw, 边框 border-accent2
+    const workingCard = pipelineGrid.locator('.border-accent2');
     await expect(workingCard).toBeVisible({ timeout: 5000 });
     await expect(workingCard.locator('svg.lucide-refresh-cw')).toBeVisible({ timeout: 3000 });
 
-    // Worker-002 = STARTING → 图标 lucide Hourglass, 边框 border-yellow-400
-    const startingCard = pipelineGrid.locator('.border-yellow-400');
+    // Worker-002 = STARTING → 图标 lucide Hourglass, 边框 border-warn
+    const startingCard = pipelineGrid.locator('.border-warn');
     await expect(startingCard).toBeVisible({ timeout: 5000 });
     await expect(startingCard.locator('svg.lucide-hourglass')).toBeVisible({ timeout: 3000 });
 
-    // Worker-003 = IDLE → 图标 lucide Pause, 边框 border-gray-400
-    const idleCard = pipelineGrid.locator('.border-gray-400');
+    // Worker-003 = IDLE → 图标 lucide Pause, 边框 border-hairline
+    const idleCard = pipelineGrid.locator('.border-hairline');
     await expect(idleCard).toBeVisible({ timeout: 5000 });
     await expect(idleCard.locator('svg.lucide-pause')).toBeVisible({ timeout: 3000 });
 
-    // Worker-004 = TERMINATED (error, as defined by factory) → 图标 lucide CircleX, 边框 border-red-500
-    const terminatedCard = pipelineGrid.locator('.border-red-500');
+    // Worker-004 = TERMINATED (error, as defined by factory) → 图标 lucide CircleX, 边框 border-err
+    const terminatedCard = pipelineGrid.locator('.border-err');
     await expect(terminatedCard).toBeVisible({ timeout: 5000 });
     await expect(terminatedCard.locator('svg.lucide-circle-x')).toBeVisible({ timeout: 3000 });
 
@@ -133,8 +133,8 @@ test.describe('APOS Phase 2 - Agent Pipeline (TC-APOS2-007~011)', () => {
 
     await toggleDetailsPanel(page, 'Agent Pipeline');
 
-    // WORKING Worker 应有进度条（蓝色填充 bg-blue-500 h-2）
-    const progressBar = page.locator('.bg-blue-500.h-2.rounded-full');
+    // WORKING Worker 应有进度条（强调色填充 bg-accent2 h-2）
+    const progressBar = page.locator('.bg-accent2.h-2.rounded-full');
     await expect(progressBar).toBeVisible({ timeout: 5000 });
 
     // 验证进度条有 width style
@@ -442,7 +442,7 @@ test.describe('APOS Phase 2 - Resource Consumption (TC-APOS2-016~018)', () => {
     await expect(workerCard).toBeVisible({ timeout: 5000 });
 
     // 验证进度条显示 80%
-    const progressBar = page.locator('.bg-blue-500.h-2.rounded-full');
+    const progressBar = page.locator('.bg-accent2.h-2.rounded-full');
     await expect(progressBar).toBeVisible({ timeout: 3000 });
 
     await takeTestScreenshot(page, 'TC-APOS2-018', '01-resource-warning');
@@ -523,7 +523,7 @@ test.describe('APOS Phase 2 - Anomaly Detection (TC-APOS2-019~024)', () => {
     await expect(workerName).toBeVisible({ timeout: 3000 });
 
     // 验证 severity=error 标签
-    const severityLabel = page.locator('.bg-yellow-100').filter({ hasText: 'ERROR' });
+    const severityLabel = page.locator('.bg-warnsoft').filter({ hasText: 'ERROR' });
     await expect(severityLabel).toBeVisible({ timeout: 3000 });
 
     // 验证消息文本

@@ -320,8 +320,8 @@ function NodeDetailPanel({
   if (!nodeData) return null;
 
   return (
-    <div className="absolute right-0 top-0 bottom-0 w-72 max-w-full bg-surfacev2 border-l border-border-hairline shadow-e3 z-20 overflow-y-auto">
-      <div className="flex items-center justify-between p-3 border-b border-border-hairline">
+    <div className="absolute right-0 top-0 bottom-0 w-72 max-w-full bg-surfacev2 border-l border-hairline shadow-e3 z-20 overflow-y-auto">
+      <div className="flex items-center justify-between p-3 border-b border-hairline">
         <span className="text-sm font-semibold text-t1">
           节点详情
         </span>
@@ -469,7 +469,7 @@ function AgentDAGChartInner({ liveSessionId }: { liveSessionId?: string }) {
   return (
     <div ref={containerRef} className="agent-dag relative w-full h-full bg-surfacev2">
       {/* 工具栏 */}
-      <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-surfacev2 backdrop-blur-sm rounded-sm shadow-e1 border border-border-hairline p-1">
+      <div className="absolute top-2 left-2 z-10 flex items-center gap-1 bg-surfacev2 backdrop-blur-sm rounded-sm shadow-e1 border border-hairline p-1">
         <button
           onClick={() => setDirection(direction === 'TB' ? 'LR' : 'TB')}
           className="panel-control p-1.5 rounded hover:bg-hover2 transition-colors"
@@ -520,7 +520,7 @@ function AgentDAGChartInner({ liveSessionId }: { liveSessionId?: string }) {
         <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
         <Controls
           showInteractive={false}
-          className="!bg-surfacev2 !border-border-hairline !shadow-e1"
+          className="!bg-surfacev2 !border-hairline !shadow-e1"
         />
       </ReactFlow>
 

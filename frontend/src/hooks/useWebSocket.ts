@@ -10,9 +10,10 @@ import { useEffect, useCallback, useRef, useState } from 'react';
 import {
     createStompClient,
     disconnectStomp,
-    isConnected as stompIsConnected,
     sendToServer as stompSendToServer,
     isWsConnected as stompIsWsConnected,
+    onStompConnect,
+    onStompDisconnect,
 } from '@/api/stompClient';
 import { useSessionStore } from '@/store/sessionStore';
 
@@ -56,13 +57,6 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
     }, [options]);
 
     const connect = useCallback(() => {
-        // 如果已连接，仅触发回调
-        if (stompIsConnected()) {
-            optionsRef.current.onConnect?.();
-            setConnectedState(true);
-            return;
-        }
-
         // 防止重复连接
         if (globalConnected) {
             return;
@@ -75,8 +69,6 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
 
         try {
             createStompClient(sessionId, authToken);
-            optionsRef.current.onConnect?.();
-            setConnectedState(true);
         } catch (err) {
             globalConnected = false;
             optionsRef.current.onError?.(err instanceof Error ? err : new Error(String(err)));
@@ -92,13 +84,38 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         return stompSendToServer(destination, body);
     }, []);
 
+    // 用真实连接状态判定（client.connected 而不是 client.active——
+    // active 在重连等待期也为 true，会误报已连接）
     const isConnectedFn = useCallback(() => {
-        return stompIsConnected();
+        return stompIsWsConnected();
+    }, []);
+
+    // onConnect / onDisconnect 由 stompjs 的真实连接生命周期驱动：
+    // 此前 createStompClient() 一返回就同步报「已连接」（握手还没完成），
+    // 而真实断开从不回调 onDisconnect，断线横幅永远不出现（2026-11-27 审计修复）
+    useEffect(() => {
+        const offConnect = onStompConnect(() => {
+            optionsRef.current.onConnect?.();
+            setConnectedState(true);
+        });
+        const offDisconnect = onStompDisconnect(() => {
+            optionsRef.current.onDisconnect?.();
+            setConnectedState(false);
+        });
+        return () => {
+            offConnect();
+            offDisconnect();
+        };
     }, []);
 
     // 自动连接
     useEffect(() => {
         connect();
+        // 若连接早已建立（热重挂载），立即补发一次 onConnect
+        if (stompIsWsConnected()) {
+            optionsRef.current.onConnect?.();
+            setConnectedState(true);
+        }
         return () => {
             disconnect();
         };

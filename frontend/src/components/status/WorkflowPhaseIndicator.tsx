@@ -133,7 +133,7 @@ export const WorkflowPhaseIndicator: React.FC = () => {
     if (!workflow) return null;
 
     return (
-        <div className="px-4 py-3 bg-surfacev2 backdrop-blur-sm border border-border-hairline rounded-md shadow-e1">
+        <div className="px-4 py-3 bg-surfacev2 backdrop-blur-sm border border-hairline rounded-md shadow-e1">
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">

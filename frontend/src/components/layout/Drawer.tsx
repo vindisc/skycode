@@ -8,8 +8,9 @@
  * overlay2 遮罩，滑入时长走 §5.1 时长表 Drawer 行（duration-sheet 320ms）。
  */
 
-import { useEffect, useCallback, ReactNode } from 'react';
+import { useEffect, useCallback, useRef, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { isTopModal, lockModalScroll, unlockModalScroll } from '@/hooks/useModalBehavior';
 
 interface DrawerProps {
     open: boolean;
@@ -28,18 +29,23 @@ export function Drawer({
     width = 280,
     side = 'left',
 }: DrawerProps) {
+    const panelRef = useRef<HTMLDivElement>(null);
+    // Escape 只在抽屉是置顶层时生效——权限弹窗压在抽屉上时，Esc 不应把底下的抽屉一起关掉
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
-        if (e.key === 'Escape') onClose();
+        if (e.key === 'Escape' && isTopModal(panelRef.current)) {
+            onClose();
+        }
     }, [onClose]);
 
     useEffect(() => {
         if (open) {
             document.addEventListener('keydown', handleKeyDown);
-            // 防止背景滚动
-            document.body.style.overflow = 'hidden';
+            // 用计数锁而不是直接改 body.overflow：并发打开的权限/澄清弹窗
+            // 也持锁，抽屉关闭时不能把别人的锁清掉
+            lockModalScroll();
             return () => {
                 document.removeEventListener('keydown', handleKeyDown);
-                document.body.style.overflow = '';
+                unlockModalScroll();
             };
         }
     }, [open, handleKeyDown]);
@@ -56,6 +62,7 @@ export function Drawer({
 
             {/* 抽屉面板 — 宽 280px / max 82%，rounded-r-panel + shadow-e4 */}
             <div
+                ref={panelRef}
                 role="dialog"
                 aria-modal={open ? true : undefined}
                 aria-hidden={!open}

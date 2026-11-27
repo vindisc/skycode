@@ -50,7 +50,7 @@ function getSeverityBg(severity: AnomalyEvent['severity']): string {
         case 'error':
             return 'bg-warnsoft border-warn';
         default:
-            return 'bg-surface2 border-border-hairline';
+            return 'bg-surface2 border-hairline';
     }
 }
 
