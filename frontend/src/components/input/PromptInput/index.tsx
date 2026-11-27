@@ -22,16 +22,12 @@ import type {
 import CommandPalette from '../CommandPalette';
 import { FileAutoComplete } from '../FileAutoComplete';
 import { useResponsive } from '@/hooks/useResponsive';
-import { useInspectorVisible } from '@/hooks/useInspectorVisible';
 import { usePromptState } from './usePromptState';
 import PromptTextarea from './PromptTextarea';
 import { PromptAttachmentBar, PromptToolbar } from './PromptToolbar';
 import PromptSendButton from './PromptSendButton';
 import MobilePromptBar from './MobilePromptBar';
 import { OptimizeButton } from './OptimizeButton';
-import { ModelChip, PermissionModeChip } from './PromptComposerChips';
-import { DensitySwitch } from './DensitySwitch';
-import { SessionStatusCapsule } from '@/components/status/SessionStatusCapsule';
 
 interface PromptInputProps {
     sessionId?: string | null;
@@ -56,8 +52,6 @@ const PromptInput: React.FC<PromptInputProps> = (props) => {
     // usePromptState 在本组件顶层仅调用一次，产物同时喂给两种形态；
     // 形态切换只是同一实例内的条件渲染，输入状态不丢失。
     const { isMobile } = useResponsive();
-    // 右侧检查器可见时，模型 / 权限 / 显示方式在检查器里，输入条带不再重复放
-    const inspectorVisible = useInspectorVisible();
     const s = usePromptState(props);
     const { promptAttachments: a, localFileReference: f } = s;
 
@@ -174,19 +168,7 @@ const PromptInput: React.FC<PromptInputProps> = (props) => {
                             onInterrupt={props.onInterrupt}
                         />
                     </div>
-
-                    {/* composer-row：权限/模型 mini-chip + 显示方式分段控件 + 键盘提示
-                        （仅桌面分支渲染；显示方式切换自消息区工具条迁入）。
-                        右侧检查器可见时，这三个控件在检查器里，这里整行不渲染，输入条带只剩输入和发送 */}
-                    {!inspectorVisible && <div className="mt-2 flex items-center gap-2">
-                        {/* 会话状态胶囊：与 Header 右簇同款组件，独立于权限 chip 并排放置 */}
-                        <SessionStatusCapsule />
-                        <PermissionModeChip />
-                        <ModelChip />
-                        <DensitySwitch />
-                        <span className="flex-1" />
-                        <span className="text-13 text-t2">⏎ 发送&ensp;·&ensp;⇧⏎ 换行</span>
-                    </div>}
+                    {/* 模型 / 权限 / 显示方式在顶栏的状态行里（任何宽度都在同一处），输入区只管输入和发送 */}
                 </>
             )}
         </div>

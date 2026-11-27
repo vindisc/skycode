@@ -14,14 +14,14 @@ import { Menu, Settings, Loader2, Cable, Brain, Puzzle, Zap, PanelRightClose, Pa
 import { useSessionStore } from '@/store/sessionStore';
 import { useCostStore } from '@/store/costStore';
 import { useDialogStore } from '@/store/dialogStore';
-import { usePermissionStore } from '@/store/permissionStore';
 import { useAppUiStore } from '@/store/appUiStore';
 import { useInspectorAvailable, useInspectorVisible } from '@/hooks/useInspectorVisible';
 import { getSessionStatusLabel } from '@/components/status/sessionStatusMeta';
-import { getPermissionModeLabel } from './StatusBar';
 import { useModelStore } from '@/store/modelStore';
 import { useBridgeStore } from '@/store/bridgeStore';
 import { clearSessionSelection } from '@/services/sessionActivation';
+import { ModelChip, PermissionModeChip } from '@/components/input/PromptInput/PromptComposerChips';
+import { DensityMenu } from '@/components/input/PromptInput/DensitySwitch';
 
 /** §7.4 头部按钮共性：hover/active/焦点环（ring-accent2-ring） */
 const HEADER_BUTTON_CLASS =
@@ -74,13 +74,11 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
     }, [loaded, defaultModel, model, setModel]);
 
     const status = useSessionStore(s => s.status);
-    const permissionMode = usePermissionStore(s => s.permissionMode);
     // 右侧检查器：够宽时顶栏给一个收起 / 展开的入口；它可见时用量只在检查器里显示
     const inspectorOpen = useAppUiStore(s => s.inspectorOpen);
     const setInspectorOpen = useAppUiStore(s => s.setInspectorOpen);
     const inspectorVisible = useInspectorVisible();
     const canToggleInspector = useInspectorAvailable();
-    const permissionLabel = getPermissionModeLabel(permissionMode);
     const customTitle = useSessionStore(s => s.customTitle);
     const firstUserText = useMessageStore(s => {
         const block = s.messages.find(m => m.type === 'user')?.content.find(b => b.type === 'text');
@@ -146,18 +144,21 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     </button>
                 </div>
 
-                {/* 状态行：模型 | 权限 | 会话状态，有用量时追加。只读信息，不放控件 */}
-                <div className="flex min-w-0 items-center justify-center gap-2 font-mono text-xs tabular-nums text-t3">
-                    <span className="truncate" title={currentModelName}>{compactModelName || '模型加载中'}</span>
-                    <span aria-hidden="true">|</span>
-                    <span>{permissionLabel}</span>
-                    <span aria-hidden="true">|</span>
+                {/* 状态行：模型 | 权限 | 显示方式 | 会话状态，有用量时追加。前三项可以直接点开切换——
+                    任何宽度都在这一处，输入区不再放这些控件 */}
+                <div className="flex min-w-0 items-center justify-center gap-1 font-mono text-xs tabular-nums text-t3">
+                    <ModelChip quiet />
+                    <span className="text-t4" aria-hidden="true">|</span>
+                    <PermissionModeChip quiet />
+                    <span className="text-t4" aria-hidden="true">|</span>
+                    <DensityMenu />
+                    <span className="text-t4" aria-hidden="true">|</span>
                     {streaming && <Loader2 className="h-3 w-3 shrink-0 animate-spin text-accent2-ink" aria-hidden="true" />}
                     <span role="status" className={`shrink-0 ${streaming ? 'text-accent2-ink' : bridgeStatus !== 'connected' ? 'text-warn' : ''}`}>
                         {mobileStatus || getSessionStatusLabel(status)}
                     </span>
                     {hasUsage && !inspectorVisible && <>
-                        <span aria-hidden="true">|</span>
+                        <span className="text-t4" aria-hidden="true">|</span>
                         <span title="输入 Tokens">↑{usage.inputTokens.toLocaleString()}</span>
                         <span title="输出 Tokens">↓{usage.outputTokens.toLocaleString()}</span>
                         {usage.cacheReadInputTokens > 0 && (

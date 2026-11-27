@@ -1,15 +1,14 @@
 /**
- * DensitySwitch 组件测试（显示方式切换器，消息展示密度，输入框工具行承载）
- * 覆盖：桌面分段控件三档切换（setDensity + 清当前会话 overrides，其他会话
- * 保留）、当前档选中态；移动端单按钮 + 三选一菜单（开关、选中、backdrop
- * 收起）。
+ * 显示方式切换的组件测试（消息展示密度）
+ * 覆盖：顶栏下拉 DensityMenu（三档切换：setDensity + 清当前会话 overrides，其他会话保留；
+ * 当前档选中态）；移动端单按钮 + 三选一菜单 MobileDensitySwitch（开关、选中、backdrop 收起）。
  */
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useSessionStore } from '@/store/sessionStore';
 import { useTurnViewStore } from '@/store/turnViewStore';
-import { DensitySwitch, MobileDensitySwitch } from './DensitySwitch';
+import { DensityMenu, MobileDensitySwitch } from './DensitySwitch';
 
 beforeEach(() => {
     localStorage.clear();
@@ -17,21 +16,29 @@ beforeEach(() => {
     useSessionStore.setState({ sessionId: 'sess-1' });
 });
 
-describe('DensitySwitch 桌面分段控件', () => {
-    it('渲染三档 tab，当前档为选中态', () => {
+describe('DensityMenu 顶栏下拉', () => {
+    it('触发按钮显示当前档；点开是三选一的面板，当前档为选中态', () => {
         useTurnViewStore.setState({ density: 'balanced' });
-        render(<DensitySwitch />);
-        expect(screen.getByRole('tab', { name: '精简' })).toHaveAttribute('aria-selected', 'false');
-        expect(screen.getByRole('tab', { name: '标准' })).toHaveAttribute('aria-selected', 'true');
-        expect(screen.getByRole('tab', { name: '完整过程' })).toHaveAttribute('aria-selected', 'false');
+        render(<DensityMenu />);
+        const trigger = screen.getByRole('button', { name: '显示方式：标准' });
+        expect(trigger).toHaveTextContent('标准');
+        expect(screen.queryByRole('dialog', { name: '显示方式' })).not.toBeInTheDocument();
+
+        fireEvent.click(trigger);
+        expect(screen.getByRole('dialog', { name: '显示方式' })).toBeInTheDocument();
+        expect(trigger).toHaveAttribute('aria-expanded', 'true');
+        expect(screen.getByRole('button', { name: /^精简/ })).toHaveAttribute('aria-pressed', 'false');
+        expect(screen.getByRole('button', { name: /^标准/ })).toHaveAttribute('aria-pressed', 'true');
+        expect(screen.getByRole('button', { name: /^完整过程/ })).toHaveAttribute('aria-pressed', 'false');
     });
 
-    it('点击「完整过程」→ setDensity 生效并清空当前会话 overrides，其他会话保留', () => {
+    it('选「完整过程」→ setDensity 生效并清空当前会话 overrides，其他会话保留', () => {
         useTurnViewStore.getState().setSectionExpanded('sess-1', '0', true);
         useTurnViewStore.getState().setSectionExpanded('sess-2', '3:0', false);
 
-        render(<DensitySwitch />);
-        fireEvent.click(screen.getByRole('tab', { name: '完整过程' }));
+        render(<DensityMenu />);
+        fireEvent.click(screen.getByRole('button', { name: /^显示方式/ }));
+        fireEvent.click(screen.getByRole('button', { name: /^完整过程/ }));
 
         const state = useTurnViewStore.getState();
         expect(state.density).toBe('detailed');
@@ -39,11 +46,13 @@ describe('DensitySwitch 桌面分段控件', () => {
         expect(state.expandOverrides['sess-2']).toEqual({ '3:0': false });
     });
 
-    it('点击「精简」→ density=compact', () => {
+    it('选「精简」→ density=compact，面板收起', () => {
         useTurnViewStore.setState({ density: 'balanced' });
-        render(<DensitySwitch />);
-        fireEvent.click(screen.getByRole('tab', { name: '精简' }));
+        render(<DensityMenu />);
+        fireEvent.click(screen.getByRole('button', { name: /^显示方式/ }));
+        fireEvent.click(screen.getByRole('button', { name: /^精简/ }));
         expect(useTurnViewStore.getState().density).toBe('compact');
+        expect(screen.queryByRole('dialog', { name: '显示方式' })).not.toBeInTheDocument();
     });
 });
 

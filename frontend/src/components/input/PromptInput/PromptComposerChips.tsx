@@ -21,6 +21,7 @@ import { useModelStore } from '@/store/modelStore';
 import { useSessionModelSelection } from '@/hooks/useSessionModelSelection';
 import { getPermissionModeLabel, getPermissionModeDescription } from '@/components/layout/StatusBar';
 import { SessionStatusIcon } from '@/components/status/SessionStatusIcon';
+import { QUIET_CHEVRON_CLASS, QUIET_SWITCH_CLASS } from './switchAppearance';
 
 /** 两个 chip 共用的胶囊壳（v2 令牌：hairline + surface2 + hover2 + accent2-ring） */
 const CHIP_SHELL =
@@ -35,20 +36,20 @@ const OVERLAY_SELECT =
     '[&::picker(select)]:bg-surface2 [&::picker(select)]:p-1 [&::picker(select)]:text-t1 [&::picker(select)]:shadow-e4';
 
 /** 权限模式 chip：Shield + 当前模式名 + ChevronDown */
-export const PermissionModeChip: React.FC<{ mobile?: boolean }> = ({ mobile = false }) => {
+export const PermissionModeChip: React.FC<{ mobile?: boolean; quiet?: boolean }> = ({ mobile = false, quiet = false }) => {
     const { permissionMode, selectMode, pending, disabled, message } = useSessionPermissionSelection();
     return <div className="flex items-center gap-2">
         <fieldset disabled={disabled} className="min-w-0">
             {mobile
                 ? <MobileChoice disabled={disabled} label="权限" showCurrent leading={<SessionStatusIcon />} value={permissionMode} options={PERMISSION_MODES.map(value => ({ value, label: getPermissionModeLabel(value), description: getPermissionModeDescription(value) }))} onChange={value => selectMode(value as PermissionMode)} />
-                : <PermissionMenu disabled={disabled} value={permissionMode} onChange={selectMode} />}
+                : <PermissionMenu disabled={disabled} value={permissionMode} onChange={selectMode} quiet={quiet} />}
         </fieldset>
         {(pending || message) && <span role="status" className="text-xs text-t3">{pending ? '正在切换' : message}</span>}
     </div>;
 };
 
 /** 模型 chip：accent 点 + 当前模型名 + ChevronDown；mobileRow 保留"更多"面板整行形态（能力保留），默认紧凑形态供手机导航栏使用 */
-export const ModelChip: React.FC<{ mobile?: boolean; mobileRow?: boolean }> = ({ mobile = false, mobileRow = false }) => {
+export const ModelChip: React.FC<{ mobile?: boolean; mobileRow?: boolean; quiet?: boolean }> = ({ mobile = false, mobileRow = false, quiet = false }) => {
     const model = useSessionStore(s => s.model);
     const modelSelection = useSessionModelSelection();
     const {
@@ -75,7 +76,7 @@ export const ModelChip: React.FC<{ mobile?: boolean; mobileRow?: boolean }> = ({
                 onClick={() => void fetchModels()}
                 className={mobile
                     ? 'flex min-h-11 w-full items-center gap-3 rounded-md border border-hairline bg-surface2 px-3 py-3 text-left text-sm text-t2 hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink'
-                    : CHIP_SHELL}
+                    : quiet ? QUIET_SWITCH_CLASS : CHIP_SHELL}
                 aria-label="重新加载模型列表"
                 title="模型列表加载失败，点击重试"
             >
@@ -91,10 +92,10 @@ export const ModelChip: React.FC<{ mobile?: boolean; mobileRow?: boolean }> = ({
     if (mobile) return <MobileChoice label="模型" row={mobileRow} showCurrent={!mobileRow} maxTextWidth="max-w-[72px]" value={model ?? ''} disabled={modelSelection.disabled} options={availableModels.map(m => ({ value: m.id, label: m.displayName }))} onChange={modelSelection.selectModel} title={modelSelection.disabledReason} />;
 
     return (
-        <span className={`${CHIP_SHELL} ${modelSelection.disabled ? 'opacity-50' : ''}`} title={modelSelection.disabledReason}>
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent2" aria-hidden="true" />
-            <span className="max-w-[140px] truncate">{currentLabel}</span>
-            <ChevronDown size={12} aria-hidden="true" />
+        <span className={`${quiet ? QUIET_SWITCH_CLASS : CHIP_SHELL} ${modelSelection.disabled ? 'opacity-50' : ''}`} title={modelSelection.disabledReason}>
+            {quiet ? null : <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent2" aria-hidden="true" />}
+            <span className="min-w-0 max-w-[140px] truncate">{currentLabel}</span>
+            <ChevronDown size={12} className={quiet ? QUIET_CHEVRON_CLASS : undefined} aria-hidden="true" />
             <select
                 aria-label="模型选择"
                 value={model || ''}

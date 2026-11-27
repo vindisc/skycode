@@ -1,17 +1,15 @@
 /**
- * Inspector — 右侧检查器（对应 Skymap 的 Inspector：只显示与「当前会话」有关的设置和信息）。
+ * Inspector — 右侧检查器：只显示与「当前会话」有关的运行信息。
  *
- * 模型 / 权限 / 显示方式从输入条带挪到这里，输入区只剩输入和发送；三个控件沿用输入区原有的组件，
- * 不另写一套。下面依次是本会话修改过的文件、最近一轮的任务、待审批、用量，没有内容的分节不显示。
+ * 依次是本会话修改过的文件、最近一轮的任务、待审批、用量，没有内容的分节不显示。
+ * 模型 / 权限 / 显示方式的切换在顶栏的状态行里（任何宽度都在同一处），这里不再放设置。
  *
- * 仅在视口 ≥1280px 且未被收起时渲染（见 useInspectorVisible）；收起后这三个控件回到输入条带。
- * 没有选中会话时设置卡仍然显示——首页发第一条消息前也要能选模型。
+ * 仅在视口 ≥1280px 且未被收起时渲染（见 useInspectorVisible）。
+ * 没有可显示的内容时给一句引导，不留一块空白面板。
  */
 
 import React, { useMemo } from 'react';
-import { Check, CircleX, Loader2, Minus } from 'lucide-react';
-import { ModelChip, PermissionModeChip } from '@/components/input/PromptInput/PromptComposerChips';
-import { DensitySwitch } from '@/components/input/PromptInput/DensitySwitch';
+import { Check, CircleX, Loader2, Minus, PanelRight } from 'lucide-react';
 import { TurnFileChanges } from '@/components/message/turn/TurnFileChanges';
 import { resolveSectionStatus, resolveTurnOutcome } from '@/components/message/turn/turnUtils';
 import { cn } from '@/components/ui/cn';
@@ -95,28 +93,22 @@ export const Inspector: React.FC<InspectorProps> = ({ className }) => {
         >
             <div className="px-3.5 pb-2.5 pt-3.5">
                 <h2 className="truncate text-13 font-semibold text-t1" title={titleHint}>{title}</h2>
-                <p className="mt-0.5 text-xs text-t3">{sessionId ? '当前会话' : '设置在发出第一条消息时生效'}</p>
+                <p className="mt-0.5 text-xs text-t3">{sessionId ? '当前会话' : '还没有开始'}</p>
             </div>
 
             <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-2.5 pb-2.5">
-                {/* 设置：左标签、右控件（Skymap 的行式布局） */}
-                <section className={CARD} aria-label="会话设置">
-                    <h3 className={CARD_TITLE}>设置</h3>
-                    <div className="pb-1.5 pt-1">
-                        <div className={ROW}>
-                            <span className={ROW_LABEL}>模型</span>
-                            <ModelChip />
-                        </div>
-                        <div className={ROW}>
-                            <span className={ROW_LABEL}>权限</span>
-                            <PermissionModeChip />
-                        </div>
-                        <div className={ROW}>
-                            <span className={ROW_LABEL}>显示方式</span>
-                            <DensitySwitch />
-                        </div>
+                {files.length === 0 && tasks.length === 0 && pendingPermissions.length === 0 && !(sessionId && hasUsage) && (
+                    <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+                        <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-md bg-sunken2 text-t3">
+                            <PanelRight className="h-5 w-5" />
+                        </span>
+                        <p className="text-13 leading-relaxed text-t3">
+                            {sessionId
+                                ? '这个会话还没有修改过的文件或任务'
+                                : '发出第一条消息后，这里会列出这个会话修改的文件、任务和用量'}
+                        </p>
                     </div>
-                </section>
+                )}
 
                 {files.length > 0 && (
                     <section className={CARD} aria-label="修改的文件">

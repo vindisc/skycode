@@ -1,15 +1,17 @@
 /**
- * 显示方式切换（消息展示密度）：桌面分段控件，移动端常驻卡片中的单按钮 + 底部 Sheet。
+ * 显示方式切换（消息展示密度）：桌面是顶栏状态行里的下拉（DensityMenu），移动端是常驻卡片中的单按钮 + 底部 Sheet。
  * 档位命名三端统一：精简 / 标准 / 完整过程；切档沿用现有 setDensity，
  * 清除当前会话的手动展开偏好。
  */
 
-import React, { useCallback, useState } from 'react';
-import { Rows3, Check, X } from 'lucide-react';
+import React, { useCallback, useRef, useState } from 'react';
+import { Rows3, Check, ChevronDown, X } from 'lucide-react';
 import { SheetShell } from '@/components/apos/MobileBottomSheet';
 import { useSessionStore } from '@/store/sessionStore';
 import { useTurnViewStore, type TurnDensity } from '@/store/turnViewStore';
 import { cn } from '@/components/ui/cn';
+import { SwitchPopover } from './PermissionMenu';
+import { QUIET_CHEVRON_CLASS, QUIET_SWITCH_CLASS } from './switchAppearance';
 
 const DENSITY_OPTIONS: Array<{ value: TurnDensity; label: string }> = [
     { value: 'compact', label: '精简' },
@@ -24,44 +26,59 @@ function useDensitySelect(): (value: TurnDensity) => void {
     }, [sessionId]);
 }
 
-// ==================== 桌面端：紧凑分段控件 ====================
+// ==================== 桌面端：顶栏状态行里的下拉 ====================
 
-export const DensitySwitch: React.FC = () => {
+const DENSITY_HINTS: Record<TurnDensity, string> = {
+    compact: '只看问答，过程收成一行',
+    balanced: '按任务查看执行摘要',
+    detailed: '查看完整过程与任务导航',
+};
+
+/** 顶栏状态行里的「显示方式」切换：安静的文字按钮，点开是三选一的面板 */
+export const DensityMenu: React.FC = () => {
     const density = useTurnViewStore(s => s.density);
     const handleSelect = useDensitySelect();
+    const [open, setOpen] = useState(false);
+    const trigger = useRef<HTMLButtonElement>(null);
+    const current = DENSITY_OPTIONS.find(option => option.value === density)?.label ?? DENSITY_OPTIONS[1].label;
 
-    return (
-        <span
-            role="tablist"
-            aria-label="显示方式"
+    return <>
+        <button
+            ref={trigger}
+            type="button"
+            aria-label={`显示方式：${current}`}
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            title={`显示方式：${current}`}
             data-testid="density-switch"
-            className="inline-flex h-7 shrink-0 items-center gap-0.5 rounded-full border border-hairline bg-sunken2 p-0.5 shadow-pressed"
+            onClick={() => setOpen(true)}
+            className={QUIET_SWITCH_CLASS}
         >
-            {DENSITY_OPTIONS.map(option => {
-                const selected = option.value === density;
-                return (
-                    <button
-                        key={option.value}
-                        type="button"
-                        role="tab"
-                        aria-selected={selected}
-                        title={`显示方式：${option.label}`}
-                        onClick={() => handleSelect(option.value)}
-                        className={cn(
-                            'h-6 rounded-full px-2.5 text-13 font-medium',
-                            'transition-interactive duration-fast',
-                            'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring',
-                            selected
-                                ? 'bg-surfacev2 text-t1 shadow-raised'
-                                : 'text-t2 hover:text-t1 hover:bg-hover2',
-                        )}
-                    >
-                        {option.label}
-                    </button>
-                );
-            })}
-        </span>
-    );
+            <span className="truncate">{current}</span>
+            <ChevronDown size={12} className={QUIET_CHEVRON_CLASS} aria-hidden="true" />
+        </button>
+        <SwitchPopover open={open} onClose={() => setOpen(false)} trigger={trigger} label="显示方式" width={260}>
+            <h3 className="px-3 py-2 text-base font-semibold text-t1">显示方式</h3>
+            {DENSITY_OPTIONS.map(option => (
+                <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={option.value === density}
+                    onClick={() => { handleSelect(option.value); setOpen(false); }}
+                    className={cn(
+                        'flex min-h-11 w-full items-center gap-3 rounded-sm px-3 py-2 text-left hover:bg-hover2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink',
+                        option.value === density && 'bg-accent2-soft',
+                    )}
+                >
+                    <span className="flex-1">
+                        <span className="block text-sm font-medium text-t1">{option.label}</span>
+                        <span className="mt-1 block text-13 text-t2">{DENSITY_HINTS[option.value]}</span>
+                    </span>
+                    {option.value === density && <Check size={18} className="shrink-0 text-accent2-ink" aria-hidden="true" />}
+                </button>
+            ))}
+        </SwitchPopover>
+    </>;
 };
 
 // ==================== 移动端：单按钮 + 三选一菜单 ====================
