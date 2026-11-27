@@ -40,7 +40,7 @@ export interface AccentPreset {
     dark: AccentVariantValues;
 }
 
-export const DEFAULT_ACCENT_HEX = '#12967F';
+export const DEFAULT_ACCENT_HEX = '#2F7BFF';
 
 /** 旧版预设 hex → 新版预设 hex（持久化的 theme.accentColor 兼容映射，大写） */
 export const LEGACY_ACCENT_ALIASES: Readonly<Record<string, string>> = {
@@ -49,12 +49,14 @@ export const LEGACY_ACCENT_ALIASES: Readonly<Record<string, string>> = {
     '#8B5CF6': '#8A63C9',
     '#EC4899': '#C9578A',
     '#3B82F6': '#2589D6',
-    '#F59E0B': '#12967F',
-    '#10B981': '#12967F',
+    '#F59E0B': '#2F7BFF',
+    '#10B981': '#2F7BFF',
     '#EF4444': '#C9578A',
     // 灰调版中被精简掉的语义冲突色 → 最接近的保留色
-    '#C98A3A': '#12967F', // 橙（与 warn 冲突）→ 青瓷（默认）
-    '#4E9E73': '#12967F', // 绿（与 ok 冲突）→ 青瓷（默认）
+    '#C98A3A': '#2F7BFF', // 橙（与 warn 冲突）→ 系统蓝（默认）
+    '#4E9E73': '#2F7BFF', // 绿（与 ok 冲突）→ 系统蓝（默认）
+    // 上一版默认青瓷 → 现行默认系统蓝（与 Skymap 一致）
+    '#12967F': '#2F7BFF',
     '#C4453F': '#C9578A', // 红（与 err 冲突）→ 品红（暖色系最近）
     '#4C86C8': '#2589D6', // 灰蓝 → 蔚蓝（直系升级）
     // 灰调版靛蓝 → A 稿基准（云白冰川 #5B6BE0）
@@ -69,9 +71,10 @@ export function normalizeAccentHex(hex: string | undefined | null): string {
 
 export const ACCENT_PRESETS: readonly AccentPreset[] = [
     {
-        hex: '#12967F', label: '青瓷',
-        light: { accent: '#12967F', strong: '#0C7563', soft: 'rgba(18,150,127,.10)', ring: 'rgba(18,150,127,.32)' },
-        dark: { accent: '#7FD4E8', strong: '#1A7C93', soft: 'rgba(127,212,232,.14)', ring: 'rgba(127,212,232,.40)' },
+        // 默认色与 Skymap 的 Accent Blue 相同；深色档的 strong 略深一档，保证白字 ≥4.5:1
+        hex: '#2F7BFF', label: '系统蓝',
+        light: { accent: '#1F63D6', strong: '#1A56BE', soft: 'rgba(31,99,214,.10)', ring: 'rgba(31,99,214,.32)' },
+        dark: { accent: '#2F7BFF', strong: '#2A6FE8', soft: 'rgba(47,123,255,.16)', ring: 'rgba(47,123,255,.45)' },
     },
     {
         // 柔夜墨蓝稿（D）的 accent #7FD4E8 为深底亮色：light 档必须配深变体（白底 ≥3:1）
@@ -125,7 +128,8 @@ export function applyAccent(hex: string, effectiveTheme: EffectiveTheme): void {
     const style = document.documentElement.style;
     style.setProperty('--v2-accent', values.accent);
     // 深底主题（dark）accent 本身即亮色调，ink 直接取 accent；浅底取 strong 压暗
-    style.setProperty('--v2-accent-ink', effectiveTheme === 'dark' ? values.accent : `color-mix(in srgb, ${values.strong} 80%, black)`);
+    // 深底上的强调文字取 accent 提亮一档：默认的 #2F7BFF 直接作小字在卡片底上只有 4.2:1，提亮后 ≥6:1
+    style.setProperty('--v2-accent-ink', effectiveTheme === 'dark' ? `color-mix(in srgb, ${values.accent} 72%, white)` : `color-mix(in srgb, ${values.strong} 80%, black)`);
     style.setProperty('--v2-accent-strong', values.strong);
     style.setProperty('--v2-accent-soft', values.soft);
     style.setProperty('--v2-accent-ring', values.ring);

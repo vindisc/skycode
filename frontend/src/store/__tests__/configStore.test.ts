@@ -10,12 +10,12 @@ const RETIRED_MODES = [
 
 describe('ConfigStore', () => {
     beforeEach(() => {
-        // Reset to defaults（§3.4/§9.6：默认强调色 = 青瓷 #12967F）
+        // Reset to defaults（§3.4/§9.6：默认强调色 = 系统蓝 #2F7BFF）
         useConfigStore.setState({
             themePreferenceSet: false,
             theme: {
                 mode: 'light',
-                accentColor: '#12967F',
+                accentColor: '#2F7BFF',
                 fontSize: 'medium',
                 fontFamily: 'monospace',
                 borderRadius: 'md',
@@ -180,7 +180,7 @@ describe('ConfigStore', () => {
     it('should have default theme', () => {
         const { theme } = useConfigStore.getState();
         expect(theme.mode).toBe('light');
-        expect(theme.accentColor).toBe('#12967F');
+        expect(theme.accentColor).toBe('#2F7BFF');
         expect(theme.fontSize).toBe('medium');
     });
 
@@ -188,7 +188,7 @@ describe('ConfigStore', () => {
         useConfigStore.getState().setTheme({ mode: 'dark' });
         const { theme } = useConfigStore.getState();
         expect(theme.mode).toBe('dark');
-        expect(theme.accentColor).toBe('#12967F'); // unchanged
+        expect(theme.accentColor).toBe('#2F7BFF'); // unchanged
     });
 
     it('resetTheme restores defaults', () => {
@@ -196,8 +196,8 @@ describe('ConfigStore', () => {
         useConfigStore.getState().resetTheme();
         const { theme } = useConfigStore.getState();
         expect(theme.mode).toBe('light');
-        // §9.6：默认强调色已改靛蓝
-        expect(theme.accentColor).toBe('#12967F');
+        // 默认强调色 = 系统蓝（与 Skymap 一致）
+        expect(theme.accentColor).toBe('#2F7BFF');
     });
 
     it('setLocale updates locale', () => {

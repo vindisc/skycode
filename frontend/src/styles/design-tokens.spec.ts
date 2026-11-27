@@ -92,14 +92,14 @@ describe('getChartColors 强调色跟随', () => {
         expect(getChartColors('dark', '#C9578A')[0]).toBe('#E58AB5');
     });
 
-    it('未知 accent 回退青瓷（light/dark 各档）', () => {
-        expect(getChartColors('light', '#123456')[0]).toBe('#12967F');
-        expect(getChartColors('dark', '#123456')[0]).toBe('#7FD4E8');
+    it('未知 accent 回退系统蓝（light/dark 各档）', () => {
+        expect(getChartColors('light', '#123456')[0]).toBe('#1F63D6');
+        expect(getChartColors('dark', '#123456')[0]).toBe('#2F7BFF');
     });
 
-    it('缺省 accent 回退青瓷；accent hex 大小写不敏感', () => {
-        expect(getChartColors('light')[0]).toBe('#12967F');
-        expect(getChartColors('dark')[0]).toBe('#7FD4E8');
+    it('缺省 accent 回退系统蓝；accent hex 大小写不敏感', () => {
+        expect(getChartColors('light')[0]).toBe('#1F63D6');
+        expect(getChartColors('dark')[0]).toBe('#2F7BFF');
         expect(getChartColors('light', '#c9578a')[0]).toBe('#C9578A');
     });
 

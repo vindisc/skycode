@@ -5,7 +5,7 @@ import { activateSessionCandidate } from '@/services/sessionActivation';
 import { useSessionStore } from '@/store/sessionStore';
 import { useWorkbenchViewStore } from '@/store/workbenchViewStore';
 
-vi.mock('@/services/sessionActivation', () => ({ activateSessionCandidate: vi.fn() }));
+vi.mock('@/services/sessionActivation', () => ({ activateSessionCandidate: vi.fn(), clearSessionSelection: vi.fn() }));
 beforeEach(() => {
     localStorage.clear();
     resetDeleteConfirmRequiredCacheForTest();

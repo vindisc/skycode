@@ -18,8 +18,8 @@ beforeEach(() => {
 });
 
 describe('ACCENT_PRESETS 色板构成', () => {
-    it('8 色按色相序排列，青瓷为默认且居首', () => {
-        expect(ACCENT_PRESETS.map(p => p.label)).toEqual(['青瓷', '冰青', '蔚蓝', '靛蓝', '藤紫', '紫罗兰', '品红', '石墨']);
+    it('8 色按色相序排列，系统蓝为默认且居首', () => {
+        expect(ACCENT_PRESETS.map(p => p.label)).toEqual(['系统蓝', '冰青', '蔚蓝', '靛蓝', '藤紫', '紫罗兰', '品红', '石墨']);
         expect(ACCENT_PRESETS[0].hex).toBe(DEFAULT_ACCENT_HEX);
     });
 
@@ -47,8 +47,10 @@ describe('normalizeAccentHex 旧值映射', () => {
     it('被砍色映射到最接近的保留色', () => {
         expect(normalizeAccentHex('#4C86C8')).toBe('#2589D6'); // 灰蓝 → 蔚蓝
         expect(normalizeAccentHex('#C4453F')).toBe('#C9578A'); // 红 → 品红
-        expect(normalizeAccentHex('#C98A3A')).toBe('#12967F'); // 橙 → 青瓷（默认）
-        expect(normalizeAccentHex('#4E9E73')).toBe('#12967F'); // 绿 → 青瓷（默认）
+        expect(normalizeAccentHex('#C98A3A')).toBe('#2F7BFF'); // 橙 → 系统蓝（默认）
+        expect(normalizeAccentHex('#4E9E73')).toBe('#2F7BFF'); // 绿 → 系统蓝（默认）
+        // 上一版默认青瓷：老用户持久化里的值要落到新默认
+        expect(normalizeAccentHex('#12967f')).toBe('#2F7BFF');
         expect(normalizeAccentHex('#5E63DE')).toBe('#5B6BE0'); // 灰调靛蓝 → A 稿基准
     });
 
@@ -66,21 +68,21 @@ describe('normalizeAccentHex 旧值映射', () => {
 
 describe('applyAccent 两主题分档', () => {
     it('light 档：写入 light 全套令牌', () => {
-        applyAccent('#12967F', 'light');
+        applyAccent('#2F7BFF', 'light');
         expect(readTokens()).toEqual({
-            '--v2-accent': '#12967F',
-            '--v2-accent-strong': '#0C7563',
-            '--v2-accent-soft': 'rgba(18,150,127,.10)',
-            '--v2-accent-ring': 'rgba(18,150,127,.32)',
+            '--v2-accent': '#1F63D6',
+            '--v2-accent-strong': '#1A56BE',
+            '--v2-accent-soft': 'rgba(31,99,214,.10)',
+            '--v2-accent-ring': 'rgba(31,99,214,.32)',
         });
     });
 
-    it('dark 档：accent 取亮变体，strong 是同色相的深一档（不再复用 light 的墨绿）', () => {
-        applyAccent('#12967F', 'dark');
+    it('dark 档：strong 是与 accent 同色相的深一档', () => {
+        applyAccent('#2F7BFF', 'dark');
         const t = readTokens();
-        expect(t['--v2-accent']).toBe('#7FD4E8');
-        expect(t['--v2-accent-strong']).toBe('#1A7C93');
-        expect(t['--v2-accent-soft']).toBe('rgba(127,212,232,.14)');
+        expect(t['--v2-accent']).toBe('#2F7BFF');
+        expect(t['--v2-accent-strong']).toBe('#2A6FE8');
+        expect(t['--v2-accent-soft']).toBe('rgba(47,123,255,.16)');
     });
 
     it('新色蔚蓝：两档各自正确', () => {
@@ -125,16 +127,19 @@ describe('applyAccent 两主题分档', () => {
         expect(readTokens()['--v2-accent']).toBe('#2589D6');
     });
 
-    it('未知 hex 回退默认青瓷', () => {
+    it('未知 hex 回退默认系统蓝', () => {
         applyAccent('#123456', 'light');
-        expect(readTokens()['--v2-accent']).toBe('#12967F');
+        expect(readTokens()['--v2-accent']).toBe('#1F63D6');
     });
 
-    it('dark 档 accent-ink 用 accent 本体；light 用 strong 派生', () => {
-        applyAccent('#12967F', 'dark');
-        expect(document.documentElement.style.getPropertyValue('--v2-accent-ink').trim()).toBe('#7FD4E8');
-        applyAccent('#12967F', 'light');
-        expect(document.documentElement.style.getPropertyValue('--v2-accent-ink').trim()).toContain('#0C7563');
+    it('dark 档 accent-ink 取 accent 提亮一档；light 用 strong 派生', () => {
+        applyAccent('#2F7BFF', 'dark');
+        const darkInk = document.documentElement.style.getPropertyValue('--v2-accent-ink').trim();
+        expect(darkInk).toContain('color-mix');
+        expect(darkInk).toContain('#2F7BFF');
+        expect(darkInk).toContain('72%');
+        applyAccent('#2F7BFF', 'light');
+        expect(document.documentElement.style.getPropertyValue('--v2-accent-ink').trim()).toContain('#1A56BE');
     });
 });
 

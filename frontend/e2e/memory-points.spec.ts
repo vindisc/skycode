@@ -30,10 +30,10 @@ async function seedTheme(page: any, mode: 'light' | 'dark') {
 
 test.describe('六记忆点截图归档', () => {
 
-    test('① 空态 Hero「今天想创造什么？」', async ({ page }) => {
+    test('① 空态 Hero「描述任务，SkyCode 开始工作」', async ({ page }) => {
         await seedTheme(page, 'light');
         await page.goto('/');
-        await expect(page.getByText('今天想')).toBeVisible({ timeout: 15000 });
+        await expect(page.getByText('描述任务')).toBeVisible({ timeout: 15000 });
         await page.waitForTimeout(400);
         await page.screenshot({ path: `${OUT}/memory-01-空态Hero.png` });
     });

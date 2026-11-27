@@ -64,9 +64,9 @@ describe('ThemeProvider', () => {
         expect(style.getPropertyValue('--v2-accent-strong')).toBe(accentOf(mode).strong);
         expect(style.getPropertyValue('--v2-accent-soft')).toBe(accentOf(mode).soft);
         expect(style.getPropertyValue('--v2-accent-ring')).toBe(accentOf(mode).ring);
-        // 深底主题 ink 取 accent 本体；浅底由 strong 压暗
+        // 深底主题 ink 取 accent 提亮一档（默认蓝直接作小字对比度不够）；浅底由 strong 压暗
         const ink = style.getPropertyValue('--v2-accent-ink');
-        if (mode === 'dark') expect(ink).toBe(accentOf(mode).accent);
+        if (mode === 'dark') expect(ink).toBe(`color-mix(in srgb, ${accentOf(mode).accent} 72%, white)`);
         else expect(ink).toContain(accentOf(mode).strong);
     });
 

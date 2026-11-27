@@ -4,24 +4,33 @@
    内容区/Virtuoso Footer 用同一变量留出等高空间。App 的 ResizeObserver 写入该变量。
    勿当作主题残留删除。 */
 .chat-workspace { position: relative; }
+/* 输入区停靠在工作区底部（各宽度一致）：消息在上、输入条带在下，各占自己的行，不叠在消息上 */
 .chat-composer-dock {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  z-index: 15;
-  border: 0;
-  background: transparent;
-  pointer-events: none;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex-shrink: 0;
 }
 .chat-composer-dock > * { pointer-events: auto; }
 .chat-composer-inset { border: 0; background: transparent; }
-.chat-composer-surface { border-radius: 22px; padding: 12px 16px; }
-.chat-content { padding-bottom: var(--glass-composer-height, 132px); }
-/* Virtualized development chat extends behind the composer. Footer reserves its real height. */
+.chat-content { padding-bottom: 0; }
 .chat-content:has(.message-list) { padding-bottom: 0; }
-.glass-chat-spacer { display: block; height: var(--glass-composer-height, 132px); }
-.message-list { scroll-padding-bottom: var(--glass-composer-height, 132px); }
-.message-list > .back-to-latest-position { bottom: calc(var(--glass-composer-height, 132px) + 12px); }
+.glass-chat-spacer { display: block; height: 12px; }
+.message-list { scroll-padding-bottom: 12px; }
+.message-list > .back-to-latest-position { bottom: 12px; }
+/* 桌面：输入区是工作区面板底部的一条横向圆角条带，底色比面板更深一档（对应 Skymap 的底部图片条） */
+@media (min-width: 1024px) {
+  .chat-composer-inset { padding: 0 10px 10px; }
+  .chat-composer-surface {
+    border-radius: var(--v2-r-md);
+    padding: 8px 10px;
+    background: var(--v2-bg-app);
+    border: 1px solid var(--v2-border-hairline);
+    transition: border-color var(--v2-dur-fast) var(--v2-ease);
+  }
+  .chat-composer-surface:focus-within { border-color: color-mix(in srgb, var(--v2-accent) 55%, var(--v2-border-hairline)); }
+}
 /* Compact screens keep messages and the composer in separate layout rows. */
 @media (max-width: 1023px) {
   .chat-workspace, .chat-content { min-height: 0; }
@@ -272,18 +281,18 @@ body {
 
 /* ===== v2 令牌（新增，不动任何旧变量） ===== */
 :root{
-  --v2-bg-app:#F2F7F4; --v2-bg-surface:#FFFFFF; --v2-bg-surface-2:#EAF3ED; --v2-bg-sunken:#E0EDE4;
-  --v2-bg-hover:rgba(20,40,34,.045); --v2-bg-active:rgba(20,40,34,.07);
-  --v2-border-hairline:rgba(20,40,34,.08); --v2-border-strong:rgba(20,40,34,.14);
-  --v2-overlay:rgba(20,40,34,.32);
-  --v2-text-1:#1F2430; --v2-text-2:#49546B; --v2-text-3:#596A60; --v2-text-4:#596A60;
+  --v2-bg-app:#EEF1F5; --v2-bg-surface:#FFFFFF; --v2-bg-surface-2:#F3F5F9; --v2-bg-sunken:#E9EDF2;
+  --v2-bg-hover:rgba(35,42,58,.06); --v2-bg-active:rgba(35,42,58,.10); --v2-bg-selected:#E1EBFF;
+  --v2-border-hairline:rgba(35,42,58,.16); --v2-border-strong:rgba(35,42,58,.28); --v2-border-outline:rgba(35,42,58,.12);
+  --v2-overlay:rgba(20,24,35,.32);
+  --v2-text-1:#171B24; --v2-text-2:#4A5366; --v2-text-3:#5E687C; --v2-text-4:#5E687C;
   --v2-ok:#2C724B; --v2-ok-soft:rgba(63,143,98,.12); --v2-ok-strong:#245E3E;
   --v2-warn:#8F5C12; --v2-warn-soft:rgba(180,116,27,.12); --v2-warn-strong:#7A4E0F;
-  --v2-err:#B03B35; --v2-err-soft:rgba(196,69,63,.12); --v2-err-strong:#A3352F;
+  --v2-err:#B03B35; --v2-err-soft:rgba(176,59,53,.10); --v2-err-strong:#A3352F;
   --v2-diff-add-bg:rgba(63,143,98,.10); --v2-diff-remove-bg:rgba(196,69,63,.10);
-  --v2-code-bg:#E4F0E8;
-  --v2-accent:#12967F; --v2-accent-strong:#0C7563;
-  --v2-accent-soft:rgba(18,150,127,.10); --v2-accent-ring:rgba(18,150,127,.32);
+  --v2-code-bg:#F0F2F6;
+  --v2-accent:#1F63D6; --v2-accent-strong:#1A56BE;
+  --v2-accent-soft:rgba(31,99,214,.10); --v2-accent-ring:rgba(31,99,214,.32);
   /* --focus-ring 跟随 accent（旧变量区不再定义，集中于 v2 块以满足单块对拍约定） */
   --focus-ring:var(--v2-accent);
   --v2-accent-hover:color-mix(in srgb, var(--v2-accent-strong) 92%, black);
@@ -293,29 +302,29 @@ body {
   --v2-shadow-md:0 2px 6px rgba(20,40,34,.05),0 10px 28px rgba(20,40,34,.08);
   --v2-shadow-lg:0 4px 12px rgba(20,40,34,.07),0 20px 56px rgba(20,40,34,.14);
   --v2-shadow-inset:inset 0 1px 2px rgba(20,40,34,.04);
-  --v2-shadow-raised:0 1px 2px rgba(20,40,34,.06);
-  --v2-shadow-raised-hover:0 2px 6px rgba(20,40,34,.10);
+  --v2-shadow-raised:none;
+  --v2-shadow-raised-hover:none;
   --v2-shadow-pressed:inset 0 1px 2px rgba(20,40,34,.10);
-  --v2-shadow-soft:0 8px 24px rgba(20,40,34,.08);
-  --v2-shadow-soft-sm:0 4px 12px rgba(20,40,34,.06);
-  --v2-r-xs:6px; --v2-r-sm:10px; --v2-r-md:14px; --v2-r-lg:16px; --v2-r-panel:22px; --v2-r-pill:999px;
-  --v2-dur-fast:120ms; --v2-dur-base:180ms; --v2-dur-slow:240ms; --v2-dur-sheet:240ms;
+  --v2-shadow-soft:0 8px 24px rgba(35,42,58,.10);
+  --v2-shadow-soft-sm:0 4px 12px rgba(35,42,58,.08);
+  --v2-r-xs:6px; --v2-r-sm:8px; --v2-r-md:10px; --v2-r-lg:12px; --v2-r-panel:13px; --v2-r-pill:999px;
+  --v2-dur-fast:140ms; --v2-dur-base:220ms; --v2-dur-slow:300ms; --v2-dur-sheet:360ms;
   --v2-ease:cubic-bezier(.2,.8,.2,1); --v2-ease-in-out:cubic-bezier(.4,0,.2,1);
   --v2-spring:cubic-bezier(.34,1.56,.64,1);
   --v2-chart-1:#5E63DE; --v2-chart-2:#2C8C7E; --v2-chart-3:#B4741B; --v2-chart-4:#C4453F;
   --v2-chart-5:#2D7DB3; --v2-chart-6:#7E4FB8; --v2-chart-7:#6B8E23; --v2-chart-8:#596A60;
 }
 .dark{
-  --v2-bg-app:#161A22; --v2-bg-surface:#1E2430; --v2-bg-surface-2:#262E3D; --v2-bg-sunken:#12161E;
-  --v2-bg-hover:rgba(148,163,184,.05); --v2-bg-active:rgba(148,163,184,.08);
-  --v2-border-hairline:rgba(148,163,184,.12); --v2-border-strong:rgba(148,163,184,.18);
+  --v2-bg-app:#0F1115; --v2-bg-surface:#141821; --v2-bg-surface-2:#1A2030; --v2-bg-sunken:#0C0E13;
+  --v2-bg-hover:#20283A; --v2-bg-active:#263046; --v2-bg-selected:#20304D;
+  --v2-border-hairline:rgba(35,42,58,.78); --v2-border-strong:#303A4E; --v2-border-outline:rgba(35,42,58,.45);
   --v2-overlay:rgba(0,0,0,.55);
-  --v2-text-1:#DCE3EE; --v2-text-2:#A3AFC2; --v2-text-3:#8B99AD; --v2-text-4:#8B99AD;
+  --v2-text-1:#E7EAF0; --v2-text-2:#A8B0C2; --v2-text-3:#7F889C; --v2-text-4:#7F889C;
   --v2-ok:#7BC79A; --v2-ok-soft:rgba(123,199,154,.14); --v2-ok-strong:#9AD6B1;
   --v2-warn:#E0A94A; --v2-warn-soft:rgba(224,169,74,.14); --v2-warn-strong:#EBC27A;
-  --v2-err:#F0756C; --v2-err-soft:rgba(240,117,108,.14); --v2-err-strong:#C4453F;
-  --v2-diff-add-bg:rgba(123,199,154,.12); --v2-diff-remove-bg:rgba(240,117,108,.12);
-  --v2-code-bg:#1A2029;
+  --v2-err:#FF5A5F; --v2-err-soft:rgba(255,90,95,.14); --v2-err-strong:#FF7A7E;
+  --v2-diff-add-bg:rgba(123,199,154,.12); --v2-diff-remove-bg:rgba(255,90,95,.12);
+  --v2-code-bg:#0C0E13;
   /* dark 同样跟随 accent（值由 applyAccent 运行时写入 --v2-accent） */
   --focus-ring:var(--v2-accent);
   --v2-shadow-xs:0 1px 2px rgba(0,0,0,.4);
@@ -323,21 +332,14 @@ body {
   --v2-shadow-md:0 2px 6px rgba(0,0,0,.4),0 10px 28px rgba(0,0,0,.45);
   --v2-shadow-lg:0 4px 12px rgba(0,0,0,.5),0 20px 56px rgba(0,0,0,.55);
   --v2-shadow-inset:inset 0 1px 2px rgba(0,0,0,.30);
-  --v2-shadow-raised:0 1px 2px rgba(0,0,0,.40);
-  --v2-shadow-raised-hover:0 2px 6px rgba(0,0,0,.45);
+  --v2-shadow-raised:none;
+  --v2-shadow-raised-hover:none;
   --v2-shadow-pressed:inset 0 1px 3px rgba(0,0,0,.45);
   --v2-shadow-soft:none; --v2-shadow-soft-sm:none;
   --v2-chart-1:#8A8FF0; --v2-chart-2:#5FC4B2; --v2-chart-3:#E0A94A; --v2-chart-4:#EF6B63;
   --v2-chart-5:#6DB4E6; --v2-chart-6:#B58CD6; --v2-chart-7:#A3C24E; --v2-chart-8:#8B99AD;
 }
 
-/* 深色氛围光：左上跟随 accent + 右上固定紫光，极低透明度，正中保持纯净阅读区（柔夜墨蓝 §D） */
-.dark .app-workspace {
-  background:
-    radial-gradient(ellipse at 10% 0%, color-mix(in srgb, var(--v2-accent) 5.5%, transparent) 0%, transparent 48%),
-    radial-gradient(ellipse at 92% 6%, rgba(183,166,240,.05) 0%, transparent 48%),
-    var(--v2-bg-surface);
-}
 
 /* ===== v2 keyframes（新增；保留现有 shimmer/slideUp/soundwave，合计 8 个） ===== */
 @keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }
@@ -376,19 +378,47 @@ body {
   .expand-collapse[data-open="false"] { max-height: 0; }
 }
 
-/* ===== 会话行选中底：一层柔和的强调色染色，无描边、无外发光、无光柱。
-   它是 framer-motion layoutId 的滑动载体（切换会话时做 FLIP 平移），所以独立成层并 will-change: transform。
-   color-mix 基于 --v2-accent，accent 运行时切换自动跟随；浅色底上染色减弱。 */
+/* ===== 外壳（Skymap 式工作站）=====
+   窗口最外层是最深一档；侧栏与工作区是嵌在窗口里的圆角面板，四周留边、之间留缝。
+   顶栏三段式：左段与侧栏等宽、中段一行等宽字体的状态、右段成组的工具按钮。 */
+@media (min-width: 1024px) {
+  .app-body { gap: 10px; padding: 8px; }
+  .app-panel {
+    background: var(--v2-bg-surface);
+    border: 1px solid var(--v2-border-outline);
+    border-radius: var(--v2-r-panel);
+  }
+}
+.app-tool-group {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 3px;
+  background: var(--v2-bg-surface-2);
+  border: 1px solid var(--v2-border-hairline);
+  border-radius: var(--v2-r-sm);
+}
+.app-tool-divider { width: 1px; height: 16px; margin: 0 3px; flex-shrink: 0; background: var(--v2-border-hairline); }
+
+/* ===== 会话条目选中态：选中底 + 左侧 3px 蓝色竖条（同 Skymap 模板卡）。
+   它是 framer-motion layoutId 的滑动载体（切换会话时做 FLIP 平移），所以独立成层并 will-change: transform。 */
 .session-active-pill {
   position: absolute;
   inset: 0;
   border-radius: var(--v2-r-sm);
   pointer-events: none;
   will-change: transform;
-  background: color-mix(in srgb, var(--v2-accent) 16%, transparent);
+  background: var(--v2-bg-selected);
 }
-html.light .session-active-pill {
-  background: color-mix(in srgb, var(--v2-accent) 11%, transparent);
+.session-active-pill::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--v2-accent);
 }
 
 /* ===== 会话卡尾部：操作区 / 状态胶囊按指针能力切换 =====

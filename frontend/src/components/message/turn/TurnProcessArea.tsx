@@ -263,7 +263,7 @@ const ProcessAggregateBar: React.FC<TurnProcessAreaProps> = ({
 
     return (
         <div
-            className="turn-process-aggregate overflow-hidden rounded-sm bg-surface2"
+            className="turn-process-aggregate"
             data-testid={`turn-process-${turn.index}`}
         >
             <button
@@ -273,7 +273,7 @@ const ProcessAggregateBar: React.FC<TurnProcessAreaProps> = ({
                 aria-label={`详细过程区，${expanded ? '点击收起' : '点击展开'}${running ? `，当前任务：${currentTitle}` : ''}`}
                 data-turn-header={turn.index}
                 className={cn(
-                    'process-aggregate-toggle flex min-h-11 w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-sm px-3 py-2 text-left',
+                    'process-aggregate-toggle flex min-h-11 w-full flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2.5 text-left',
                     'transition-colors duration-fast hover:bg-hover2',
                 )}
             >

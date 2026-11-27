@@ -527,7 +527,7 @@ function App() {
             ) : workbenchEnabled && viewMode === 'simple' ? (
               <SimpleWorkbench sessionId={sessionId} messages={messages} status={status} />
             ) : messages.length === 0 ? (
-                /* §7.1 空态 Hero（记忆点①）：今天想创造什么？ */
+                /* 没有会话内容时的工作提示卡 */
                 <EmptyHero />
               ) : (
                 <MessageList ref={messageListRef} keyboardHeight={keyboardHeight} />
@@ -542,7 +542,7 @@ function App() {
             {(!workbenchEnabled || viewMode === 'development') && <JourneyVerifyPanel />}
             <div className={isMobile
               ? 'chat-composer-inset prompt-input-container px-3 pt-1'
-              : 'chat-composer-inset border-t border-hairline bg-app2 p-4'}>
+              : 'chat-composer-inset'}>
             <PromptInput
               sessionId={sessionId}
               onSubmit={handleSubmit}

@@ -153,9 +153,8 @@
 .panel-control:not(.rounded-full) { border-radius: var(--v2-r-sm); }
 
 /* Reading widths are applied to content, never to the virtual scroll viewport.
-   消息列与输入区共用一个阅读列宽（--thread-max-width），宽屏下两者居中对齐。 */
+   输入区是工作区底部通栏的条带，不随阅读列宽收窄。 */
 .turn-card { width: 100%; max-width: var(--thread-max-width); margin-inline: auto; }
-.chat-composer-surface { max-width: var(--thread-max-width); margin-inline: auto; }
 .text-block > :is(p, ul, ol, blockquote) { max-width: 860px; }
 .panel-control > .lucide, .dialog-control > .lucide, .workbench-control > .lucide {
     width: 18px; height: 18px; flex-shrink: 0;
@@ -169,7 +168,7 @@
 }
 
 :root { --v2-accent-ink: color-mix(in srgb, var(--v2-accent-strong) 80%, black); }
-:root.dark { --v2-accent-ink: var(--v2-accent); }
+:root.dark { --v2-accent-ink: color-mix(in srgb, var(--v2-accent) 72%, white); }
 
 /* Controls use a distinct readable label tier. Auxiliary metadata remains 13px. */
 .panel-control, .dialog-control, .workbench-control { font-size: 14px; line-height: 1.5; }

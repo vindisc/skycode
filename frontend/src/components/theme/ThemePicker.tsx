@@ -34,7 +34,7 @@ export const ThemePicker: React.FC = () => {
             {/* 主题模式 */}
             <div>
                 <h4 className="text-sm font-medium text-t2 mb-3">主题模式</h4>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" role="group" aria-label="主题">
+                <div className="grid grid-cols-2 gap-2" role="group" aria-label="主题">
                     {modes.map(({ value, label, icon: Icon }) => {
                         const selected = theme.mode === value;
                         return (

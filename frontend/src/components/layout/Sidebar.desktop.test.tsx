@@ -229,7 +229,7 @@ it('会话卡只保留标题：不显示模型、消息数与时间；运行中�
     render(<Sidebar />);
     const title = await screen.findByText('目标会话');
     const card = title.closest('.session-card')!;
-    expect(title).toHaveClass('line-clamp-2');
+    expect(title).toHaveClass('truncate');
     expect(screen.queryByText('test-model-x')).not.toBeInTheDocument();
     expect(screen.queryByText(/8 条/)).not.toBeInTheDocument();
     expect(screen.queryByText(/刚刚/)).not.toBeInTheDocument();

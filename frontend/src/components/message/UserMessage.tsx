@@ -36,9 +36,9 @@ const UserMessage: React.FC<UserMessageProps> = ({ message, disclosure }) => {
     const summary = preview?.type === 'text' ? preview.text.trim().slice(0, 120) : '图片附件';
 
     return (
-        <div className="user-message group flex flex-col items-end px-3 py-3 sm:px-4">
+        <div className="user-message group flex flex-col items-end px-1 pb-2 pt-1">
             {/* Bubble（视觉换肤 §6.3.2：凸起白卡 + hairline 边 + 尾角 6px，右对齐） */}
-            <div className="user-message-bubble min-w-0 max-w-[92%] sm:max-w-[76%] [overflow-wrap:anywhere] rounded-md rounded-br-xs bg-surface2 px-[17px] py-[11px] text-15 leading-[1.6] text-t1">
+            <div className="user-message-bubble min-w-0 max-w-[92%] sm:max-w-[76%] [overflow-wrap:anywhere] rounded-md bg-hover2 px-4 py-3 text-15 leading-[1.7] text-t1">
                 {disclosure && (
                     <button type="button" aria-expanded={expanded} aria-label={`这条消息，点击${expanded ? '收起' : '展开'}`}
                         onClick={disclosure.onToggle}

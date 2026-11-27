@@ -70,7 +70,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     // 独立 Sidebar 模式：只渲染 Sidebar 全屏
     if (isDetachedSidebar) {
         return (
-            <div className="app-root app-workspace flex flex-col bg-[var(--v2-bg-surface)] overflow-hidden">
+            <div className="app-root app-workspace flex flex-col bg-app2 overflow-hidden">
                 <Sidebar className="flex-1" isDrawerMode={false} defaultTab={detachedTab} />
                 {!isConnected && (
                     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 
@@ -85,7 +85,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     }
 
     return (
-        <div className="app-root app-workspace flex flex-col bg-[var(--v2-bg-surface)] overflow-hidden">
+        <div className="app-root app-workspace flex flex-col bg-app2 overflow-hidden">
             {/* Header */}
             <Header 
                 onMenuClick={openSessionList}
@@ -93,14 +93,14 @@ export function AppLayout({ children }: AppLayoutProps) {
             />
 
             {/* Main Layout */}
-            <div className="flex-1 min-h-0 flex overflow-hidden">
+            <div className="app-body flex-1 min-h-0 flex overflow-hidden">
                 {/* Desktop Sidebar */}
                 {!compactNavigation && (
-                    <Sidebar className="shrink-0" />
+                    <Sidebar className="app-panel shrink-0" />
                 )}
 
                 {/* Main Content Area */}
-                <main className="flex-1 min-h-0 flex flex-col min-w-0">
+                <main className="app-panel flex-1 min-h-0 flex flex-col min-w-0">
                     {/* Content — 手机和平板菜单直接在主区打开会话列表 */}
                     <div className="flex-1 min-h-0 overflow-hidden relative">
                         {compactNavigation && mobileNavTab ? (

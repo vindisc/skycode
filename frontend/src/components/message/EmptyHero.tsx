@@ -1,21 +1,14 @@
 /**
- * EmptyHero — §7.1 空态 Hero（记忆点①）
+ * EmptyHero — 没有会话内容时的起步提示
  *
- * 结构（ui EmptyState hero 变体承载）：
- * 1. 徽章：现有品牌 Logo + skycode；
- * 2. 标题：今天想<b>创造</b>什么？（clamp(34px,5.4vw,50px)/300/-0.02em，<b>=650+accent，
- *    移动端固定 34px —— 经 [&_h1]:max-md 覆盖）；
- * 3. 副文案（text-t3 档、1.7 行高，EmptyState hero 内置）；
- * 4. 快捷 chips ×4：icon accent + text-t2，surface+hairline+shadow-e1，
- *    hover 上移 2px 升 e2；点击只「填入模板文本 + 聚焦输入框」，不提交
- *    （CustomEvent 桥，零跨组件耦合，见 services/promptTemplateFill）；
- * 5. kbd 提示条（ui Kbd，text-t4；仅 ≥768px 显示，手机触屏无快捷键意义）。
- * 移动端：标题固定 34px、上下留白减半（py-12 → py-6）。
+ * Skymap 的空态是一张"工作提示"小卡片（图标 + 15px 标题 + 一句说明 + 动作），不是营销页。
+ * 这里同样只放一张卡：四条起步任务点击后把模板文本填进输入框并聚焦，不提交
+ * （CustomEvent 桥，零跨组件耦合，见 services/promptTemplateFill）；真正的输入在下方停靠的输入条带里。
  */
 
 import { Bug, FlaskConical, FolderTree, ListChecks } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
-import { Button, Chip, EmptyState, Kbd } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { dispatchPromptTemplateFill } from '@/services/promptTemplateFill';
 
 interface QuickChip {
@@ -24,8 +17,7 @@ interface QuickChip {
     template: string;
 }
 
-/** 起步任务：面向"打开了一个项目、还没想好从哪开始"的时刻。
- *  原先这里是四条上游演示案例（王者荣耀、12306、黄金投资、宇树 Excel），和编程工作台的定位对不上。 */
+/** 起步任务：面向"打开了一个项目、还没想好从哪开始"的时刻。 */
 const QUICK_CHIPS: QuickChip[] = [
     {
         label: '梳理项目结构',
@@ -51,52 +43,28 @@ const QUICK_CHIPS: QuickChip[] = [
 
 export function EmptyHero() {
     return (
-        // h-full 保持原 min-h-full 垂直居中链不变
-        <div className="relative h-full">
-            <EmptyState
-            variant="hero"
-            className="relative [&_h1]:max-md:text-[34px] [&>p]:text-t2 min-h-full max-md:py-6"
-            badge={
-                <Chip variant="accent" className="h-7 px-3">
-                    <BrandLogo className="h-5 w-5" />
-                    <span>SkyCode</span>
-                </Chip>
-            }
-            title={<>今天想<b>创造</b>什么？</>}
-            description="描述任务，SkyCode 会读代码、改文件、跑命令，过程随时可查"
-            actions={
-                <>
-                    {/* 四条起步任务固定成一行（窄屏两列），不随按钮宽度掉成 3+1 */}
-                    <div className="grid basis-full grid-cols-2 justify-items-center gap-2 sm:grid-cols-4">
-                        {QUICK_CHIPS.map((chip) => (
-                            <Button
-                                key={chip.label}
-                                variant="secondary"
-                                size="sm"
-                                className="text-t2 hover:-translate-y-0.5"
-                                onClick={() => dispatchPromptTemplateFill(chip.template)}
-                            >
-                                <chip.icon className="h-3.5 w-3.5 text-accent2-ink" aria-hidden="true" />
-                                {chip.label}
-                            </Button>
-                        ))}
-                    </div>
-                    <div className="mt-3 hidden basis-full flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-13 text-t2 md:flex">
-                        <span className="flex items-center gap-1">
-                            <Kbd>⌘</Kbd><Kbd>K</Kbd> 命令面板
-                        </span>
-                        <span aria-hidden="true">·</span>
-                        <span className="flex items-center gap-1">
-                            <Kbd>⌘</Kbd><Kbd>⏎</Kbd> 发送
-                        </span>
-                        <span aria-hidden="true">·</span>
-                        <span className="flex items-center gap-1">
-                            <Kbd>Esc</Kbd> 中断任务
-                        </span>
-                    </div>
-                </>
-            }
-        />
+        <div className="flex h-full items-start justify-center overflow-y-auto px-6 pt-[15vh]" data-testid="empty-hero">
+            <section className="w-full max-w-[460px] rounded-md border border-hairline bg-surface2 px-7 pb-6 pt-7 text-center">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-sm bg-hover2">
+                    <BrandLogo className="h-7 w-7" />
+                </div>
+                <h1 className="text-15 font-semibold text-t1">描述任务，SkyCode 开始工作</h1>
+                <p className="mt-1.5 text-13 leading-relaxed text-t2">读代码、改文件、跑命令，过程随时可查</p>
+                <div className="mt-5 grid grid-cols-2 gap-2">
+                    {QUICK_CHIPS.map((chip) => (
+                        <Button
+                            key={chip.label}
+                            variant="secondary"
+                            size="sm"
+                            className="justify-start text-t2"
+                            onClick={() => dispatchPromptTemplateFill(chip.template)}
+                        >
+                            <chip.icon className="h-3.5 w-3.5 shrink-0 text-accent2-ink" aria-hidden="true" />
+                            <span className="truncate">{chip.label}</span>
+                        </Button>
+                    ))}
+                </div>
+            </section>
         </div>
     );
 }

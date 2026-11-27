@@ -1,3 +1,5 @@
+import { BrandLogo } from '@/components/ui/BrandLogo';
+import { clearSessionSelection } from '@/services/sessionActivation';
 import { pageSessionOrder } from '@/utils/pageSessionOrder';
 import { selectMergeSourceIds, useSessionMergeStore } from '@/store/sessionMergeStore';
 import { LayoutGroup, motion, useReducedMotion } from 'framer-motion';
@@ -91,7 +93,7 @@ export const SIDEBAR_TAB_LABELS: Record<TabType, string> = {
 // ═══ Sidebar 宽度配置 ═══
 const MIN_WIDTH = 256;
 const MAX_WIDTH = 800;
-const DEFAULT_WIDTH = 320;
+const DEFAULT_WIDTH = 300;
 const STORAGE_KEY = 'sidebar-width';
 /** 桌面端收起后侧栏保留的固定展开条宽度（图标 + 竖排文字，整条可点击恢复） */
 const COLLAPSED_STRIP_WIDTH = 36;
@@ -99,7 +101,7 @@ const COLLAPSED_STRIP_WIDTH = 36;
 // ═══ §7.5 桌面面板配方常量（移动抽屉文字列表路径不消费） ═══
 /** 面板 Label：12px/500/大写/tracking .06em（视觉换肤 §1.6 小标签）。
  *  颜色取 text-t3：t3 终值 #596A60 / #8B99AD 在 surface-2 上对比度 ≥4.5，满足 AA 红线。 */
-const PANEL_LABEL_CLASS = 'text-xs font-medium uppercase tracking-[.06em] text-t3';
+const PANEL_LABEL_CLASS = 'text-13 font-medium text-t2';
 
 /** 「新建」按钮：主操作实心 accent-strong + 白字（≥4.5:1，与公共 Button primary 一致）。
  *  注意不可用 bg-accent2：--v2-accent 是表面强调色（dark 档刻意取亮如 #7FD4E8），压白字不达标；
@@ -110,10 +112,10 @@ const PANEL_NEW_BUTTON_CLASS =
     'transition-interactive duration-fast hover:bg-accent2-hover active:bg-accent2-active active:scale-[0.98] ' +
     'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring';
 
-/** 会话行：列表用"行"而不是一张张带边框阴影的卡片——六条会话各占一张卡时，侧栏比正文还抢眼。
- *  静默态透明，hover 铺一层底；选中视觉由行内 .session-active-pill 独立层承担（globals.css）。 */
+/** 会话条目：Skymap 模板卡式的实心小卡（卡片底、单行标题）；选中态由条目内的 .session-active-pill
+ *  独立层承担——选中底 + 左侧蓝色竖条（globals.css）。 */
 const SESSION_CARD_CLASS =
-    'session-card group relative px-2.5 py-2 rounded-sm cursor-pointer ' +
+    'session-card group relative pl-3.5 pr-2 py-[7px] rounded-sm cursor-pointer bg-surface2 ' +
     'transition-colors duration-fast hover:bg-hover2';
 
 /** §7.5 面板头：Label（大写）+ 计数 chip */
@@ -128,7 +130,7 @@ function PanelHeader({ label, count, onCollapse, onBack }: { label: string; coun
                     </button>
                 )}
                 <span className={PANEL_LABEL_CLASS}>{label}</span>
-                {count !== undefined && <Chip variant="accent" className="tabular-nums">{count}</Chip>}
+                {count !== undefined && <span className="text-13 tabular-nums text-t3">{count}</span>}
             </div>
             {onCollapse && (
                 <button
@@ -136,12 +138,11 @@ function PanelHeader({ label, count, onCollapse, onBack }: { label: string; coun
                     onClick={onCollapse}
                     aria-label="收起整个对话列表"
                     title="收起整个对话列表"
-                    className="panel-control inline-flex items-center gap-1.5 shrink-0 rounded-sm px-2 py-1 text-13 text-t2
+                    className="panel-control inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-sm text-t2
                         hover:bg-hover2 hover:text-t1 focus-visible:outline-none
                         focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
                 >
                     <PanelLeftClose className="w-4 h-4" aria-hidden="true" />
-                    收起列表
                 </button>
             )}
         </div>
@@ -329,7 +330,7 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
 
     return (
         <motion.aside
-            className={`app-sidebar ${sidebarWidthClass} h-full bg-app2 ${isDrawerMode ? '' : 'border-r border-hairline'} flex flex-col relative z-10 overflow-hidden ${className}`}
+            className={`app-sidebar ${sidebarWidthClass} h-full flex flex-col relative z-10 overflow-hidden ${className}`}
             style={sidebarStyle}
             animate={isDrawerMode ? undefined : { width: panelCollapsed ? COLLAPSED_STRIP_WIDTH : width }}
             transition={{ duration: 0, ease: [.2, .8, .2, 1] }}
@@ -909,18 +910,58 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
 
     return (
         <div className="flex flex-col h-full">
-            {/* §7.5 面板头：Label + 计数 chip */}
-            <PanelHeader onBack={onBack} label={simpleMode ? '任务' : '会话'} count={filteredSessions.length} onCollapse={onCollapse} />
+            {/* 面板头。桌面：品牌行——小号标识（点击回首页），右端是新建与收起的图标按钮，品牌不再占顶栏；
+                移动端（带 onBack）与任务列表沿用「标题 + 计数」的 PanelHeader */}
+            {!onBack && !simpleMode ? (
+                <div className="flex h-12 shrink-0 items-center gap-1 pl-3 pr-2">
+                    <button
+                        type="button"
+                        onClick={clearSessionSelection}
+                        aria-label="返回首页"
+                        title="返回首页"
+                        className="flex min-w-0 items-center gap-2 rounded-sm px-1 py-1 hover:bg-hover2
+                            focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
+                    >
+                        <BrandLogo className="h-[18px] w-[18px]" />
+                        <span className="text-xs font-medium tracking-[0.08em] text-t3">SKYCODE</span>
+                    </button>
+                    <span className="ml-auto text-13 tabular-nums text-t3" aria-label="会话数">{filteredSessions.length}</span>
+                    <button
+                        type="button"
+                        onClick={handleNewSession}
+                        aria-label="新建会话"
+                        title="新建会话"
+                        className="panel-control inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-sm text-t2 hover:bg-hover2 hover:text-t1
+                            focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
+                    >
+                        <Plus className="w-4 h-4" aria-hidden="true" />
+                    </button>
+                    {onCollapse && (
+                        <button
+                            type="button"
+                            onClick={onCollapse}
+                            aria-label="收起整个对话列表"
+                            title="收起整个对话列表"
+                            className="panel-control inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-sm text-t2 hover:bg-hover2 hover:text-t1
+                                focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
+                        >
+                            <PanelLeftClose className="w-4 h-4" aria-hidden="true" />
+                        </button>
+                    )}
+                </div>
+            ) : (
+                <PanelHeader onBack={onBack} label={simpleMode ? '任务' : '会话'} count={filteredSessions.length} onCollapse={onCollapse} />
+            )}
 
-            {/* 新建按钮 + 搜索框（§7.5 配方） */}
-            <div className="px-2 pb-2 space-y-2 border-b border-hairline flex-shrink-0">
-                <button
+            {/* 搜索框；移动端与任务列表在这里保留带文字的新建按钮 */}
+            <div className="px-2 pb-2 space-y-2 flex-shrink-0">
+                {(onBack || simpleMode) && <button
                     onClick={handleNewSession}
                     className={PANEL_NEW_BUTTON_CLASS}
                 >
                     <Plus className="w-4 h-4" />
                     {simpleMode ? '新建任务' : '新建会话'}
-                </button>
+                </button>}
                 <PanelSearchBox
                     value={query}
                     onChange={handleQueryChange}
@@ -950,15 +991,15 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                     aria-expanded={expanded}
                                     aria-label={`${expanded ? '收起' : '展开'}文件夹 ${group.directory || group.name}`}
                                     title={group.directory || group.name}
-                                    className="panel-control w-full flex items-center gap-2 px-2 py-1.5 rounded-sm text-t2 hover:bg-hover2
+                                    className="panel-control w-full flex items-center gap-1.5 px-2 py-1.5 mt-1 rounded-sm text-t3 hover:text-t2 hover:bg-hover2
                                         focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring"
                                 >
                                     {expanded ? <ChevronDown className="w-3.5 h-3.5 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 shrink-0" />}
                                     <Folder className="w-4 h-4 shrink-0" />
-                                    <span className="min-w-0 flex-1 truncate text-left text-sm font-medium text-t1">{group.name}</span>
-                                    <span className="text-13 tabular-nums">{group.sessions.length}</span>
+                                    <span className="min-w-0 flex-1 truncate text-left text-13 font-medium">{group.name}</span>
+                                    <span className="text-xs tabular-nums">{group.sessions.length}</span>
                                 </button>
-                                {expanded && <div className="mt-1 space-y-0.5">
+                                {expanded && <div className="mt-1.5 space-y-1">
                                     {group.sessions.map(session => {
                                         const folder = session.workingDirectory.split(/[\\/]/).filter(Boolean).at(-1);
                                         const displayTitle = simpleMode
@@ -994,7 +1035,7 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                                 )}
                                                 <div className="relative flex items-start gap-1">
                                                     <div className="flex-1 min-w-0">
-                                                        <div className={`line-clamp-2 break-words text-sm ${isActive ? 'font-medium text-t1' : 'text-t2'}`}>
+                                                        <div className={`truncate text-13 ${isActive ? 'font-medium text-t1' : 'text-t2'}`}>
                                                             {displayTitle}
                                                         </div>
                                                         {simpleMode && (
@@ -1299,7 +1340,7 @@ function SimpleTaskList({ onCollapse, onSessionActivated, onBack }: { onCollapse
                 if (group.tasks.length === 0) return null;
                 const collapsedGroup = collapsed.has(group.status); const GroupIcon = iconFor(group.status);
                 return <section key={group.status} className="mb-3"><button onClick={() => setCollapsed(previous => { const next = new Set(previous); next.has(group.status) ? next.delete(group.status) : next.add(group.status); return next; })} className="panel-control flex w-full items-center gap-2 px-2 py-1.5 text-13 font-medium text-t2"><span>{collapsedGroup ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}</span><GroupIcon className={`h-3.5 w-3.5 ${toneFor(group.status)} ${group.status === 'RUNNING' ? 'animate-spin' : ''}`} />{group.label}<span className="ml-auto text-t2 tabular-nums whitespace-nowrap shrink-0">{group.tasks.length}</span></button>
-                    {!collapsedGroup && <div className="space-y-0.5">{group.tasks.map(task => {
+                    {!collapsedGroup && <div className="space-y-1">{group.tasks.map(task => {
                         const isActive = task.sessionId === currentSessionId;
                         return (
                         <div
@@ -1319,7 +1360,7 @@ function SimpleTaskList({ onCollapse, onSessionActivated, onBack }: { onCollapse
                             )}
                             <div className="relative flex items-start gap-2">
                                 <div className="min-w-0 flex-1">
-                                    <p className={`truncate text-sm ${isActive ? 'font-medium text-t1' : 'text-t2'}`}>{task.title}</p>
+                                    <p className={`truncate text-13 ${isActive ? 'font-medium text-t1' : 'text-t2'}`}>{task.title}</p>
                                     <p className={`mt-1 flex items-center gap-1.5 text-13 ${isActive ? 'text-t2' : 'text-t3'}`}>
                                         <span className="truncate">{task.folderName}{task.hint ? ` · ${task.hint}` : ''}</span>
                                         <span aria-hidden="true">·</span>

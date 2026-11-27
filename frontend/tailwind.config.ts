@@ -29,6 +29,8 @@ export default {
                 surfacev2: 'var(--v2-bg-surface)',
                 surface2: 'var(--v2-bg-surface-2)',
                 sunken2: 'var(--v2-bg-sunken)',
+                selected2: 'var(--v2-bg-selected)',
+                outline: 'var(--v2-border-outline)',
                 hover2: 'var(--v2-bg-hover)',
                 active2: 'var(--v2-bg-active)',
                 t1: 'var(--v2-text-1)',

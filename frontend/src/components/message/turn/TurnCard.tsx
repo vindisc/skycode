@@ -135,13 +135,14 @@ const TurnCard: React.FC<TurnCardProps> = ({
                     </div>
                 ))}
 
-                {/* 过程与回复共用一个外框和身份标识，形成一份完整的助手回应。 */}
+                {/* 助手回合是一张卡片（Skymap 的卡片式分节）：顶栏是身份，下面依次是过程、回复、本轮修改，
+                    各分节之间用细线分隔，可折叠的分节标题在右侧放收起 / 展开。 */}
                 {(layers.process.length > 0 || layers.answer || layers.tail.length > 0 || publications.length > 0) && (
-                    <section className="mx-1 mb-8 mt-1 min-w-0 sm:mx-2"
+                    <section className="mb-3 min-w-0 overflow-hidden rounded-md border border-hairline bg-surface2"
                         aria-label="助手回复" data-testid={`turn-response-${turn.index}`}>
-                        <div className="flex items-center gap-2 px-2 pb-2 text-13 font-medium text-t3">
-                            <BrandLogo className="h-7 w-7" />
-                            <span>SkyCode</span>
+                        <div className="flex h-10 shrink-0 items-center gap-2 px-3.5">
+                            <BrandLogo className="h-5 w-5" />
+                            <span className="text-13 font-medium text-t2">SkyCode</span>
                         </div>
                         {/* 过程区（密度分档；无过程消息则不渲染） */}
                         {layers.process.length > 0 && (
@@ -168,17 +169,21 @@ const TurnCard: React.FC<TurnCardProps> = ({
 
                         {/* answer 层：完整最终回复（流式命中时实时渲染） */}
                         {layers.answer && (
-                            <div data-message-uuid={layers.answer.uuid} className="turn-message min-w-0 px-2 pb-1 pt-4">
-                                {compact && (
-                                    <button type="button" aria-expanded={answerExpanded} aria-label={`最终回复，点击${answerExpanded ? '收起' : '展开'}`}
-                                        onClick={() => toggleMessage(answerKey)}
-                                        className="panel-control -mx-2 flex min-h-7 w-[calc(100%+1rem)] items-center gap-2 rounded-sm px-2 py-1 text-left text-13 text-t3 hover:bg-hover2 hover:text-t1 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring max-md:min-h-11">
-                                        <span className="font-medium">{answerStreaming ? '回复生成中' : '最终回复'}</span>
-                                        <span className="ml-auto shrink-0 text-13">{answerExpanded ? '收起' : '展开'}</span>
-                                        <ChevronRight size={13} aria-hidden="true" className={`shrink-0 text-t3 ${answerExpanded ? 'rotate-90' : ''}`} />
-                                    </button>
-                                )}
-                                {answerExpanded && (compact ? <div className="pt-3">{answerContent}</div> : answerContent)}
+                            <div data-message-uuid={layers.answer.uuid} className="turn-message min-w-0 border-t border-hairline">
+                                <div className="flex min-h-10 items-center gap-2 px-3.5">
+                                    {compact ? (
+                                        <button type="button" aria-expanded={answerExpanded} aria-label={`最终回复，点击${answerExpanded ? '收起' : '展开'}`}
+                                            onClick={() => toggleMessage(answerKey)}
+                                            className="panel-control -ml-2 flex min-h-7 flex-1 items-center gap-2 rounded-sm py-1 pl-2 pr-2 text-left hover:bg-hover2 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring max-md:min-h-11">
+                                            <span className="text-13 font-semibold text-t1">{answerStreaming ? '回复生成中' : '回复'}</span>
+                                            <span className="ml-auto shrink-0 text-xs text-t3">{answerExpanded ? '收起' : '展开'}</span>
+                                            <ChevronRight size={13} aria-hidden="true" className={`shrink-0 text-t3 ${answerExpanded ? 'rotate-90' : ''}`} />
+                                        </button>
+                                    ) : (
+                                        <span className="text-13 font-semibold text-t1">{answerStreaming ? '回复生成中' : '回复'}</span>
+                                    )}
+                                </div>
+                                {answerExpanded && <div className="min-w-0 px-3.5 pb-3.5">{answerContent}</div>}
                             </div>
                         )}
 
@@ -188,9 +193,9 @@ const TurnCard: React.FC<TurnCardProps> = ({
                                 {renderMessageContent(message)}
                             </div>
                         ))}
-                        {files.length > 0 && <div className="min-w-0 px-2 pb-1">
+                        {files.length > 0 && <div className="min-w-0 border-t border-hairline">
                             <TurnFileChanges key={`${sessionId}:${turn.key}`} files={files} running={running} />
-                            {layers.answer?.type === 'assistant' && answerExpanded && <AssistantMessageActions message={layers.answer} isStreaming={answerStreaming} />}
+                            {layers.answer?.type === 'assistant' && answerExpanded && <AssistantMessageActions message={layers.answer} isStreaming={answerStreaming} className="px-3.5 pb-2" />}
                         </div>}
                     </section>
                 )}
