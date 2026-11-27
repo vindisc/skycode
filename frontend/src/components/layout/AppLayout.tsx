@@ -11,6 +11,8 @@ import { ChevronLeft } from 'lucide-react';
 import { MobileComposerNavigation } from '@/components/input/PromptInput/MobileComposerNavigation';
 import { Header } from './Header';
 import { Sidebar, SidebarTabContent, SIDEBAR_TAB_LABELS, type TabType } from './Sidebar';
+import { Inspector } from './Inspector';
+import { useInspectorVisible } from '@/hooks/useInspectorVisible';
 import { StatusBar } from './StatusBar';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useResponsive, useViewportWidth } from '@/hooks/useResponsive';
@@ -26,6 +28,8 @@ export function AppLayout({ children }: AppLayoutProps) {
     // 手机和平板共用会话列表入口，≥1024px 保留桌面侧栏。
     const { isMobile, isTablet } = useResponsive();
     const compactNavigation = isMobile || isTablet;
+    // 右侧检查器只在桌面且视口够宽时出现（见 useInspectorVisible）
+    const inspectorVisible = useInspectorVisible();
 
     const aposEnabled = useFeatureFlagStore((s) => s.flags.APOS_ACTIVITY_STREAM);
     const mobileStatusEnabled = useFeatureFlagStore((s) => s.flags.APOS_MOBILE_STATUS);
@@ -133,6 +137,9 @@ export function AppLayout({ children }: AppLayoutProps) {
                         ? <MobileStatusBar />
                         : !isMobile && <StatusBar />}
                 </main>
+
+                {/* 右侧检查器：当前会话的设置与运行信息 */}
+                {inspectorVisible && <Inspector className="app-panel w-80 shrink-0" />}
             </div>
 
             {/* Connection Status Toast */}

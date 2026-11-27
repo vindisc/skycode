@@ -52,15 +52,22 @@ function FileDetails({ file, onClose }: { file: TurnFileChange; onClose: () => v
     </div>, document.body);
 }
 
-export function TurnFileChanges({ files, running }: { files: TurnFileChange[]; running: boolean }) {
-    const [open, setOpen] = useState(false);
+export function TurnFileChanges({ files, running, defaultOpen = false, title = '本轮修改' }: {
+    files: TurnFileChange[];
+    running: boolean;
+    /** 检查器里直接展开清单；会话卡片里默认收起 */
+    defaultOpen?: boolean;
+    /** 清单标题：会话卡片里是「本轮修改」，检查器汇总整个会话时是「修改的文件」 */
+    title?: string;
+}) {
+    const [open, setOpen] = useState(defaultOpen);
     const [showAll, setShowAll] = useState(false);
     const [selected, setSelected] = useState<string | null>(null);
     if (!files.length) return null;
     const selectedFile = files.find(file => file.path === selected);
     return <div className="min-w-0" data-testid="turn-file-changes">
         <button className={`${button} flex w-full items-center gap-2 px-3 text-left text-sm font-medium text-t1`} aria-expanded={open} onClick={() => setOpen(!open)}>
-            <FileCode2 size={18} className="shrink-0 text-t2" /><span>{running ? '本轮已记录修改' : '本轮修改'} · {files.length} 个文件</span><ChevronDown size={18} className={`ml-auto shrink-0 text-t2 ${open ? 'rotate-180' : ''}`} />
+            <FileCode2 size={18} className="shrink-0 text-t2" /><span>{running ? '本轮已记录修改' : title} · {files.length} 个文件</span><ChevronDown size={18} className={`ml-auto shrink-0 text-t2 ${open ? 'rotate-180' : ''}`} />
         </button>
         {open && <div className="px-3 pb-3">
             {(showAll ? files : files.slice(0, 5)).map(file => <button key={file.path} className={`${button} flex w-full items-center gap-2 px-2 py-2 text-left`} onClick={() => setSelected(file.path)}>

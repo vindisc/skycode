@@ -10,11 +10,13 @@ import { BrandLogo } from '@/components/ui/BrandLogo';
  */
 
 import { useEffect } from 'react';
-import { Menu, Settings, Loader2, Cable, Brain, Puzzle, Zap } from 'lucide-react';
+import { Menu, Settings, Loader2, Cable, Brain, Puzzle, Zap, PanelRightClose, PanelRightOpen } from 'lucide-react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useCostStore } from '@/store/costStore';
 import { useDialogStore } from '@/store/dialogStore';
 import { usePermissionStore } from '@/store/permissionStore';
+import { useAppUiStore } from '@/store/appUiStore';
+import { useInspectorAvailable, useInspectorVisible } from '@/hooks/useInspectorVisible';
 import { getSessionStatusLabel } from '@/components/status/sessionStatusMeta';
 import { getPermissionModeLabel } from './StatusBar';
 import { useModelStore } from '@/store/modelStore';
@@ -73,6 +75,11 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
 
     const status = useSessionStore(s => s.status);
     const permissionMode = usePermissionStore(s => s.permissionMode);
+    // 右侧检查器：够宽时顶栏给一个收起 / 展开的入口；它可见时用量只在检查器里显示
+    const inspectorOpen = useAppUiStore(s => s.inspectorOpen);
+    const setInspectorOpen = useAppUiStore(s => s.setInspectorOpen);
+    const inspectorVisible = useInspectorVisible();
+    const canToggleInspector = useInspectorAvailable();
     const permissionLabel = getPermissionModeLabel(permissionMode);
     const customTitle = useSessionStore(s => s.customTitle);
     const firstUserText = useMessageStore(s => {
@@ -148,7 +155,7 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     <span role="status" className={`shrink-0 ${streaming ? 'text-accent2-ink' : bridgeStatus !== 'connected' ? 'text-warn' : ''}`}>
                         {mobileStatus || getSessionStatusLabel(status)}
                     </span>
-                    {hasUsage && <>
+                    {hasUsage && !inspectorVisible && <>
                         <span aria-hidden="true">|</span>
                         <span title="输入 Tokens">↑{usage.inputTokens.toLocaleString()}</span>
                         <span title="输出 Tokens">↓{usage.outputTokens.toLocaleString()}</span>
@@ -206,6 +213,20 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                 >
                     <Settings className="w-4 h-4" aria-hidden="true" />
                 </button>
+
+                {canToggleInspector && <>
+                    <span className="app-tool-divider" aria-hidden="true" />
+                    <button
+                        type="button"
+                        onClick={() => setInspectorOpen(!inspectorOpen)}
+                        className={TOOL_BUTTON_CLASS}
+                        aria-label="检查器"
+                        aria-pressed={inspectorOpen}
+                        title={inspectorOpen ? '收起检查器' : '展开检查器'}
+                    >
+                        {inspectorOpen ? <PanelRightClose className="w-4 h-4" aria-hidden="true" /> : <PanelRightOpen className="w-4 h-4" aria-hidden="true" />}
+                    </button>
+                </>}
                 </div>
             </div>
         </header>

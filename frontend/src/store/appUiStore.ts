@@ -29,6 +29,9 @@ export interface AppUiStoreState {
      */
     mobileNavTab: string | null;
 
+    /** 右侧检查器是否展开（仅 ≥1280px 渲染，见 useInspectorVisible；收起后模型 / 权限 / 显示方式回到输入条带） */
+    inspectorOpen: boolean;
+
     showElicitationDialog: (data: ElicitationRequest) => void;
     dismissElicitationDialog: (interactionId: string) => void;
     updateElicitationDeadline: (interactionId: string, decisionDeadlineAt: number, version?: number) => void;
@@ -36,6 +39,7 @@ export interface AppUiStoreState {
     updateSpeculation: (data: { id: string; accepted: boolean }) => void;
     requestVisualizationTab: (tab: string | null) => void;
     setMobileNavTab: (tab: string | null) => void;
+    setInspectorOpen: (open: boolean) => void;
 }
 
 export const useAppUiStore = create<AppUiStoreState>()(
@@ -45,6 +49,7 @@ export const useAppUiStore = create<AppUiStoreState>()(
         speculationResults: new Map(),
         pendingVisualizationTab: null,
         mobileNavTab: null,
+        inspectorOpen: true,
 
         showElicitationDialog: (data) => set(d => { d.elicitationDialog = data; }),
         dismissElicitationDialog: (interactionId) => set(d => {
@@ -62,5 +67,6 @@ export const useAppUiStore = create<AppUiStoreState>()(
         updateSpeculation: (data) => set(d => { d.speculationResults.set(data.id, data.accepted); }),
         requestVisualizationTab: (tab) => set(d => { d.pendingVisualizationTab = tab; }),
         setMobileNavTab: (tab) => set(d => { d.mobileNavTab = tab; }),
+        setInspectorOpen: (open) => set(d => { d.inspectorOpen = open; }),
     })))
 );

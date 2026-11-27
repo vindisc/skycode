@@ -18,7 +18,7 @@ import { useSessionStore } from '@/store/sessionStore';
 
 /** 本地显示方式命令控制消息展示；精简档默认折叠问题、过程与回复。命名与 DensitySwitch / 手机导航三端统一。 */
 const VIEW_DENSITY_COMMANDS: Array<Command & { density: TurnDensity }> = [
-    { name: '视图：精简', description: '问题、过程与回复默认折叠，可分别展开', group: '视图', density: 'compact' },
+    { name: '视图：精简', description: '只看问答，过程收成一行', group: '视图', density: 'compact' },
     { name: '视图：标准', description: '按任务分节展示过程，展开查看步骤摘要', group: '视图', density: 'balanced' },
     { name: '视图：完整过程', description: '按任务分节展示完整过程与工具详情', group: '视图', density: 'detailed' },
 ];

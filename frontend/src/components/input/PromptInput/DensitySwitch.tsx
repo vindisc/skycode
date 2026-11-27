@@ -113,7 +113,7 @@ export const MobileDensitySwitch: React.FC = () => {
                             onClick={() => handlePick(option.value)}
                             className={cn(MOBILE_MENU_ITEM_CLASS, 'min-h-14 rounded-md', option.value === density && 'bg-accent2-soft text-accent2-ink')}>
                             <span className="flex flex-1 flex-col items-start gap-0.5"><span className="font-medium">{option.label}</span>
-                                <span className="text-13 text-t3">{option.value === 'compact' ? '问题、过程与回复默认折叠' : option.value === 'balanced' ? '按任务查看执行摘要' : '查看完整过程与任务导航'}</span>
+                                <span className="text-13 text-t3">{option.value === 'compact' ? '只看问答，过程收成一行' : option.value === 'balanced' ? '按任务查看执行摘要' : '查看完整过程与任务导航'}</span>
                             </span>
                             {option.value === density && <Check size={18} aria-hidden="true" />}
                         </button>

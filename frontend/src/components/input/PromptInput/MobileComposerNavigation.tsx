@@ -28,7 +28,7 @@ function ActionRow({ label, icon: Icon, run, disabled = false, hint }: { label: 
 
 /** 显示方式三档（消息展示密度；描述沿用原 MobileDensitySwitch 文案；选项面板为上下列表） */
 const DENSITY_OPTIONS: { value: TurnDensity; label: string; description: string }[] = [
-    { value: 'compact', label: '精简', description: '问题、过程与回复默认折叠' },
+    { value: 'compact', label: '精简', description: '只看问答，过程收成一行' },
     { value: 'balanced', label: '标准', description: '按任务查看执行摘要' },
     { value: 'detailed', label: '完整过程', description: '查看完整过程与任务导航' },
 ];
