@@ -122,7 +122,8 @@ test.describe('双主题视觉基线', () => {
             // Header 设置钮：title="设置"（桌面视口可见）；弹窗标题是「设置」。基线截的是外观页
             await page.locator('button[title="设置"]').click();
             await page.getByRole('dialog', { name: '设置', exact: true }).getByRole('tab', { name: '外观' }).click();
-            await expect(page.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
+            // 右侧检查器里也有一张叫「设置」的卡，所以限定在弹窗里找标题
+            await expect(page.getByRole('dialog', { name: '设置', exact: true }).getByRole('heading', { name: '设置', exact: true })).toBeVisible();
             await page.waitForTimeout(300);
             await expect(page).toHaveScreenshot(`settings-open-${theme}.png`, {
                 maxDiffPixelRatio: 0.01,

@@ -285,7 +285,7 @@ body {
   --v2-bg-hover:rgba(35,42,58,.06); --v2-bg-active:rgba(35,42,58,.10); --v2-bg-selected:#E1EBFF;
   --v2-border-hairline:rgba(35,42,58,.16); --v2-border-strong:rgba(35,42,58,.28); --v2-border-outline:rgba(35,42,58,.12);
   --v2-overlay:rgba(20,24,35,.32);
-  --v2-text-1:#171B24; --v2-text-2:#4A5366; --v2-text-3:#5E687C; --v2-text-4:#5E687C;
+  --v2-text-1:#171B24; --v2-text-2:#4A5366; --v2-text-3:#59637A; --v2-text-4:#59637A;
   --v2-ok:#2C724B; --v2-ok-soft:rgba(63,143,98,.12); --v2-ok-strong:#245E3E;
   --v2-warn:#8F5C12; --v2-warn-soft:rgba(180,116,27,.12); --v2-warn-strong:#7A4E0F;
   --v2-err:#B03B35; --v2-err-soft:rgba(176,59,53,.10); --v2-err-strong:#A3352F;
@@ -319,10 +319,10 @@ body {
   --v2-bg-hover:#20283A; --v2-bg-active:#263046; --v2-bg-selected:#20304D;
   --v2-border-hairline:rgba(35,42,58,.78); --v2-border-strong:#303A4E; --v2-border-outline:rgba(35,42,58,.45);
   --v2-overlay:rgba(0,0,0,.55);
-  --v2-text-1:#E7EAF0; --v2-text-2:#A8B0C2; --v2-text-3:#7F889C; --v2-text-4:#7F889C;
+  --v2-text-1:#E7EAF0; --v2-text-2:#A8B0C2; --v2-text-3:#8F98AD; --v2-text-4:#8F98AD;
   --v2-ok:#7BC79A; --v2-ok-soft:rgba(123,199,154,.14); --v2-ok-strong:#9AD6B1;
   --v2-warn:#E0A94A; --v2-warn-soft:rgba(224,169,74,.14); --v2-warn-strong:#EBC27A;
-  --v2-err:#FF5A5F; --v2-err-soft:rgba(255,90,95,.14); --v2-err-strong:#FF7A7E;
+  --v2-err:#FF5A5F; --v2-err-soft:rgba(255,90,95,.14); --v2-err-strong:#D63B43;
   --v2-diff-add-bg:rgba(123,199,154,.12); --v2-diff-remove-bg:rgba(255,90,95,.12);
   --v2-code-bg:#0C0E13;
   /* dark 同样跟随 accent（值由 applyAccent 运行时写入 --v2-accent） */
@@ -339,6 +339,9 @@ body {
   --v2-chart-1:#8A8FF0; --v2-chart-2:#5FC4B2; --v2-chart-3:#E0A94A; --v2-chart-4:#EF6B63;
   --v2-chart-5:#6DB4E6; --v2-chart-6:#B58CD6; --v2-chart-7:#A3C24E; --v2-chart-8:#8B99AD;
 }
+/* 深色下 err-strong 是「白字按钮的底色」，要够深才压得住白字（#FF7A7E 时只有 2.5:1）。
+   它同时被当作强调的错误文字色用在十几处，深色底上这个深度不够，所以文字一律落到 err（与各处已有的 dark:text-err 同义）。 */
+.dark .text-errstrong { color: var(--v2-err); }
 
 
 /* ===== v2 keyframes（新增；保留现有 shimmer/slideUp/soundwave，合计 8 个） ===== */

@@ -151,7 +151,8 @@ test.describe('axe WCAG 2.1 A/AA 闸', () => {
     test('设置面板打开态 - light', async ({ page }) => {
         await openMain(page);
         await page.locator('button[title="设置"]').click();
-        await expect(page.getByRole('heading', { name: '设置', exact: true })).toBeVisible();
+        // 右侧检查器里也有一张叫「设置」的卡（1280 宽起显示），所以限定在弹窗里找标题
+        await expect(page.getByRole('dialog', { name: '设置', exact: true }).getByRole('heading', { name: '设置', exact: true })).toBeVisible();
 
         const results = await scan(page);
         const { legacy, fresh } = splitNewVsLegacy(flatten(results));
