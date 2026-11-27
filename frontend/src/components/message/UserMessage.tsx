@@ -4,13 +4,13 @@
  * SPEC: §8.2.1 UserMessage, §8.2.4J MessageType='user'
  * 渲染用户输入文本 + 附件预览。
  *
- * 用户气泡：surface-2 染色填充（不描边、不加阴影，靠底色与页面区分）+
- * rounded-md rounded-br-xs（主圆角 + 小尾角）+ max-w-[92%] sm:max-w-[76%] +
- * padding 11×17，右对齐；禁用高饱和实底。
+ * 用户消息是和回复同宽、靠左的一张卡：凹陷的浅色底（bg-sunken2）、不描边——回复是凸起的卡片，
+ * 两者用「凹 / 凸」区分角色，不再用靠右的半宽气泡。左上角标「你」，同一行右端是时间与操作
+ * （桌面端悬停才出现，见 MessageActions），不另占一行。
  */
 
 import React, { useCallback, useState } from 'react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, UserRound } from 'lucide-react';
 import type { Message, ContentBlock, StripImagesResponse } from '@/types';
 import { useSessionStore } from '@/store/sessionStore';
 import { useMessageStore } from '@/store/messageStore';
@@ -36,25 +36,33 @@ const UserMessage: React.FC<UserMessageProps> = ({ message, disclosure }) => {
     const summary = preview?.type === 'text' ? preview.text.trim().slice(0, 120) : '图片附件';
 
     return (
-        <div className="user-message group flex flex-col items-end px-1 pb-2 pt-1">
-            {/* Bubble（视觉换肤 §6.3.2：凸起白卡 + hairline 边 + 尾角 6px，右对齐） */}
-            <div className="user-message-bubble min-w-0 max-w-[92%] sm:max-w-[76%] [overflow-wrap:anywhere] rounded-md bg-hover2 px-4 py-3 text-15 leading-[1.7] text-t1">
-                {disclosure && (
-                    <button type="button" aria-expanded={expanded} aria-label={`这条消息，点击${expanded ? '收起' : '展开'}`}
-                        onClick={disclosure.onToggle}
-                        className="user-message-disclosure panel-control -mx-2 flex min-h-6 w-[calc(100%+1rem)] min-w-0 items-center gap-2 rounded-sm px-2 text-left focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring max-md:min-h-11">
-                        {!expanded && <span className="min-w-0 flex-1 truncate text-15 text-t2">{summary}</span>}
-                        <span className="ml-auto shrink-0 text-13 text-t3">{expanded ? '收起' : '展开'}</span>
-                        <ChevronRight size={13} aria-hidden="true" className={`shrink-0 text-t3 ${expanded ? 'rotate-90' : ''}`} />
-                    </button>
+        <div className="user-message group min-w-0 pb-2 [overflow-wrap:anywhere]">
+            <div className="user-message-card rounded-md bg-sunken2 px-4 pt-2">
+                <div className="flex min-h-8 items-center justify-between gap-3">
+                    <span className="flex items-center gap-1.5 text-13 text-t3">
+                        <UserRound size={13} aria-hidden="true" />你
+                    </span>
+                    <span className="flex min-w-0 items-center gap-0.5">
+                        {/* 时间与操作放在标签行右端（桌面端悬停才出现），不另占一行，短消息不会被撑高 */}
+                        {expanded && <MessageActions message={message} />}
+                        {disclosure && (
+                            <button type="button" aria-expanded={expanded} aria-label={`这条消息，点击${expanded ? '收起' : '展开'}`}
+                                onClick={disclosure.onToggle}
+                                className="dialog-control flex min-h-6 items-center gap-1 rounded-sm px-2 text-left text-13 text-t3 hover:bg-hover2 hover:text-t1 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring">
+                                {expanded ? '收起' : '展开'}
+                                <ChevronRight size={13} aria-hidden="true" className={`shrink-0 ${expanded ? 'rotate-90' : ''}`} />
+                            </button>
+                        )}
+                    </span>
+                </div>
+                {disclosure && !expanded && <p className="mt-0.5 truncate text-15 text-t2">{summary}</p>}
+                {expanded && (
+                    <div className="mt-0.5 pb-2.5 text-15 leading-[1.7] text-t1">
+                        {message.content.map((block, i) => (
+                            <ContentBlockRenderer key={i} block={block} messageId={message.uuid} />
+                        ))}
+                    </div>
                 )}
-                {expanded && <>
-                    {message.content.map((block, i) => (
-                        <ContentBlockRenderer key={i} block={block} messageId={message.uuid} />
-                    ))}
-                    {/* 时间与操作属于这条问题，收入气泡内，不用横线切成两块。 */}
-                    <MessageActions message={message} className="mt-1.5 flex-wrap gap-x-1.5 gap-y-0 border-t-0 pt-0" />
-                </>}
             </div>
         </div>
     );

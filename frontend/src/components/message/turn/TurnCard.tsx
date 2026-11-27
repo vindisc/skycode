@@ -107,7 +107,8 @@ const TurnCard: React.FC<TurnCardProps> = ({
     const files = useMemo(() => projectTurnFileChanges(turn.messages, activeToolCalls), [turn.messages, activeToolCalls]);
     const answerContent = layers.answer && renderMessageContent(layers.answer, {
         embeddedAssistant: true,
-        hideAssistantActions: files.length > 0,
+        // 回复正文自带的操作行一律收起：卡片底部有统一的一行（有没有文件改动都在）
+        hideAssistantActions: true,
         isStreaming: answerStreaming,
         streamingContent: answerStreaming ? streamingContent : undefined,
         thinkingContent: answerStreaming ? thinkingContent : undefined,
@@ -136,13 +137,16 @@ const TurnCard: React.FC<TurnCardProps> = ({
                 ))}
 
                 {/* 助手回合是一张卡片（Skymap 的卡片式分节）：顶栏是身份，下面依次是过程、回复、本轮修改，
-                    各分节之间用细线分隔，可折叠的分节标题在右侧放收起 / 展开。 */}
+                    各分节之间用细线分隔，可折叠的分节标题在右侧放收起 / 展开。
+                    role="group"：每个回合都叫「助手回复」，做成区域地标会重名（axe landmark-unique），分组即可。 */}
                 {(layers.process.length > 0 || layers.answer || layers.tail.length > 0 || publications.length > 0) && (
-                    <section className="mb-3 min-w-0 overflow-hidden rounded-md border border-hairline bg-surface2"
-                        aria-label="助手回复" data-testid={`turn-response-${turn.index}`}>
-                        <div className="flex h-10 shrink-0 items-center gap-2 px-3.5">
-                            <BrandLogo className="h-5 w-5" />
-                            <span className="text-13 font-medium text-t2">SkyCode</span>
+                    <section className="group mb-3 min-w-0 overflow-hidden rounded-md border border-hairline bg-surface2"
+                        aria-label="助手回复" data-testid={`turn-response-${turn.index}`}
+                        role="group">
+                        {/* 身份行是附属信息，压到最小一档；鼠标移到整张卡上时，底部的操作行才出现 */}
+                        <div className="flex h-9 shrink-0 items-center gap-2 px-3.5">
+                            <BrandLogo className="h-4 w-4" />
+                            <span className="text-13 text-t3">SkyCode</span>
                         </div>
                         {/* 过程区（密度分档；无过程消息则不渲染） */}
                         {layers.process.length > 0 && (
@@ -195,8 +199,9 @@ const TurnCard: React.FC<TurnCardProps> = ({
                         ))}
                         {files.length > 0 && <div className="min-w-0 border-t border-hairline">
                             <TurnFileChanges key={`${sessionId}:${turn.key}`} files={files} running={running} />
-                            {layers.answer?.type === 'assistant' && answerExpanded && <AssistantMessageActions message={layers.answer} isStreaming={answerStreaming} className="px-3.5 pb-2" />}
                         </div>}
+                        {/* 操作行是卡片的收尾，有没有文件改动都渲染（原来挂在「本轮修改」分节里，没有改动就没有复制入口） */}
+                        {layers.answer?.type === 'assistant' && answerExpanded && <AssistantMessageActions message={layers.answer} isStreaming={answerStreaming} className="mx-3.5 pb-1.5" />}
                     </section>
                 )}
             </div>

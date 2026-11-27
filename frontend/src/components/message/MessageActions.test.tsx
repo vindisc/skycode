@@ -2,7 +2,7 @@
  * MessageActions 组件测试
  *
  * 覆盖场景:
- * - 时间戳 (X月X日（周X）HH:MM:SS) 渲染
+ * - 时间戳渲染（平时只显示月日和时分，完整时间在 title 里）
  * - 有文本 → 复制 Markdown 源码 (writeText)
  * - 无文本有图片 (base64) → Blob + ClipboardItem 写入 (clipboard.write)
  * - ClipboardItem 不支持 → 降级复制图片 URL 文本
@@ -21,12 +21,13 @@ import type { Message, ContentBlock } from '@/types';
 import { useSessionStore } from '@/store/sessionStore';
 import { useMessageStore } from '@/store/messageStore';
 import { useNotificationStore } from '@/store/notificationStore';
+import { formatMessageTimeShort } from '@/utils/datetime';
 
 vi.mock('@/hooks/useTtsAvailability', () => ({
     useTtsAvailability: () => false,
 }));
 
-/** 2026-09-11 09:05:03 (本地时区，周五) → 期望时间戳 "9月11日（周五）09:05:03" */
+/** 2026-09-11 09:05:03 (本地时区，周五) → 完整时间 "9月11日（周五）09:05:03" */
 const TS = new Date(2026, 8, 11, 9, 5, 3).getTime();
 
 /** PNG 文件头 8 字节的 base64（无需有效图片，仅校验字节搬运） */
@@ -72,9 +73,13 @@ afterEach(() => {
 });
 
 describe('MessageActions — 时间戳', () => {
-    it('显示 X月X日（周X）HH:MM:SS 时间戳', () => {
+    it('平时只显示「月日 时分」，完整的日期和星期放在 title 里', () => {
         render(<MessageActions message={userMessage([{ type: 'text', text: 'hi' }])} />);
-        expect(screen.getByTestId('message-timestamp')).toHaveTextContent('9月11日（周五）09:05:03');
+        const stamp = screen.getByTestId('message-timestamp');
+        // 显示文案按「现在」折算（今天的消息只有时分），所以和同一个函数的结果比；形状固定为「月日 时分」
+        expect(stamp).toHaveTextContent(formatMessageTimeShort(TS));
+        expect(stamp.textContent).toMatch(/9月11日 09:05$/);
+        expect(stamp).toHaveAttribute('title', '9月11日（周五）09:05:03');
     });
 });
 
@@ -151,14 +156,14 @@ describe('MessageActions — 复制按钮显示条件', () => {
         ]);
         render(<MessageActions message={msg} />);
         expect(screen.queryByTestId('message-copy-button')).not.toBeInTheDocument();
-        expect(screen.getByTestId('message-timestamp')).toHaveTextContent('9月11日（周五）09:05:03');
+        expect(screen.getByTestId('message-timestamp')).toHaveTextContent(formatMessageTimeShort(TS));
     });
 
     it('流式进行中 (isStreaming) 不渲染复制按钮，时间戳仍显示', () => {
         const msg = assistantMessage([{ type: 'text', text: 'streaming...' }]);
         render(<MessageActions message={msg} isStreaming />);
         expect(screen.queryByTestId('message-copy-button')).not.toBeInTheDocument();
-        expect(screen.getByTestId('message-timestamp')).toHaveTextContent('9月11日（周五）09:05:03');
+        expect(screen.getByTestId('message-timestamp')).toHaveTextContent(formatMessageTimeShort(TS));
     });
 
     it('图片块无 base64 也无 url 时不渲染复制按钮', () => {

@@ -290,7 +290,7 @@ const ProcessAggregateBar: React.FC<TurnProcessAreaProps> = ({
                         {steps > 0 && <><span>{steps} 步</span><span aria-hidden="true">·</span></>}
                         <span>{duration}</span>
                     </span>
-                    <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-13 font-medium text-accent2-ink">
+                    <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-13 text-accent2-ink">
                         <span>{expanded ? '收起执行过程' : '查看执行过程'}</span>
                         <ChevronDown size={16} aria-hidden="true" className={cn('shrink-0 transition-transform duration-base motion-reduce:transition-none', expanded && 'rotate-180')} />
                     </span>

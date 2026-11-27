@@ -66,8 +66,8 @@ export function TurnFileChanges({ files, running, defaultOpen = false, title = '
     if (!files.length) return null;
     const selectedFile = files.find(file => file.path === selected);
     return <div className="min-w-0" data-testid="turn-file-changes">
-        <button className={`${button} flex w-full items-center gap-2 px-3 text-left text-sm font-medium text-t1`} aria-expanded={open} onClick={() => setOpen(!open)}>
-            <FileCode2 size={18} className="shrink-0 text-t2" /><span>{running ? '本轮已记录修改' : title} · {files.length} 个文件</span><ChevronDown size={18} className={`ml-auto shrink-0 text-t2 ${open ? 'rotate-180' : ''}`} />
+        <button className={`${button} flex min-h-10 w-full items-center gap-2 px-3.5 text-left text-13 font-medium text-t2`} aria-expanded={open} onClick={() => setOpen(!open)}>
+            <FileCode2 size={16} className="shrink-0 text-t3" /><span>{running ? '本轮已记录修改' : title} · {files.length} 个文件</span><ChevronDown size={16} className={`ml-auto shrink-0 text-t3 ${open ? 'rotate-180' : ''}`} />
         </button>
         {open && <div className="px-3 pb-3">
             {(showAll ? files : files.slice(0, 5)).map(file => <button key={file.path} className={`${button} flex w-full items-center gap-2 px-2 py-2 text-left`} onClick={() => setSelected(file.path)}>

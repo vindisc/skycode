@@ -51,8 +51,8 @@ const BackToLatestCapsule: React.FC<BackToLatestCapsuleProps> = ({
             className={cn(
                 'inline-flex items-center gap-1.5 rounded-full',
                 visible ? 'pointer-events-auto' : 'pointer-events-none',
-                'border border-hairline bg-surfacev2 px-3 py-1.5 shadow-e3',
-                'text-13 font-medium text-t2',
+                'border border-hairline bg-surfacev2 px-2.5 py-1 shadow-e2',
+                'text-xs text-t2',
                 'transition-interactive duration-fast hover:bg-hover2 hover:text-t1 hover:shadow-raised-hover active:shadow-pressed',
             )}
         >

@@ -17,7 +17,7 @@
 import React from 'react';
 import type { ContentBlock, Message } from '@/types';
 import TtsPlayButton from './TtsPlayButton';
-import MessageActions from './MessageActions';
+import MessageActions, { MESSAGE_ACTIONS_REVEAL } from './MessageActions';
 import { useTtsAvailability } from '@/hooks/useTtsAvailability';
 import { cn } from '@/components/ui/cn';
 
@@ -45,7 +45,8 @@ const AssistantMessageActions: React.FC<AssistantMessageActionsProps> = ({
     return (
         <div
             className={cn(
-                'mt-2 flex items-center gap-1 border-t border-hairline pt-1',
+                'flex items-center gap-1 border-t border-hairline py-1 transition-opacity duration-fast',
+                MESSAGE_ACTIONS_REVEAL,
                 className,
             )}
             data-testid="assistant-message-actions"
