@@ -120,7 +120,7 @@ beforeEach(() => {
 // ==================== 三层常驻可见 ====================
 
 describe('TurnCard 三层结构', () => {
-    it('简洁档问题、补充指令、过程和回复独立折叠；切回简洁恢复默认', () => {
+    it('简洁档问题与回复默认可见、可分别收起，过程默认收起；切回简洁恢复默认', () => {
         const turn = singleTurn([
             userText('u1', 1000, '原始问题'),
             assistantWithBlocks('a1', 1500, [toolUseBlock('t1', 'Read', {}, okResult())]),
@@ -128,25 +128,29 @@ describe('TurnCard 三层结构', () => {
             assistantMsg('a2', 2000),
         ]);
         renderCard(turn);
-        const queries = screen.getAllByRole('button', { name: /用户问题/ });
-        for (const button of queries) expect(button).toHaveAttribute('aria-expanded', 'false');
-        expect(screen.queryByTestId('message-timestamp')).not.toBeInTheDocument();
-        expect(screen.queryByText('reply-a2')).not.toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /最终回复/ })).toHaveAttribute('aria-expanded', 'false');
-        fireEvent.click(queries[0]);
-        expect(screen.getByTestId('message-timestamp')).toBeVisible();
-        expect(queries[1]).toHaveAttribute('aria-expanded', 'false');
-        expect(screen.queryByText('reply-a2')).not.toBeInTheDocument();
-        fireEvent.click(screen.getByRole('button', { name: /最终回复/ }));
+        // 对话首先是能读到问答：精简档只收起过程，问题与回复默认可见
+        const queries = screen.getAllByRole('button', { name: /这条消息/ });
+        expect(queries).toHaveLength(2);
+        const timestampsBefore = screen.getAllByTestId('message-timestamp').length;
         expect(screen.getByText('reply-a2')).toBeVisible();
+        expect(screen.getByRole('button', { name: /最终回复/ })).toHaveAttribute('aria-expanded', 'true');
         expect(screen.getByRole('button', { name: /过程区/ })).toHaveAttribute('aria-expanded', 'false');
-        act(() => useTurnViewStore.getState().setDensity('balanced', 'sess-1'));
-        expect(screen.queryByRole('button', { name: /用户问题|最终回复/ })).not.toBeInTheDocument();
+        // 收起一条问题只影响它自己，回复不受牵连
+        fireEvent.click(queries[0]);
+        expect(queries[0]).toHaveAttribute('aria-expanded', 'false');
+        expect(queries[1]).toHaveAttribute('aria-expanded', 'true');
+        expect(screen.getAllByTestId('message-timestamp')).toHaveLength(timestampsBefore - 1);
         expect(screen.getByText('reply-a2')).toBeVisible();
-        act(() => useTurnViewStore.getState().setDensity('compact', 'sess-1'));
+        fireEvent.click(screen.getByRole('button', { name: /最终回复/ }));
         expect(screen.queryByText('reply-a2')).not.toBeInTheDocument();
-        for (const button of screen.getAllByRole('button', { name: /用户问题/ })) {
-            expect(button).toHaveAttribute('aria-expanded', 'false');
+        act(() => useTurnViewStore.getState().setDensity('balanced', 'sess-1'));
+        expect(screen.queryByRole('button', { name: /这条消息|最终回复/ })).not.toBeInTheDocument();
+        expect(screen.getByText('reply-a2')).toBeVisible();
+        // 切密度会放弃手动收起的偏好：回到精简档恢复默认可见
+        act(() => useTurnViewStore.getState().setDensity('compact', 'sess-1'));
+        expect(screen.getByText('reply-a2')).toBeVisible();
+        for (const button of screen.getAllByRole('button', { name: /这条消息/ })) {
+            expect(button).toHaveAttribute('aria-expanded', 'true');
         }
     });
 

@@ -66,7 +66,7 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
     };
 
     return (
-        <Dialog open title="设置" onClose={requestClose} className="max-w-2xl border border-hairline max-h-[85vh] flex flex-col">
+        <Dialog open title="设置" onClose={requestClose} className="max-w-3xl border border-hairline max-h-[85vh] flex flex-col">
             <div className="px-5 pt-4 shrink-0">
                 <Tabs items={TABS} value={tab} onValueChange={value => changeTab(toSettingsTab(value))} />
             </div>

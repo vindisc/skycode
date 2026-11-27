@@ -58,11 +58,11 @@ export function TurnFileChanges({ files, running }: { files: TurnFileChange[]; r
     const [selected, setSelected] = useState<string | null>(null);
     if (!files.length) return null;
     const selectedFile = files.find(file => file.path === selected);
-    return <div className="my-3 min-w-0 rounded-sm border border-hairline bg-surface2" data-testid="turn-file-changes">
+    return <div className="my-3 min-w-0 rounded-sm bg-surface2" data-testid="turn-file-changes">
         <button className={`${button} flex w-full items-center gap-2 px-3 text-left text-sm font-medium text-t1`} aria-expanded={open} onClick={() => setOpen(!open)}>
             <FileCode2 size={18} className="shrink-0 text-t2" /><span>{running ? '本轮已记录修改' : '本轮修改'} · {files.length} 个文件</span><ChevronDown size={18} className={`ml-auto shrink-0 text-t2 ${open ? 'rotate-180' : ''}`} />
         </button>
-        {open && <div className="border-t border-hairline p-2">
+        {open && <div className="p-2 pt-0">
             {(showAll ? files : files.slice(0, 5)).map(file => <button key={file.path} className={`${button} flex w-full items-center gap-2 px-2 py-2 text-left`} onClick={() => setSelected(file.path)}>
                 <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium text-t1">{fileName(file.path)}</span><span className="block truncate text-13 text-t2">{file.path.includes('/') ? file.path.slice(0, file.path.lastIndexOf('/')) : '相对路径'}</span></span>
                 <span className="shrink-0 text-13 text-t2">修改 {file.operations.length} 次</span><ChevronRight size={18} className="shrink-0 text-t2" />

@@ -194,7 +194,7 @@ it('搜索首页和分页保留服务端顺序，清空搜索后仍使用普通�
     }
 });
 
-it('当前会话卡渲染 .session-active-pill 且标题为 font-semibold', async () => {
+it('当前会话行渲染 .session-active-pill，标题用正文色（text-t1）', async () => {
     mockTwoSessionsFetch();
     useSessionStore.setState({ sessionId: 'target' });
     render(<Sidebar />);
@@ -203,7 +203,7 @@ it('当前会话卡渲染 .session-active-pill 且标题为 font-semibold', asyn
     expect(card).not.toBeNull();
     expect(card).toHaveAttribute('data-active', 'true');
     expect(card!.querySelector('.session-active-pill')).not.toBeNull();
-    expect(title).toHaveClass('font-semibold');
+    expect(title).toHaveClass('font-medium', 'text-t1');
 });
 
 it('非选中卡不渲染 pill', async () => {
@@ -216,7 +216,9 @@ it('非选中卡不渲染 pill', async () => {
     expect(otherCard).not.toBeNull();
     expect(otherCard).toHaveAttribute('data-active', 'false');
     expect(otherCard!.querySelector('.session-active-pill')).toBeNull();
-    expect(otherTitle).toHaveClass('font-medium');
+    // 未选中的行 quieter：次要文字色、常规字重
+    expect(otherTitle).toHaveClass('text-t2');
+    expect(otherTitle).not.toHaveClass('font-semibold');
 });
 
 it('会话卡只保留标题：不显示模型、消息数与时间；运行中状态收进尾部槽位与操作区同位', async () => {

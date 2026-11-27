@@ -49,7 +49,8 @@ const ThinkingBlock: React.FC<ThinkingBlockProps> = ({
     }, [durationMs, redacted, preview]);
 
     return (
-        <div className="thinking-block my-2 rounded-md border border-hairline bg-surface2 overflow-hidden">
+        // 与工具行同一套层次：折叠态是不描边的列表行（悬停高亮），展开后才升成带描边的面板
+        <div className={`thinking-block my-0.5 overflow-hidden rounded-md transition-surface duration-fast ${expanded ? 'border border-hairline bg-surfacev2' : 'hover:bg-hover2'}`}>
             {/* Header — always visible */}
             <button
                 onClick={toggle}

@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test';
 
+// 起步任务与 src/components/message/EmptyHero.tsx 的 QUICK_CHIPS 保持一致
 const examples = [
-  ['生成一个王者荣耀', '你可以开发一个类似王者荣耀的游戏么？我希望页面越逼真越好，帮我开发一个这样的游戏，跟王者荣耀越像越好，最终需要正常能玩没有明显功能 bug，你在开始动手前所有不确定的问题都要先跟我确认，给我我多个独立方案让我选择。但是在你开始写代码以后，就不要再问我了，都要自动选择能正常落地而且能尽量逼真效果的方案，不要选择注册网站单独购买等方案'],
-  ['帮我做一个12306网站动画', "帮我做一个动态html，可视化展示'你后补成功的那一刻，12306后台发送了什么'，要覆盖候补成功的12306后台完整流程，要展示各种数学原理和12306对应系统的架构，最关键的是一定要动态可视化，页面自己动，有很多惊艳漂亮的可视化动画"],
-  ['我想投资黄金', '我想做黄金投资，但是不太懂怎么具体操作，也不知道该怎么监控行情，你能帮我每日可以随时跟踪国际国内市场的金价以及银行的积存金的价格。同时监控国家对黄金回购的频率及整体金额趋势。你不是很确定的要先跟我沟通确认'],
-  ['帮我做一个宇树科技Excel', '请以2026年8月30日为资料截止时间，优先使用上海证券交易所披露的招股说明书、上市公告和宇树科技官方公开资料，对宇树科技的经营与财务表现进行分析，并生成一份可编辑的Excel分析底稿。请至少保留资料来源、原始数据、核心计算、趋势图表和分析结论；统一单位与报告期口径，不得把预测数据写成已经发生的事实。除文件外，请简要说明你的分析步骤和仍需人工核验的内容。'],
+  ['梳理项目结构', '请梳理这个项目的目录结构和主要模块，说明各模块的职责和它们之间的调用关系，整理成一份简明的项目导览。这一步只读，先不要修改任何文件。'],
+  ['修复一个问题', '帮我排查并修复一个问题：先阅读相关代码和最近的改动，定位原因并说明依据，再实施修复，完成后运行相关测试验证。'],
+  ['补单元测试', '请查看最近的代码改动，找出其中缺少测试覆盖的关键逻辑，补上单元测试，并运行测试确认全部通过。'],
+  ['跑测试并总结', '运行这个项目的测试，把失败的用例逐个分析原因，区分是代码问题还是环境问题，并给出修复建议。先不要改动代码。'],
 ];
 
 test.beforeEach(async ({ page }) => {
@@ -38,8 +39,9 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     await expect(heading).toBeVisible();
     const hero = heading.locator('..');
     await expect(hero.getByText('SkyCode', { exact: true })).toBeVisible();
-    await expect(hero.locator('img')).toBeVisible();
-    await expect(hero.getByText('下达指令，剩下的一切交给 SkyCode')).toBeVisible();
+    // 品牌标现在是无障碍隐藏的内联 SVG（配色跟随强调色），不再是 <img>
+    await expect(hero.locator('svg[aria-hidden="true"]').first()).toBeVisible();
+    await expect(hero.getByText('描述任务，SkyCode 会读代码、改文件、跑命令，过程随时可查')).toBeVisible();
     await expect(hero.getByText(/APOS/)).toHaveCount(0);
     await page.evaluate(() => window.dispatchEvent(new Event('session-list-updated')));
     expect(await page.evaluate(() => sessionStorage.getItem('skycode.activeSessionId'))).toBeNull();

@@ -44,11 +44,12 @@ interface ToolCallBlockProps {
 
 /** 状态 → 图标/颜色/文案（导出供 turn/ToolRunBlock 的 L2 行复用同一套语义） */
 export const STATUS_CONFIG = {
-    pending:           { icon: Loader2, color: 'text-t3',      label: 'Pending',    spin: false },
-    running:           { icon: Loader2, color: 'text-accent2-ink', label: 'Running',    spin: true  },
-    completed:         { icon: Check,   color: 'text-ok',      label: 'Completed',  spin: false },
-    error:             { icon: XCircle, color: 'text-err',     label: 'Error',      spin: false },
-    permission_needed: { icon: ShieldAlert, color: 'text-warn', label: 'Permission', spin: false },
+    // 状态词与界面其余部分统一用中文（原来这里是 Pending / Running / Completed / Error）
+    pending:           { icon: Loader2, color: 'text-t3',      label: '等待中', spin: false },
+    running:           { icon: Loader2, color: 'text-accent2-ink', label: '运行中', spin: true  },
+    completed:         { icon: Check,   color: 'text-ok',      label: '已完成', spin: false },
+    error:             { icon: XCircle, color: 'text-err',     label: '失败',   spin: false },
+    permission_needed: { icon: ShieldAlert, color: 'text-warn', label: '待授权', spin: false },
 } as const;
 
 /** Edit 类工具名（带 +n/−n diff chip） */
@@ -65,6 +66,16 @@ export function formatToolDuration(ms: number): string {
     if (minutes < 60) return `${minutes}m ${seconds}s`;
     const hours = Math.floor(minutes / 60);
     return `${hours}h ${minutes % 60}m`;
+}
+
+/** 路径超过这个长度就只留末三段：文件名和它所在的目录最有信息量 */
+const PATH_DISPLAY_LIMIT = 52;
+
+/** 目标路径的展示串：过长的收成「…/上级目录/所在目录/文件名」。
+ *  原先靠 CSS direction:rtl 做"开头省略"，双向文本排版会把省略号和分隔符排错位（出现 …Header.tsx/ 这种尾巴）。 */
+export function displayTargetPath(target: string): string {
+    if (target.length <= PATH_DISPLAY_LIMIT) return target;
+    return `…/${target.split('/').slice(-3).join('/')}`;
 }
 
 /** 从工具输入提取主目标（文件路径 / 命令 / pattern，header chip 数据源） */
@@ -181,10 +192,12 @@ const ToolCallBlock: React.FC<ToolCallBlockProps> = ({ toolUseId, toolCall, expa
 
     return (
         <div
-            className={`tool-call-block my-2 overflow-hidden border border-hairline transition-surface duration-fast
+            // 折叠态是一行列表项：不描边、不铺底，悬停才高亮——二十几次调用摞在一起时不再是一叠卡片；
+            // 展开后才升成一块面板（描边 + 浮起），框住里面的参数和结果
+            className={`tool-call-block my-0.5 overflow-hidden rounded-md transition-surface duration-fast
                 ${expanded
-                    ? 'rounded-md bg-surfacev2 shadow-e2'
-                    : 'rounded-md bg-surface2 hover:border-[var(--v2-border-strong)]'}`}
+                    ? 'border border-hairline bg-surfacev2 shadow-e2'
+                    : 'hover:bg-hover2'}`}
             data-tool-use-id={toolUseId}
         >
             {/* Header — 折叠态一行：图标 + 名称(600) + 文件 chip + diff chip + 状态 + 耗时 */}
@@ -205,12 +218,10 @@ const ToolCallBlock: React.FC<ToolCallBlockProps> = ({ toolUseId, toolCall, expa
                 {primaryTarget && (
                     <span
                         data-spider-anchor="tool"
-                        className="min-w-0 max-w-[40%] truncate rounded-xs bg-sunken2 px-2 py-0.5 font-mono text-13 text-t2"
-                        // 路径类目标省略号前置（保留文件名可见），命令/pattern 省略号后置
-                        style={primaryTarget.isPath ? { direction: 'rtl', textAlign: 'left' } : undefined}
+                        className="min-w-0 max-w-[60%] truncate rounded-xs bg-sunken2 px-2 py-0.5 font-mono text-13 text-t2"
                         title={primaryTarget.target}
                     >
-                        {primaryTarget.target}
+                        {primaryTarget.isPath ? displayTargetPath(primaryTarget.target) : primaryTarget.target}
                     </span>
                 )}
                 {diffStats && diffStats.added > 0 && (

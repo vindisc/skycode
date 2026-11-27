@@ -69,7 +69,8 @@ describe('MessageList 详细档导航', () => {
         useMessageStore.setState({ messages: [] });
         useTurnViewStore.setState({ density: 'detailed' });
         render(<MessageList />);
-        expect(screen.getByText('Start a conversation')).toBeInTheDocument();
+        // 空列表的兜底空态与首页是同一个 Hero（中文），不再是英文占位
+        expect(screen.getByRole('heading', { name: '今天想创造什么？' })).toBeInTheDocument();
         expect(screen.queryByTestId('detail-navigation')).not.toBeInTheDocument();
     });
 });

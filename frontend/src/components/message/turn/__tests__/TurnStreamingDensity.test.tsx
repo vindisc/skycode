@@ -23,10 +23,11 @@ it.each(['compact', 'balanced', 'detailed'] as const)('%s follows density when t
     useTurnViewStore.setState({ density, expandOverrides: {} });
     render(<Conversation />);
     act(() => { appendStreamDelta('检查文件'); flushStreamingBuffer(); });
+    // 还没有工具时，流式文字就是回复层：各档默认可见（精简档带收起开关）
+    expect(screen.getByText('检查文件')).toBeInTheDocument();
     if (density === 'compact') {
-        expect(screen.queryByText('检查文件')).not.toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /最终回复/ })).toHaveAttribute('aria-expanded', 'false');
-    } else expect(screen.getByText('检查文件')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /最终回复/ })).toHaveAttribute('aria-expanded', 'true');
+    }
     act(() => { useMessageStore.getState().startToolCall('read', 'Read', { file_path: '/example' }); });
     expect(screen.getByText('完整用户指令')).toBeInTheDocument();
     if (density === 'detailed') {
@@ -34,15 +35,17 @@ it.each(['compact', 'balanced', 'detailed'] as const)('%s follows density when t
         act(() => { appendStreamDelta('，继续'); flushStreamingBuffer(); });
         expect(screen.getByText('检查文件，继续')).toBeInTheDocument();
     } else {
+        // 工具出现后这段话归入过程层：精简 / 平衡档默认收起
         expect(screen.queryByText('检查文件')).not.toBeInTheDocument();
     }
     act(() => {
         useMessageStore.getState().finalizeAssistantSegment();
         useMessageStore.getState().appendStreamDelta('完整最终回复');
     });
-    if (density === 'compact') {
-        expect(screen.queryByText('完整最终回复')).not.toBeInTheDocument();
-        fireEvent.click(screen.getByRole('button', { name: /最终回复/ }));
-    }
+    // 最终回复在各档都默认可见；精简档可以手动收起
     expect(screen.getByText('完整最终回复')).toBeInTheDocument();
+    if (density === 'compact') {
+        fireEvent.click(screen.getByRole('button', { name: /最终回复/ }));
+        expect(screen.queryByText('完整最终回复')).not.toBeInTheDocument();
+    }
 });

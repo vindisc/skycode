@@ -266,7 +266,7 @@ const ProcessAggregateBar: React.FC<TurnProcessAreaProps> = ({
 
     return (
         <div
-            className="turn-process-aggregate overflow-hidden rounded-md border border-hairline bg-surface2"
+            className="turn-process-aggregate overflow-hidden rounded-sm bg-surface2"
             data-testid={`turn-process-${turn.index}`}
         >
             <button
@@ -277,26 +277,27 @@ const ProcessAggregateBar: React.FC<TurnProcessAreaProps> = ({
                 data-turn-header={turn.index}
                 data-galaxy-tool-ids={galaxyToolIds}
                 className={cn(
-                    'process-aggregate-toggle flex min-h-11 w-full flex-col gap-2 rounded-sm px-3 py-3 text-left',
+                    'process-aggregate-toggle flex min-h-11 w-full flex-wrap items-center gap-x-3 gap-y-1 rounded-sm px-3 py-2 text-left',
                     'transition-colors duration-fast hover:bg-hover2',
                 )}
             >
-                <span className="flex w-full flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                    <span className="inline-flex items-center gap-2 text-sm font-medium text-t1">
+                <span className="flex w-full flex-wrap items-center gap-x-3 gap-y-1">
+                    <span className="inline-flex shrink-0 items-center gap-2 text-sm font-medium text-t1">
                         <span role="img" aria-label={{ completed: '已完成', running: '进行中', error: '失败', interrupted: '被中断' }[dotStatus]} data-testid={`turn-process-dot-${turn.index}`} className={cn('inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full text-white dark:text-app2',
                             dotStatus === 'completed' ? 'bg-ok' : dotStatus === 'error' ? 'bg-err' : dotStatus === 'interrupted' ? 'bg-warn' : 'bg-accent2 animate-accent-pulse motion-reduce:animate-none')}><StatusIcon size={12} aria-hidden="true" /></span>
                         {statusLabel}
                     </span>
-                    <span className="flex flex-wrap items-center gap-x-1.5 text-13 tabular-nums text-t2">
+                    {running && <span className="min-w-0 flex-1 truncate text-13 text-t2">当前任务：{currentTitle}</span>}
+                    {/* 右侧依次是「步数 · 耗时」和展开入口；窄屏放不下时整体折到第二行 */}
+                    <span className="ml-auto flex shrink-0 items-center gap-x-1.5 whitespace-nowrap text-13 tabular-nums text-t3">
                         {hasTaskData && <><span>{tasks.length} 个任务</span><span aria-hidden="true">·</span></>}
                         {steps > 0 && <><span>{steps} 步</span><span aria-hidden="true">·</span></>}
                         <span>{duration}</span>
                     </span>
-                </span>
-                {running && <span className="w-full truncate text-13 text-t2">当前任务：{currentTitle}</span>}
-                <span className="flex w-full items-center justify-between gap-2 text-sm font-medium text-accent2-ink">
-                    <span>{expanded ? '收起执行过程' : '查看执行过程'}</span>
-                    <ChevronDown size={18} aria-hidden="true" className={cn('shrink-0 transition-transform duration-base motion-reduce:transition-none', expanded && 'rotate-180')} />
+                    <span className="flex shrink-0 items-center gap-1 whitespace-nowrap text-13 font-medium text-accent2-ink">
+                        <span>{expanded ? '收起执行过程' : '查看执行过程'}</span>
+                        <ChevronDown size={16} aria-hidden="true" className={cn('shrink-0 transition-transform duration-base motion-reduce:transition-none', expanded && 'rotate-180')} />
+                    </span>
                 </span>
             </button>
 

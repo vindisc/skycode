@@ -38,6 +38,7 @@ import { buildTurns, type Turn } from '@/store/selectors/turnProjection';
 import { collectTurnExpandKeys, findProcessExpandKey, findTurnMessageExpandKey } from '@/store/selectors/turnSections';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useKeyboardScrollCompensation } from '@/hooks/useVirtualKeyboard';
+import { EmptyHero } from './EmptyHero';
 
 import TurnCard from './turn/TurnCard';
 import DetailNavigation from './turn/DetailNavigation';
@@ -331,7 +332,7 @@ const MessageList = React.forwardRef<MessageListHandle, { keyboardHeight?: numbe
         return (
             <div className="message-list relative flex h-full flex-col overflow-hidden"
                 role="log" aria-live="polite" aria-label="对话消息">
-                <EmptyState />
+                <EmptyHero />
                 {mobileBottomFade}
             </div>
         );
@@ -376,20 +377,6 @@ const MessageList = React.forwardRef<MessageListHandle, { keyboardHeight?: numbe
         </div>
     );
 });
-
-// ==================== Empty State ====================
-
-const EmptyState: React.FC = () => (
-    <div className="flex-1 flex items-center justify-center text-t2">
-        <div className="text-center">
-            <div className="text-4xl mb-3">💬</div>
-            <div className="text-sm">Start a conversation</div>
-            <div className="text-13 text-t2 mt-1">
-                Type a message or use / for commands
-            </div>
-        </div>
-    </div>
-);
 
 MessageList.displayName = 'MessageList';
 

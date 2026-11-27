@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeAll, describe, expect, it } from 'vitest';
-import ToolCallBlock from './ToolCallBlock';
+import ToolCallBlock, { displayTargetPath } from './ToolCallBlock';
 import { useMessageStore } from '@/store/messageStore';
 import type { Message, ToolCallState } from '@/types';
 
@@ -41,7 +41,7 @@ function expandCardAndResult(name: string | RegExp) {
 describe('ToolCallBlock 主卡默认折叠行为', () => {
     it('does not display elapsed time for a missing start timestamp', () => {
         render(<ToolCallBlock toolUseId="missing-time" toolCall={makeToolCall({ status: 'running', startTime: 0, duration: undefined })} />);
-        expect(screen.getByText('Running')).toBeInTheDocument();
+        expect(screen.getByText('运行中')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: /FileReadTool/ }).textContent).not.toMatch(/\d+[hms]/);
     });
 
@@ -54,7 +54,7 @@ describe('ToolCallBlock 主卡默认折叠行为', () => {
         expect(screen.queryByText('Result')).not.toBeInTheDocument();
         // header 自解释信息齐备
         expect(screen.getByText('src/App.tsx')).toBeInTheDocument();
-        expect(screen.getByText('Completed')).toBeInTheDocument();
+        expect(screen.getByText('已完成')).toBeInTheDocument();
         expect(screen.getByText('1s')).toBeInTheDocument();
     });
 
@@ -277,11 +277,11 @@ describe('Edit actual diff presentation', () => {
             call = makeToolCall({ toolName: block.toolName, input: block.input, result: block.result });
         }
         render(<ToolCallBlock toolUseId="edit-1" toolCall={call} />);
-        const header = screen.getByRole('button', { name: /Edit.*Completed/ });
+        const header = screen.getByRole('button', { name: /Edit.*已完成/ });
         expect(header.textContent).toContain('+2');
         expect(header.textContent).toContain('−2');
         expect(screen.queryAllByText('after')).toHaveLength(0);
-        expandCardAndResult(/Edit.*Completed/);
+        expandCardAndResult(/Edit.*已完成/);
         expect(screen.getAllByText('before')).toHaveLength(2);
         expect(screen.getAllByText('after')).toHaveLength(2);
         expect(screen.queryByText('requested')).not.toBeInTheDocument();
@@ -294,8 +294,8 @@ describe('Edit actual diff presentation', () => {
             toolName: 'Edit', input: editInput,
             result: { content: 'Edited: /tmp/demo.ts', isError: false, metadata },
         })} />);
-        expect(screen.getByRole('button', { name: /Edit.*Completed/ }).textContent).not.toMatch(/[+−]\d/);
-        expandCardAndResult(/Edit.*Completed/);
+        expect(screen.getByRole('button', { name: /Edit.*已完成/ }).textContent).not.toMatch(/[+−]\d/);
+        expandCardAndResult(/Edit.*已完成/);
         const resultSection = screen.getByRole('button', { name: /Result/ }).parentElement!;
         const result = within(resultSection);
         expect(result.getByText('此记录未提供差异预览。')).toBeInTheDocument();
@@ -310,8 +310,8 @@ describe('Edit actual diff presentation', () => {
             toolName: 'Edit', input: { ...editInput, old_string: '' },
             result: { content: 'Created: /tmp/demo.ts', isError: false },
         })} />);
-        expect(screen.getByRole('button', { name: /Edit.*Completed/ }).textContent).not.toMatch(/[+−]\d/);
-        expandCardAndResult(/Edit.*Completed/);
+        expect(screen.getByRole('button', { name: /Edit.*已完成/ }).textContent).not.toMatch(/[+−]\d/);
+        expandCardAndResult(/Edit.*已完成/);
         const resultSection = screen.getByRole('button', { name: /Result/ }).parentElement!;
         const result = within(resultSection);
         expect(result.getByText('Created: /tmp/demo.ts')).toBeInTheDocument();
@@ -324,8 +324,8 @@ describe('Edit actual diff presentation', () => {
             toolName: 'Edit', input: editInput, status: 'error',
             result: { ...editResult, content: 'Conflict: edit not applied', isError: true },
         })} />);
-        expect(screen.getByRole('button', { name: /Edit.*Error/ }).textContent).not.toMatch(/[+−]\d/);
-        expandCardAndResult(/Edit.*Error/);
+        expect(screen.getByRole('button', { name: /Edit.*失败/ }).textContent).not.toMatch(/[+−]\d/);
+        expandCardAndResult(/Edit.*失败/);
         expect(screen.getByText('Conflict: edit not applied')).toBeInTheDocument();
         expect(screen.queryByText('after')).not.toBeInTheDocument();
     });
@@ -336,10 +336,26 @@ describe('Edit actual diff presentation', () => {
                 ...editMetadata.structuredResult, diff: '@@ -0,0 +1 @@\n+<script>bad()</script>', truncated: true,
             } } },
         })} />);
-        expect(screen.getByRole('button', { name: /Edit.*Completed/ }).textContent).not.toMatch(/[+−]\d/);
-        expandCardAndResult(/Edit.*Completed/);
+        expect(screen.getByRole('button', { name: /Edit.*已完成/ }).textContent).not.toMatch(/[+−]\d/);
+        expandCardAndResult(/Edit.*已完成/);
         expect(screen.getByText(/差异过大，仅展示部分内容/)).toBeInTheDocument();
         expect(screen.getByText('<script>bad()</script>')).toBeInTheDocument();
         expect(document.querySelector('script')).toBeNull();
+    });
+});
+
+describe('displayTargetPath', () => {
+    it('短路径原样显示', () => {
+        expect(displayTargetPath('src/index.ts')).toBe('src/index.ts');
+    });
+
+    it('长路径只留末三段，开头用省略号；文件名始终完整可见', () => {
+        expect(displayTargetPath('/app/workspace/skycode/frontend/src/components/layout/Header.tsx'))
+            .toBe('…/components/layout/Header.tsx');
+    });
+
+    it('只有一两段的路径不会被吃掉开头', () => {
+        expect(displayTargetPath('/app/workspace/zhikuncode-notes-and-docs-for-a-very-long-name.md'))
+            .toBe('…/app/workspace/zhikuncode-notes-and-docs-for-a-very-long-name.md');
     });
 });

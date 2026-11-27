@@ -5,7 +5,8 @@ import { Spinner } from './Spinner';
 
 /** Shared button states; compact desktop sizing and 44px mobile hit targets. */
 const buttonVariants = cva(
-    'inline-flex items-center justify-center gap-2 rounded-sm font-medium select-none transition-interactive duration-fast ease-out focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none active:scale-[.98] active:shadow-pressed',
+    // shrink-0 + whitespace-nowrap：弹性布局里按钮不参与压缩，标签绝不折成竖排
+    'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-sm font-medium select-none transition-interactive duration-fast ease-out focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring disabled:opacity-50 disabled:pointer-events-none disabled:shadow-none active:scale-[.98] active:shadow-pressed',
     {
         variants: {
             variant: {

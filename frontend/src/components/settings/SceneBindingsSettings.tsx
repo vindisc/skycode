@@ -5,6 +5,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { X } from 'lucide-react';
 import { Button, Card, Chip, EmptyState, Spinner, cn, inputVariants } from '@/components/ui';
 import {
     settingsApi,
@@ -203,19 +204,25 @@ export function SceneBindingsSettings({ onGoToProviders }: SceneBindingsSettings
                                         <Button
                                             size="sm"
                                             variant="primary"
+                                            // 六行里多数没有改动：禁用态收成灰字，不留一排绿色块
+                                            className="disabled:bg-transparent disabled:text-t4 disabled:opacity-100"
                                             loading={saving}
                                             disabled={!dirty || !choice?.modelId}
                                             onClick={() => { if (choice) void handleSave(scene, choice); }}
                                         >
                                             保存
                                         </Button>
+                                        {/* 清除做成图标按钮：六行里多数没有分派，带文字的常驻按钮会把这一行挤到放不下 */}
                                         <Button
                                             size="sm"
                                             variant="ghost"
+                                            iconOnly
                                             disabled={!scene.binding || saving}
+                                            aria-label="清除"
+                                            title="清除这条分派"
                                             onClick={() => { void handleClear(scene); }}
                                         >
-                                            清除
+                                            <X size={16} aria-hidden="true" />
                                         </Button>
                                     </div>
                                 )}

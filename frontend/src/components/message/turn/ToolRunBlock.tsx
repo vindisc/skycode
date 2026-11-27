@@ -23,6 +23,7 @@ import { Check, ChevronRight, CircleSlash, Wrench } from 'lucide-react';
 import type { ToolCallState } from '@/types';
 import ToolCallBlock, {
     STATUS_CONFIG,
+    displayTargetPath,
     extractPrimaryTarget,
     formatToolDuration,
 } from '../ToolCallBlock';
@@ -214,10 +215,9 @@ const ToolRunBlock: React.FC<ToolRunBlockProps> = ({ blocks, activeToolCalls }) 
                                         <span
                                             data-spider-anchor="tool"
                                             className="min-w-0 truncate rounded bg-sunken2 px-1.5 py-0.5 font-mono text-13 text-t2"
-                                            style={target.isPath ? { direction: 'rtl', textAlign: 'left' } : undefined}
                                             title={target.target}
                                         >
-                                            {target.target}
+                                            {target.isPath ? displayTargetPath(target.target) : target.target}
                                         </span>
                                     )}
                                     {typeof tc.duration === 'number' && (

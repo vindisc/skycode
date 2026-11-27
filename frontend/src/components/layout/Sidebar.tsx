@@ -104,19 +104,18 @@ const PANEL_LABEL_CLASS = 'text-xs font-medium uppercase tracking-[.06em] text-t
 
 /** 「新建」按钮：主操作实心 accent-strong + 白字（≥4.5:1，与公共 Button primary 一致）。
  *  注意不可用 bg-accent2：--v2-accent 是表面强调色（dark 档刻意取亮如 #7FD4E8），压白字不达标；
- *  strong 档三主题复用 light 深值，专为白字实心底设计（accents.ts §3.4）。 */
+ *  strong 档是为白字实心底设计的深一档，且与 accent 同色相（accents.ts §3.4）。 */
 const PANEL_NEW_BUTTON_CLASS =
     'w-full flex items-center justify-center gap-2 px-3 py-2 rounded-md ' +
     'bg-accent2-strong text-white text-sm font-medium shadow-e2 ' +
     'transition-interactive duration-fast hover:bg-accent2-hover active:bg-accent2-active active:scale-[0.98] ' +
     'focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent2-ring';
 
-/** 会话卡：surface 底浮在 app 底上（三主题自动适配），hover 泛 accent 微光 + 浮起阴影。
- *  选中视觉不再改卡片本身，由卡内 .session-active-pill 独立层承担（globals.css）。 */
+/** 会话行：列表用"行"而不是一张张带边框阴影的卡片——六条会话各占一张卡时，侧栏比正文还抢眼。
+ *  静默态透明，hover 铺一层底；选中视觉由行内 .session-active-pill 独立层承担（globals.css）。 */
 const SESSION_CARD_CLASS =
-    'session-card group relative px-3 py-2 rounded-md cursor-pointer border border-hairline ' +
-    'bg-surfacev2 shadow-e1 transition-interactive duration-fast ' +
-    'hover:shadow-raised hover:border-accent2-ring';
+    'session-card group relative px-2.5 py-2 rounded-sm cursor-pointer ' +
+    'transition-colors duration-fast hover:bg-hover2';
 
 /** §7.5 面板头：Label（大写）+ 计数 chip */
 function PanelHeader({ label, count, onCollapse, onBack }: { label: string; count?: number; onCollapse?: () => void; onBack?: () => void }) {
@@ -970,7 +969,7 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                     <span className="min-w-0 flex-1 truncate text-left text-sm font-medium text-t1">{group.name}</span>
                                     <span className="text-13 tabular-nums">{group.sessions.length}</span>
                                 </button>
-                                {expanded && <div className="mt-1.5 space-y-2">
+                                {expanded && <div className="mt-1 space-y-0.5">
                                     {group.sessions.map(session => {
                                         const folder = session.workingDirectory.split(/[\\/]/).filter(Boolean).at(-1);
                                         const displayTitle = simpleMode
@@ -1006,7 +1005,7 @@ function SessionList({ onCollapse, onSessionActivated, onBack }: { onCollapse?: 
                                                 )}
                                                 <div className="relative flex items-start gap-1">
                                                     <div className="flex-1 min-w-0">
-                                                        <div className={`line-clamp-2 break-words text-sm ${isActive ? 'font-semibold' : 'font-medium'} text-t1`}>
+                                                        <div className={`line-clamp-2 break-words text-sm ${isActive ? 'font-medium text-t1' : 'text-t2'}`}>
                                                             {displayTitle}
                                                         </div>
                                                         {simpleMode && (
@@ -1311,7 +1310,7 @@ function SimpleTaskList({ onCollapse, onSessionActivated, onBack }: { onCollapse
                 if (group.tasks.length === 0) return null;
                 const collapsedGroup = collapsed.has(group.status); const GroupIcon = iconFor(group.status);
                 return <section key={group.status} className="mb-3"><button onClick={() => setCollapsed(previous => { const next = new Set(previous); next.has(group.status) ? next.delete(group.status) : next.add(group.status); return next; })} className="panel-control flex w-full items-center gap-2 px-2 py-1.5 text-13 font-medium text-t2"><span>{collapsedGroup ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}</span><GroupIcon className={`h-3.5 w-3.5 ${toneFor(group.status)} ${group.status === 'RUNNING' ? 'animate-spin' : ''}`} />{group.label}<span className="ml-auto text-t2 tabular-nums whitespace-nowrap shrink-0">{group.tasks.length}</span></button>
-                    {!collapsedGroup && <div className="space-y-2">{group.tasks.map(task => {
+                    {!collapsedGroup && <div className="space-y-0.5">{group.tasks.map(task => {
                         const isActive = task.sessionId === currentSessionId;
                         return (
                         <div
@@ -1331,7 +1330,7 @@ function SimpleTaskList({ onCollapse, onSessionActivated, onBack }: { onCollapse
                             )}
                             <div className="relative flex items-start gap-2">
                                 <div className="min-w-0 flex-1">
-                                    <p className={`truncate text-sm ${isActive ? 'font-semibold' : 'font-medium'} text-t1`}>{task.title}</p>
+                                    <p className={`truncate text-sm ${isActive ? 'font-medium text-t1' : 'text-t2'}`}>{task.title}</p>
                                     <p className={`mt-1 flex items-center gap-1.5 text-13 ${isActive ? 'text-t2' : 'text-t3'}`}>
                                         <span className="truncate">{task.folderName}{task.hint ? ` · ${task.hint}` : ''}</span>
                                         <span aria-hidden="true">·</span>

@@ -11,7 +11,7 @@ import { GlassMaterial } from '@/components/theme/GlassMaterial';
  */
 
 import { useEffect } from 'react';
-import { Menu, Settings, Coins, Loader2, Flag } from 'lucide-react';
+import { Menu, Settings, Coins, Loader2, Flag, Cable, Brain, Puzzle, Zap } from 'lucide-react';
 import { useSessionStore } from '@/store/sessionStore';
 import { useCostStore } from '@/store/costStore';
 import { useDialogStore } from '@/store/dialogStore';
@@ -19,9 +19,6 @@ import { defaultInkHavocFx, useConfigStore } from '@/store/configStore';
 import { useModelStore } from '@/store/modelStore';
 import { useBridgeStore } from '@/store/bridgeStore';
 import { clearSessionSelection } from '@/services/sessionActivation';
-import { McpIcon } from '@/components/mcp/McpIcon';
-import { MemoryIcon } from '@/components/memory/MemoryIcon';
-import { SkillIcon } from '@/components/skills/SkillIcon';
 import { SessionStatusCapsule } from '@/components/status/SessionStatusCapsule';
 import { DriftSyncBadge } from '@/components/theme/DriftSyncBadge';
 
@@ -49,6 +46,9 @@ interface HeaderProps {
 export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
     const { model, setModel } = useSessionStore();
     const { sessionCost, totalCost, usage } = useCostStore();
+    // 用量指标只在有数可示时出现：空会话/首页上一排「↑0 ↓0 $0.000 ∑$0.000」只是噪音
+    const hasUsage = usage.inputTokens > 0 || usage.outputTokens > 0 || usage.cacheReadInputTokens > 0
+        || sessionCost > 0 || totalCost > 0;
     const { bridgeStatus } = useBridgeStore();
     const { openDialog } = useDialogStore();
     const { theme, setTheme } = useConfigStore();
@@ -149,13 +149,14 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     <SessionStatusCapsule />
                     {/* 星舰 HUD 事件特效：streaming 时呈现 DRIFT SYNCED 徽章（内部三重门控，其他主题返回 null） */}
                     <DriftSyncBadge />
+                    {hasUsage && <>
                     <MetricDivider className="hidden lg:block" />
                     <div className="hidden lg:flex items-center gap-2 tabular-nums">
                         <span title="输入 Tokens">↑ {usage.inputTokens.toLocaleString()}</span>
                         <span title="输出 Tokens">↓ {usage.outputTokens.toLocaleString()}</span>
                         {usage.cacheReadInputTokens > 0 && (
                             <span title="缓存读取" className="text-accent2-ink">
-                                ⚡ {usage.cacheReadInputTokens.toLocaleString()}
+                                <Zap className="w-3 h-3" aria-hidden="true" /> {usage.cacheReadInputTokens.toLocaleString()}
                             </span>
                         )}
                     </div>
@@ -168,6 +169,7 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     <span className="hidden lg:block tabular-nums" title={`全局累计: $${totalCost.toFixed(3)}`}>
                         ∑ ${totalCost.toFixed(3)}
                     </span>
+                    </>}
                 </div>
 
                 {/* 波次3② 闭关令旗（ink 双主题限定）：挂匾收起装饰专注书写 / 摘匾装饰回归；
@@ -185,35 +187,39 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     </button>
                 )}
 
-                {/* Settings */}
+                {/* MCP / 记忆 / Skill / 设置：四个入口统一成同规格的图标按钮（悬停有名称提示）。
+                    原先前三个是三块宽度不一的文字徽标，和最右边的齿轮图标不是一套 */}
                 <button
                     onClick={() => openDialog('mcp')}
                     className={`panel-control inline-flex ${HEADER_BUTTON_CLASS}`}
                     title="MCP 管理"
                     aria-label="MCP 管理"
+                    aria-haspopup="dialog"
                 >
-                    <McpIcon className="h-7 w-auto" />
+                    <Cable className="w-4 h-4" aria-hidden="true" />
                 </button>
 
-                {/* Memory */}
                 <button
                     onClick={() => openDialog('memory')}
                     className={`panel-control inline-flex ${HEADER_BUTTON_CLASS}`}
                     title="记忆"
                     aria-label="记忆"
+                    aria-haspopup="dialog"
                 >
-                    <MemoryIcon className="h-7 w-auto" />
+                    <Brain className="w-4 h-4" aria-hidden="true" />
                 </button>
 
                 <button
                     onClick={() => openDialog('skills')}
-                    className={`panel-control inline-flex ${HEADER_BUTTON_CLASS} min-h-11 min-w-11`}
+                    className={`panel-control inline-flex ${HEADER_BUTTON_CLASS}`}
                     title="Skill 管理"
                     aria-label="Skill 管理"
                     aria-haspopup="dialog"
                 >
-                    <SkillIcon className="h-7 w-auto" />
+                    <Puzzle className="w-4 h-4" aria-hidden="true" />
                 </button>
+
+                {/* Settings */}
 
                 <button
                     onClick={() => openDialog('settings')}

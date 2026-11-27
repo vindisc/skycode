@@ -65,13 +65,13 @@ describe('AssistantMessage 消息级操作行（共享 AssistantMessageActions�
 describe('AssistantMessage finalized tool_use fallback status', () => {
     it('无 result 的工具渲染为 Running，不误标 Completed', () => {
         render(<AssistantMessage message={assistantMessage()} />);
-        expect(screen.getByText('Running')).toBeInTheDocument();
-        expect(screen.queryByText('Completed')).not.toBeInTheDocument();
+        expect(screen.getByText('运行中')).toBeInTheDocument();
+        expect(screen.queryByText('已完成')).not.toBeInTheDocument();
     });
 
     it('带成功 result 的工具渲染为 Completed', () => {
         render(<AssistantMessage message={assistantMessage({ content: 'ok', isError: false })} />);
-        expect(screen.getByText('Completed')).toBeInTheDocument();
+        expect(screen.getByText('已完成')).toBeInTheDocument();
     });
 
     it('恢复结果携带 durationMs 时显示固定耗时', () => {
@@ -85,8 +85,8 @@ describe('AssistantMessage finalized tool_use fallback status', () => {
 
     it('带错误 result 的工具渲染为 Error', () => {
         render(<AssistantMessage message={assistantMessage({ content: 'boom', isError: true })} />);
-        expect(screen.getAllByText('Error').length).toBeGreaterThan(0);
-        expect(screen.queryByText('Completed')).not.toBeInTheDocument();
+        expect(screen.getAllByText('失败').length).toBeGreaterThan(0);
+        expect(screen.queryByText('已完成')).not.toBeInTheDocument();
     });
 
     it('错误路径迁移合成的 isError result block（activeToolCalls 为空 Map）渲染为 Error，不回退 Running', () => {
@@ -97,9 +97,9 @@ describe('AssistantMessage finalized tool_use fallback status', () => {
                 activeToolCalls={new Map()}
             />,
         );
-        expect(screen.getAllByText('Error').length).toBeGreaterThan(0);
-        expect(screen.queryByText('Running')).not.toBeInTheDocument();
-        expect(screen.queryByText('Completed')).not.toBeInTheDocument();
+        expect(screen.getAllByText('失败').length).toBeGreaterThan(0);
+        expect(screen.queryByText('运行中')).not.toBeInTheDocument();
+        expect(screen.queryByText('已完成')).not.toBeInTheDocument();
     });
 
     it('activeToolCalls 中存在实时状态时优先使用实时状态', () => {
@@ -114,7 +114,7 @@ describe('AssistantMessage finalized tool_use fallback status', () => {
             }],
         ]);
         render(<AssistantMessage message={assistantMessage()} activeToolCalls={active} />);
-        expect(screen.getByText('Completed')).toBeInTheDocument();
-        expect(screen.queryByText('Running')).not.toBeInTheDocument();
+        expect(screen.getByText('已完成')).toBeInTheDocument();
+        expect(screen.queryByText('运行中')).not.toBeInTheDocument();
     });
 });
