@@ -22,6 +22,7 @@ import {
     History,
     CheckSquare,
     Square,
+    ClipboardList,
 } from 'lucide-react';
 import { usePlanStore, type PlanStep } from '@/store/planStore';
 import { useResponsive } from '@/hooks/useResponsive';
@@ -312,7 +313,7 @@ function MobileDrawer() {
                     text-sm text-[var(--v2-text-1)]"
             >
                 <span className="font-medium truncate">
-                    📋 {usePlanStore.getState().planName || '执行计划'}
+                    <ClipboardList aria-hidden="true" className="inline-block h-4 w-4 align-[-0.125em]" /> {usePlanStore.getState().planName || '执行计划'}
                 </span>
                 <span className="text-13 text-[var(--v2-text-2)] ml-2 shrink-0">
                     {completedCount}/{steps.length}

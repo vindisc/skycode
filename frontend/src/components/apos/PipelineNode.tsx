@@ -4,6 +4,8 @@
  */
 
 import React from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { Hourglass, RefreshCw, Pause, CircleCheck, CircleX, Circle, CircleHelp, TriangleAlert } from 'lucide-react';
 import type { WorkerInfo } from '@/types';
 
 interface PipelineNodeProps {
@@ -11,28 +13,28 @@ interface PipelineNodeProps {
     swarmId: string;
 }
 
-/** 根据 Worker 状态返回对应图标 */
-function getStatusIcon(worker: WorkerInfo): string {
+/** 根据 Worker 状态返回对应图标与着色 class（沿用 emoji 原本的状态色） */
+function getStatusIcon(worker: WorkerInfo): { icon: LucideIcon; color: string } {
     switch (worker.status) {
         case 'STARTING':
-            return '⏳';
+            return { icon: Hourglass, color: 'text-warn' };
         case 'WORKING':
-            return '🔄';
+            return { icon: RefreshCw, color: 'text-accent2-ink' };
         case 'IDLE':
-            return '⏸';
+            return { icon: Pause, color: 'text-t3' };
         case 'TERMINATED':
             switch (worker.terminationReason) {
                 case 'completed':
-                    return '✅';
+                    return { icon: CircleCheck, color: 'text-ok' };
                 case 'error':
-                    return '❌';
+                    return { icon: CircleX, color: 'text-err' };
                 case 'aborted':
-                    return '⚫';
+                    return { icon: Circle, color: 'text-t3' };
                 default:
-                    return '⚫';
+                    return { icon: Circle, color: 'text-t3' };
             }
         default:
-            return '❓';
+            return { icon: CircleHelp, color: 'text-t3' };
     }
 }
 
@@ -53,7 +55,7 @@ function getStatusBorderColor(worker: WorkerInfo): string {
 }
 
 export const PipelineNode: React.FC<PipelineNodeProps> = ({ worker, swarmId: _swarmId }) => {
-    const statusIcon = getStatusIcon(worker);
+    const { icon: StatusIcon, color: statusIconColor } = getStatusIcon(worker);
     const borderColor = getStatusBorderColor(worker);
 
     return (
@@ -63,8 +65,8 @@ export const PipelineNode: React.FC<PipelineNodeProps> = ({ worker, swarmId: _sw
                 <span className="font-semibold text-sm text-t1 truncate">
                     {worker.workerId}
                 </span>
-                <span className="text-lg" title={`${worker.status}${worker.terminationReason ? ` (${worker.terminationReason})` : ''}`}>
-                    {statusIcon}
+                <span className={`text-lg ${statusIconColor}`} title={`${worker.status}${worker.terminationReason ? ` (${worker.terminationReason})` : ''}`}>
+                    <StatusIcon aria-hidden="true" className="h-5 w-5 align-middle" />
                 </span>
             </div>
 
@@ -98,7 +100,7 @@ export const PipelineNode: React.FC<PipelineNodeProps> = ({ worker, swarmId: _sw
             {/* Error message */}
             {worker.errorMessage && (
                 <p className="text-13 text-err mt-1 truncate" title={worker.errorMessage}>
-                    ⚠️ {worker.errorMessage}
+                    <TriangleAlert aria-hidden="true" className="inline-block h-3.5 w-3.5 align-[-0.125em] text-warn" /> {worker.errorMessage}
                 </p>
             )}
         </div>

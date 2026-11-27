@@ -1,4 +1,5 @@
 import React from 'react';
+import { TriangleAlert } from 'lucide-react';
 import { useMessageStore } from '@/store/messageStore';
 // TokenWarningPayload type is inferred from messageStore selector
 
@@ -22,8 +23,9 @@ export const TokenWarningBanner: React.FC = () => {
         ? 'bg-errsoft text-err border border-err dark:text-err'
         : 'bg-warnsoft text-warn border border-warn dark:text-warn'
     }`}>
-      <span className="font-medium shrink-0">
-        {isCritical ? '⚠️ 上下文窗口即将用尽' : '⚠ 上下文窗口占用较高'}
+      <span className="inline-flex items-center gap-1.5 font-medium shrink-0">
+        <TriangleAlert aria-hidden="true" className="h-4 w-4 shrink-0" />
+        {isCritical ? '上下文窗口即将用尽' : '上下文窗口占用较高'}
       </span>
       <span className="text-13 opacity-80">
         {tokenWarning.usagePercent.toFixed(0)}% 已使用

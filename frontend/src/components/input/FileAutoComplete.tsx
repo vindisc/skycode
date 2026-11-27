@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { Folder, File } from 'lucide-react';
 import { useSessionStore } from '@/store/sessionStore';
 
 interface FileResult {
@@ -110,7 +111,9 @@ export const FileAutoComplete: React.FC<FileAutoCompleteProps> = ({
                         ${i === selectedIndex ? 'bg-accent2-strong text-white' : 'hover:bg-hover2'}`}
                     onClick={() => onSelect(r.path)}
                     onMouseEnter={() => setSelectedIndex(i)}>
-                    <span>{r.type === 'directory' ? '📁' : '📄'}</span>
+                    <span>{r.type === 'directory'
+                        ? <Folder aria-hidden="true" className="h-4 w-4 shrink-0" />
+                        : <File aria-hidden="true" className="h-4 w-4 shrink-0" />}</span>
                     <span className="flex-1 font-mono truncate">{r.path}</span>
                 </button>
             ))}

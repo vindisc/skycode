@@ -51,7 +51,7 @@ test.describe('APOS Phase 2 - Agent Pipeline (TC-APOS2-007~011)', () => {
     await expect(title).toBeVisible({ timeout: 5000 });
 
     // 验证空状态图标和文案
-    const emptyIcon = page.locator('text=🔗');
+    const emptyIcon = page.locator('.py-12 svg.lucide-link');
     await expect(emptyIcon).toBeVisible({ timeout: 3000 });
 
     const noSwarmText = page.locator('text=No active Swarm');
@@ -103,25 +103,25 @@ test.describe('APOS Phase 2 - Agent Pipeline (TC-APOS2-007~011)', () => {
     const pipelineGrid = page.locator('.grid.grid-cols-1');
     await expect(pipelineGrid).toBeVisible({ timeout: 5000 });
 
-    // Worker-001 = WORKING → 图标 🔄, 边框 border-blue-500
+    // Worker-001 = WORKING → 图标 lucide RefreshCw, 边框 border-blue-500
     const workingCard = pipelineGrid.locator('.border-blue-500');
     await expect(workingCard).toBeVisible({ timeout: 5000 });
-    await expect(workingCard.locator('text=🔄')).toBeVisible({ timeout: 3000 });
+    await expect(workingCard.locator('svg.lucide-refresh-cw')).toBeVisible({ timeout: 3000 });
 
-    // Worker-002 = STARTING → 图标 ⏳, 边框 border-yellow-400
+    // Worker-002 = STARTING → 图标 lucide Hourglass, 边框 border-yellow-400
     const startingCard = pipelineGrid.locator('.border-yellow-400');
     await expect(startingCard).toBeVisible({ timeout: 5000 });
-    await expect(startingCard.locator('text=⏳')).toBeVisible({ timeout: 3000 });
+    await expect(startingCard.locator('svg.lucide-hourglass')).toBeVisible({ timeout: 3000 });
 
-    // Worker-003 = IDLE → 图标 ⏸, 边框 border-gray-400
+    // Worker-003 = IDLE → 图标 lucide Pause, 边框 border-gray-400
     const idleCard = pipelineGrid.locator('.border-gray-400');
     await expect(idleCard).toBeVisible({ timeout: 5000 });
-    await expect(idleCard.locator('text=⏸')).toBeVisible({ timeout: 3000 });
+    await expect(idleCard.locator('svg.lucide-pause')).toBeVisible({ timeout: 3000 });
 
-    // Worker-004 = TERMINATED (error, as defined by factory) → 图标 ❌, 边框 border-red-500
+    // Worker-004 = TERMINATED (error, as defined by factory) → 图标 lucide CircleX, 边框 border-red-500
     const terminatedCard = pipelineGrid.locator('.border-red-500');
     await expect(terminatedCard).toBeVisible({ timeout: 5000 });
-    await expect(terminatedCard.locator('text=❌')).toBeVisible({ timeout: 3000 });
+    await expect(terminatedCard.locator('svg.lucide-circle-x')).toBeVisible({ timeout: 3000 });
 
     await takeTestScreenshot(page, 'TC-APOS2-009', '01-status-icons');
   });
@@ -182,16 +182,16 @@ test.describe('APOS Phase 2 - Agent Pipeline (TC-APOS2-007~011)', () => {
 
     await toggleDetailsPanel(page, 'Agent Pipeline');
 
-    // 验证错误消息显示 ⚠️ + errorMessage
-    const errorMsg = page.locator('text=⚠️ Process terminated unexpectedly');
+    // 验证错误消息显示 TriangleAlert 图标 + errorMessage
+    const errorMsg = page.locator('text=Process terminated unexpectedly');
     await expect(errorMsg).toBeVisible({ timeout: 5000 });
 
     // 验证边框为红色
     const errorCard = page.locator('.border-red-500');
     await expect(errorCard).toBeVisible({ timeout: 3000 });
 
-    // 验证 ❌ 图标
-    await expect(errorCard.locator('text=❌')).toBeVisible({ timeout: 3000 });
+    // 验证 lucide CircleX 图标
+    await expect(errorCard.locator('svg.lucide-circle-x')).toBeVisible({ timeout: 3000 });
 
     // 验证 Swarm 存在但 Workers 为空 时的等待提示
     await injectSwarmData(page, {
@@ -480,8 +480,8 @@ test.describe('APOS Phase 2 - Anomaly Detection (TC-APOS2-019~024)', () => {
     const countBadge = page.locator('.bg-red-500.text-white');
     await expect(countBadge).not.toBeVisible({ timeout: 2000 });
 
-    // 验证空状态 ✅ 图标
-    const checkIcon = page.locator('text=✅');
+    // 验证空状态 lucide CircleCheck 图标
+    const checkIcon = page.locator('.py-12 svg.lucide-circle-check');
     await expect(checkIcon).toBeVisible({ timeout: 3000 });
 
     // 验证 "运行正常" 文案
@@ -514,8 +514,8 @@ test.describe('APOS Phase 2 - Anomaly Detection (TC-APOS2-019~024)', () => {
     const alertTitle = page.locator('h2').filter({ hasText: 'Anomaly Alerts' });
     await expect(alertTitle).toBeVisible({ timeout: 5000 });
 
-    // 验证 loop_detection 图标 🔄
-    const loopIcon = page.locator('.rounded-sm.border').locator('text=🔄');
+    // 验证 loop_detection 图标（lucide Repeat）
+    const loopIcon = page.locator('.rounded-sm.border').locator('svg.lucide-repeat');
     await expect(loopIcon).toBeVisible({ timeout: 5000 });
 
     // 验证 Worker 名称

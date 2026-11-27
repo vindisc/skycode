@@ -13,7 +13,7 @@
 import React, { useEffect, useState } from 'react';
 import { SheetShell } from '@/components/apos/MobileBottomSheet';
 import { PermissionMenu } from './PermissionMenu';
-import { ChevronDown, Cpu } from 'lucide-react';
+import { Check, ChevronDown, Cpu } from 'lucide-react';
 import { PERMISSION_MODES, type PermissionMode } from '@/types';
 import { useSessionPermissionSelection } from '@/hooks/useSessionPermissionSelection';
 import { useSessionStore } from '@/store/sessionStore';
@@ -123,10 +123,10 @@ export function MobileChoice({ label, value, options, onChange, title, disabled 
     const currentLabel = options.find(option => option.value === value)?.label ?? value;
     const content = row
         ? <span className="flex w-full items-center gap-3 rounded-md border border-hairline bg-surface2 px-3 py-3 text-left"><Cpu size={20} className="shrink-0 text-t2" /><span className="min-w-0 flex-1"><span className="block text-13 text-t2">模型</span><span className="mt-0.5 block truncate text-sm font-medium text-t1">{options.find(option => option.value === value)?.label ?? (disabled ? '模型暂不可用' : '选择模型')}</span></span><ChevronDown size={16} className="shrink-0" /></span>
-        : showCurrent ? <MobileSelectionLabel label={label} value={currentLabel} maxTextWidth={maxTextWidth} /> : <>{label}⌄</>;
+        : showCurrent ? <MobileSelectionLabel label={label} value={currentLabel} maxTextWidth={maxTextWidth} /> : <>{label}<ChevronDown size={12} aria-hidden="true" /></>;
     return <><button type="button" aria-label={showCurrent ? `${label}：${currentLabel}，点击切换` : undefined} className="min-h-11 min-w-0 shrink-0 rounded-sm px-1.5 text-sm text-t2 transition-interactive duration-fast hover:bg-hover2 active:bg-hover2 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent2-ink" aria-haspopup="dialog" aria-expanded={open} disabled={disabled} title={title} onClick={() => setOpen(true)}>{leading ? <span className="inline-flex items-center gap-1.5">{leading}{content}</span> : content}</button>
         <SheetShell isOpen={open && !disabled} onClose={() => setOpen(false)} ariaLabel={`选择${label}`} header={<div className="flex items-center justify-between px-4"><h2 className="text-xl font-semibold">选择{label}</h2><button className="min-h-11 px-3" onClick={() => setOpen(false)}>完成</button></div>}>
-            <div className="p-4 space-y-1">{options.map(option => <button key={option.value} disabled={disabled} className="flex min-h-11 w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm text-t1 hover:bg-hover2" aria-pressed={option.value === value} onClick={() => { onChange(option.value); setOpen(false); }}><span><span className="block">{option.label}</span>{option.description && <span className="block mt-1 text-13 text-t2">{option.description}</span>}</span>{option.value === value && <span aria-hidden="true">✓</span>}</button>)}</div>
+            <div className="p-4 space-y-1">{options.map(option => <button key={option.value} disabled={disabled} className="flex min-h-11 w-full items-center justify-between rounded-sm px-3 py-2 text-left text-sm text-t1 hover:bg-hover2" aria-pressed={option.value === value} onClick={() => { onChange(option.value); setOpen(false); }}><span><span className="block">{option.label}</span>{option.description && <span className="block mt-1 text-13 text-t2">{option.description}</span>}</span>{option.value === value && <Check size={16} className="shrink-0" aria-hidden="true" />}</button>)}</div>
         </SheetShell></>;
 }
 

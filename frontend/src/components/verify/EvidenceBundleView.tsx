@@ -10,6 +10,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { Check, Minus, X } from 'lucide-react';
 import { useEvidenceStore } from '@/store/evidenceStore';
 import type { EvidenceBundle, EvidenceItem } from '@/store/evidenceStore';
 
@@ -367,7 +368,11 @@ const TestList: React.FC<{ items: EvidenceItem[] }> = ({ items }) => (
                     <span
                         className={ok ? 'text-ok' : fail ? 'text-err' : 'text-t2'}
                     >
-                        {ok ? '✓' : fail ? '✗' : '·'}
+                        {ok
+                        ? <Check aria-label="Passed" className="h-3.5 w-3.5 shrink-0" />
+                        : fail
+                        ? <X aria-label="Failed" className="h-3.5 w-3.5 shrink-0" />
+                        : <Minus aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />}
                     </span>
                     <span className="font-mono truncate">
                         {item.summary ?? (item.meta?.name as string | undefined) ?? shortId(item.id)}

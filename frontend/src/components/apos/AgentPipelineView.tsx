@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { Link, Hourglass } from 'lucide-react';
 import { useSwarmStore } from '@/store/swarmStore';
 import PipelineNode from './PipelineNode';
 
@@ -19,7 +20,7 @@ export const AgentPipelineView: React.FC = () => {
                     Agent Pipeline
                 </h2>
                 <div className="flex flex-col items-center justify-center py-12 text-t2">
-                    <span className="text-4xl mb-3">🔗</span>
+                    <Link aria-hidden="true" className="mb-3 h-10 w-10" />
                     <p className="text-sm">No active Swarm</p>
                     <p className="text-13 mt-1">Pipeline will appear when a Swarm is running</p>
                 </div>
@@ -37,7 +38,7 @@ export const AgentPipelineView: React.FC = () => {
 
             {workers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-t2">
-                    <span className="text-3xl mb-2">⏳</span>
+                    <Hourglass aria-hidden="true" className="mb-2 h-9 w-9" />
                     <p className="text-sm">Waiting for workers to start...</p>
                 </div>
             ) : (

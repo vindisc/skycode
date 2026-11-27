@@ -187,12 +187,14 @@ test.describe('F15 文件树导航', () => {
     await page.waitForTimeout(1000);
 
     // 验证文件树中有文件类型图标
-    // FileTreePanel uses emoji icons: 📁/📂 for dirs, TS/JS for code, etc.
-    const asideContent = await page.locator('aside').textContent() ?? '';
+    // FileTreePanel uses lucide icons: Folder/FolderOpen for dirs, File/FileText for files, TS/JS text badges for code, etc.
+    const aside = page.locator('aside');
+    const asideContent = await aside.textContent() ?? '';
 
-    const hasDirIcon = asideContent.includes('📁') || asideContent.includes('📂');
-    const hasFileIcon = asideContent.includes('📄') || asideContent.includes('📝') ||
-                        asideContent.includes('TS') || asideContent.includes('JS');
+    const dirIconCount = await aside.locator('svg.lucide-folder, svg.lucide-folder-open').count();
+    const fileIconCount = await aside.locator('svg.lucide-file, svg.lucide-file-text').count();
+    const hasDirIcon = dirIconCount > 0;
+    const hasFileIcon = fileIconCount > 0 || asideContent.includes('TS') || asideContent.includes('JS');
 
     console.log(`[TC-VIS-04] Dir icon present: ${hasDirIcon}, File icon present: ${hasFileIcon}`);
     // At least directory icons should be visible
@@ -652,7 +654,7 @@ test.describe('F8 工具进度增强', () => {
       // 等待工具完成 — 检查Completed状态标签
       await page.waitForFunction(() => {
         const blocks = Array.from(document.querySelectorAll('.tool-call-block'));
-        return blocks.some(block => block.textContent?.includes('Completed'));
+        return blocks.some(block => block.textContent?.includes('已完成'));
       }, { timeout: 30000 }).catch(() => {});
     } catch {
       console.log('[TC-VIS-18] No tool-call-block appeared');
@@ -664,7 +666,7 @@ test.describe('F8 工具进度增强', () => {
     const toolText = await toolBlock.textContent() ?? '';
 
     // 验证完成状态；耗时仅记录，不把可选展示误当成必需合同。
-    const isCompleted = toolText.includes('Completed');
+    const isCompleted = toolText.includes('已完成');
     const hasDuration = /\d+(\.\d+)?[ms]+/.test(toolText);
 
     console.log(`[TC-VIS-18] Completed: ${isCompleted}, Has duration: ${hasDuration}`);
@@ -693,7 +695,7 @@ test.describe('F8 工具进度增强', () => {
       // 等待完成
       await page.waitForFunction(() => {
         const blocks = Array.from(document.querySelectorAll('.tool-call-block'));
-        return blocks.some(block => block.textContent?.includes('Completed') || block.textContent?.includes('Result'));
+        return blocks.some(block => block.textContent?.includes('已完成') || block.textContent?.includes('Result'));
       }, { timeout: 30000 }).catch(() => {});
     } catch {
       console.log('[TC-VIS-19] No tool-call-block appeared');

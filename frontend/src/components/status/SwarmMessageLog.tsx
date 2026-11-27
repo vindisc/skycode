@@ -4,14 +4,16 @@
  */
 
 import React, { useRef, useEffect } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { Play, Check, X, ArrowRight, Circle } from 'lucide-react';
 import { useSwarmStore } from '@/store/swarmStore';
 
-const typeIcons: Record<string, { icon: string; color: string }> = {
-    worker_start: { icon: '▶', color: 'text-ok' },
-    worker_complete: { icon: '✓', color: 'text-accent2-ink dark:text-accent2-ink' },
-    worker_error: { icon: '✗', color: 'text-err' },
-    task_assigned: { icon: '→', color: 'text-accent2-ink' },
-    message: { icon: '●', color: 'text-t3' },
+const typeIcons: Record<string, { icon: LucideIcon; color: string }> = {
+    worker_start: { icon: Play, color: 'text-ok' },
+    worker_complete: { icon: Check, color: 'text-accent2-ink dark:text-accent2-ink' },
+    worker_error: { icon: X, color: 'text-err' },
+    task_assigned: { icon: ArrowRight, color: 'text-accent2-ink' },
+    message: { icon: Circle, color: 'text-t3' },
 };
 
 export const SwarmMessageLog: React.FC = () => {
@@ -59,13 +61,14 @@ export const SwarmMessageLog: React.FC = () => {
                 ) : (
                     logs.slice(-50).map((entry) => {
                         const cfg = typeIcons[entry.type] ?? typeIcons.message;
+                        const TypeIcon = cfg.icon;
                         return (
                             <div key={entry.id} className="flex items-start gap-2 text-13 leading-relaxed group">
                                 <span className="text-13 text-t3 font-mono tabular-nums shrink-0 mt-0.5">
                                     {formatTime(entry.timestamp)}
                                 </span>
                                 <span className={`shrink-0 mt-0.5 ${cfg.color}`}>
-                                    {cfg.icon}
+                                    <TypeIcon aria-hidden="true" className="h-3.5 w-3.5 align-middle" />
                                 </span>
                                 <span className="text-t2 break-all">
                                     {entry.workerId && (

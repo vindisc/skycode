@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { Check, X, ChevronDown, ChevronRight } from 'lucide-react';
 import { useJourneyVerifyStore } from '@/store/journeyVerifyStore';
 import type { JourneyVerifyStatus } from '@/store/journeyVerifyStore';
 import { EvidenceBundleView } from '@/components/verify/EvidenceBundleView';
@@ -33,7 +34,9 @@ export const JourneyVerifyPanel: React.FC = () => {
                 {steps.map((step) => (
                     <div key={step.stepIndex} className="flex items-center gap-2 text-13">
                         <span className={step.ok ? 'text-ok' : 'text-err'}>
-                            {step.ok ? '✓' : '✗'}
+                            {step.ok
+                                ? <Check aria-label="通过" className="h-3.5 w-3.5 shrink-0" />
+                                : <X aria-label="失败" className="h-3.5 w-3.5 shrink-0" />}
                         </span>
                         <span className="font-mono">{step.action}</span>
                         <span className="text-t2 ml-auto">{step.durationMs}ms</span>
@@ -54,7 +57,9 @@ export const JourneyVerifyPanel: React.FC = () => {
                         onClick={() => setShowEvidence((v) => !v)}
                         className="panel-control mt-2 text-13 text-accent2-ink hover:text-accent2-ink hover:underline cursor-pointer flex items-center gap-1"
                     >
-                        <span>{showEvidence ? '▼' : '▶'}</span>
+                        {showEvidence
+                            ? <ChevronDown aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+                            : <ChevronRight aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />}
                         <span>Evidence: {bundleId.slice(0, 12)}…</span>
                     </button>
                     {showEvidence && <EvidenceBundleView bundleId={bundleId} />}

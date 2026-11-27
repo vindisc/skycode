@@ -5,14 +5,16 @@
  */
 
 import React, { useMemo } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { Search, Brain, Settings2, CircleCheck } from 'lucide-react';
 import { useCoordinatorStore } from '@/store/coordinatorStore';
-import type { WorkflowPhaseState } from '@/types';
+import type { WorkflowPhaseName, WorkflowPhaseState } from '@/types';
 
-const phaseIcons: Record<string, string> = {
-    Research: '🔍',
-    Synthesis: '🧠',
-    Implementation: '⚙️',
-    Verification: '✅',
+const phaseIcons: Record<WorkflowPhaseName, LucideIcon> = {
+    Research: Search,
+    Synthesis: Brain,
+    Implementation: Settings2,
+    Verification: CircleCheck,
 };
 
 const phaseLabels: Record<string, string> = {
@@ -65,6 +67,8 @@ const PhaseStep: React.FC<PhaseStepProps> = ({ phase, isLast }) => {
         return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
     }, [phase.startTime, phase.endTime]);
 
+    const PhaseIcon = phaseIcons[phase.name];
+
     return (
         <div className="flex items-center">
             {/* Phase circle + label */}
@@ -78,7 +82,7 @@ const PhaseStep: React.FC<PhaseStepProps> = ({ phase, isLast }) => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                         </svg>
                     ) : (
-                        <span className="text-base">{phaseIcons[phase.name]}</span>
+                        <PhaseIcon aria-hidden="true" className="h-5 w-5" />
                     )}
                 </div>
                 <span className={`mt-1.5 text-13 leading-tight text-center ${statusStyles.label}`}>

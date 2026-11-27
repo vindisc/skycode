@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { CheckCircle, AlertTriangle, XCircle, Activity, RefreshCw, Download } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import {
+    CheckCircle, AlertTriangle, XCircle, Activity, RefreshCw, Download,
+    CircleCheckBig, TriangleAlert, CircleX, Cpu, Bot, Folder, Lock, MessageSquare, Wrench, Server,
+} from 'lucide-react';
 
 interface DiagnosticCheck {
     category: string;
@@ -26,13 +30,34 @@ const StatusIcon: React.FC<{ status: DiagnosticCheck['status'] }> = ({ status })
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-    runtime: '💻 运行时',
-    llm: '🤖 LLM',
-    env: '📁 环境',
-    auth: '🔐 认证',
-    session: '💬 会话',
-    tool: '🛠️ 工具',
-    service: '⚙️ 服务',
+    runtime: '运行时',
+    llm: 'LLM',
+    env: '环境',
+    auth: '认证',
+    session: '会话',
+    tool: '工具',
+    service: '服务',
+};
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+    runtime: Cpu,
+    llm: Bot,
+    env: Folder,
+    auth: Lock,
+    session: MessageSquare,
+    tool: Wrench,
+    service: Server,
+};
+
+/** 分类标题：图标 + 文案 */
+const CategoryHeading: React.FC<{ category: string }> = ({ category }) => {
+    const Icon = CATEGORY_ICONS[category];
+    return (
+        <div className="flex items-center gap-1.5 text-13 font-medium text-[var(--v2-text-2)] mb-1.5">
+            {Icon && <Icon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />}
+            {CATEGORY_LABELS[category] ?? category}
+        </div>
+    );
 };
 
 export const DiagnosticPanel: React.FC<{
@@ -79,9 +104,22 @@ export const DiagnosticPanel: React.FC<{
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                     <div className={`flex items-center gap-3 px-3 py-1 rounded-full border ${statusColor}`}>
-                        <span className="text-13">✅ {summary.ok}</span>
-                        {summary.warn > 0 && <span className="text-13">⚠️ {summary.warn}</span>}
-                        {summary.error > 0 && <span className="text-13">❌ {summary.error}</span>}
+                        <span className="text-13 inline-flex items-center gap-1">
+                            <CircleCheckBig aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-ok" />
+                            {summary.ok}
+                        </span>
+                        {summary.warn > 0 && (
+                            <span className="text-13 inline-flex items-center gap-1">
+                                <TriangleAlert aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-warn" />
+                                {summary.warn}
+                            </span>
+                        )}
+                        {summary.error > 0 && (
+                            <span className="text-13 inline-flex items-center gap-1">
+                                <CircleX aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-err" />
+                                {summary.error}
+                            </span>
+                        )}
                     </div>
                     {onRecheck && (
                         <button onClick={onRecheck}
@@ -100,9 +138,7 @@ export const DiagnosticPanel: React.FC<{
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {Object.entries(grouped).map(([category, items]) => (
                     <div key={category} className="space-y-1">
-                        <div className="text-13 font-medium text-[var(--v2-text-2)] mb-1.5">
-                            {CATEGORY_LABELS[category] ?? category}
-                        </div>
+                        <CategoryHeading category={category} />
                         <div className="space-y-1">
                             {items.map((check) => (
                                 <div key={check.name}

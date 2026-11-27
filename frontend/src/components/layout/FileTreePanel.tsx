@@ -6,7 +6,8 @@ import { useResponsive } from '@/hooks/useResponsive';
 
 import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { Tree, NodeRendererProps } from 'react-arborist';
-import { Search, X, RefreshCw, Loader2, Copy, Check } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { Search, X, RefreshCw, Loader2, Copy, Check, File, FileCode2, FileText, Coffee, Palette, Globe, Settings2, Terminal, Database, Folder, FolderOpen } from 'lucide-react';
 import { useFileTreeStore, type FileTreeNode } from '@/store/fileTreeStore';
 import { Chip, Kbd } from '@/components/ui';
 import { useState } from 'react';
@@ -27,32 +28,35 @@ interface ArboristNode {
     relativePath: string;
 }
 
+/** 文件图标：TS / JS / JSON 沿用文字徽标，其余为 lucide 图标组件 */
+type FileIconType = 'TS' | 'JS' | '{}' | LucideIcon;
+
 /** 获取文件类型图标 */
-function getFileIcon(node: ArboristNode, isOpen: boolean): string {
-    if (node.fileType === 'dir') return isOpen ? '📂' : '📁';
+function getFileIcon(node: ArboristNode, isOpen: boolean): FileIconType {
+    if (node.fileType === 'dir') return isOpen ? FolderOpen : Folder;
     switch (node.extension) {
         case '.ts':
         case '.tsx': return 'TS';
         case '.js':
         case '.jsx': return 'JS';
-        case '.java': return '☕';
-        case '.py': return '🐍';
+        case '.java': return Coffee;
+        case '.py': return FileCode2;
         case '.json': return '{}';
-        case '.md': return '📝';
+        case '.md': return FileText;
         case '.css':
         case '.scss':
-        case '.less': return '🎨';
-        case '.html': return '🌐';
+        case '.less': return Palette;
+        case '.html': return Globe;
         case '.yaml':
-        case '.yml': return '⚙️';
-        case '.sh': return '💻';
-        case '.sql': return '🗃️';
-        default: return '📄';
+        case '.yml': return Settings2;
+        case '.sh': return Terminal;
+        case '.sql': return Database;
+        default: return File;
     }
 }
 
 /** 图标文字样式：TS/JS 等文字类使用小字号 + 固定宽度 */
-function FileIcon({ icon }: { icon: string }) {
+function FileIcon({ icon }: { icon: FileIconType }) {
     const isTextIcon = icon === 'TS' || icon === 'JS' || icon === '{}';
     if (isTextIcon) {
         return (
@@ -65,7 +69,12 @@ function FileIcon({ icon }: { icon: string }) {
             </span>
         );
     }
-    return <span className="inline-flex items-center justify-center w-4 h-4 text-sm shrink-0">{icon}</span>;
+    const Icon = icon;
+    return (
+        <span className="inline-flex items-center justify-center w-4 h-4 shrink-0">
+            <Icon aria-hidden="true" className="h-4 w-4" />
+        </span>
+    );
 }
 
 /** 将 FileTreeNode 转为 react-arborist 需要的格式 */

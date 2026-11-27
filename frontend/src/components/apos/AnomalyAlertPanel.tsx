@@ -4,22 +4,30 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { Repeat, Hourglass, CircleX, TriangleAlert, CircleCheck } from 'lucide-react';
 import { useAnomalyStore } from '@/store/anomalyStore';
 import { useSessionStore } from '@/store/sessionStore';
 import type { AnomalyEvent } from '@/types/apos';
 
 /** 根据 ruleId 返回对应图标 */
-function getRuleIcon(ruleId: AnomalyEvent['ruleId']): string {
+function getRuleIcon(ruleId: AnomalyEvent['ruleId']): LucideIcon {
     switch (ruleId) {
         case 'loop_detection':
-            return '🔄';
+            return Repeat;
         case 'stall_detection':
-            return '⏳';
+            return Hourglass;
         case 'error_cascade':
-            return '❌';
+            return CircleX;
         default:
-            return '⚠️';
+            return TriangleAlert;
     }
+}
+
+/** 按 ruleId 渲染对应图标 */
+function RuleIcon({ ruleId }: { ruleId: AnomalyEvent['ruleId'] }) {
+    const Icon = getRuleIcon(ruleId);
+    return <Icon aria-hidden="true" className="h-5 w-5 align-middle" />;
 }
 
 /** 根据 severity 返回着色 class */
@@ -92,7 +100,7 @@ export const AnomalyAlertPanel: React.FC = () => {
             {/* Empty state */}
             {activeAnomalies.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-t2">
-                    <span className="text-4xl mb-3">✅</span>
+                    <CircleCheck aria-hidden="true" className="mb-3 h-10 w-10 text-ok" />
                     <p className="text-sm font-medium">运行正常</p>
                     <p className="text-13 mt-1">No anomalies detected</p>
                 </div>
@@ -105,7 +113,7 @@ export const AnomalyAlertPanel: React.FC = () => {
                         >
                             {/* Top row: icon + worker name + severity */}
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="text-lg">{getRuleIcon(anomaly.ruleId)}</span>
+                                <span className="text-lg"><RuleIcon ruleId={anomaly.ruleId} /></span>
                                 <span className={`font-semibold text-sm ${getSeverityColor(anomaly.severity)}`}>
                                     {anomaly.workerName}
                                 </span>

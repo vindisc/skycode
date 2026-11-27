@@ -4,6 +4,8 @@
  */
 
 import React, { useMemo } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { Coffee, FileCode2, FileJson, FileText, Settings2, Database, File, Folder } from 'lucide-react';
 
 interface FileNode {
     name: string;
@@ -31,15 +33,16 @@ function buildTree(paths: string[]): FileNode[] {
     return root.children;
 }
 
-const fileIcons: Record<string, string> = {
-    java: '☕', ts: '🔵', tsx: '⚛️', py: '🐍', json: '📄',
-    md: '📝', yaml: '⚙️', yml: '⚙️', xml: '📄', sql: '🗃️',
+const fileIcons: Record<string, LucideIcon> = {
+    java: Coffee, ts: FileCode2, tsx: FileCode2, py: FileCode2, json: FileJson,
+    md: FileText, yaml: Settings2, yml: Settings2, xml: FileCode2, sql: Database,
 };
 
 const FileIcon: React.FC<{ isDir: boolean; name: string }> = ({ isDir, name }) => {
-    if (isDir) return <span className="text-accent2-ink">📁</span>;
+    if (isDir) return <Folder aria-hidden="true" className="h-4 w-4 shrink-0 text-accent2-ink" />;
     const ext = name.split('.').pop()?.toLowerCase() || '';
-    return <span>{fileIcons[ext] || '📄'}</span>;
+    const Icon = fileIcons[ext] ?? File;
+    return <Icon aria-hidden="true" className="h-4 w-4 shrink-0" />;
 };
 
 const TreeNode: React.FC<{ node: FileNode; depth: number }> = ({ node, depth }) => (

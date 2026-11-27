@@ -1,4 +1,5 @@
 import React from 'react';
+import { Minimize2, Target } from 'lucide-react';
 
 export interface CompactResultData {
     originalMessageCount: number;
@@ -16,7 +17,7 @@ export const CompactResultPanel: React.FC<{ data: CompactResultData; displayText
     return (
         <div className="rounded-md border border-[var(--v2-border-hairline)] bg-[var(--v2-bg-sunken)] p-4 space-y-3">
             <div className="flex items-center gap-2">
-                <span className="text-lg">🗜️</span>
+                <span className="text-lg"><Minimize2 aria-hidden="true" className="h-5 w-5 align-middle" /></span>
                 <span className="font-semibold text-[var(--v2-text-1)]">Context Compacted</span>
             </div>
             {/* Token 对比条 */}
@@ -48,7 +49,9 @@ export const CompactResultPanel: React.FC<{ data: CompactResultData; displayText
                 </div>
             </div>
             {data.instruction && (
-                <div className="text-13 text-[var(--v2-text-2)] italic">🎯 Focus: {data.instruction}</div>
+                <div className="text-13 text-[var(--v2-text-2)] italic">
+                    <Target aria-hidden="true" className="inline-block h-3.5 w-3.5 align-[-0.125em]" /> Focus: {data.instruction}
+                </div>
             )}
         </div>
     );

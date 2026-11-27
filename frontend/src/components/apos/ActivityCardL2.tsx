@@ -165,9 +165,9 @@ export function ActivityCardL2({
                     : 'bg-errsoft text-err'
                 }`}>
                   {activity.decision === 'approved' ? (
-                    <><Check size={12} /> 已批准 ✓</>
+                    <><Check size={12} aria-hidden="true" /> 已批准</>
                   ) : (
-                    <><X size={12} /> 已拒绝 ✗</>
+                    <><X size={12} aria-hidden="true" /> 已拒绝</>
                   )}
                 </span>
               ) : activity.insight?.signal === 'auto_approve' ? (

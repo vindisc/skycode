@@ -5,24 +5,26 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { Hourglass, Check, X } from 'lucide-react';
 import { useCoordinatorStore } from '@/store/coordinatorStore';
 import type { AgentTask } from '@/types';
 
-const statusConfig: Record<string, { color: string; label: string; icon: string }> = {
+const statusConfig: Record<string, { color: string; label: string; icon: LucideIcon }> = {
     running: {
         color: 'border-accent2 bg-accent2-soft',
         label: '运行中',
-        icon: '⏳',
+        icon: Hourglass,
     },
     completed: {
         color: 'border-ok bg-oksoft',
         label: '已完成',
-        icon: '✓',
+        icon: Check,
     },
     failed: {
         color: 'border-err bg-errsoft',
         label: '失败',
-        icon: '✗',
+        icon: X,
     },
 };
 
@@ -33,6 +35,7 @@ interface TaskCardItemProps {
 const TaskCardItem: React.FC<TaskCardItemProps> = ({ task }) => {
     const [expanded, setExpanded] = useState(false);
     const config = statusConfig[task.status] || statusConfig.running;
+    const StatusIcon = config.icon;
 
     const toggleExpand = useCallback(() => setExpanded((prev) => !prev), []);
 
@@ -57,7 +60,7 @@ const TaskCardItem: React.FC<TaskCardItemProps> = ({ task }) => {
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                             </svg>
-                        ) : config.icon}
+                        ) : <StatusIcon aria-label={config.label} className="h-3.5 w-3.5" />}
                     </span>
 
                     {/* Agent name & type */}

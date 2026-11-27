@@ -89,7 +89,8 @@ export const PromptAttachmentBar: React.FC<PromptAttachmentBarProps> = ({
                             className="flex items-center gap-1 px-2 py-1 bg-surfacev2 rounded text-13 text-t2
                                        border border-hairline"
                         >
-                            📎 {a.name}
+                            <Paperclip size={13} className="shrink-0" aria-hidden="true" />
+                            {a.name}
                             <span className="text-t3">
                                 ({formatFileSize(a.size)})
                             </span>
@@ -99,7 +100,7 @@ export const PromptAttachmentBar: React.FC<PromptAttachmentBarProps> = ({
                                 type="button"
                                 aria-label={`移除 ${a.name}`}
                             >
-                                ×
+                                <X size={12} aria-hidden="true" />
                             </button>
                         </span>
                     )
