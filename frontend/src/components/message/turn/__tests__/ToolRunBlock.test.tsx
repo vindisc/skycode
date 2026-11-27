@@ -122,7 +122,7 @@ describe('ToolRunBlock L2/L3 展开', () => {
         expect(screen.getByTestId('tool-run-list')).toBeInTheDocument();
         // L2 行按钮的可访问名以工具名开头（L1 摘要为「1 次工具调用 Read×1…」）
         expect(screen.getByRole('button', { name: /^Read/ })).toBeInTheDocument();
-        expect(screen.getByText('/src/App.tsx')).toBeInTheDocument();
+        expect(screen.getByTitle('/src/App.tsx')).toHaveTextContent('/src/App.tsx');
         // L1 总耗时 + L2 行耗时各一份
         expect(screen.getAllByText('1s')).toHaveLength(2);
     });
@@ -161,10 +161,10 @@ describe('ToolRunBlock L2/L3 展开', () => {
             toolUse(`t${i}`, 'Read', { file_path: `/f/${i}.ts` }, okResult()));
         render(<ToolRunBlock blocks={blocks} />);
         fireEvent.click(screen.getByRole('button', { name: /25 次工具调用/ }));
-        expect(screen.getByText('/f/19.ts')).toBeInTheDocument();
-        expect(screen.queryByText('/f/20.ts')).not.toBeInTheDocument();
+        expect(screen.getByTitle('/f/19.ts')).toHaveTextContent('/f/19.ts');
+        expect(screen.queryByTitle('/f/20.ts')).not.toBeInTheDocument();
         fireEvent.click(screen.getByRole('button', { name: '显示全部 25 个' }));
-        expect(screen.getByText('/f/24.ts')).toBeInTheDocument();
+        expect(screen.getByTitle('/f/24.ts')).toHaveTextContent('/f/24.ts');
     });
 });
 

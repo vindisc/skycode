@@ -71,11 +71,32 @@ export function formatToolDuration(ms: number): string {
 /** 路径超过这个长度就只留末三段：文件名和它所在的目录最有信息量 */
 const PATH_DISPLAY_LIMIT = 52;
 
-/** 目标路径的展示串：过长的收成「…/上级目录/所在目录/文件名」。
+/** 目标路径的展示串：过长的收成「…/上级目录/所在目录/文件名」；没有可去掉的前缀时原样返回，不加假省略号。
  *  原先靠 CSS direction:rtl 做"开头省略"，双向文本排版会把省略号和分隔符排错位（出现 …Header.tsx/ 这种尾巴）。 */
 export function displayTargetPath(target: string): string {
     if (target.length <= PATH_DISPLAY_LIMIT) return target;
-    return `…/${target.split('/').slice(-3).join('/')}`;
+    // 开头的斜杠不算一段：/app/workspace/x.md 只有三个真实段，没有可去掉的前缀
+    const segments = target.split('/').filter(Boolean);
+    if (segments.length <= 3) return target;
+    return `…/${segments.slice(-3).join('/')}`;
+}
+
+const TARGET_CHIP_BASE = 'flex min-w-0 items-center overflow-hidden bg-sunken2 font-mono text-13 text-t2';
+
+/** 工具行的目标片。路径拆成「目录 + 文件名」两段：宽度不够时先截目录，文件名始终完整可见——
+ *  整片 truncate 截的是末尾，手机宽度下正好把文件名吃掉。命令、pattern 这类非路径照旧整片截断。 */
+export function ToolTargetChip({ target, isPath, className = '' }: { target: string; isPath: boolean; className?: string }) {
+    const shown = isPath ? displayTargetPath(target) : target;
+    // 目录段带着结尾的斜杠；文件名是最后一个斜杠之后的部分
+    const nameStart = isPath ? shown.lastIndexOf('/') + 1 : 0;
+    return (
+        <span className={`${TARGET_CHIP_BASE} ${className}`} title={target}>
+            {nameStart > 0 && <span className="min-w-0 truncate">{shown.slice(0, nameStart)}</span>}
+            <span className={nameStart > 0 ? 'min-w-0 max-w-full shrink-0 truncate' : 'min-w-0 truncate'}>
+                {shown.slice(nameStart)}
+            </span>
+        </span>
+    );
 }
 
 /** 从工具输入提取主目标（文件路径 / 命令 / pattern，header chip 数据源） */
@@ -216,12 +237,11 @@ const ToolCallBlock: React.FC<ToolCallBlockProps> = ({ toolUseId, toolCall, expa
                     {toolCall.toolName}
                 </span>
                 {primaryTarget && (
-                    <span
-                        className="min-w-0 max-w-[60%] truncate rounded-xs bg-sunken2 px-2 py-0.5 font-mono text-13 text-t2"
-                        title={primaryTarget.target}
-                    >
-                        {primaryTarget.isPath ? displayTargetPath(primaryTarget.target) : primaryTarget.target}
-                    </span>
+                    <ToolTargetChip
+                        target={primaryTarget.target}
+                        isPath={primaryTarget.isPath}
+                        className="max-w-[60%] rounded-xs px-2 py-0.5"
+                    />
                 )}
                 {diffStats && diffStats.added > 0 && (
                     <span className="shrink-0 rounded bg-oksoft px-1.5 py-0.5 text-13 font-medium tabular-nums text-ok">

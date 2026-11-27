@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeAll, describe, expect, it } from 'vitest';
-import ToolCallBlock, { displayTargetPath } from './ToolCallBlock';
+import ToolCallBlock, { ToolTargetChip, displayTargetPath } from './ToolCallBlock';
 import { useMessageStore } from '@/store/messageStore';
 import type { Message, ToolCallState } from '@/types';
 
@@ -53,7 +53,7 @@ describe('ToolCallBlock 主卡默认折叠行为', () => {
         // 折叠态不渲染 Input / Result 区
         expect(screen.queryByText('Result')).not.toBeInTheDocument();
         // header 自解释信息齐备
-        expect(screen.getByText('src/App.tsx')).toBeInTheDocument();
+        expect(screen.getByTitle('src/App.tsx')).toHaveTextContent('src/App.tsx');
         expect(screen.getByText('已完成')).toBeInTheDocument();
         expect(screen.getByText('1s')).toBeInTheDocument();
     });
@@ -354,8 +354,30 @@ describe('displayTargetPath', () => {
             .toBe('…/components/layout/Header.tsx');
     });
 
-    it('只有一两段的路径不会被吃掉开头', () => {
+    it('只有三段以内的长路径没有可去掉的前缀，原样返回、不加省略号', () => {
         expect(displayTargetPath('/app/workspace/zhikuncode-notes-and-docs-for-a-very-long-name.md'))
-            .toBe('…/app/workspace/zhikuncode-notes-and-docs-for-a-very-long-name.md');
+            .toBe('/app/workspace/zhikuncode-notes-and-docs-for-a-very-long-name.md');
+    });
+});
+
+describe('ToolTargetChip', () => {
+    it('路径拆成目录和文件名两段，文件名单独成段；完整路径放在 title 里', () => {
+        const target = '/app/workspace/skycode/frontend/src/components/layout/Header.tsx';
+        render(<ToolTargetChip target={target} isPath />);
+        const chip = screen.getByTitle(target);
+        const [directory, name] = chip.querySelectorAll('span');
+        expect(directory).toHaveTextContent('…/components/layout/');
+        expect(name).toHaveTextContent('Header.tsx');
+        // 目录先被截，文件名不参与收缩
+        expect(directory).toHaveClass('truncate');
+        expect(name).toHaveClass('shrink-0');
+        expect(chip).toHaveTextContent('…/components/layout/Header.tsx');
+    });
+
+    it('命令、pattern 这类非路径整片显示，不拆段', () => {
+        render(<ToolTargetChip target="git status --short" isPath={false} />);
+        const chip = screen.getByTitle('git status --short');
+        expect(chip.querySelectorAll('span')).toHaveLength(1);
+        expect(chip).toHaveTextContent('git status --short');
     });
 });
