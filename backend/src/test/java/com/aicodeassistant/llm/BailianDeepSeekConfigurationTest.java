@@ -66,7 +66,6 @@ class BailianDeepSeekConfigurationTest {
         // Direct DeepSeek is registered first; global fast selection must still use Bailian.
         assertEquals(BAILIAN, registry.getFastModel());
         assertEquals(BAILIAN, registry.getLightweightModel());
-        assertEquals(BAILIAN, registry.resolveClassifierModel());
         assertFalse(registry.supportsModel("qwen3.7-plus"));
         var models = new ModelRegistry(registry);
         assertTrue(registry.getProvider("qwen4-max").supportsThinking("qwen4-max"));

@@ -36,9 +36,6 @@ public class LlmProviderRegistry {
     private final Set<String> warnedInvalidDefaults = ConcurrentHashMap.newKeySet();
     private final Set<String> warnedInvalidTierAliases = ConcurrentHashMap.newKeySet();
 
-    @Value("${classifier.model:}")
-    private String classifierModel;
-
     @Value("${app.model.default:deepseek-v4.1-flash}")
     private String configuredDefaultModel;
 
@@ -299,11 +296,6 @@ public class LlmProviderRegistry {
         return getFastModel();
     }
 
-    /** 获取主循环模型 — 用于核心对话循环 (SPEC: MainLoop) */
-    public String getMainLoopModel() {
-        return getDefaultModel();
-    }
-
     /**
      * 解析模型别名为实际模型名称。
      * <p>
@@ -394,39 +386,5 @@ public class LlmProviderRegistry {
         synchronized (providers) {
             return List.copyOf(providers.values());
         }
-    }
-
-    /**
-     * 四级回退解析分类器模型。
-         * 1. 环境变量 CLASSIFIER_MODEL
-     * 2. application.yml classifier.model
-     * 3. 轻量级模型 (getLightweightModel)
-     * 4. 默认模型 (getDefaultModel) 兜底
-     */
-    public String resolveClassifierModel() {
-        // Level 1: 环境变量
-        String envModel = System.getenv("CLASSIFIER_MODEL");
-        if (envModel != null && !envModel.isBlank() && hasProvider(envModel)) {
-            log.debug("resolveClassifierModel: resolved via env CLASSIFIER_MODEL={}", envModel);
-            return envModel;
-        }
-
-        // Level 2: Spring 配置文件 classifier.model
-        if (classifierModel != null && !classifierModel.isBlank() && hasProvider(classifierModel)) {
-            log.debug("resolveClassifierModel: resolved via config classifier.model={}", classifierModel);
-            return classifierModel;
-        }
-
-        // Level 3: 轻量级模型
-        String lightweight = getLightweightModel();
-        if (lightweight != null && hasProvider(lightweight)) {
-            log.debug("resolveClassifierModel: resolved via lightweight model={}", lightweight);
-            return lightweight;
-        }
-
-        // Level 4: 默认模型兜底
-        String defaultModel = getDefaultModel();
-        log.debug("resolveClassifierModel: fallback to default model={}", defaultModel);
-        return defaultModel;
     }
 }

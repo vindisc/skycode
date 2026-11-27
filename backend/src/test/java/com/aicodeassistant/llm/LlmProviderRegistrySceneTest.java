@@ -47,9 +47,8 @@ class LlmProviderRegistrySceneTest {
 
         assertThat(registry.getDefaultModel()).isEqualTo("glm-5.4");
         assertThat(registry.getFastModel()).isEqualTo("gpt-6.1-sol");
-        // 这两处是同一个入口，都要跟着变
+        // 同一个入口，都要跟着变
         assertThat(registry.getLightweightModel()).isEqualTo("gpt-6.1-sol");
-        assertThat(registry.getMainLoopModel()).isEqualTo("glm-5.4");
     }
 
     @Test

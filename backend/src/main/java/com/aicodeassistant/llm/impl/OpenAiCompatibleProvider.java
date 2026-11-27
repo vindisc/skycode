@@ -1515,7 +1515,8 @@ public class OpenAiCompatibleProvider implements LlmProvider {
                                     : ": " + errorBody);
                     throw new LlmApiException(
                             "chatSync HTTP " + errorCode + detail,
-                            errorCode >= 500, errorCode);
+                            // 与流式路径同一口径：429（限流）和 5xx 都可重试
+                            errorCode == 429 || errorCode >= 500, errorCode);
                 }
 
                 ResponseBody body = response.body();

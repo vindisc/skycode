@@ -151,51 +151,6 @@ public class SideQueryService {
         return trimmed.strip();
     }
 
-    // ═══════════════════════════════════════════
-    // 预设任务
-    // ═══════════════════════════════════════════
-
-    /**
-     * 生成 commit message。
-     *
-     * @param diff git diff 内容
-     * @return 简洁的 commit message，或 null
-     */
-    public String generateCommitMessage(String diff) {
-        String systemPrompt = """
-                You are a git commit message generator. Write a concise, conventional commit message
-                for the given diff. Use the format: <type>(<scope>): <description>
-                Types: feat, fix, refactor, docs, style, test, chore.
-                Keep the message under 72 characters. Return ONLY the commit message, nothing else.""";
-        return query(systemPrompt, diff, 128, DEFAULT_TIMEOUT_MS);
-    }
-
-    /**
-     * 生成对话摘要/标题。
-     *
-     * @param conversationSnippet 对话片段（前几条消息）
-     * @return 简短标题，或 null
-     */
-    public String generateTitle(String conversationSnippet) {
-        String systemPrompt = """
-                Generate a short title (max 50 chars) for this conversation.
-                Return ONLY the title, no quotes, no explanation.""";
-        return query(systemPrompt, conversationSnippet, 64, 10_000L);
-    }
-
-    /**
-     * 生成代码摘要。
-     *
-     * @param code 代码片段
-     * @return 1-2 句话的代码功能描述，或 null
-     */
-    public String summarizeCode(String code) {
-        String systemPrompt = """
-                Summarize what the following code does in 1-2 concise sentences.
-                Focus on the main purpose and key operations. Return ONLY the summary.""";
-        return query(systemPrompt, code, 256, DEFAULT_TIMEOUT_MS);
-    }
-
     /**
      * 检查是否可用（有 Provider 且 fast model 可解析）。
      */

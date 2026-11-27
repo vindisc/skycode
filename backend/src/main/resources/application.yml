@@ -340,18 +340,21 @@ app:
     session-timeout-hours: 24
   model:
     # LlmProviderRegistry verifies the configured value against registered providers.
-    default: ${LLM_DEFAULT_MODEL:gpt-6.2-sol}
+    # 未设环境变量时的回退值统一为 deepseek-v4.1-flash——与 docker-compose.yml 的
+    # 默认值、代码里 @Value 的兜底一致（此前三处各写各的模型名，未设变量时行为取决于
+    # 读到哪个键，且火神中转站的专属模型名对上游用户没有意义）。
+    default: ${LLM_DEFAULT_MODEL:deepseek-v4.1-flash}
     # Preferred image fallback when the selected model cannot accept images.
-    vision-fallback: ${LLM_VISION_FALLBACK_MODEL:gpt-6.1-sol}
-    fast: ${LLM_FAST_MODEL:gpt-6-sol}
+    vision-fallback: ${LLM_VISION_FALLBACK_MODEL:deepseek-v4.1-flash}
+    fast: ${LLM_FAST_MODEL:deepseek-v4.1-flash}
     # 降级链 — 按性能从高到低；末位跨站点兜底（火神站整体不可用时降智谱）
     tier-chain:
       - gpt-6.2-sol
       - gpt-6.1-sol
       - gpt-6-sol
       - glm-5.3
-    # 降级时是否自动剥离 thinking blocks
-    strip-thinking-on-downgrade: true
+      # 说明：QueryEngine 在降级到不支持 thinking 的模型时会无条件剥离 thinking blocks，
+      # 不存在 strip-thinking-on-downgrade 开关（2026-11-27 审计确认该配置键无读取点，已删）。
 
 context:
   cascade:

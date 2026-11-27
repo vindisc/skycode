@@ -119,6 +119,7 @@ public class QueryController {
     @PostMapping
     public ResponseEntity<QueryResponse> query(@RequestBody QueryRequest request) {
         rejectUnsupportedMaxBudgetUsd(request.maxBudgetUsd());
+        requireUsablePrompt(request.prompt(), request.context());
         // 1. 创建或复用会话
         try (LockedSession locked = resolveSessionLocked(request)) {
         SessionData session = locked.session();
@@ -208,8 +209,8 @@ public class QueryController {
     @PostMapping("/stream")
     public SseEmitter streamQuery(@RequestBody QueryRequest request) {
         rejectUnsupportedMaxBudgetUsd(request.maxBudgetUsd());
-        long timeoutMs = (request.timeoutSeconds() != null
-                ? request.timeoutSeconds() : 600) * 1000L;
+        requireUsablePrompt(request.prompt(), request.context());
+        long timeoutMs = resolveTimeoutMs(request.timeoutSeconds());
         SseEmitter emitter = new SseEmitter(timeoutMs);
         // Validate admission before returning an SSE response so conflicts remain HTTP 409.
         LockedSession locked = resolveSessionLocked(request);
@@ -308,6 +309,7 @@ public class QueryController {
 
         rejectUnsupportedMaxBudgetUsd(request.maxBudgetUsd());
         rejectClientWorkingDirectory(request.workingDirectory());
+        requireUsablePrompt(request.prompt(), null);
         try (SessionExecutionGate.Token ignored = acquireSession(request.sessionId())) {
 
         // 1. 加载会话
@@ -472,6 +474,32 @@ public class QueryController {
         }
     }
 
+    /**
+     * prompt 为空（且无 context.stdin）时直接拒绝：此前会静默构造一条空用户消息
+     * 并跑完整个查询循环。SSE 的 timeoutSeconds 也做下限——Servlet 把 <=0 解释为
+     * “永不超时”，客户端可以借此关掉 SSE 的超时保护长期占住会话锁。
+     */
+    static void requireUsablePrompt(String prompt, QueryContext context) {
+        boolean hasStdin = context != null && context.stdin() != null && !context.stdin().isBlank();
+        if (prompt == null || prompt.isBlank()) {
+            if (!hasStdin) {
+                throw new RequestValidationException(
+                        "QUERY_PROMPT_REQUIRED",
+                        "prompt 不能为空（或提供 context.stdin）。");
+            }
+        }
+    }
+
+    static long resolveTimeoutMs(Integer timeoutSeconds) {
+        int seconds = timeoutSeconds != null ? timeoutSeconds : 600;
+        if (seconds < 1) {
+            throw new RequestValidationException(
+                    "QUERY_TIMEOUT_INVALID",
+                    "timeoutSeconds 必须 >= 1（<=0 会被 Servlet 解释为永不超时）。");
+        }
+        return seconds * 1000L;
+    }
+
     private List<Tool> assembleToolPool(List<String> allowedTools, List<String> disallowedTools) {
         List<Tool> tools = toolRegistry.getEnabledTools();
         if (allowedTools != null && !allowedTools.isEmpty()) {
@@ -537,15 +565,22 @@ public class QueryController {
 
     /**
      * 结果收集处理器 — 收集工具调用信息。
+     * 工具结果按 toolUseId 精确配对（工具是并行执行的，start A → start B →
+     * result B → result A 的交错下「更新最后一个」会拿到别人的结果）；
+     * LinkedHashMap 保插入序，put 已有键不会改变顺序；
+     * 回调可能来自不同线程，读写都在同一把锁上。
+     * 包可见：供配对回归测试直接驱动。
      */
-    private static class ResultCollectingHandler implements QueryMessageHandler {
-        private final List<ToolCallSummary> toolCalls = new ArrayList<>();
+    static class ResultCollectingHandler implements QueryMessageHandler {
+        private final Map<String, ToolCallSummary> toolCalls = new LinkedHashMap<>();
 
         @Override public void onTextDelta(String text) {}
 
         @Override
         public void onToolUseStart(String toolUseId, String toolName) {
-            toolCalls.add(new ToolCallSummary(toolName, null, null, false));
+            synchronized (toolCalls) {
+                toolCalls.put(toolUseId, new ToolCallSummary(toolName, null, null, false));
+            }
         }
 
         @Override
@@ -553,19 +588,24 @@ public class QueryController {
 
         @Override
         public void onToolResult(String toolUseId, ContentBlock.ToolResultBlock result) {
-            // 更新最后一个工具调用的结果
-            if (!toolCalls.isEmpty()) {
-                ToolCallSummary last = toolCalls.getLast();
-                toolCalls.set(toolCalls.size() - 1,
-                        new ToolCallSummary(last.tool(), last.input(),
-                                result.content(), result.isError()));
+            synchronized (toolCalls) {
+                ToolCallSummary existing = toolCalls.get(toolUseId);
+                if (existing != null) {
+                    toolCalls.put(toolUseId, new ToolCallSummary(
+                            existing.tool(), existing.input(),
+                            result.content(), result.isError()));
+                }
             }
         }
 
         @Override
         public void onAssistantMessage(Message.AssistantMessage message) {}
 
-        public List<ToolCallSummary> getToolCalls() { return toolCalls; }
+        public List<ToolCallSummary> getToolCalls() {
+            synchronized (toolCalls) {
+                return List.copyOf(toolCalls.values());
+            }
+        }
     }
 
     // ═══ DTO Records ═══

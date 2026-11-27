@@ -147,16 +147,10 @@ class BailianDeepSeekLiveTest {
         var registry = new LlmProviderRegistry(List.of(provider), null);
         assertEquals(MODEL, registry.getFastModel());
         var side = new SideQueryService(registry, mapper);
-        String title = side.generateTitle("Fix a Python function that retries network requests three times.");
-        assertNotNull(title, "64-token title request must return text");
-        assertFalse(title.isBlank());
-        String commit = side.generateCommitMessage("diff --git a/demo.py b/demo.py\n-RETRIES = 2\n+RETRIES = 3\n");
-        assertNotNull(commit, "128-token commit request must return text");
-        assertTrue(commit.contains(":"), commit);
         ProbeResult structured = side.queryStructured("Extract the supplied fields exactly.",
                 "code=FAST-7429; count=3", ProbeResult.class);
         assertEquals(new ProbeResult("FAST-7429", 3), structured);
-        System.out.println("BAILIAN_LIVE fast queries: title=" + title + "; commit=" + commit + "; structured=" + structured);
+        System.out.println("BAILIAN_LIVE fast queries: structured=" + structured);
     }
 
     private static class Capture implements StreamChatCallback {

@@ -1,6 +1,7 @@
 package com.aicodeassistant.tool.impl;
 
 import com.aicodeassistant.tool.*;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -39,6 +40,7 @@ public class WebFetchTool implements Tool {
     private static final int MAX_CONTENT_CHARS = 100_000;
     private static final int TIMEOUT_SECONDS = 30;
     private static final long MAX_RESPONSE_BYTES = 10_485_760; // 10MB (SPEC: MAX_HTTP_CONTENT)
+    private static final int MAX_REDIRECTS = 5;
 
     private final OkHttpClient httpClient;
 
@@ -62,7 +64,10 @@ public class WebFetchTool implements Tool {
         this.httpClient = new OkHttpClient.Builder()
                 .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
                 .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                .followRedirects(true)
+                // 关闭自动重定向：checkUrlSafety 只校验初始 URL，让 OkHttp 静默跟随
+                // 302 就等于允许重定向到 127.0.0.1 / 云元数据（SSRF 绕过）。
+                // 重定向在 execute() 里逐跳手动跟随，每一跳都重新过安全检查。
+                .followRedirects(false)
                 .build();
     }
 
@@ -177,7 +182,11 @@ public class WebFetchTool implements Tool {
                 .build();
 
         try {
-            Response response = httpClient.newCall(request).execute();
+            Response response = executeWithSafeRedirects(request, url, MAX_REDIRECTS);
+            if (response == null) {
+                return ToolResult.validationError("WEB_FETCH_URL_DENIED",
+                        "SSRF protection: redirect target blocked");
+            }
             int statusCode = response.code();
             String contentType = response.header("Content-Type", "text/html");
 
@@ -231,6 +240,45 @@ public class WebFetchTool implements Tool {
             return ToolResult.networkError("WEB_FETCH_IO_FAILED", "Failed to fetch URL: " + msg,
                     ToolResult.Retryability.SAFE_READ_ONLY);
         }
+    }
+
+    /**
+     * 手动跟随重定向，每一跳都重新过 checkUrlSafety。
+     * OkHttp 已配置 followRedirects(false)；这里把 3xx 的 Location 逐跳展开，
+     * 任何一跳被安全检查拒绝就返回 null（由调用方报 WEB_FETCH_URL_DENIED）。
+     * 中间跳的响应体都会正确关闭。
+     */
+    private Response executeWithSafeRedirects(Request initial, String originalUrl,
+                                              int maxRedirects) throws IOException {
+        Request current = initial;
+        for (int hop = 0; hop <= maxRedirects; hop++) {
+            Response response = httpClient.newCall(current).execute();
+            if (!response.isRedirect()) {
+                return response;
+            }
+            String location = response.header("Location");
+            HttpUrl resolved = (location == null || location.isBlank())
+                    ? null : current.url().resolve(location);
+            if (resolved == null) {
+                response.close();
+                return null;
+            }
+            String redirectUrl = resolved.toString();
+            // 读完即关：不跟随的中间响应必须释放连接
+            try (ResponseBody ignored = response.body()) {
+                // 关闭前不读 body（3xx 通常无 body）
+            }
+            if (hop == maxRedirects) {
+                return null; // 重定向次数超限
+            }
+            String ssrfError = checkUrlSafety(redirectUrl);
+            if (ssrfError != null) {
+                log.warn("WebFetch redirect blocked: {} -> {} ({})", originalUrl, redirectUrl, ssrfError);
+                return null;
+            }
+            current = initial.newBuilder().url(redirectUrl).build();
+        }
+        return null;
     }
 
     /**

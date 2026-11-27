@@ -18,6 +18,8 @@ import java.net.NetworkInterface;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
@@ -151,7 +153,7 @@ public class RemoteAccessSecurityFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            if (accessToken.equals(token)) {
+            if (tokenMatches(accessToken, token)) {
                 issueSessionCookie(response);
                 chain.doFilter(request, response);
                 return;
@@ -166,7 +168,7 @@ public class RemoteAccessSecurityFilter extends OncePerRequestFilter {
         // normal cookie or Bearer flow for this endpoint.
         String urlToken = RawFileUploadWebConfig.isRawLocalFileUpload(request)
                 ? null : request.getParameter("token");
-        if (urlToken != null && accessToken.equals(urlToken)) {
+        if (urlToken != null && tokenMatches(accessToken, urlToken)) {
             issueSessionCookie(response);
             // 重定向到去掉 token 参数的 URL (避免 token 泄露到浏览器历史)
             String cleanUrl = removeTokenParam(request);
@@ -180,6 +182,16 @@ public class RemoteAccessSecurityFilter extends OncePerRequestFilter {
     }
 
     // ───── Cookie 管理 ─────
+
+    /**
+     * 访问令牌比较用恒时实现：这是远程访问的真实安全边界，
+     * 普通 equals 的逐字符短路会泄露前缀匹配长度。
+     */
+    private static boolean tokenMatches(String expected, String actual) {
+        return MessageDigest.isEqual(
+                expected.getBytes(StandardCharsets.UTF_8),
+                actual.getBytes(StandardCharsets.UTF_8));
+    }
 
     /**
      * 签发 HttpOnly Cookie — 后续请求不再需要传递 Token。

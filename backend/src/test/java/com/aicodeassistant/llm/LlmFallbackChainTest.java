@@ -94,23 +94,6 @@ class LlmFallbackChainTest {
 
         String lightweight = registry.getLightweightModel();
         assertNotNull(lightweight, "轻量级模型不应为 null（应回退到默认）");
-    }
-
-    @Test
-    @DisplayName("回退层级不超过 4 级")
-    void fallbackChainMaxFourLevels() {
-        LlmProvider provider = mock(LlmProvider.class);
-        when(provider.getDefaultModel()).thenReturn("qwen3.8-max-0902");
-        when(provider.getFastModel()).thenReturn("qwen-plus");
-        when(provider.getProviderName()).thenReturn("test-provider");
-        when(provider.getSupportedModels()).thenReturn(List.of("qwen-plus", "qwen3.8-max-0902"));
-
-        LlmProviderRegistry registry = new LlmProviderRegistry(
-            List.of(provider), mockEnv);
-
-        // 无论如何都应返回一个有效模型
-        String classifierModel = registry.resolveClassifierModel();
-        assertNotNull(classifierModel, "分类器模型不应为 null");
-        assertFalse(classifierModel.isBlank(), "分类器模型不应为空");
+        assertFalse(lightweight.isBlank(), "轻量级模型不应为空");
     }
 }

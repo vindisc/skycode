@@ -256,7 +256,10 @@ public class McpAuthTool implements Tool {
         CompletableFuture<String> codeFuture = new CompletableFuture<>();
 
         Thread.ofVirtual().name("zhiku-mcp-auth-callback").start(() -> {
-            try (var server = new ServerSocket(port)) {
+            // 只绑 loopback：这是本机的 OAuth 回调，通配绑定会把端口暴露给局域网
+            // 上的任何主机（先到的连接会被 accept，浏览器回调反而被拒）
+            try (var server = new ServerSocket()) {
+                server.bind(new InetSocketAddress("127.0.0.1", port));
                 server.setSoTimeout((int) CALLBACK_TIMEOUT.toMillis());
                 try (var socket = server.accept()) {
                     var reader = new java.io.BufferedReader(

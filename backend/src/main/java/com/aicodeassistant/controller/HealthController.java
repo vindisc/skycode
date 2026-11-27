@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -142,8 +143,15 @@ public class HealthController {
             Process process = new ProcessBuilder(cmd)
                     .redirectErrorStream(true)
                     .start();
+            // 工具二进制挂起时不能让 /health 无限阻塞：5 秒上界，超时强杀
+            if (!process.waitFor(5, TimeUnit.SECONDS)) {
+                process.destroyForcibly();
+                long latency = System.currentTimeMillis() - start;
+                return doctorCheck(name, "warning", null,
+                        name + " timed out after 5s", latency);
+            }
             String output = new String(process.getInputStream().readAllBytes()).trim();
-            int exitCode = process.waitFor();
+            int exitCode = process.exitValue();
             long latency = System.currentTimeMillis() - start;
 
             if (exitCode == 0) {

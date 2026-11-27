@@ -16,7 +16,6 @@ import java.net.ServerSocket;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -169,20 +168,26 @@ public class DevServerLauncher {
 
     private void runSync(Path workspace, String command, Duration timeout) {
         try {
+            // 输出重定向到文件而不是留在 OS 管道里：npm install 的输出轻松超过 64KB
+            // 管道缓冲，子进程会阻塞在写管道上永不退出，waitFor 必然假超时。
+            // 与 startProcess 的 redirectOutput(appendTo(log)) 同一套路。
+            Path logFile = workspace.resolve(".ai-code-assistant/npm-install.log");
+            Files.createDirectories(logFile.getParent());
             ProcessBuilder pb = new ProcessBuilder("bash", "-c", command);
             pb.directory(workspace.toFile());
             pb.redirectErrorStream(true);
+            pb.redirectOutput(ProcessBuilder.Redirect.appendTo(logFile.toFile()));
             Process p = OwnedProcess.start(pb);
             Throwable primaryFailure = null;
             try {
                 boolean done = p.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS);
                 if (!done) throw new RuntimeException("npm install timed out after " + timeout.toSeconds() + "s");
                 if (p.exitValue() != 0) {
-                    String output = new String(p.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+                    String output = readLogTail(logFile, 2000);
                     throw new RuntimeException("npm install failed (exit " + p.exitValue() + "): "
-                        + output.substring(0, Math.min(output.length(), 2000)));
+                        + output);
                 }
-            } catch (IOException | InterruptedException | RuntimeException | Error failure) {
+            } catch (InterruptedException | RuntimeException | Error failure) {
                 primaryFailure = failure;
                 throw failure;
             } finally {

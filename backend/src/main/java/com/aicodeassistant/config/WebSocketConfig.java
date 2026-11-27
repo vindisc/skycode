@@ -200,8 +200,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 if (authHeader != null && authHeader.startsWith("Bearer ")
                         && authHeader.length() > 7) {
                     String token = authHeader.substring(7);
-                    // 验证 token 与 accessToken 匹配
-                    if (!securityFilter.getAccessToken().equals(token)) {
+                    // 验证 token 与 accessToken 匹配（恒时比较，避免逐字符短路泄露前缀长度）
+                    if (!java.security.MessageDigest.isEqual(
+                            securityFilter.getAccessToken().getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                            token.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
                         log.warn("STOMP CONNECT rejected: invalid Bearer token");
                         throw new org.springframework.security.access.AccessDeniedException(
                                 "Invalid access token");

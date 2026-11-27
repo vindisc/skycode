@@ -290,8 +290,12 @@ public class WebSocketSessionManager {
         return removed;
     }
     private void removeSessionIndex(String sessionId,String transportId){
-        Set<String> ids=sessionToTransports.get(sessionId);
-        if(ids!=null){ids.remove(transportId);if(ids.isEmpty())sessionToTransports.remove(sessionId,ids);}
+        // 用 computeIfPresent 而不是 get→remove 两步：与 computeIfAbsent(...).add(...)
+        // 在同一个 bin 锁下串行，避免「判空之后别的传输刚好加入，整条索引被误删」
+        sessionToTransports.computeIfPresent(sessionId,(id,ids)->{
+            ids.remove(transportId);
+            return ids.isEmpty()?null:ids;
+        });
     }
 
     // ───── 持久化与恢复 ─────
@@ -323,15 +327,21 @@ public class WebSocketSessionManager {
                 Map<String, Object> row = rows.get(0);
                 String recoveredSessionId = (String) row.get("app_session_id");
                 long recoveredEpoch = ((Number) row.get("binding_epoch")).longValue();
-                // 直接绑定到恢复的会话（等同于执行了一次bindSession，但epoch用恢复值+1避免STALE拒绝）
+                // 直接绑定到恢复的会话。用 compute 而不是 get+put：
+                // 与显式 bindSession 的 compute 在同一把 bin 锁下串行，不会互相覆盖；
+                // epoch 用恢复值+1，后续显式 bind 带着旧 epoch 到来时不至于被 STALE 拒绝。
                 long now = System.nanoTime();
-                TransportState current = transports.get(transportId);
-                if (current != null && !current.bindCompleted()) {
-                    transports.put(transportId, current.bind(recoveredSessionId, now, recoveredEpoch));
+                boolean[] bound = {false};
+                transports.compute(transportId, (id, current) -> {
+                    if (current == null || current.bindCompleted()) return current;
+                    bound[0] = true;
+                    return current.bind(recoveredSessionId, now, recoveredEpoch + 1);
+                });
+                if (bound[0]) {
                     sessionToTransports.computeIfAbsent(recoveredSessionId, ignored -> ConcurrentHashMap.newKeySet()).add(transportId);
                     sessionOfflineSince.remove(recoveredSessionId);
                     log.info("Auto-recovered WebSocket binding from persistence: principal={}, session={}, epoch={}",
-                            principalName, recoveredSessionId, recoveredEpoch);
+                            principalName, recoveredSessionId, recoveredEpoch + 1);
                 }
             }
         } catch (Exception e) {
