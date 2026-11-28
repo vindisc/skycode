@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.Tag;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.env.MockEnvironment;
 
@@ -30,6 +31,7 @@ import static org.mockito.Mockito.when;
  * 池同步：池里的服务商以 db: 前缀注册进运行时，不抢配置里已有的模型，
  * 配置里的服务商按原名注册（叠加设置页里的修改），池里的以 db: 前缀注册、不抢已被占用的模型。
  */
+@Tag("smoke")
 class DbProviderRegistrySyncTest {
 
     @TempDir

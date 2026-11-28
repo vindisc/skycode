@@ -3,6 +3,7 @@ package com.aicodeassistant.llm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.time.Duration;
 
@@ -14,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 纯逻辑测试，不依赖 Spring Context。
  * Jitter 测试使用统计范围断言。
  */
+@Tag("smoke")
 class ModelAwareRetryPolicyTest {
 
     private ModelAwareRetryPolicy policy;

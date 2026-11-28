@@ -9,6 +9,7 @@ import com.aicodeassistant.tool.agent.BackgroundAgentTracker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
@@ -19,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
+@Tag("smoke")
 class SessionManagerMessageIdempotencyTest {
     private JdbcTemplate jdbc;
     private SessionManager manager;

@@ -52,6 +52,15 @@ ZhikunCode 是一个自托管的 AI 编程工作台。仓库由多个服务组�
 - Python 源码位于 `python-service/src/`，测试位于 `python-service/tests/`；沿用现有 FastAPI/Pydantic 模式。
 - 修改范围应限于相关服务。项目未配置的格式化工具、lint 工具或依赖不要随意引入。
 
+### 测试分层（2026-11-28 起）
+
+后端测试按 `@Tag("smoke")` 分层（22 个核心类，覆盖模型注册/场景分派/提示注入/记忆存储/WS 会话状态/控制器校验/payload 守卫），选择验证深度的约定：
+
+- **L0 冒烟（小改动的默认验证）**：`./scripts/test-smoke.sh`——后端 smoke（`./mvnw test -Dgroups=smoke`，22 类 256 用例 ≈10 秒）+ 前端 `src/api src/store`（337 用例 ≈10 秒）+ pytest 全量（≈12 秒）。
+- **L1 模块（改哪跑哪）**：后端 `./mvnw test "-Dtest=com.aicodeassistant.<包>.*"`；前端 `npx vitest run <改动相关测试路径>`。改动 Spring Bean 构造器/新增 Bean 后必须额外跑 `SecurityFilterIntegrationTest`（完整上下文集成测试，唯一能抓 Bean 装配致命错误）。
+- **L2 全量（推送前 / 大改动 / 部署镜像前）**：`./mvnw test` 全量（约 5 分钟）+ `npx vitest run` 全量。CI 在 push/PR 上永远跑全量（backend-smoke job 先行快速反馈）。
+- 新增测试类若属核心链路，随改动给类加 `@Tag("smoke")` 并同步进 `scripts/test-smoke.sh` 头部的清单说明。
+
 ## 开发工作建议
 
 - 修改行为前先检查相邻实现和测试；在负责该行为的服务边界补充或更新测试。

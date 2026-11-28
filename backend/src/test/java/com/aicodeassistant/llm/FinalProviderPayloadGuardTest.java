@@ -2,6 +2,7 @@ package com.aicodeassistant.llm;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
+@Tag("smoke")
 class FinalProviderPayloadGuardTest {
     private ModelRegistry models;
     private FinalProviderPayloadGuard guard;

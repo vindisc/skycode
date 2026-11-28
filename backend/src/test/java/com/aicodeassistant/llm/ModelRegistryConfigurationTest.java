@@ -3,6 +3,7 @@ package com.aicodeassistant.llm;
 import com.aicodeassistant.config.FeatureFlagService;
 import com.aicodeassistant.engine.TokenCounter;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.springframework.mock.env.MockEnvironment;
 
 import java.util.LinkedHashMap;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("smoke")
 class ModelRegistryConfigurationTest {
     @Test
     void yamlOverrideWinsOverProviderAndCarriesEveryConfiguredCapability() {

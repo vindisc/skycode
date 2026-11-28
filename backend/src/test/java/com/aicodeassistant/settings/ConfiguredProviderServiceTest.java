@@ -8,6 +8,7 @@ import com.aicodeassistant.settings.ConfiguredProviderService.ConfiguredProvider
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.Tag;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.nio.file.Path;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * 设置页里带注册名的那批服务商：定义存在库里、页面是唯一来源；
  * .env 只在第一次启动时提供一次性导入的初始值。
  */
+@Tag("smoke")
 class ConfiguredProviderServiceTest {
 
     private static final String ENV_KEY = "sk-from-env-1234567890";

@@ -8,6 +8,7 @@ import com.aicodeassistant.tool.agent.AgentStrategyFactory;
 import com.aicodeassistant.tool.agent.SubAgentExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -23,6 +24,7 @@ import static org.mockito.Mockito.*;
  *
  * @see EffectiveSystemPromptBuilder
  */
+@Tag("smoke")
 class EffectiveSystemPromptBuilderTest {
 
     private SystemPromptBuilder systemPromptBuilder;

@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * TC-MEM-001/003/004/005 记忆系统测试。
  */
 @DisplayName("记忆系统测试")
+@Tag("smoke")
 class MemorySystemTest {
 
     /**

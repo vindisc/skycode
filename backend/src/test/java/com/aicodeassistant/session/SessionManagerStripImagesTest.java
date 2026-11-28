@@ -11,6 +11,7 @@ import com.aicodeassistant.tool.agent.BackgroundAgentTracker;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.mock;
  * <p>
  * 使用真实 SQLite 内存库验证 SQL 行为（与 SessionManagerSearchTest 同模式）。
  */
+@Tag("smoke")
 class SessionManagerStripImagesTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.Tag;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.env.MockEnvironment;
 
@@ -26,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * 场景分派：绑定只存引用；图片理解兜底必须选一个能力表里收图的模型；
  * 引用的服务商被停用或删除后绑定自动失效，由调用方回落默认配置。
  */
+@Tag("smoke")
 class SceneBindingServiceTest {
 
     private static final String BASE_URL = "https://open.bigmodel.cn/api/paas/v4";

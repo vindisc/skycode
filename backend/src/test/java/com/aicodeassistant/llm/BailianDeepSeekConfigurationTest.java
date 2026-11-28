@@ -5,6 +5,7 @@ import com.aicodeassistant.llm.impl.OpenAiCompatibleProvider;
 import com.aicodeassistant.settings.SceneBindingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.env.YamlPropertySourceLoader;
@@ -18,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
+@Tag("smoke")
 class BailianDeepSeekConfigurationTest {
     private static final String BAILIAN = "deepseek-v4.1-flash";
 

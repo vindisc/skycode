@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Memdir 自动记忆系统黄金测试 — 覆盖 §4.11 全部功能。
  */
+@Tag("smoke")
 class MemdirGoldenTest {
 
     // ==================== MemdirService ====================

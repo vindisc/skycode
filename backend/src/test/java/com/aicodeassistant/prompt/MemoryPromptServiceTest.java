@@ -5,6 +5,7 @@ import com.aicodeassistant.memdir.MemoryCategory;
 import com.aicodeassistant.service.ProjectMemoryService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -15,6 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Tag("smoke")
 class MemoryPromptServiceTest {
 
     @TempDir Path temp;

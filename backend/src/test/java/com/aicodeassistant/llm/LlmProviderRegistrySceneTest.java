@@ -4,6 +4,7 @@ import com.aicodeassistant.llm.impl.OpenAiCompatibleProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -16,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * 场景分派接到注册表上的两个钩子：主对话默认模型、后台小任务。没绑定、绑定失效、查询出错，都要走回配置文件里的值。
  */
+@Tag("smoke")
 class LlmProviderRegistrySceneTest {
 
     private LlmProviderRegistry registry;

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Given-When-Then 模式，JUnit 5。
  */
 @DisplayName("TokenCounter 单元测试")
+@Tag("smoke")
 class TokenCounterTest {
 
     private TokenCounter counter;

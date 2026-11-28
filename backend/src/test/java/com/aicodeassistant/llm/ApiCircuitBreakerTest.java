@@ -3,6 +3,7 @@ package com.aicodeassistant.llm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 
 import java.lang.reflect.Field;
 import java.time.Instant;
@@ -15,6 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 纯逻辑测试，不依赖 Spring Context。
  * TC-MODEL-008 使用反射修改 lastFailureTime 模拟超时。
  */
+@Tag("smoke")
 class ApiCircuitBreakerTest {
 
     private ApiCircuitBreaker breaker;

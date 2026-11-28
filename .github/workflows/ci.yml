@@ -32,6 +32,32 @@ jobs:
         run: node scripts/verify-king-case.mjs
 
   # =========================================================================
+  # Job 0: 后端冒烟（P0 快速反馈）
+  # @Tag("smoke") 的 22 个核心类（模型注册/场景分派/提示注入/记忆/WS 状态/控制器
+  # 校验），秒级反馈；全量回归仍由 backend-build 覆盖。分层约定见 scripts/test-smoke.sh
+  # =========================================================================
+  backend-smoke:
+    name: Backend Smoke (P0 core, ~1min)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: '21'
+          cache: maven
+
+      - name: Run smoke tests
+        run: ./mvnw test -Dgroups=smoke -DfailIfNoTests=false -q
+
+  # =========================================================================
   # Job 1: 后端 Java 测试
   # =========================================================================
   backend-build:

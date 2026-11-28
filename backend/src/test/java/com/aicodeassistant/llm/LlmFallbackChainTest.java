@@ -13,6 +13,7 @@ import static org.mockito.Mockito.*;
  * 验证 LlmProviderRegistry 的模型解析和分类器模型回退链完整性。
  */
 @DisplayName("TC-LLM-002 四级回退验证")
+@Tag("smoke")
 class LlmFallbackChainTest {
 
     private Environment mockEnv;
