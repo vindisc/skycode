@@ -1700,6 +1700,10 @@ public class QueryEngine {
                             handler.onTurnEnd(turn, "stop_hook_blocking");
                             continue; // 继续循环
                         }
+
+                        // 无拦截 → 会话正常终止，触发自动记忆沉淀（异步，不阻塞终止路径）
+                        hookService.executePostStopActions(
+                                state.getMessages(), state.getToolUseContext().sessionId());
                     } catch (Exception e) {
                         if (e instanceof com.aicodeassistant.session.MessagePersistenceException persistenceFailure) {
                             throw persistenceFailure;

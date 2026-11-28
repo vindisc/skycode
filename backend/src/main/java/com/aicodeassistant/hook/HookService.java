@@ -1,9 +1,12 @@
 package com.aicodeassistant.hook;
 
+import com.aicodeassistant.engine.SideQueryService;
 import com.aicodeassistant.memdir.MemdirService;
 import com.aicodeassistant.model.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -35,6 +38,14 @@ public class HookService {
 
     private final HookRegistry hookRegistry;
     private final MemdirService memdirService;
+
+    /** 可选的 fast 模型通道——用于把「请记住 X」提炼成一条干净记忆；不可用时回落原文 */
+    @Autowired(required = false)
+    private SideQueryService sideQueryService;
+
+    /** 自动沉淀开关（默认开；@Value 仅在 Spring 环境覆盖，直接 new 的测试环境保持默认） */
+    @Value("${app.memory.auto-capture:true}")
+    private boolean autoCaptureEnabled = true;
 
     /**
      * 会话级配置快照 — 确保会话内钩子配置一致性 (§11.5.8)。
@@ -284,41 +295,90 @@ public class HookService {
         }
     }
 
+    /**
+     * 自动记忆沉淀 — 会话正常终止后调用（QueryEngine TERMINATE_SUCCESS 分支）。
+     * <p>
+     * 2026-11-28 重写：旧实现从<strong>助手回复</strong>里找触发词并存<strong>助手回复
+     * 开头 200 字</strong>——用户说「请记住 X」，存进去的却是「好的，我已记住…」，
+     * 方向完全反了。现在从<strong>用户消息</strong>里识别记忆指令（请记住 / remember
+     * that / 备忘），提取指令之后的实际内容，经 fast 模型提炼成一条干净记忆
+     * （LLM 不可用回落原文），异步写入 AUTO 记忆——绝不阻塞、绝不影响查询链路。
+     */
     public void executePostStopActions(List<Message> messages, String sessionId) {
-        String lastAssistantText = extractLastAssistantText(messages);
-        if (lastAssistantText != null && shouldExtractMemory(lastAssistantText)) {
+        if (!autoCaptureEnabled) return;
+        String userText = extractLastUserText(messages);
+        if (userText == null) return;
+        String candidate = extractMemoryCandidate(userText);
+        if (candidate == null) return;
+
+        Thread.ofVirtual().name("memory-capture-" + sessionId).start(() -> {
             try {
-                memdirService.writeMemory(
-                    "Auto-extracted from session " + sessionId + ": " +
-                    lastAssistantText.substring(0, Math.min(200, lastAssistantText.length())),
-                    MemdirService.MemorySource.AUTO);
-                log.info("Post-stop memory extraction completed for session: {}", sessionId);
+                String content = refineWithSideQuery(sessionId, userText, candidate);
+                memdirService.writeMemory(content, MemdirService.MemorySource.AUTO);
+                log.info("Auto memory captured for session {}: {}", sessionId,
+                        content.length() > 80 ? content.substring(0, 80) + "…" : content);
             } catch (Exception e) {
-                log.warn("Memory extraction failed for session {}: {}", sessionId, e.getMessage());
+                log.warn("Auto memory capture failed for session {}: {}", sessionId, e.getMessage());
             }
-        }
+        });
     }
 
-    private boolean shouldExtractMemory(String text) {
-        if (text == null) return false;
-        String lower = text.toLowerCase();
-        return lower.contains("remember")
-            || lower.contains("note for future")
-            || lower.contains("请记住")
-            || lower.contains("备忘");
-    }
-
-    private String extractLastAssistantText(List<Message> messages) {
+    /** 触发词匹配的是用户消息，不是助手回复（旧实现的方向性错误） */
+    private String extractLastUserText(List<Message> messages) {
         for (int i = messages.size() - 1; i >= 0; i--) {
-            if (messages.get(i) instanceof Message.AssistantMessage am && am.content() != null) {
-                for (var block : am.content()) {
-                    if (block instanceof com.aicodeassistant.model.ContentBlock.TextBlock tb) {
+            if (messages.get(i) instanceof Message.UserMessage um && um.content() != null) {
+                for (var block : um.content()) {
+                    if (block instanceof com.aicodeassistant.model.ContentBlock.TextBlock tb
+                            && tb.text() != null && !tb.text().isBlank()) {
                         return tb.text();
                     }
                 }
             }
         }
         return null;
+    }
+
+    /**
+     * 从用户消息提取记忆候选：必须是明确的记忆指令（请记住 / remember that / 备忘），
+     * 返回指令之后的实际内容；无触发词或内容过短返回 null。
+     * 不匹配裸「记住」/「remember」——讨论「记住密码功能」这类实现话题不应误触发。
+     */
+    static String extractMemoryCandidate(String userText) {
+        if (userText == null || userText.isBlank()) return null;
+        String lower = userText.toLowerCase();
+        String[] triggers = {"请记住", "记住一下", "remember that", "remember:", "备忘"};
+        for (String trigger : triggers) {
+            int idx = lower.indexOf(trigger);
+            if (idx >= 0) {
+                String candidate = userText.substring(idx + trigger.length()).trim();
+                candidate = candidate.replaceFirst("^[：:，,。\\-—]+\\s*", "").trim();
+                if (candidate.length() >= 4 && candidate.length() <= 500) {
+                    return candidate;
+                }
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * fast 模型提炼（2.5 秒超时）——把用户原话整理成一条不含对话痕迹的记忆；
+     * side query 不可用或失败时回落到原文（触发词之后的内容，足够可用）。
+     */
+    private String refineWithSideQuery(String sessionId, String userText, String fallback) {
+        if (sideQueryService == null || !sideQueryService.isAvailable()) {
+            return fallback;
+        }
+        try {
+            String refined = sideQueryService.query(
+                    "把用户的记忆指令整理成一条独立、自包含的持久记忆（第三人称，去掉「请记住」等指令"
+                  + "痕迹与寒暄，保留关键事实与细节），只输出整理后的记忆正文，不要解释。",
+                    "会话 " + sessionId + " 中用户说：" + userText,
+                    128, 2_500L);
+            return (refined == null || refined.isBlank()) ? fallback : refined.trim();
+        } catch (Exception e) {
+            return fallback;
+        }
     }
 
     // ============ 会话级配置快照 (§11.5.8) ============

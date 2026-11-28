@@ -37,6 +37,13 @@ public class MemoryController {
         this.memdirService = memdirService;
     }
 
+    /**
+     * @deprecated 孤儿存储（2026-11-28 审计确认）：这个 SQLite memories 表<strong>不会注入
+     * 系统提示</strong>——从这里写入的"记忆"LLM 根本看不到（双源真相）。前端也只使用
+     * /api/memory/file 系列。请改用文件级端点（/api/memory/file、/api/memory/file/entries）
+     * 或让模型通过 Memory 工具写入。这些端点保留仅为兼容旧调用方，计划移除。
+     */
+    @Deprecated
     /** 获取记忆条目列表 */
     @GetMapping
     public ResponseEntity<Map<String, List<MemoryEntry>>> getMemories() {
@@ -55,6 +62,13 @@ public class MemoryController {
         return ResponseEntity.ok(Map.of("entries", entries));
     }
 
+    /**
+     * @deprecated 孤儿存储（2026-11-28 审计确认）：这个 SQLite memories 表<strong>不会注入
+     * 系统提示</strong>——从这里写入的"记忆"LLM 根本看不到（双源真相）。前端也只使用
+     * /api/memory/file 系列。请改用文件级端点（/api/memory/file、/api/memory/file/entries）
+     * 或让模型通过 Memory 工具写入。这些端点保留仅为兼容旧调用方，计划移除。
+     */
+    @Deprecated
     /** 更新记忆条目（批量覆盖） */
     @PutMapping
     public ResponseEntity<Map<String, Object>> updateMemories(
@@ -83,6 +97,13 @@ public class MemoryController {
         return ResponseEntity.ok(Map.of("success", true));
     }
 
+    /**
+     * @deprecated 孤儿存储（2026-11-28 审计确认）：这个 SQLite memories 表<strong>不会注入
+     * 系统提示</strong>——从这里写入的"记忆"LLM 根本看不到（双源真相）。前端也只使用
+     * /api/memory/file 系列。请改用文件级端点（/api/memory/file、/api/memory/file/entries）
+     * 或让模型通过 Memory 工具写入。这些端点保留仅为兼容旧调用方，计划移除。
+     */
+    @Deprecated
     /** 创建单条记忆 */
     @PostMapping
     public ResponseEntity<Map<String, Object>> createMemory(@RequestBody MemoryEntry entry) {
@@ -103,6 +124,13 @@ public class MemoryController {
                 "id", id));
     }
 
+    /**
+     * @deprecated 孤儿存储（2026-11-28 审计确认）：这个 SQLite memories 表<strong>不会注入
+     * 系统提示</strong>——从这里写入的"记忆"LLM 根本看不到（双源真相）。前端也只使用
+     * /api/memory/file 系列。请改用文件级端点（/api/memory/file、/api/memory/file/entries）
+     * 或让模型通过 Memory 工具写入。这些端点保留仅为兼容旧调用方，计划移除。
+     */
+    @Deprecated
     /** 统一查询所有记忆（SQLite + MEMORY.md） */
     @GetMapping("/all")
     public ResponseEntity<Map<String, Object>> getAllMemories() {
@@ -126,6 +154,13 @@ public class MemoryController {
         ));
     }
 
+    /**
+     * @deprecated 孤儿存储（2026-11-28 审计确认）：这个 SQLite memories 表<strong>不会注入
+     * 系统提示</strong>——从这里写入的"记忆"LLM 根本看不到（双源真相）。前端也只使用
+     * /api/memory/file 系列。请改用文件级端点（/api/memory/file、/api/memory/file/entries）
+     * 或让模型通过 Memory 工具写入。这些端点保留仅为兼容旧调用方，计划移除。
+     */
+    @Deprecated
     /** 删除单条记忆 */
     @DeleteMapping("/{memoryId}")
     public ResponseEntity<Void> deleteMemory(@PathVariable String memoryId) {

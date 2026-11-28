@@ -308,6 +308,9 @@ app:
     auto-purge: true
     rerank-enabled: true
     rerank-timeout-ms: 3000
+    # 自动记忆沉淀：用户消息含「请记住 / remember that / 备忘」时，经 fast 模型提炼
+    # 写入个人记忆 AUTO 条目（QueryEngine 正常终止时异步执行）。默认开，可关闭。
+    auto-capture: true
   compact:
     # Independent summary model; does not use getFastModel().
     model: ${LLM_COMPACT_MODEL:deepseek-flash}
