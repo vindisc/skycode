@@ -899,11 +899,11 @@ public class WebSocketController implements PermissionNotifier {
                                       String model, Set<String> allowedToolNames) {
         Path workingDir = requireSessionWorkingDirectory(sessionId);
 
-        // 构建系统提示
+        // 构建系统提示（带用户消息：个人记忆超阈值时按相关性检索注入）
         SystemPromptConfig promptConfig = SystemPromptConfig.defaults()
                 .withSessionId(sessionId);
         String systemPrompt = systemPromptBuilder.buildEffectiveSystemPrompt(
-                promptConfig, tools, model, workingDir);
+                promptConfig, tools, model, workingDir, userText);
 
         // 构建 QueryConfig
         int contextWindow = getContextWindow(model);

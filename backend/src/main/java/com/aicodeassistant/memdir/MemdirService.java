@@ -674,20 +674,76 @@ public class MemdirService {
     }
 
     /**
-     * 压缩旧记忆 — 保留最新的 70%。
+     * 压缩旧记忆 — AUTO/TOOL 条目保留最新的 70%。
+     * <p>
+     * USER 来源条目与无时间戳（EPOCH）条目不参与淘汰：自动压缩只收敛自动记忆的滚动，
+     * 不能动用户手写的长期偏好。输出保持原文件顺序，不打散用户在前端排列的顺序。
      */
     String compactMemories(String existing) {
         List<MemoryEntry> entries = parseEntries(existing);
         if (entries.isEmpty()) return "";
 
-        entries.sort(Comparator.comparing(MemoryEntry::timestamp).reversed());
-        int keepCount = Math.max(1, (int) (entries.size() * COMPACT_KEEP_RATIO));
-
-        return entries.stream()
+        // 可淘汰的是 AUTO/TOOL 且带真实时间戳的条目；按时间倒序保留最新 70%
+        List<Integer> evictableIdx = new ArrayList<>();
+        for (int i = 0; i < entries.size(); i++) {
+            MemoryEntry e = entries.get(i);
+            if (e.source() != MemorySource.USER && !e.timestamp().equals(Instant.EPOCH)) {
+                evictableIdx.add(i);
+            }
+        }
+        int keepCount = Math.max(1, (int) (evictableIdx.size() * COMPACT_KEEP_RATIO));
+        Set<Integer> keptIdx = evictableIdx.stream()
+                .sorted(Comparator.comparing((Integer i) -> entries.get(i).timestamp()).reversed())
                 .limit(keepCount)
-                .map(e -> String.format("<!-- source:%s time:%s category:%s -->\n%s",
-                        e.source().name(), e.timestamp(), e.category().tag(), e.content()))
-                .collect(Collectors.joining("\n\n"));
+                .collect(Collectors.toSet());
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < entries.size(); i++) {
+            MemoryEntry e = entries.get(i);
+            boolean userOwned = e.source() == MemorySource.USER || e.timestamp().equals(Instant.EPOCH);
+            if (!userOwned && !keptIdx.contains(i)) continue;
+            if (!sb.isEmpty()) sb.append("\n\n");
+            sb.append(String.format("<!-- source:%s time:%s category:%s -->\n%s",
+                    e.source().name(), e.timestamp(), e.category().tag(), e.content()));
+        }
+        return sb.toString();
+    }
+
+    /** 容量超过该比例时触发自动压缩 */
+    static final double COMPACT_TRIGGER_RATIO = 0.8;
+
+    /**
+     * 容量检查 + 自动压缩（供每日维护调度调用）。
+     * 个人记忆超过 MAX_MEMORY_SIZE 的 80% 时压缩 AUTO/TOOL 条目；
+     * 压不下去（全是 USER 条目）则不动文件。
+     *
+     * @return 是否发生了压缩重写
+     */
+    public boolean compactIfNeeded() {
+        writeLock.lock();
+        try {
+            String content = readMemories();
+            if (content.isEmpty()) return false;
+            if (content.length() <= MAX_MEMORY_SIZE * COMPACT_TRIGGER_RATIO) return false;
+
+            String compacted = compactMemories(content);
+            if (compacted.length() >= content.length()) {
+                log.info("Memory at {} chars is mostly user-owned; skip auto-compact", content.length());
+                return false;
+            }
+            Path tempFile = memoryFile.resolveSibling(memoryFile.getFileName() + ".tmp");
+            Files.writeString(tempFile, compacted,
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.move(tempFile, memoryFile, StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING);
+            log.info("Memory auto-compacted: {} -> {} chars", content.length(), compacted.length());
+            return true;
+        } catch (IOException e) {
+            log.error("Failed to auto-compact memory", e);
+            return false;
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -790,7 +846,9 @@ public class MemdirService {
         if (!Files.isDirectory(teamDir)) return List.of();
         List<Memory> memories = new ArrayList<>();
         try (var stream = Files.list(teamDir)) {
+            // 按文件名排序保证注入顺序稳定（文件系统枚举顺序不保证）
             stream.filter(p -> p.toString().endsWith(".md"))
+                  .sorted()
                   .forEach(p -> {
                       try {
                           String content = Files.readString(p, StandardCharsets.UTF_8);
@@ -840,34 +898,5 @@ public class MemdirService {
         } finally {
             writeLock.unlock();
         }
-    }
-
-    /**
-     * 构建记忆提示行 — 用于注入系统提示。
-     */
-    public String buildMemoryPrompt(Path projectRoot) {
-        StringBuilder sb = new StringBuilder();
-        String personalMemory = readMemoriesForPrompt();
-        if (!personalMemory.isEmpty()) {
-            sb.append("## Personal Memory\n");
-            sb.append(personalMemory);
-            sb.append("\n\n");
-        }
-        List<Memory> teamMemories = loadTeamMemories(projectRoot);
-        if (!teamMemories.isEmpty()) {
-            sb.append("## Team Memory\n");
-            for (Memory mem : teamMemories) {
-                sb.append("### ").append(mem.name()).append("\n");
-                sb.append(mem.content()).append("\n\n");
-            }
-        }
-        if (!sb.isEmpty()) {
-            sb.append("\n---\n");
-            sb.append("Memory categories: USER_PREFERENCE, PROJECT_CONVENTION, ");
-            sb.append("CODE_PATTERN, ERROR_SOLUTION, SEMANTIC, TEAM\n");
-            sb.append("To save memory: use the Memory tool with action=write\n");
-            sb.append("To read memory: use the Memory tool with action=read\n");
-        }
-        return sb.toString();
     }
 }

@@ -140,7 +140,7 @@ public class QueryController {
                 .withSessionId(sessionId);
         String systemPrompt = systemPromptBuilder.buildEffectiveSystemPrompt(
                 promptConfig, tools, request.model(),
-                Path.of(session.workingDir()));
+                Path.of(session.workingDir()), request.prompt());
 
         // 4. 组装用户消息
         String userMessage = buildUserMessage(request.prompt(), request.context());
@@ -230,10 +230,10 @@ public class QueryController {
                         .withCustom(request.systemPrompt())
                         .withAppend(request.appendSystemPrompt())
                         .withSessionId(sessionId);
+                String userMessage = buildUserMessage(request.prompt(), request.context());
                 String systemPrompt = systemPromptBuilder.buildEffectiveSystemPrompt(
                         promptConfig, tools, request.model(),
-                        Path.of(session.workingDir()));
-                String userMessage = buildUserMessage(request.prompt(), request.context());
+                        Path.of(session.workingDir()), userMessage);
                 String rawModel = request.model() != null
                         ? request.model() : providerRegistry.getDefaultModel();
                 String model = providerRegistry.resolveModelAlias(rawModel);
@@ -329,7 +329,7 @@ public class QueryController {
                 .withSessionId(request.sessionId());
         String systemPrompt = systemPromptBuilder.buildEffectiveSystemPrompt(
                 promptConfig, tools, request.model(),
-                Path.of(session.workingDir()));
+                Path.of(session.workingDir()), request.prompt());
         String rawModel = request.model() != null ? request.model() : session.model();
         String model = providerRegistry.resolveModelAlias(rawModel);
         int maxTurns = request.maxTurns() != null ? request.maxTurns() : QueryConfig.DEFAULT_MAX_TURNS;

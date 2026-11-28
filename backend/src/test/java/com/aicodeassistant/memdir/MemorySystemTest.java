@@ -208,6 +208,65 @@ class MemorySystemTest {
         }
 
         @Test
+        @DisplayName("自动压缩保护 USER 条目且保持原顺序（2026-11-28 接线）")
+        void compactProtectsUserEntriesAndKeepsOrder() {
+            MemdirService service = new MemdirService(tempDir);
+
+            // 12 条很旧的 AUTO 条目 + 2 条更旧的 USER 条目夹在中间
+            Instant oldBase = Instant.now().minus(Duration.ofDays(80));
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 12; i++) {
+                sb.append(String.format("\n<!-- source:AUTO time:%s category:semantic -->\nAUTO记忆%d\n",
+                        oldBase.plusSeconds(i * 10), i));
+                if (i == 5) {
+                    sb.append(String.format(
+                            "\n<!-- source:USER time:%s category:semantic -->\n用户手写的长期偏好甲\n",
+                            oldBase.minusSeconds(100)));
+                    sb.append(String.format(
+                            "\n<!-- source:USER time:%s category:semantic -->\n用户手写的长期偏好乙\n",
+                            oldBase.minusSeconds(200)));
+                }
+            }
+            String original = sb.toString();
+            String compacted = service.compactMemories(original);
+
+            assertTrue(compacted.contains("用户手写的长期偏好甲"), "USER 条目不得被自动压缩淘汰");
+            assertTrue(compacted.contains("用户手写的长期偏好乙"), "USER 条目不得被自动压缩淘汰");
+            // 保留的是最新的 70%（8 条 AUTO），最旧的 4 条 AUTO 应被淘汰
+            assertFalse(compacted.contains("AUTO记忆0\n"), "最旧 AUTO 条目应被淘汰");
+            assertTrue(compacted.contains("AUTO记忆11"), "最新 AUTO 条目应保留");
+            // 输出保持原文件顺序：用户条目仍夹在 AUTO记忆5 与 AUTO记忆6 之间
+            int m5 = compacted.indexOf("AUTO记忆5");
+            int prefA = compacted.indexOf("长期偏好甲");
+            int m6 = compacted.indexOf("AUTO记忆6");
+            assertTrue(m5 < prefA && prefA < m6, "输出应保持原文件顺序，不打散用户排列");
+        }
+
+        @Test
+        @DisplayName("compactIfNeeded 超容量触发、未超不触发（2026-11-28 接线）")
+        void compactIfNeededTriggersAtCapacityThreshold() throws Exception {
+            MemdirService service = new MemdirService(tempDir);
+
+            // 80% × 50_000 = 40_000 字符；35_000 低于阈值 → 不压缩
+            String below = "<!-- source:AUTO time:" + Instant.now() + " category:semantic -->\n"
+                    + "填充内容。".repeat(7000); // 28_000 字符条目 + 头部
+            Files.writeString(tempDir.resolve(MemdirService.ENTRYPOINT_NAME), below);
+            assertFalse(service.compactIfNeeded(), "低于容量阈值不应压缩");
+
+            // 超阈值且全是 AUTO → 压缩发生、文件变短（多条目：单条条目压缩淘汰不了）
+            StringBuilder above = new StringBuilder();
+            for (int i = 0; i < 60; i++) {
+                above.append(String.format("<!-- source:AUTO time:%s category:semantic -->\n%s\n",
+                        Instant.now().minusSeconds(60L * i),
+                        "自动记忆填充段落，用于触发容量压缩检查。".repeat(36)));
+            }
+            Files.writeString(tempDir.resolve(MemdirService.ENTRYPOINT_NAME), above.toString());
+            assertTrue(service.compactIfNeeded(), "超过容量阈值应触发压缩");
+            assertTrue(Files.readString(tempDir.resolve(MemdirService.ENTRYPOINT_NAME)).length()
+                    < above.length(), "压缩后文件应变短");
+        }
+
+        @Test
         @DisplayName("过期记忆被清理")
         void purgeExpiredMemories() throws Exception {
             MemdirService service = new MemdirService(tempDir);

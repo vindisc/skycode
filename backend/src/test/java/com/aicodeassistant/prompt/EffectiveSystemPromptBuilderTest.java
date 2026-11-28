@@ -458,7 +458,7 @@ class EffectiveSystemPromptBuilderTest {
     @Test
     void memoryAppendedBetweenBaseAndAppend() {
         MemoryPromptService memory = mock(MemoryPromptService.class);
-        when(memory.buildMemoryPrompt(any())).thenReturn("MEMORY_BLOCK");
+        when(memory.buildMemoryPrompt(any(), nullable(String.class))).thenReturn("MEMORY_BLOCK");
 
         String result = withMemory(memory).buildEffectiveSystemPrompt(
                 SystemPromptConfig.defaults().withAppend("APPEND_TEXT"),
@@ -471,7 +471,7 @@ class EffectiveSystemPromptBuilderTest {
     void memoryAppendedInCoordinatorBranch() {
         when(coordinatorService.isCoordinatorTopLevel(null)).thenReturn(true);
         MemoryPromptService memory = mock(MemoryPromptService.class);
-        when(memory.buildMemoryPrompt(any())).thenReturn("MEMORY_BLOCK");
+        when(memory.buildMemoryPrompt(any(), nullable(String.class))).thenReturn("MEMORY_BLOCK");
 
         String result = withMemory(memory).buildEffectiveSystemPrompt(
                 SystemPromptConfig.defaults().withCoordinator("COORDINATOR_PROMPT"),
@@ -500,7 +500,7 @@ class EffectiveSystemPromptBuilderTest {
         when(coordinatorService.isCoordinatorTopLevel(null)).thenReturn(true);
         MemoryPromptService memory = mock(MemoryPromptService.class);
         Path project = Path.of("project");
-        when(memory.buildMemoryPrompt(project)).thenReturn("MEMORY_BLOCK");
+        when(memory.buildMemoryPrompt(eq(project), nullable(String.class))).thenReturn("MEMORY_BLOCK");
 
         String result = withMemory(memory).buildEffectiveSystemPrompt(
                 SystemPromptConfig.defaults().withCoordinator("COORDINATOR_PROMPT")
@@ -508,7 +508,7 @@ class EffectiveSystemPromptBuilderTest {
                 List.of(), "gpt-4o", project);
 
         assertEquals("COORDINATOR_PROMPT\n\nMEMORY_BLOCK\n\nAPPEND_TEXT", result);
-        verify(memory).buildMemoryPrompt(project);
+        verify(memory).buildMemoryPrompt(eq(project), isNull());
     }
 
     @ParameterizedTest
@@ -516,7 +516,7 @@ class EffectiveSystemPromptBuilderTest {
     void agentWinningOverCustomStillInjectsMemory(boolean proactive) {
         MemoryPromptService memory = mock(MemoryPromptService.class);
         Path project = Path.of("project");
-        when(memory.buildMemoryPrompt(project)).thenReturn("MEMORY_BLOCK");
+        when(memory.buildMemoryPrompt(eq(project), nullable(String.class))).thenReturn("MEMORY_BLOCK");
         var agent = new SubAgentExecutor.AgentDefinition(
                 "test-agent", 10, null, Set.of(), Set.of(), false, "AGENT_PROMPT");
 
@@ -527,7 +527,7 @@ class EffectiveSystemPromptBuilderTest {
 
         assertEquals((proactive ? "DEFAULT_SYSTEM_PROMPT\n\n" : "")
                 + "AGENT_PROMPT\n\nMEMORY_BLOCK\n\nAPPEND_TEXT", result);
-        verify(memory).buildMemoryPrompt(project);
+        verify(memory).buildMemoryPrompt(eq(project), isNull());
     }
 
     @Test
@@ -548,7 +548,7 @@ class EffectiveSystemPromptBuilderTest {
     @Test
     void emptyMemoryLeavesPromptUnchanged() {
         MemoryPromptService memory = mock(MemoryPromptService.class);
-        when(memory.buildMemoryPrompt(any())).thenReturn("");
+        when(memory.buildMemoryPrompt(any(), nullable(String.class))).thenReturn("");
 
         String result = withMemory(memory).buildEffectiveSystemPrompt(
                 SystemPromptConfig.defaults(), List.of(), "gpt-4o", Path.of("."));

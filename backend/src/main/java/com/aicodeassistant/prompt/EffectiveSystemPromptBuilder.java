@@ -89,6 +89,26 @@ public class EffectiveSystemPromptBuilder {
                                               List<Tool> tools,
                                               String model,
                                               Path cwd) {
+        return buildEffectiveSystemPrompt(config, tools, model, cwd, null);
+    }
+
+    /**
+     * 构建有效系统提示 — 带用户消息版本。
+     *
+     * @param config    系统提示配置
+     * @param tools     可用工具列表
+     * @param model     模型名称
+     * @param cwd       工作目录
+     * @param userQuery 本次请求的用户消息文本；个人记忆超过阈值时用它做相关性检索注入，
+     *                  null 或空白时个人记忆整文件注入（旧行为）。后台/续跑链路没有
+     *                  明确的用户输入，传 null 即可。
+     * @return 最终系统提示文本
+     */
+    public String buildEffectiveSystemPrompt(SystemPromptConfig config,
+                                              List<Tool> tools,
+                                              String model,
+                                              Path cwd,
+                                              String userQuery) {
         ResolvedBasePrompt basePrompt = resolveBasePrompt(config, tools, model, cwd);
 
         // Override 完全替换：不追加记忆和额外提示
@@ -100,7 +120,7 @@ public class EffectiveSystemPromptBuilder {
 
         // 由实际胜出的来源决定是否注入，不能仅凭 custom 配置存在就跳过更高优先级来源的记忆。
         if (basePrompt.injectMemory() && memoryPromptService != null) {
-            String memoryPrompt = memoryPromptService.buildMemoryPrompt(cwd);
+            String memoryPrompt = memoryPromptService.buildMemoryPrompt(cwd, userQuery);
             if (memoryPrompt != null && !memoryPrompt.isBlank()) {
                 result.append("\n\n").append(memoryPrompt);
             }
