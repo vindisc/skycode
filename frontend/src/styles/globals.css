@@ -399,7 +399,7 @@ body {
 
 /* ===== 外壳（Skymap 式工作站）=====
    窗口最外层是最深一档；侧栏与工作区是嵌在窗口里的圆角面板，四周留边、之间留缝。
-   顶栏：左右控件各靠一边，中间一行等宽字体的状态居中在工作区上（见下方 .app-header-grid）。 */
+   顶栏：左段是菜单 / 回首页，右段是工具按钮组；模型、权限、显示方式的切换收在输入框里。 */
 @media (min-width: 1024px) {
   .app-body { gap: 10px; padding: 8px; }
   .app-panel {
@@ -419,26 +419,12 @@ body {
 }
 .app-tool-divider { width: 1px; height: 16px; margin: 0 3px; flex-shrink: 0; background: var(--v2-border-hairline); }
 
-/* ===== 顶栏（≥768px）=====
-   左右控件各靠一边，中间一行等宽字体的状态。状态行横向居中在工作区（主面板）上，而不是整个窗口：
-   两侧面板不等宽、侧栏拖宽或收起时，它仍然对着会话列的中线。
-   --sidebar-track / --inspector-track 由 AppLayout 写在 .app-root 上（px），分别是工作区左缘、
-   右侧需要让出的宽度。左右两轨等宽（1fr）状态行才居中；右侧按钮组靠右，检查器展开时它悬在检查器上方，
-   用负外边距把按钮组拉出工作区范围，两轨就不必为它让位。 */
-@media (min-width: 768px) {
-  .app-header-grid {
-    position: absolute;
-    inset: 0 calc(var(--inspector-track, 0px) + 8px) 0 var(--sidebar-track, 10px);
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(max-content, 1fr);
-    column-gap: 12px;
-    align-items: center;
-  }
-  .app-header-grid > .app-tool-group {
-    justify-self: end;
-    margin-right: calc(2px - var(--inspector-track, 0px));
-  }
-}
+/* ===== 输入框底部的切换行（模型 / 权限 / 显示方式 + 回车提示）=====
+   比次级文字再低半档：向条带底色（≥1024px 是 bg-app）混色，取「白底和 app 底都 ≥4.5:1」的最淡档：
+   浅 96%（4.86 / 5.51）、深 86%（5.11 / 4.80）。行内控件悬停 / 聚焦恢复主文字色（hover:text-t1）。 */
+.composer-meta-row { color: color-mix(in srgb, var(--v2-text-3) 96%, var(--v2-bg-app)); }
+.dark .composer-meta-row { color: color-mix(in srgb, var(--v2-text-3) 86%, var(--v2-bg-app)); }
+
 /* ≥1024px：品牌在左栏顶部，顶栏不重复放；左栏收起（或切到别的页签、品牌行不在）时，顶栏自己的回首页按钮顶上 */
 @media (min-width: 1024px) {
   .app-root .header-home { display: none; }

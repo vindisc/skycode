@@ -58,10 +58,6 @@
     color: var(--v2-accent-ink);
 }
 
-:root .app-header [role=tab][aria-selected=true] {
-    background: var(--v2-accent-strong);
-}
-
 /* 输入文字 14px（与 text-sm 一致）；手机上 16px，避免 iOS 聚焦时自动放大页面 */
 :root .chat-composer-surface textarea {
     line-height: 1.65;

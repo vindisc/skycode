@@ -4,24 +4,20 @@ import { BrandLogo } from '@/components/ui/BrandLogo';
  * Header — 顶部导航栏组件
  * SPEC: §8.6.1
  *
- * 桌面（≥768px）：左侧是菜单 / 回首页，中间一行等宽字体的「模型 | 权限 | 会话状态」，居中在工作区上；
- * 右侧是 MCP / 记忆 / Skill / 设置 / 检查器的按钮组。手机（<768px）换成「菜单 + 会话标题和模型 + 状态」。
+ * 桌面（≥768px）：左侧是菜单 / 回首页，右侧是 MCP / 记忆 / Skill / 设置 / 检查器的按钮组；
+ * 模型 / 权限 / 显示方式 / 会话状态都在输入框里，顶栏不再放。手机（<768px）换成「菜单 + 会话标题和模型 + 状态」。
  * 品牌在左栏顶部的品牌行里，顶栏只在左栏收起（或没有桌面侧栏）时露出回首页按钮。
  */
 
 import { useEffect } from 'react';
-import { Menu, Settings, Loader2, Cable, Brain, Puzzle, Zap, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import { Menu, Settings, Loader2, Cable, Brain, Puzzle, PanelRightClose, PanelRightOpen } from 'lucide-react';
 import { useSessionStore } from '@/store/sessionStore';
-import { useCostStore } from '@/store/costStore';
 import { useDialogStore } from '@/store/dialogStore';
 import { useAppUiStore } from '@/store/appUiStore';
-import { useInspectorAvailable, useInspectorVisible } from '@/hooks/useInspectorVisible';
-import { getSessionStatusLabel } from '@/components/status/sessionStatusMeta';
+import { useInspectorAvailable } from '@/hooks/useInspectorVisible';
 import { useModelStore } from '@/store/modelStore';
 import { useBridgeStore } from '@/store/bridgeStore';
 import { clearSessionSelection } from '@/services/sessionActivation';
-import { usePermissionStore } from '@/store/permissionStore';
-import { getPermissionModeLabel } from './StatusBar';
 
 /** §7.4 头部按钮共性：hover/active/焦点环（ring-accent2-ring） */
 const HEADER_BUTTON_CLASS =
@@ -46,10 +42,6 @@ interface HeaderProps {
 
 export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
     const { model, setModel } = useSessionStore();
-    const { sessionCost, totalCost, usage } = useCostStore();
-    // 用量指标只在有数可示时出现：空会话/首页上一排「↑0 ↓0 $0.000 ∑$0.000」只是噪音
-    const hasUsage = usage.inputTokens > 0 || usage.outputTokens > 0 || usage.cacheReadInputTokens > 0
-        || sessionCost > 0 || totalCost > 0;
     const { bridgeStatus } = useBridgeStore();
     const { openDialog } = useDialogStore();
 
@@ -74,12 +66,9 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
     }, [loaded, defaultModel, model, setModel]);
 
     const status = useSessionStore(s => s.status);
-    const permissionMode = usePermissionStore(s => s.permissionMode);
-    const permissionLabel = getPermissionModeLabel(permissionMode);
     // 右侧检查器：够宽时顶栏给一个收起 / 展开的入口；它可见时用量只在检查器里显示
     const inspectorOpen = useAppUiStore(s => s.inspectorOpen);
     const setInspectorOpen = useAppUiStore(s => s.setInspectorOpen);
-    const inspectorVisible = useInspectorVisible();
     const canToggleInspector = useInspectorAvailable();
     const customTitle = useSessionStore(s => s.customTitle);
     const firstUserText = useMessageStore(s => {
@@ -125,10 +114,10 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     <BrandLogo className="h-8 w-8" />
                 </button>
             </div>
-            {/* 桌面：左右控件各靠一边，中间一行等宽字体的状态居中在工作区上（居中与等宽轨的写法见
-                globals.css 的 .app-header-grid；--sidebar-track / --inspector-track 由 AppLayout 写在根节点） */}
-            <div className="app-header-grid hidden min-w-0">
-                <div className="flex min-w-0 items-center gap-1 justify-self-start">
+            {/* 桌面：左段（平板的菜单键 / 左栏收起时的回首页），右段工具按钮组。
+                模型 / 权限 / 显示方式 / 会话状态的展示与切换都在输入框里，顶栏不再重复 */}
+            <div className="hidden md:flex flex-1 items-center justify-between">
+                <div className="flex min-w-0 items-center gap-1">
                     {showMenuButton && (
                         <button
                             onClick={onMenuClick}
@@ -146,76 +135,21 @@ export function Header({ onMenuClick, showMenuButton = false }: HeaderProps) {
                     </button>
                 </div>
 
-                {/* 状态行：模型 | 权限 | 会话状态，有用量时追加。只读展示；模型 / 权限 / 显示方式的
-                    切换收在输入框里（边写边调），不在这里重复放交互控件 */}
-                <div className="flex min-w-0 items-center justify-center gap-2 font-mono text-xs tabular-nums text-t3">
-                    <span className="truncate" title={currentModelName}>{compactModelName || '模型加载中'}</span>
-                    <span aria-hidden="true">|</span>
-                    <span>{permissionLabel}</span>
-                    <span aria-hidden="true">|</span>
-                    {streaming && <Loader2 className="h-3 w-3 shrink-0 animate-spin text-accent2-ink" aria-hidden="true" />}
-                    <span role="status" className={`shrink-0 ${streaming ? 'text-accent2-ink' : bridgeStatus !== 'connected' ? 'text-warn' : ''}`}>
-                        {mobileStatus || getSessionStatusLabel(status)}
-                    </span>
-                    {hasUsage && !inspectorVisible && <>
-                        <span className="text-t4" aria-hidden="true">|</span>
-                        <span title="输入 Tokens">↑{usage.inputTokens.toLocaleString()}</span>
-                        <span title="输出 Tokens">↓{usage.outputTokens.toLocaleString()}</span>
-                        {usage.cacheReadInputTokens > 0 && (
-                            <span title="缓存读取" className="inline-flex items-center gap-0.5 text-accent2-ink">
-                                <Zap className="w-3 h-3" aria-hidden="true" />{usage.cacheReadInputTokens.toLocaleString()}
-                            </span>
-                        )}
-                        <span aria-hidden="true">|</span>
-                        <span title="当前会话成本">${sessionCost.toFixed(3)}</span>
-                    </>}
-                </div>
-
                 {/* MCP / 记忆 / Skill / 设置：装在同一个带描边的按钮组里，组内用细分隔线隔开（悬停有名称提示） */}
                 <div className="app-tool-group">
-                <button
-                    onClick={() => openDialog('mcp')}
-                    className={TOOL_BUTTON_CLASS}
-                    title="MCP 管理"
-                    aria-label="MCP 管理"
-                    aria-haspopup="dialog"
-                >
+                <button onClick={() => openDialog('mcp')} className={TOOL_BUTTON_CLASS} title="MCP 管理" aria-label="MCP 管理" aria-haspopup="dialog">
                     <Cable className="w-4 h-4" aria-hidden="true" />
                 </button>
-
-                <button
-                    onClick={() => openDialog('memory')}
-                    className={TOOL_BUTTON_CLASS}
-                    title="记忆"
-                    aria-label="记忆"
-                    aria-haspopup="dialog"
-                >
+                <button onClick={() => openDialog('memory')} className={TOOL_BUTTON_CLASS} title="记忆" aria-label="记忆" aria-haspopup="dialog">
                     <Brain className="w-4 h-4" aria-hidden="true" />
                 </button>
-
-                <button
-                    onClick={() => openDialog('skills')}
-                    className={TOOL_BUTTON_CLASS}
-                    title="Skill 管理"
-                    aria-label="Skill 管理"
-                    aria-haspopup="dialog"
-                >
+                <button onClick={() => openDialog('skills')} className={TOOL_BUTTON_CLASS} title="Skill 管理" aria-label="Skill 管理" aria-haspopup="dialog">
                     <Puzzle className="w-4 h-4" aria-hidden="true" />
                 </button>
-
                 <span className="app-tool-divider" aria-hidden="true" />
-
-                {/* Settings */}
-                <button
-                    onClick={() => openDialog('settings')}
-                    className={TOOL_BUTTON_CLASS}
-                    title="设置"
-                    aria-label="设置"
-                    aria-haspopup="dialog"
-                >
+                <button onClick={() => openDialog('settings')} className={TOOL_BUTTON_CLASS} title="设置" aria-label="设置" aria-haspopup="dialog">
                     <Settings className="w-4 h-4" aria-hidden="true" />
                 </button>
-
                 {canToggleInspector && <>
                     <span className="app-tool-divider" aria-hidden="true" />
                     <button

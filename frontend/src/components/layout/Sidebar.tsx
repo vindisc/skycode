@@ -249,11 +249,6 @@ export function Sidebar({ className = '', isDrawerMode = false, defaultTab, onNa
     const [isDragging, setIsDragging] = useState(false);
     const widthRef = useRef(width);
     widthRef.current = width;
-    // 顶栏的状态行要对准工作区中线（AppLayout 用它算 --sidebar-track），需要侧栏的真实宽度：拖拽、收起都会变
-    useEffect(() => {
-        const outer = isDrawerMode ? 0 : panelCollapsed ? COLLAPSED_STRIP_WIDTH : width;
-        document.documentElement.style.setProperty('--sidebar-w', `${outer}px`);
-    }, [width, panelCollapsed, isDrawerMode]);
 
     // 拖拽手柄 — mousedown
     const handleMouseDown = useCallback((e: React.MouseEvent) => {

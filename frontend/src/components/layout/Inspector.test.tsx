@@ -18,22 +18,25 @@ describe('Inspector', () => {
         useCostStore.setState({ sessionCost: 0, totalCost: 0, usage: { inputTokens: 0, outputTokens: 0, cacheReadInputTokens: 0 } as never });
     });
 
-    it('没有选中会话时只给一句引导：不放设置，也不显示任何分节', () => {
+    it('没有标题头：会话名在左栏列表里，检查器只放分节内容', () => {
+        useSessionStore.setState({ sessionId: 's1', customTitle: '改侧栏' });
         render(<Inspector />);
-        expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('新会话');
-        expect(screen.getByText('还没有开始')).toBeInTheDocument();
+        expect(screen.queryByRole('heading', { level: 2 })).not.toBeInTheDocument();
+        expect(screen.queryByText('当前会话')).not.toBeInTheDocument();
+    });
+
+    it('没有选中会话时只给一句引导：不放任何分节', () => {
+        render(<Inspector />);
         expect(screen.getByText(/发出第一条消息后/)).toBeInTheDocument();
         for (const name of regionNames) {
             expect(screen.queryByRole('region', { name })).not.toBeInTheDocument();
         }
     });
 
-    it('选中会话后标题取自定义名称，有用量时显示用量分节', () => {
-        useSessionStore.setState({ sessionId: 's1', customTitle: '  改侧栏  ' });
+    it('选中会话后有用量时显示用量分节', () => {
+        useSessionStore.setState({ sessionId: 's1' });
         useCostStore.setState({ sessionCost: 0.0125, totalCost: 3, usage: { inputTokens: 1234, outputTokens: 567, cacheReadInputTokens: 0 } as never });
         render(<Inspector />);
-        expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('改侧栏');
-        expect(screen.getByText('当前会话')).toBeInTheDocument();
         const usage = screen.getByRole('region', { name: '用量' });
         expect(usage).toHaveTextContent('1,234');
         expect(usage).toHaveTextContent('567');

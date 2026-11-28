@@ -6,12 +6,11 @@
  * 响应式: 手机和平板菜单直接进入会话列表，桌面保留 Sidebar
  */
 
-import { useState, useCallback, useMemo, type CSSProperties } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { MobileComposerNavigation } from '@/components/input/PromptInput/MobileComposerNavigation';
 import { Header } from './Header';
 import { Sidebar, SidebarTabContent, SIDEBAR_TAB_LABELS, type TabType } from './Sidebar';
-import { DEFAULT_SIDEBAR_WIDTH, INSPECTOR_WIDTH, SHELL_GAP, SHELL_PADDING } from './shellMetrics';
 import { Inspector } from './Inspector';
 import { useInspectorVisible } from '@/hooks/useInspectorVisible';
 import { StatusBar } from './StatusBar';
@@ -50,16 +49,6 @@ export function AppLayout({ children }: AppLayoutProps) {
         const params = new URLSearchParams(window.location.search);
         return params.get('tab') || undefined;
     }, []);
-
-    // 顶栏状态行的居中基准（.app-header-grid 读这两个值）：工作区左缘 = 窗口留边 + 侧栏 + 面板缝，
-    // 没有桌面侧栏时就是顶栏自己的内边距（10px）；右侧在检查器展开时让出「检查器 + 面板缝」。
-    // 侧栏的实际宽度由 Sidebar 写在 :root 的 --sidebar-w 上，这里只给首帧的兜底值
-    const shellVars = {
-        '--sidebar-track': compactNavigation
-            ? '10px'
-            : `calc(${SHELL_PADDING + SHELL_GAP}px + var(--sidebar-w, ${DEFAULT_SIDEBAR_WIDTH}px))`,
-        '--inspector-track': inspectorVisible ? `${INSPECTOR_WIDTH + SHELL_GAP}px` : '0px',
-    } as CSSProperties;
 
     // WebSocket 连接状态
     const [isConnected, setIsConnected] = useState(false);
@@ -100,7 +89,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     }
 
     return (
-        <div className="app-root app-workspace flex flex-col bg-app2 overflow-hidden" style={shellVars}>
+        <div className="app-root app-workspace flex flex-col bg-app2 overflow-hidden">
             {/* Header */}
             <Header 
                 onMenuClick={openSessionList}

@@ -5,6 +5,7 @@
  * 模型 / 权限 / 显示方式的切换在顶栏的状态行里（任何宽度都在同一处），这里不再放设置。
  *
  * 仅在视口 ≥1280px 且未被收起时渲染（见 useInspectorVisible）。
+ * 顶部不再放会话标题（左栏已经在列表里高亮了当前会话，再写一遍是重复）；
  * 没有可显示的内容时给一句引导，不留一块空白面板。
  */
 
@@ -43,7 +44,6 @@ export interface InspectorProps {
 export const Inspector: React.FC<InspectorProps> = ({ className }) => {
     const sessionId = useSessionStore(s => s.sessionId);
     const status = useSessionStore(s => s.status);
-    const customTitle = useSessionStore(s => s.customTitle);
     const messages = useMessageStore(s => s.messages);
     const streamingMessageId = useMessageStore(s => s.streamingMessageId);
     const activeToolCalls = useMessageStore(s => s.activeToolCalls);
@@ -51,15 +51,6 @@ export const Inspector: React.FC<InspectorProps> = ({ className }) => {
     const pendingPermissions = usePermissionStore(s => s.pendingPermissions);
 
     const runActive = status === 'streaming' || status === 'waiting_permission';
-    // 标题与左栏改名、顶栏同一口径：自定义名称优先，其次首条用户消息
-    const firstUserText = useMemo(() => {
-        const block = messages.find(m => m.type === 'user')?.content.find(b => b.type === 'text');
-        return block?.type === 'text' ? block.text : '';
-    }, [messages]);
-    const sessionTitle = customTitle?.trim() || firstUserText.trim();
-    const title = sessionTitle || '新会话';
-    // 悬停提示不挂整段长文本（首条用户消息可能有几百字）
-    const titleHint = sessionTitle && sessionTitle.length > 120 ? `${sessionTitle.slice(0, 120)}…` : sessionTitle || undefined;
 
     const files = useMemo(() => projectTurnFileChanges(messages, activeToolCalls), [messages, activeToolCalls]);
 
@@ -91,12 +82,8 @@ export const Inspector: React.FC<InspectorProps> = ({ className }) => {
             aria-label="检查器"
             data-testid="inspector"
         >
-            <div className="px-3.5 pb-2.5 pt-3.5">
-                <h2 className="truncate text-13 font-semibold text-t1" title={titleHint}>{title}</h2>
-                <p className="mt-0.5 text-xs text-t3">{sessionId ? '当前会话' : '还没有开始'}</p>
-            </div>
-
-            <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-2.5 pb-2.5">
+            {/* 直接从分节开始：会话名在左栏列表里已经有了 */}
+            <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-2.5 pb-2.5 pt-3">
                 {files.length === 0 && tasks.length === 0 && pendingPermissions.length === 0 && !(sessionId && hasUsage) && (
                     <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
                         <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-md bg-sunken2 text-t3">

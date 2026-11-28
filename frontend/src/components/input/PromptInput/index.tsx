@@ -173,11 +173,11 @@ const PromptInput: React.FC<PromptInputProps> = (props) => {
 
                     {/* 模型 / 权限 / 显示方式收在输入框里（边写边调），这一行常驻：
                         检查器开关不再影响输入区的高度。左边是三个切换，右边是回车提示。 */}
-                    <div className="mt-1 flex items-center gap-1 text-13">
+                    <div className="composer-meta-row mt-1 flex items-center gap-1 text-13">
                         <ModelChip quiet />
                         <PermissionModeChip quiet />
                         <DensityMenu />
-                        <span className="ml-auto text-xs text-t3">⏎ 发送&ensp;·&ensp;⇧⏎ 换行</span>
+                        <span className="ml-auto text-xs">⏎ 发送&ensp;·&ensp;⇧⏎ 换行</span>
                     </div>
                 </>
             )}

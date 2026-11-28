@@ -36,7 +36,7 @@ describe('Header', () => {
         expect(document.documentElement.classList.contains('light') || document.documentElement.classList.contains('dark')).toBe(true);
     });
 
-    it('presents an active run as 运行中 with a spinner on both desktop and mobile', () => {
+    it('运行中在移动端头部显示状态胶囊；桌面顶栏不再有状态行（状态在输入框 / 回合卡里）', () => {
         useModelStore.setState({
             loaded: true,
             loading: false,
@@ -48,22 +48,13 @@ describe('Header', () => {
 
         const { container } = render(<Header />);
 
-        // 桌面右簇状态与移动端状态胶囊同时呈现"运行中"（PC/手机/平板全覆盖）
+        // 只剩移动端头部那一枚状态胶囊
         const statusEls = screen.getAllByRole('status');
-        expect(statusEls.length).toBeGreaterThanOrEqual(2);
-        for (const el of statusEls) expect(el).toHaveTextContent('运行中');
-        // 旋转图标（Loader2 animate-spin）替代原脉冲圆点
+        expect(statusEls).toHaveLength(1);
+        expect(statusEls[0]).toHaveTextContent('运行中');
         expect(container.querySelectorAll('.animate-spin').length).toBeGreaterThan(0);
-    });
-
-    it('shows the session status in the header metrics cluster', () => {
-        useModelStore.setState({ loaded: true, loading: false, error: null, models: [], defaultModel: null });
-        useSessionStore.setState({ status: 'idle' });
-
-        render(<Header />);
-
-        // idle 时移动端无状态胶囊，role=status 唯一命中桌面右簇的会话状态
-        expect(screen.getByRole('status')).toHaveTextContent('就绪');
+        // 桌面顶栏不再渲染「就绪 / 运行中」之类的只读状态行
+        expect(screen.queryByText('就绪')).not.toBeInTheDocument();
     });
 
     it('opens Skill management from the desktop and tablet header', () => {
