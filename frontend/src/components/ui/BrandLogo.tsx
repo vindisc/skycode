@@ -1,69 +1,24 @@
-import { useId } from 'react';
+import { memo } from 'react';
 
 /**
- * BrandLogo — 品牌鲸鱼标（图形不变）。
+ * BrandLogo — 品牌鲸鱼标：头朝右的极简鲸鱼，单色填充。
  *
- * 以内联 SVG 渲染，配色取强调色令牌：原来 assets/logo.svg 把 GitHub 蓝写死在渐变里，
- * 和界面的强调色是两个色系，同屏会出现第三种颜色。眼睛与嘴用 strong 压暗后的墨色，
- * 浅色、深色两套底都能看清。渐变 id 按实例生成，页面上多处同时出现不会串色。
+ * 内联 SVG，填色取强调色令牌（--v2-accent），跟随主题与用户选的强调色；
+ * 眼睛是 evenodd 镂空，透出所在背景，深浅底都成立。整个组件就是一个 path，
+ * 无渐变无共享 id，页面上多处同时出现互不影响。
  */
 export function BrandLogo({ className = 'h-8 w-8' }: { className?: string }) {
-    // useId 的返回值带冒号，不能直接放进 url(#…)，只留安全字符
-    const id = useId().replace(/[^a-zA-Z0-9_-]/g, '');
-    const body = `${id}-body`;
-    const wingUp = `${id}-wing-up`;
-    const wingDown = `${id}-wing-down`;
-    const tail = `${id}-tail`;
-    const ink = 'color-mix(in srgb, var(--v2-accent-strong) 35%, #0d1117)';
-
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 512 512"
+            viewBox="24 24 192 112"
             aria-hidden="true"
             focusable="false"
             className={`shrink-0 ${className}`}
         >
-            <defs>
-                <linearGradient id={body} x1="0.2" y1="0" x2="0.8" y2="1">
-                    <stop offset="0%" stopColor="var(--v2-accent)" />
-                    <stop offset="100%" stopColor="var(--v2-accent-strong)" />
-                </linearGradient>
-                <linearGradient id={wingUp} x1="0" y1="1" x2="0" y2="0">
-                    <stop offset="0%" stopColor="var(--v2-accent)" />
-                    <stop offset="100%" stopColor="var(--v2-accent)" stopOpacity="0.15" />
-                </linearGradient>
-                <linearGradient id={wingDown} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--v2-accent)" />
-                    <stop offset="100%" stopColor="var(--v2-accent)" stopOpacity="0.15" />
-                </linearGradient>
-                <linearGradient id={tail} x1="1" y1="0.5" x2="0" y2="0.5">
-                    <stop offset="0%" stopColor="var(--v2-accent)" />
-                    <stop offset="100%" stopColor="var(--v2-accent)" stopOpacity="0.2" />
-                </linearGradient>
-            </defs>
-            {/* Body: round cute whale facing right, head-heavy */}
-            <path d="M100 260C100 158,190 85,290 95C350 90,422 148,440 218Q454 262,440 308C422 378,350 435,290 428C190 438,100 365,100 260Z" fill={`url(#${body})`} />
-            {/* Belly highlight */}
-            <ellipse cx="328" cy="340" rx="85" ry="55" fill="var(--v2-accent)" opacity="0.3" />
-            {/* Tail upper lobe */}
-            <path d="M100 250C72 232,38 178,22 158C16 148,28 154,48 180C66 202,86 232,100 250Z" fill={`url(#${tail})`} />
-            {/* Tail lower lobe */}
-            <path d="M100 270C72 288,38 342,22 362C16 372,28 366,48 340C66 318,86 288,100 270Z" fill={`url(#${tail})`} />
-            {/* Upper wing (far side) */}
-            <path d="M218 130C198 78,152 28,122 16C110 12,116 36,132 66C156 100,194 126,218 130Z" fill={`url(#${wingUp})`} />
-            {/* Lower wing (near side, mirror) */}
-            <path d="M218 390C198 442,152 492,122 504C110 508,116 484,132 454C156 420,194 394,218 390Z" fill={`url(#${wingDown})`} />
-            {/* Dorsal fin */}
-            <path d="M260 98C256 72,270 56,286 66C292 72,280 94,270 100Z" fill={`url(#${body})`} />
-            {/* Eye white */}
-            <circle cx="362" cy="228" r="30" fill="#fff" />
-            {/* Pupil */}
-            <circle cx="368" cy="232" r="17" fill={ink} />
-            {/* Eye highlight */}
-            <circle cx="354" cy="220" r="8" fill="#fff" />
-            {/* Mouth */}
-            <path d="M332 298Q356 314,380 302" fill="none" stroke={ink} strokeWidth="4" strokeLinecap="round" />
+            <path fill="var(--v2-accent)" fillRule="evenodd" d="M 30 38 C 36 28 48 28 53 40 C 56 45 59 47 63 47 C 68 38 75 31 82 33 C 87 35 88 44 89 54 C 108 42 146 36 172 46 C 196 54 208 72 204 92 C 200 112 174 128 138 128 C 104 128 76 116 68 96 C 62 84 50 64 42 52 C 38 46 33 43 30 38 Z M 156 76 a 8 8 0 1 0 16 0 a 8 8 0 1 0 -16 0 Z" />
         </svg>
     );
 }
+
+export default memo(BrandLogo);
